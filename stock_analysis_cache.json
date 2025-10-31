@@ -1,0 +1,2519 @@
+{
+  "date": "2025-10-31",
+  "timestamp": "2025-10-31 18:20:28",
+  "stocks": {
+    "600036": {
+      "ticker": "600036",
+      "name": "招商银行",
+      "industry": "银行",
+      "concept": "基础股票",
+      "price": 40.89,
+      "score": 8.343690617368171,
+      "recommendation_reason": "基本面表现优秀",
+      "cache_time": "17:26:13"
+    },
+    "600519": {
+      "ticker": "600519",
+      "name": "贵州茅台",
+      "price": 1430.0,
+      "technical_score": 8.5,
+      "fundamental_score": 9.0,
+      "total_score": 8.75,
+      "cache_time": "18:13:11"
+    },
+    "600276": {
+      "ticker": "600276",
+      "name": "恒瑞医药",
+      "industry": "化学制药",
+      "concept": "基础股票",
+      "price": 64.15,
+      "score": 8.079085461527983,
+      "recommendation_reason": "基本面表现优秀 | 医药行业稳定增长",
+      "cache_time": "17:26:23"
+    },
+    "600030": {
+      "ticker": "600030",
+      "name": "中信证券",
+      "industry": "证券",
+      "concept": "基础股票",
+      "price": 29.38,
+      "score": 9.15632755967562,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:26:28"
+    },
+    "600887": {
+      "ticker": "600887",
+      "name": "伊利股份",
+      "industry": "食品饮料",
+      "concept": "基础股票",
+      "price": 27.41,
+      "score": 9.968980553010368,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:26:33"
+    },
+    "600000": {
+      "ticker": "600000",
+      "name": "浦发银行",
+      "industry": "银行",
+      "concept": "基础股票",
+      "price": 11.49,
+      "score": 10.0,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:26:45"
+    },
+    "600585": {
+      "ticker": "600585",
+      "name": "海螺水泥",
+      "industry": "水泥建材",
+      "concept": "基础股票",
+      "price": 23.19,
+      "score": 8.6733855950738,
+      "recommendation_reason": "基本面表现优秀",
+      "cache_time": "17:26:50"
+    },
+    "600309": {
+      "ticker": "600309",
+      "name": "万华化学",
+      "industry": "化学制品",
+      "concept": "基础股票",
+      "price": 62.63,
+      "score": 7.399230721214502,
+      "recommendation_reason": "基本面表现优秀",
+      "cache_time": "17:27:00"
+    },
+    "600900": {
+      "ticker": "600900",
+      "name": "长江电力",
+      "industry": "电力行业",
+      "concept": "基础股票",
+      "price": 28.1,
+      "score": 9.852382564230776,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:27:05"
+    },
+    "601318": {
+      "ticker": "601318",
+      "name": "中国平安",
+      "industry": "保险",
+      "concept": "基础股票",
+      "price": 57.83,
+      "score": 9.1147695684203,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:27:11"
+    },
+    "601166": {
+      "ticker": "601166",
+      "name": "兴业银行",
+      "industry": "银行",
+      "concept": "基础股票",
+      "price": 20.23,
+      "score": 10.0,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:27:16"
+    },
+    "601398": {
+      "ticker": "601398",
+      "name": "工商银行",
+      "industry": "银行",
+      "concept": "基础股票",
+      "price": 7.78,
+      "score": 8.008208034406652,
+      "recommendation_reason": "基本面表现优秀",
+      "cache_time": "17:27:23"
+    },
+    "601939": {
+      "ticker": "601939",
+      "name": "建设银行",
+      "industry": "银行",
+      "concept": "基础股票",
+      "price": 9.13,
+      "score": 9.95495268026852,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:27:28"
+    },
+    "601988": {
+      "ticker": "601988",
+      "name": "中国银行",
+      "industry": "银行",
+      "concept": "基础股票",
+      "price": 5.61,
+      "score": 10.0,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:27:33"
+    },
+    "601012": {
+      "ticker": "601012",
+      "name": "隆基绿能",
+      "industry": "光伏设备",
+      "concept": "基础股票",
+      "price": 21.11,
+      "score": 10.0,
+      "recommendation_reason": "基本面表现优秀 | 投资价值突出",
+      "cache_time": "17:27:37"
+    },
+    "000858": {
+      "ticker": "000858",
+      "name": "五 粮 液",
+      "price": 118.99,
+      "technical_score": 7.448,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.532,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "MACD金叉且位于零轴上方",
+          "价格站上短期均线",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:05"
+    },
+    "000002": {
+      "ticker": "000002",
+      "name": "万 科Ａ",
+      "price": 6.27,
+      "technical_score": 4.5,
+      "fundamental_score": 3.24,
+      "total_score": 3.87,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 70,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:17:07"
+    },
+    "000001": {
+      "ticker": "000001",
+      "name": "平安银行",
+      "price": 11.32,
+      "technical_score": 9.690000000000001,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 8.737000000000002,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 85,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格站上短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:08"
+    },
+    "600031": {
+      "ticker": "600031",
+      "name": "三一重工",
+      "price": 22.14,
+      "technical_score": 4.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 5.82,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:10"
+    },
+    "600809": {
+      "ticker": "600809",
+      "name": "山西汾酒",
+      "price": 190.5,
+      "technical_score": 7.448,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.532,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "MACD金叉且位于零轴上方"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值合理",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:12"
+    },
+    "600690": {
+      "ticker": "600690",
+      "name": "海尔智家",
+      "price": 26.81,
+      "technical_score": 9.350000000000001,
+      "fundamental_score": 3.24,
+      "total_score": 6.295000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 75,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格站上短期均线",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 70,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "PB估值较高",
+          "ROE良好"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:17:14"
+    },
+    "600196": {
+      "ticker": "600196",
+      "name": "复星医药",
+      "price": 29.2,
+      "technical_score": 4.5,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 6.142,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "价格跌破短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "ROE良好"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:15"
+    },
+    "601328": {
+      "ticker": "601328",
+      "name": "交通银行",
+      "price": 7.18,
+      "technical_score": 7.448,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 7.6160000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "MACD金叉且位于零轴上方"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "PB估值较低，投资价值显现",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:17"
+    },
+    "600048": {
+      "ticker": "600048",
+      "name": "保利发展",
+      "price": 7.33,
+      "technical_score": 4.5,
+      "fundamental_score": 2.232,
+      "total_score": 3.366,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "价格站上短期均线",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "坚决回避",
+        "confidence": 79,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "严禁配置",
+        "exit_strategy": "尽快清仓",
+        "risk_level": "高",
+        "target_return": "-20-0%"
+      },
+      "cache_time": "18:17:19"
+    },
+    "600015": {
+      "ticker": "600015",
+      "name": "华夏银行",
+      "price": 6.81,
+      "technical_score": 7.448,
+      "fundamental_score": 8.120000000000001,
+      "total_score": 7.784000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "价格站上短期均线"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 90,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较低，投资价值显现",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:17:21"
+    },
+    "600025": {
+      "ticker": "600025",
+      "name": "华能水电",
+      "price": 9.84,
+      "technical_score": 9.520000000000001,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 8.652000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 80,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:22"
+    },
+    "600028": {
+      "ticker": "600028",
+      "name": "中国石化",
+      "price": 5.47,
+      "technical_score": 7.448,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 7.2940000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格跌破短期均线"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:24"
+    },
+    "600038": {
+      "ticker": "600038",
+      "name": "中直股份",
+      "price": 36.04,
+      "technical_score": 9.520000000000001,
+      "fundamental_score": 2.232,
+      "total_score": 5.876000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 80,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "坚决回避",
+        "confidence": 79,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "严禁配置",
+        "exit_strategy": "尽快清仓",
+        "risk_level": "高",
+        "target_return": "-20-0%"
+      },
+      "cache_time": "18:17:26"
+    },
+    "600050": {
+      "ticker": "600050",
+      "name": "中国联通",
+      "price": 5.42,
+      "technical_score": 7.448,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 7.2940000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格跌破短期均线"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "ROE良好",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:28"
+    },
+    "600104": {
+      "ticker": "600104",
+      "name": "上汽集团",
+      "price": 16.63,
+      "technical_score": 7.224,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.42,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 58,
+        "key_factors": [
+          "MACD金叉且位于零轴上方",
+          "价格跌破短期均线"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值合理",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:29"
+    },
+    "600111": {
+      "ticker": "600111",
+      "name": "北方稀土",
+      "price": 50.81,
+      "technical_score": 5.4,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 6.5920000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "MACD死叉且位于零轴下方"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:31"
+    },
+    "600132": {
+      "ticker": "600132",
+      "name": "重庆啤酒",
+      "price": 53.7,
+      "technical_score": 9.350000000000001,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 8.245000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 75,
+        "key_factors": [
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:33"
+    },
+    "600150": {
+      "ticker": "600150",
+      "name": "中国船舶",
+      "price": 35.9,
+      "technical_score": 5.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 6.32,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 75,
+        "key_factors": [
+          "MACD死叉且位于零轴下方",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:35"
+    },
+    "600160": {
+      "ticker": "600160",
+      "name": "巨化股份",
+      "price": 35.32,
+      "technical_score": 7.448,
+      "fundamental_score": 8.120000000000001,
+      "total_score": 7.784000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "MACD金叉且位于零轴上方"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 90,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较低，投资价值显现",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:17:37"
+    },
+    "600170": {
+      "ticker": "600170",
+      "name": "上海建工",
+      "price": 2.82,
+      "technical_score": 9.350000000000001,
+      "fundamental_score": 8.120000000000001,
+      "total_score": 8.735000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 75,
+        "key_factors": [
+          "RSI健康区间",
+          "价格站上短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 90,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较低，投资价值显现",
+          "ROE优秀，盈利能力强"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:17:38"
+    },
+    "600177": {
+      "ticker": "600177",
+      "name": "雅戈尔",
+      "price": 7.5,
+      "technical_score": 7.448,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 7.728000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较低，投资价值显现",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:17:40"
+    },
+    "600188": {
+      "ticker": "600188",
+      "name": "兖矿能源",
+      "price": 14.72,
+      "technical_score": 9.520000000000001,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 8.330000000000002,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 80,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "PB估值较低，投资价值显现",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:42"
+    },
+    "600199": {
+      "ticker": "600199",
+      "name": "金种子酒",
+      "price": 10.39,
+      "technical_score": 9.520000000000001,
+      "fundamental_score": 2.232,
+      "total_score": 5.876000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 80,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格站上短期均线"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "坚决回避",
+        "confidence": 79,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "严禁配置",
+        "exit_strategy": "尽快清仓",
+        "risk_level": "高",
+        "target_return": "-20-0%"
+      },
+      "cache_time": "18:17:43"
+    },
+    "600208": {
+      "ticker": "600208",
+      "name": "衢州发展",
+      "price": 4.32,
+      "technical_score": 5.4,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 6.704000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "MACD死叉且位于零轴下方"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值合理",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:17:45"
+    },
+    "600219": {
+      "ticker": "600219",
+      "name": "南山铝业",
+      "price": 4.61,
+      "technical_score": 7.224,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 7.182,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 58,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格跌破短期均线",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:47"
+    },
+    "600233": {
+      "ticker": "600233",
+      "name": "圆通速递",
+      "price": 17.12,
+      "technical_score": 9.520000000000001,
+      "fundamental_score": 3.24,
+      "total_score": 6.380000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 80,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格站上短期均线"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 70,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:17:48"
+    },
+    "600256": {
+      "ticker": "600256",
+      "name": "广汇能源",
+      "price": 5.27,
+      "technical_score": 5.4,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 6.704000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:17:50"
+    },
+    "600271": {
+      "ticker": "600271",
+      "name": "航天信息",
+      "price": 8.31,
+      "technical_score": 7.224,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.42,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 58,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "价格站上短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较高",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:52"
+    },
+    "600281": {
+      "ticker": "600281",
+      "name": "华阳新材",
+      "price": 6.21,
+      "technical_score": 4.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 5.82,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "价格跌破短期均线"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:17:54"
+    },
+    "600297": {
+      "ticker": "600297",
+      "name": "广汇汽车",
+      "price": 0.78,
+      "technical_score": 4.5,
+      "fundamental_score": 3.18,
+      "total_score": 3.84,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "MACD死叉且位于零轴下方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 65,
+        "key_factors": [
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:17:55"
+    },
+    "600305": {
+      "ticker": "600305",
+      "name": "恒顺醋业",
+      "price": 8.14,
+      "technical_score": 5.4,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 6.5920000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "MACD死叉且位于零轴下方"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:17:57"
+    },
+    "600315": {
+      "ticker": "600315",
+      "name": "上海家化",
+      "price": 25.08,
+      "technical_score": 9.350000000000001,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 8.679000000000002,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 75,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值合理",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:17:59"
+    },
+    "600332": {
+      "ticker": "600332",
+      "name": "白云山",
+      "price": 26.36,
+      "technical_score": 7.448,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 7.728000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "ROE优秀，盈利能力强"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:18:01"
+    },
+    "600340": {
+      "ticker": "600340",
+      "name": "华夏幸福",
+      "price": 2.12,
+      "technical_score": 7.448,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.532,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "MACD金叉且位于零轴上方"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值偏低，安全边际高"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:19:33"
+    },
+    "600352": {
+      "ticker": "600352",
+      "name": "浙江龙盛",
+      "price": 10.53,
+      "technical_score": 7.224,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 7.6160000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 58,
+        "key_factors": [
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值合理",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:19:35"
+    },
+    "600362": {
+      "ticker": "600362",
+      "name": "江西铜业",
+      "price": 41.09,
+      "technical_score": 7.448,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 7.6160000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:19:37"
+    },
+    "600372": {
+      "ticker": "600372",
+      "name": "中航机载",
+      "price": 12.11,
+      "technical_score": 4.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 5.82,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:19:39"
+    },
+    "600383": {
+      "ticker": "600383",
+      "name": "金地集团",
+      "price": 3.91,
+      "technical_score": 7.448,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.532,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE优秀，盈利能力强"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:19:40"
+    },
+    "600395": {
+      "ticker": "600395",
+      "name": "盘江股份",
+      "price": 5.15,
+      "technical_score": 5.4,
+      "fundamental_score": 3.18,
+      "total_score": 4.29,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 65,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:19:42"
+    },
+    "600406": {
+      "ticker": "600406",
+      "name": "国电南瑞",
+      "price": 24.23,
+      "technical_score": 9.350000000000001,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 8.245000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 75,
+        "key_factors": [
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:19:44"
+    },
+    "600418": {
+      "ticker": "600418",
+      "name": "江淮汽车",
+      "price": 50.93,
+      "technical_score": 4.5,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 6.2540000000000004,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "价格跌破短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较低，投资价值显现"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:19:46"
+    },
+    "600426": {
+      "ticker": "600426",
+      "name": "华鲁恒升",
+      "price": 25.67,
+      "technical_score": 7.224,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 7.5040000000000004,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 58,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "价格站上短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:19:47"
+    },
+    "600438": {
+      "ticker": "600438",
+      "name": "通威股份",
+      "price": 24.78,
+      "technical_score": 4.5,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 6.058,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:19:49"
+    },
+    "600449": {
+      "ticker": "600449",
+      "name": "宁夏建材",
+      "price": 13.44,
+      "technical_score": 9.520000000000001,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 8.330000000000002,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 80,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:19:51"
+    },
+    "600459": {
+      "ticker": "600459",
+      "name": "贵研铂业",
+      "price": 16.64,
+      "technical_score": 7.224,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 7.182,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 58,
+        "key_factors": [
+          "RSI健康区间"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PB估值较高",
+          "ROE优秀，盈利能力强"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:19:53"
+    },
+    "600469": {
+      "ticker": "600469",
+      "name": "风神股份",
+      "price": 6.99,
+      "technical_score": 7.448,
+      "fundamental_score": 3.24,
+      "total_score": 5.344,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 70,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:19:55"
+    },
+    "600478": {
+      "ticker": "600478",
+      "name": "科力远",
+      "price": 7.51,
+      "technical_score": 4.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 5.82,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "MACD死叉且位于零轴下方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值合理",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:19:56"
+    },
+    "600487": {
+      "ticker": "600487",
+      "name": "亨通光电",
+      "price": 22.36,
+      "technical_score": 4.5,
+      "fundamental_score": 3.18,
+      "total_score": 3.84,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "价格跌破短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 65,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "ROE良好"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:19:58"
+    },
+    "600498": {
+      "ticker": "600498",
+      "name": "烽火通信",
+      "price": 24.31,
+      "technical_score": 5.4,
+      "fundamental_score": 8.008000000000001,
+      "total_score": 6.704000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "MACD死叉且位于零轴下方",
+          "价格跌破短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 86,
+        "key_factors": [
+          "PE估值合理",
+          "ROE优秀，盈利能力强",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:20:00"
+    },
+    "000063": {
+      "ticker": "000063",
+      "name": "中兴通讯",
+      "price": 43.46,
+      "technical_score": 7.224,
+      "fundamental_score": 8.120000000000001,
+      "total_score": 7.672000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 58,
+        "key_factors": [
+          "RSI健康区间"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 90,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "PB估值较低，投资价值显现",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:20:01"
+    },
+    "000100": {
+      "ticker": "000100",
+      "name": "TCL科技",
+      "price": 4.31,
+      "technical_score": 7.448,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.532,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "MACD金叉且位于零轴上方"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值合理",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:20:03"
+    },
+    "000157": {
+      "ticker": "000157",
+      "name": "中联重科",
+      "price": 8.17,
+      "technical_score": 5.4,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 6.2700000000000005,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "MACD死叉且位于零轴下方",
+          "价格跌破短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "ROE良好",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:20:05"
+    },
+    "000166": {
+      "ticker": "000166",
+      "name": "申万宏源",
+      "price": 5.47,
+      "technical_score": 7.448,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.532,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "成交量萎缩，观望情绪浓"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值合理",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:20:07"
+    },
+    "000338": {
+      "ticker": "000338",
+      "name": "潍柴动力",
+      "price": 14.96,
+      "technical_score": 4.5,
+      "fundamental_score": 3.18,
+      "total_score": 3.84,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 65,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:20:08"
+    },
+    "000425": {
+      "ticker": "000425",
+      "name": "徐工机械",
+      "price": 10.64,
+      "technical_score": 9.350000000000001,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 8.483,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 75,
+        "key_factors": [
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE优秀，盈利能力强"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:20:10"
+    },
+    "000568": {
+      "ticker": "000568",
+      "name": "泸州老窖",
+      "price": 134.54,
+      "technical_score": 7.448,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 7.532,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "谨慎买入",
+        "confidence": 66,
+        "key_factors": [
+          "MACD金叉且位于零轴上方"
+        ],
+        "entry_strategy": "轻仓试探，20%仓位",
+        "exit_strategy": "获利2-3%止盈",
+        "risk_level": "中等",
+        "target_return": "2-5%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PB估值较低，投资价值显现",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:20:12"
+    },
+    "000625": {
+      "ticker": "000625",
+      "name": "长安汽车",
+      "price": 12.39,
+      "technical_score": 5.4,
+      "fundamental_score": 3.24,
+      "total_score": 4.32,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "MACD死叉且位于零轴下方"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "谨慎回避",
+        "confidence": 70,
+        "key_factors": [
+          "PE估值偏高，泡沫风险",
+          "PB估值较高",
+          "ROE良好"
+        ],
+        "entry_strategy": "暂缓配置",
+        "exit_strategy": "逢高减仓",
+        "risk_level": "中高",
+        "target_return": "-10-5%"
+      },
+      "cache_time": "18:20:14"
+    },
+    "000651": {
+      "ticker": "000651",
+      "name": "格力电器",
+      "price": 39.75,
+      "technical_score": 9.690000000000001,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 8.415000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 85,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格站上短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:20:15"
+    },
+    "000725": {
+      "ticker": "000725",
+      "name": "京东方Ａ",
+      "price": 4.06,
+      "technical_score": 5.4,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 6.508000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "减仓",
+        "confidence": 70,
+        "key_factors": [
+          "MACD死叉且位于零轴下方",
+          "价格跌破短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "不建议新增",
+        "exit_strategy": "逢高减仓50%",
+        "risk_level": "中高",
+        "target_return": "-2-0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:20:17"
+    },
+    "000876": {
+      "ticker": "000876",
+      "name": "新 希 望",
+      "price": 9.73,
+      "technical_score": 4.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 5.82,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "价格跌破短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PB估值较高",
+          "ROE优秀，盈利能力强"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:20:19"
+    },
+    "000895": {
+      "ticker": "000895",
+      "name": "双汇发展",
+      "price": 25.74,
+      "technical_score": 4.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 5.82,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PB估值较高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:20:21"
+    },
+    "000938": {
+      "ticker": "000938",
+      "name": "紫光股份",
+      "price": 27.08,
+      "technical_score": 9.350000000000001,
+      "fundamental_score": 7.784000000000001,
+      "total_score": 8.567,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 75,
+        "key_factors": [
+          "MACD金叉且位于零轴上方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 78,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "ROE优秀，盈利能力强",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:20:22"
+    },
+    "000977": {
+      "ticker": "000977",
+      "name": "浪潮信息",
+      "price": 65.23,
+      "technical_score": 4.5,
+      "fundamental_score": 7.140000000000001,
+      "total_score": 5.82,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "MACD死叉且位于零轴下方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "观察配置",
+        "confidence": 55,
+        "key_factors": [
+          "PB估值较高",
+          "ROE良好",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "小仓位配置，20%以内",
+        "exit_strategy": "密切关注，适时调整",
+        "risk_level": "中等",
+        "target_return": "0-15%"
+      },
+      "cache_time": "18:20:24"
+    },
+    "002001": {
+      "ticker": "002001",
+      "name": "新 和 成",
+      "price": 24.3,
+      "technical_score": 9.690000000000001,
+      "fundamental_score": 8.120000000000001,
+      "total_score": 8.905000000000001,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "积极买入",
+        "confidence": 85,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD金叉且位于零轴上方",
+          "价格站上短期均线",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "分批建仓，首批30%仓位",
+        "exit_strategy": "短线获利3-5%止盈",
+        "risk_level": "中等",
+        "target_return": "3-8%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "重点配置",
+        "confidence": 90,
+        "key_factors": [
+          "PE估值合理",
+          "PB估值较低，投资价值显现",
+          "ROE良好",
+          "长期趋势向上"
+        ],
+        "entry_strategy": "分批建仓，目标仓位60-80%",
+        "exit_strategy": "长期持有，目标收益20-30%",
+        "risk_level": "中低",
+        "target_return": "15-35%"
+      },
+      "cache_time": "18:20:26"
+    },
+    "002027": {
+      "ticker": "002027",
+      "name": "分众传媒",
+      "price": 7.75,
+      "technical_score": 4.5,
+      "fundamental_score": 7.6160000000000005,
+      "total_score": 6.058,
+      "short_term": {
+        "period": "短期 (1-7天)",
+        "recommendation": "观望",
+        "confidence": 50,
+        "key_factors": [
+          "RSI健康区间",
+          "MACD死叉且位于零轴下方",
+          "成交量放大，资金活跃"
+        ],
+        "entry_strategy": "等待更明确信号",
+        "exit_strategy": "不建议操作",
+        "risk_level": "低",
+        "target_return": "0%"
+      },
+      "long_term": {
+        "period": "长期 (7-90天)",
+        "recommendation": "适度配置",
+        "confidence": 72,
+        "key_factors": [
+          "PE估值偏低，安全边际高",
+          "ROE良好",
+          "长期趋势向下"
+        ],
+        "entry_strategy": "逐步建仓，目标仓位30-50%",
+        "exit_strategy": "中期持有，目标收益10-20%",
+        "risk_level": "中等",
+        "target_return": "8-25%"
+      },
+      "cache_time": "18:20:28"
+    }
+  }
+}
