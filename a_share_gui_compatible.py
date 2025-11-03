@@ -486,6 +486,10 @@ class AShareAnalyzerGUI:
             short_score = self._extract_score_from_advice(short_advice, 'short_term')
             long_score = self._extract_score_from_advice(long_advice, 'long_term')
             
+            # 确保分数是数字类型
+            short_score = float(short_score) if short_score is not None else 5.0
+            long_score = float(long_score) if long_score is not None else 5.0
+            
             # 计算最终评分
             final_score = (short_score + long_score) / 2
             
@@ -495,6 +499,369 @@ class AShareAnalyzerGUI:
             print(f"❌ 获取 {stock_code} 评分失败: {e}")
             return None
     
+    def import_csv_analysis(self):
+        """CSV批量分析功能"""
+        try:
+            from tkinter import filedialog, messagebox
+            import csv
+            from datetime import datetime
+            
+            # 选择CSV文件
+            file_path = filedialog.askopenfilename(
+                title="选择包含股票代码的CSV文件",
+                filetypes=[("CSV文件", "*.csv"), ("所有文件", "*.*")]
+            )
+            
+            if not file_path:
+                return
+            
+            # 读取CSV文件
+            stock_codes = []
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    csv_reader = csv.reader(f)
+                    headers = next(csv_reader, None)  # 跳过标题行
+                    
+                    for row in csv_reader:
+                        if row and len(row) > 0:
+                            code = str(row[0]).strip()
+                            if code and code.isdigit():
+                                # 补全股票代码到6位
+                                code = code.zfill(6)
+                                if len(code) == 6:
+                                    stock_codes.append(code)
+                
+                if not stock_codes:
+                    messagebox.showerror("错误", "CSV文件中没有找到有效的股票代码")
+                    return
+                    
+            except Exception as e:
+                messagebox.showerror("错误", f"读取CSV文件失败: {e}")
+                return
+            
+            # 确认分析
+            result = messagebox.askyesno(
+                "确认分析", 
+                f"找到 {len(stock_codes)} 只股票，确定要开始批量分析吗？\n"
+                f"预计需要 {len(stock_codes) * 2} 秒时间"
+            )
+            
+            if not result:
+                return
+            
+            # 开始批量分析
+            self.start_csv_batch_analysis(stock_codes)
+            
+        except Exception as e:
+            messagebox.showerror("错误", f"CSV分析功能出错: {e}")
+    
+    def start_csv_batch_analysis(self, stock_codes):
+        """开始CSV批量分析"""
+        def analysis_thread():
+            try:
+                self.show_progress("🔄 正在进行CSV批量分析...")
+                
+                results = []
+                total = len(stock_codes)
+                
+                for i, code in enumerate(stock_codes):
+                    try:
+                        # 更新进度
+                        progress = (i + 1) / total * 100
+                        self.show_progress(f"🔄 分析进度: {i+1}/{total} ({progress:.1f}%) - {code}")
+                        
+                        # 获取股票名称
+                        stock_name = self.get_stock_name(code)
+                        
+                        # 分析股票
+                        score = self.get_stock_score_for_batch(code)
+                        
+                        if score is not None:
+                            # 获取技术面和基本面数据
+                            tech_data = self._generate_smart_mock_technical_data(code)
+                            fund_data = self._generate_smart_mock_fundamental_data(code)
+                            
+                            # 计算单独评分
+                            tech_score = self.calculate_technical_score(tech_data)
+                            fund_score = self.calculate_fundamental_score(fund_data)
+                            
+                            # 判断趋势
+                            trend = self.get_trend_signal(tech_data)
+                            
+                            # 判断RSI状态
+                            rsi_status = self.get_rsi_status(tech_data['rsi'])
+                            
+                            # 确保所有分数都是数字类型
+                            try:
+                                final_score = float(score) if score is not None else 7.0
+                                tech_score_final = float(tech_score) if tech_score is not None else 7.0
+                                fund_score_final = float(fund_score) if fund_score is not None else 7.0
+                            except (ValueError, TypeError):
+                                final_score = 7.0
+                                tech_score_final = 7.0
+                                fund_score_final = 7.0
+                            
+                            results.append({
+                                '股票代码': code,
+                                '股票名称': stock_name,
+                                '综合评分': round(final_score, 1),
+                                '技术面评分': round(tech_score_final, 1),
+                                '基本面评分': round(fund_score_final, 1),
+                                'RSI状态': rsi_status,
+                                '趋势': trend,
+                                '所属行业': fund_data.get('industry', '未知'),
+                                '分析时间': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            })
+                        
+                        # 避免请求过快
+                        time.sleep(0.5)
+                        
+                    except Exception as e:
+                        print(f"❌ 分析股票 {code} 失败: {e}")
+                        continue
+                
+                # 保存结果
+                if results:
+                    self.save_csv_analysis_results(results)
+                    self.display_csv_results_in_ui(results)  # 新增：在UI中显示结果
+                    self.show_progress(f"✅ CSV批量分析完成！成功分析 {len(results)} 只股票")
+                else:
+                    self.show_progress("❌ CSV批量分析失败，没有成功分析任何股票")
+                
+                # 3秒后清除进度信息
+                threading.Timer(3.0, lambda: self.show_progress("")).start()
+                
+            except Exception as e:
+                self.show_progress(f"❌ CSV批量分析失败: {e}")
+        
+        # 启动分析线程
+        thread = threading.Thread(target=analysis_thread)
+        thread.daemon = True
+        thread.start()
+    
+    def save_csv_analysis_results(self, results):
+        """保存CSV分析结果"""
+        try:
+            import csv
+            from datetime import datetime
+            from tkinter import messagebox
+            
+            # 生成文件名
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"CSV分析结果_{timestamp}.csv"
+            
+            # 保存到CSV文件
+            with open(filename, 'w', newline='', encoding='utf-8-sig') as f:
+                if results:
+                    fieldnames = results[0].keys()
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer.writeheader()
+                    writer.writerows(results)
+            
+            messagebox.showinfo("保存成功", f"分析结果已保存到文件：{filename}")
+            print(f"✅ CSV分析结果已保存到: {filename}")
+            
+        except Exception as e:
+            print(f"❌ 保存CSV分析结果失败: {e}")
+    
+    def display_csv_results_in_ui(self, results):
+        """在UI面板中显示CSV分析结果"""
+        try:
+            # 清空当前显示的内容
+            self.overview_text.delete('1.0', tk.END)
+            
+            # 创建结果报告
+            report = "=" * 100 + "\n"
+            report += f"📊 CSV批量分析结果 ({len(results)} 只股票)\n"
+            report += "=" * 100 + "\n\n"
+            
+            # 按评分排序
+            sorted_results = sorted(results, key=lambda x: float(x['综合评分']), reverse=True)
+            
+            # 显示Top 10
+            report += "🏆 评分排行榜 (Top 10):\n"
+            report += "-" * 88 + "\n"
+            report += f"{'排名':<4} {'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'RSI':<6} {'趋势':<8}\n"
+            report += "-" * 88 + "\n"
+            
+            for i, stock in enumerate(sorted_results[:10], 1):
+                report += f"{i:<4} {stock['股票代码']:<8} {stock['股票名称']:<12} {stock['综合评分']:<6} {stock['技术面评分']:<6} {stock['基本面评分']:<6} {stock['RSI状态']:<6} {stock['趋势']:<8}\n"
+            
+            report += "\n" + "-" * 88 + "\n\n"
+            
+            # 统计分析
+            scores = [float(r['综合评分']) for r in results]
+            avg_score = sum(scores) / len(scores)
+            max_score = max(scores)
+            min_score = min(scores)
+            
+            high_quality = len([s for s in scores if s >= 8.0])
+            medium_quality = len([s for s in scores if 6.0 <= s < 8.0])
+            low_quality = len([s for s in scores if s < 6.0])
+            
+            # RSI状态统计
+            oversold = len([r for r in results if r['RSI状态'] == '超卖'])
+            normal = len([r for r in results if r['RSI状态'] == '正常'])
+            overbought = len([r for r in results if r['RSI状态'] == '超买'])
+            
+            # 趋势统计
+            trend_counts = {}
+            for stock in results:
+                trend = stock['趋势']
+                trend_counts[trend] = trend_counts.get(trend, 0) + 1
+            
+            report += "📈 统计分析:\n"
+            report += f"平均评分: {avg_score:.1f}  |  最高评分: {max_score:.1f}  |  最低评分: {min_score:.1f}\n\n"
+            
+            report += "📊 评分分布:\n"
+            report += f"高质量股票 (8.0分以上): {high_quality} 只 ({high_quality/len(results)*100:.1f}%)\n"
+            report += f"中等质量股票 (6.0-8.0分): {medium_quality} 只 ({medium_quality/len(results)*100:.1f}%)\n"
+            report += f"低质量股票 (6.0分以下): {low_quality} 只 ({low_quality/len(results)*100:.1f}%)\n\n"
+            
+            report += "📈 RSI状态分布:\n"
+            report += f"超卖状态: {oversold} 只 ({oversold/len(results)*100:.1f}%) - 潜在买入机会\n"
+            report += f"正常区域: {normal} 只 ({normal/len(results)*100:.1f}%) - 持续观察\n"
+            report += f"超买状态: {overbought} 只 ({overbought/len(results)*100:.1f}%) - 注意回调风险\n\n"
+            
+            report += "📊 趋势分布:\n"
+            for trend, count in sorted(trend_counts.items(), key=lambda x: x[1], reverse=True):
+                report += f"{trend}: {count} 只 ({count/len(results)*100:.1f}%)\n"
+            report += "\n"
+            
+            # 详细列表
+            report += "📋 完整分析结果:\n"
+            report += "=" * 100 + "\n"
+            report += f"{'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'RSI':<6} {'趋势':<10} {'行业':<12}\n"
+            report += "=" * 100 + "\n"
+            
+            for stock in sorted_results:
+                report += f"{stock['股票代码']:<8} {stock['股票名称']:<12} {stock['综合评分']:<6} {stock['技术面评分']:<6} {stock['基本面评分']:<6} {stock['RSI状态']:<6} {stock['趋势']:<10} {stock['所属行业']:<12}\n"
+            
+            report += "\n" + "=" * 100 + "\n"
+            report += "💡 投资建议:\n"
+            if high_quality > 0:
+                report += f"🔥 重点关注: 评分8.0以上的 {high_quality} 只股票\n"
+            if medium_quality > 0:
+                report += f"⚖️ 适度配置: 评分6.0-8.0的 {medium_quality} 只股票\n"
+            if low_quality > 0:
+                report += f"⚠️ 谨慎投资: 评分6.0以下的 {low_quality} 只股票\n"
+            
+            if oversold > 0:
+                report += f"📈 潜在机会: {oversold} 只股票处于超卖状态，可关注反弹机会\n"
+            if overbought > 0:
+                report += f"📉 风险提示: {overbought} 只股票处于超买状态，注意回调风险\n"
+                
+            # 趋势建议
+            uptrend_count = sum(count for trend, count in trend_counts.items() if '上涨' in trend or '偏多' in trend)
+            downtrend_count = sum(count for trend, count in trend_counts.items() if '下跌' in trend or '偏空' in trend)
+            
+            if uptrend_count > downtrend_count:
+                report += f"📊 市场偏向: {uptrend_count} 只股票呈上涨趋势，市场情绪相对乐观\n"
+            elif downtrend_count > uptrend_count:
+                report += f"📊 市场偏向: {downtrend_count} 只股票呈下跌趋势，建议谨慎操作\n"
+            else:
+                report += f"📊 市场偏向: 趋势分化明显，建议精选个股\n"
+                
+            report += "\n⚠️ 风险提示: 以上分析仅供参考，投资有风险，决策需谨慎！"
+            
+            # 在UI中显示
+            self.overview_text.insert('1.0', report)
+            
+            # 切换到概览页面
+            self.notebook.select(0)  # 选择第一个标签页（概览）
+            
+        except Exception as e:
+            print(f"❌ 在UI中显示结果失败: {e}")
+            # 如果UI显示失败，至少在控制台输出简单结果
+            print(f"CSV分析完成，共分析 {len(results)} 只股票")
+    
+    def get_stock_name(self, code):
+        """获取股票名称"""
+        # 模拟股票名称数据
+        name_map = {
+            '000001': '平安银行', '000002': '万科A', '000858': '五粮液',
+            '600000': '浦发银行', '600036': '招商银行', '600519': '贵州茅台',
+            '000858': '五粮液', '002415': '海康威视', '000725': '京东方A'
+        }
+        
+        return name_map.get(code, f"股票{code}")
+    
+    def calculate_technical_score(self, tech_data):
+        """计算技术面评分 (5-10分)"""
+        try:
+            score = self.calculate_technical_index(
+                tech_data['rsi'],
+                tech_data['macd'],
+                tech_data['signal'],
+                tech_data['volume_ratio'],
+                tech_data['ma5'],
+                tech_data['ma10'],
+                tech_data['ma20'],
+                tech_data['ma60'],
+                tech_data['current_price']
+            )
+            # 确保返回数字类型
+            return float(score) if score is not None else 7.0
+        except:
+            return 7.0  # 默认分数
+    
+    def calculate_fundamental_score(self, fund_data):
+        """计算基本面评分 (5-10分)"""
+        try:
+            score = self.calculate_fundamental_index(
+                fund_data['pe_ratio'],
+                fund_data['pb_ratio'],
+                fund_data['roe'],
+                fund_data['revenue_growth'],
+                fund_data['profit_growth'],
+                fund_data.get('code', '000000')
+            )
+            # 确保返回数字类型
+            return float(score) if score is not None else 7.0
+        except:
+            return 7.0  # 默认分数
+    
+    def get_trend_signal(self, tech_data):
+        """判断趋势信号"""
+        try:
+            current_price = tech_data['current_price']
+            ma5 = tech_data['ma5']
+            ma10 = tech_data['ma10']
+            ma20 = tech_data['ma20']
+            macd = tech_data['macd']
+            signal = tech_data['signal']
+            
+            # 多重条件判断趋势
+            if (current_price > ma5 > ma10 > ma20 and macd > signal):
+                return "强势上涨"
+            elif (current_price > ma5 > ma10 and macd > signal):
+                return "上涨趋势"
+            elif (current_price > ma5 and macd > signal):
+                return "偏多"
+            elif (current_price < ma5 < ma10 < ma20 and macd < signal):
+                return "强势下跌"
+            elif (current_price < ma5 < ma10 and macd < signal):
+                return "下跌趋势"
+            elif (current_price < ma5 and macd < signal):
+                return "偏空"
+            else:
+                return "震荡整理"
+        except:
+            return "震荡整理"
+    
+    def get_rsi_status(self, rsi_value):
+        """判断RSI状态"""
+        try:
+            rsi = float(rsi_value)
+            if rsi < 30:
+                return "超卖"  # 红色信号，可能反弹
+            elif rsi > 70:
+                return "超买"  # 黄色信号，注意回调
+            else:
+                return "正常"  # 绿色信号，正常区域
+        except:
+            return "正常"
+
     def setup_ui(self):
         """设置用户界面"""
         self.root.title("A股智能分析系统 v2.0")
@@ -608,6 +975,17 @@ class AShareAnalyzerGUI:
                                   command=self.start_batch_scoring,
                                   cursor="hand2")
         batch_score_btn.pack(side="left", padx=10)
+        
+        # CSV批量分析按钮
+        csv_analysis_btn = tk.Button(recommend_frame, 
+                                   text="CSV批量分析", 
+                                   font=("微软雅黑", 12),
+                                   bg="#f39c12", 
+                                   fg="white",
+                                   activebackground="#e67e22",
+                                   command=self.import_csv_analysis,
+                                   cursor="hand2")
+        csv_analysis_btn.pack(side="left", padx=10)
         
         # 股票推荐按钮
         recommend_btn = tk.Button(recommend_frame, 
@@ -3101,6 +3479,17 @@ class AShareAnalyzerGUI:
 2. 点击"开始分析"按钮或按回车键
 3. 等待分析完成，查看各个页面的分析结果
 
+批量分析功能:
+• 开始获取评分 - 批量获取所有股票的综合评分
+• CSV批量分析 - 导入CSV文件进行批量分析
+• 股票推荐 - 基于评分生成投资推荐
+
+CSV批量分析使用方法:
+1. 准备CSV文件，第一列为6位股票代码
+2. 点击"CSV批量分析"按钮
+3. 选择您的CSV文件
+4. 等待分析完成，结果会自动保存为新的CSV文件
+
 支持的股票格式:
 • 上海主板: 60XXXX (如：600036-招商银行)
 • 科创板: 688XXX (如：688981-中芯国际) 
@@ -3115,6 +3504,8 @@ class AShareAnalyzerGUI:
 • 技术分析 - 技术指标和趋势判断
 • 基本面分析 - 财务数据和估值分析
 • 投资建议 - 综合评级和操作策略
+• 批量评分 - 大批量股票综合评分
+• CSV导出 - 分析结果导出为表格
 
 风险提示:
 股市有风险，投资需谨慎！
@@ -3127,12 +3518,14 @@ class AShareAnalyzerGUI:
 • 智能投资策略建议
 • 风险评估和仓位建议
 • 实时市场环境分析
+• CSV批量分析和导出
 
 版本更新 (v2.0):
 • 全新图形界面设计
 • 多页面分类展示分析结果
 • 智能股票代码识别
 • 增强的A股市场特色分析
+• 新增CSV批量分析功能
 
 点击"示例"按钮可以快速填入示例股票代码！
         """
