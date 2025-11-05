@@ -5,8 +5,22 @@ A股智能分析系统 - GUI版本 (完全兼容版)
 适配Python 3.7+和旧版Tkinter，去除特殊字符
 """
 
-import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox
+# 检查tkinter是否可用，如果不可用则启动命令行版本
+try:
+    import tkinter as tk
+    from tkinter import ttk, scrolledtext, messagebox
+except ImportError:
+    print("❌ tkinter模块不可用")
+    print("🔄 自动启动命令行版本...")
+    import subprocess
+    import sys
+    try:
+        subprocess.run([sys.executable, "cli_launcher.py"])
+    except Exception as e:
+        print(f"❌ 启动命令行版本失败: {e}")
+        input("按回车键退出...")
+    sys.exit(0)
+
 import threading
 import random
 from datetime import datetime, timedelta
@@ -23,10 +37,10 @@ warnings.filterwarnings('ignore')
 try:
     import akshare as ak
     AKSHARE_AVAILABLE = True
-    print("✅ akshare已加载，支持实时数据获取")
+    print("akshare已加载，支持实时数据获取")
 except ImportError:
     AKSHARE_AVAILABLE = False
-    print("⚠️ akshare未安装，使用本地数据库")
+    print("akshare未安装，使用本地数据库")
 
 class AShareAnalyzerGUI:
     """A股分析系统GUI界面"""
@@ -34,6 +48,11 @@ class AShareAnalyzerGUI:
     def __init__(self, root):
         self.root = root
         self.setup_ui()
+        
+        # 网络模式配置
+        self.network_mode = "auto"  # auto: 自动检测, online: 强制在线, offline: 强制离线
+        self.network_retry_count = 0  # 网络重试次数
+        self.max_network_retries = 2  # 最大重试次数
         
         # 添加失败记录缓存
         self.failed_stock_names = set()  # 记录获取名称失败的股票
@@ -48,6 +67,14 @@ class AShareAnalyzerGUI:
         # 新增：批量评分数据存储
         self.batch_score_file = "batch_stock_scores.json"
         self.batch_scores = {}           # 批量评分数据
+        
+        # 新增：完整推荐数据存储
+        self.comprehensive_data_file = "comprehensive_stock_data.json"
+        self.comprehensive_data = {}     # 完整的三时间段推荐数据
+        
+        # 加载现有数据
+        self.load_batch_scores()         # 加载批量评分数据
+        self.load_comprehensive_data()   # 加载完整推荐数据
         self.load_batch_scores()         # 加载批量评分数据
         
         self.stock_info = {
@@ -220,28 +247,96 @@ class AShareAnalyzerGUI:
         self.save_daily_cache()
     
     def load_batch_scores(self):
-        """加载批量评分数据"""
+        """加载批量评分数据 - 增强版本"""
         import json
         from datetime import datetime
+        import os
         
         try:
-            if os.path.exists(self.batch_score_file):
-                with open(self.batch_score_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                
-                # 检查数据是否在48小时内
-                if self._is_batch_scores_valid(data):
-                    self.batch_scores = data.get('scores', {})
-                    score_time = data.get('timestamp', data.get('date', '未知'))
-                    print(f"✅ 加载批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time})")
-                else:
-                    print("📅 批量评分数据已超过48小时，将重新获取")
-                    self.batch_scores = {}
-            else:
-                print("📝 首次运行，无批量评分数据")
+            if not os.path.exists(self.batch_score_file):
+                print("📊 未找到历史评分数据")
                 self.batch_scores = {}
+                return False
+            
+            # 检查文件大小
+            file_size = os.path.getsize(self.batch_score_file)
+            if file_size == 0:
+                print("⚠️ 评分文件为空")
+                self.batch_scores = {}
+                return False
+            
+            # 检查文件大小是否合理（超过100MB可能有问题）
+            if file_size > 100 * 1024 * 1024:
+                print(f"⚠️ 评分文件过大: {file_size / (1024*1024):.1f}MB")
+                # 尝试备份大文件
+                try:
+                    backup_file = f"{self.batch_score_file}.large_backup"
+                    import shutil
+                    shutil.move(self.batch_score_file, backup_file)
+                    print(f"📦 大文件已备份为: {backup_file}")
+                    self.batch_scores = {}
+                    return False
+                except:
+                    pass
+            
+            with open(self.batch_score_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # 检查数据是否在48小时内
+            if self._is_batch_scores_valid(data):
+                scores = data.get('scores', {})
+                
+                # 验证并清理无效数据
+                valid_scores = {}
+                invalid_count = 0
+                
+                for code, score_data in scores.items():
+                    if isinstance(score_data, dict) and 'score' in score_data:
+                        try:
+                            score = float(score_data['score'])
+                            if 1.0 <= score <= 10.0:  # 评分范围检查
+                                valid_scores[code] = score_data
+                            else:
+                                invalid_count += 1
+                        except (ValueError, TypeError):
+                            invalid_count += 1
+                    else:
+                        invalid_count += 1
+                
+                self.batch_scores = valid_scores
+                
+                if invalid_count > 0:
+                    print(f"⚠️ 清理了 {invalid_count} 条无效评分数据")
+                
+                score_time = data.get('timestamp', data.get('date', '未知'))
+                print(f"✅ 加载批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time})")
+            else:
+                print("📅 批量评分数据已超过48小时，将重新获取")
+                self.batch_scores = {}
+                
+        except json.JSONDecodeError as e:
+            print(f"❌ 评分文件JSON格式错误: {e}")
+            # 尝试恢复备份
+            backup_file = f"{self.batch_score_file}.backup"
+            if os.path.exists(backup_file):
+                try:
+                    import shutil
+                    shutil.copy2(backup_file, self.batch_score_file)
+                    print("� 已尝试从备份恢复")
+                    return self.load_batch_scores()  # 递归调用一次
+                except:
+                    pass
+            self.batch_scores = {}
+        except PermissionError:
+            print("❌ 无权限读取评分文件")
+            self.batch_scores = {}
+        except MemoryError:
+            print("❌ 内存不足，无法加载评分文件")
+            self.batch_scores = {}
         except Exception as e:
             print(f"❌ 加载批量评分失败: {e}")
+            import traceback
+            traceback.print_exc()
             self.batch_scores = {}
     
     def _is_batch_scores_valid(self, data):
@@ -275,23 +370,152 @@ class AShareAnalyzerGUI:
             return False
     
     def save_batch_scores(self):
-        """保存批量评分数据"""
+        """保存批量评分数据 - 增强版本"""
         import json
         from datetime import datetime
-        
-        data = {
-            'date': datetime.now().strftime('%Y-%m-%d'),
-            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'scores': self.batch_scores,
-            'count': len(self.batch_scores)
-        }
+        import os
         
         try:
+            # 数据验证
+            if not hasattr(self, 'batch_scores') or not self.batch_scores:
+                print("⚠️ 没有评分数据需要保存")
+                return False
+            
+            # 验证数据完整性
+            valid_scores = {}
+            for code, data in self.batch_scores.items():
+                if isinstance(data, dict) and 'score' in data:
+                    try:
+                        # 确保评分是有效数字
+                        score = float(data['score'])
+                        if 1.0 <= score <= 10.0:  # 评分范围检查
+                            valid_scores[code] = data
+                        else:
+                            print(f"⚠️ 股票 {code} 评分异常: {score}")
+                    except (ValueError, TypeError):
+                        print(f"⚠️ 股票 {code} 评分数据类型错误")
+            
+            if not valid_scores:
+                print("⚠️ 没有有效的评分数据")
+                return False
+            
+            data = {
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'scores': valid_scores,
+                'count': len(valid_scores)
+            }
+            
+            # 创建备份
+            backup_file = f"{self.batch_score_file}.backup"
+            if os.path.exists(self.batch_score_file):
+                try:
+                    import shutil
+                    shutil.copy2(self.batch_score_file, backup_file)
+                except Exception as backup_error:
+                    print(f"⚠️ 创建备份失败: {backup_error}")
+            
+            # 保存主文件
             with open(self.batch_score_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-            print(f"💾 批量评分已保存：{len(self.batch_scores)}只股票 (时间: {data['timestamp']})")
+            
+            print(f"💾 批量评分已保存：{len(valid_scores)}只股票 (时间: {data['timestamp']})")
+            
+            # 清理旧备份（只保留最新的）
+            try:
+                if os.path.exists(backup_file) and os.path.getsize(self.batch_score_file) > 0:
+                    pass  # 保留备份
+            except:
+                pass
+                
+            return True
+            
+        except PermissionError:
+            print("❌ 保存失败: 文件被占用或权限不足")
+            return False
+        except OSError as e:
+            print(f"❌ 保存失败: 磁盘空间不足或IO错误 - {e}")
+            return False
         except Exception as e:
             print(f"❌ 保存批量评分失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def save_comprehensive_data(self):
+        """保存完整的三时间段推荐数据"""
+        import json
+        from datetime import datetime
+        import os
+        
+        try:
+            # 数据验证
+            if not hasattr(self, 'comprehensive_data') or not self.comprehensive_data:
+                print("⚠️ 没有完整数据需要保存")
+                return False
+            
+            data = {
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'version': '2.0',
+                'data': self.comprehensive_data,
+                'count': len(self.comprehensive_data)
+            }
+            
+            # 创建备份
+            backup_file = f"{self.comprehensive_data_file}.backup"
+            if os.path.exists(self.comprehensive_data_file):
+                try:
+                    import shutil
+                    shutil.copy2(self.comprehensive_data_file, backup_file)
+                except Exception as backup_error:
+                    print(f"⚠️ 创建完整数据备份失败: {backup_error}")
+            
+            # 保存主文件
+            with open(self.comprehensive_data_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            
+            print(f"💾 完整推荐数据已保存：{len(self.comprehensive_data)}只股票")
+            return True
+            
+        except PermissionError:
+            print("❌ 保存完整数据失败: 文件被占用或权限不足")
+            return False
+        except OSError as e:
+            print(f"❌ 保存完整数据失败: 磁盘空间不足或IO错误 - {e}")
+            return False
+        except Exception as e:
+            print(f"❌ 保存完整数据失败: {e}")
+            return False
+
+    def load_comprehensive_data(self):
+        """加载完整的三时间段推荐数据"""
+        import json
+        from datetime import datetime
+        import os
+        
+        try:
+            if not os.path.exists(self.comprehensive_data_file):
+                print("📄 完整推荐数据文件不存在")
+                return False
+            
+            with open(self.comprehensive_data_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # 验证数据格式
+            if 'data' in data and isinstance(data['data'], dict):
+                self.comprehensive_data = data['data']
+                data_date = data.get('date', '未知')
+                count = len(self.comprehensive_data)
+                print(f"✅ 加载完整推荐数据：{count}只股票 (日期: {data_date})")
+                return True
+            else:
+                print("❌ 完整推荐数据格式错误")
+                return False
+                
+        except Exception as e:
+            print(f"❌ 加载完整推荐数据失败: {e}")
+            return False
     
     def get_all_stock_codes(self):
         """获取所有A股股票代码（60/00/30开头和ETF）"""
@@ -374,83 +598,160 @@ class AShareAnalyzerGUI:
         return sorted(list(set(all_stocks)))
     
     def start_batch_scoring(self):
-        """开始批量获取评分"""
+        """开始批量获取评分 - 增强稳定性版本"""
         import threading
+        import gc
+        
+        # 检查是否已经在运行
+        if hasattr(self, '_batch_running') and self._batch_running:
+            self.show_progress("⚠️ 批量评分已在运行中，请等待完成")
+            return
         
         # 在后台线程中运行，避免界面卡死
         def batch_scoring_thread():
+            self._batch_running = True
             try:
                 self.show_progress("🚀 开始获取全部股票评分...")
                 
                 # 获取所有股票代码
-                all_codes = self.get_all_stock_codes()
-                total_stocks = len(all_codes)
+                try:
+                    all_codes = self.get_all_stock_codes()
+                    total_stocks = len(all_codes)
+                except Exception as e:
+                    self.show_progress(f"❌ 获取股票列表失败: {e}")
+                    return
                 
                 if total_stocks == 0:
                     self.show_progress("❌ 未找到股票代码")
                     return
                 
-                self.show_progress(f"📊 找到 {total_stocks} 只股票，开始批量评分...")
+                # 限制最大处理数量，防止内存溢出
+                max_process = min(total_stocks, 5000)  # 最多处理5000只
+                if total_stocks > max_process:
+                    self.show_progress(f"⚠️ 股票数量过多，本次处理前{max_process}只")
+                    all_codes = all_codes[:max_process]
+                    total_stocks = max_process
+                
+                self.show_progress(f"📊 准备分析 {total_stocks} 只股票...")
                 
                 success_count = 0
                 failed_count = 0
+                batch_save_interval = 20  # 每20只保存一次，减少频率
                 
                 for i, code in enumerate(all_codes):
                     try:
+                        # 检查是否需要停止
+                        if hasattr(self, '_stop_batch') and self._stop_batch:
+                            self.show_progress("⏹️ 用户停止了批量分析")
+                            break
+                        
                         # 更新进度
                         progress = (i + 1) / total_stocks * 100
-                        self.show_progress(f"⏳ 正在分析 {code} ({i+1}/{total_stocks}) - {progress:.1f}%")
+                        self.show_progress(f"⏳ 分析 {code} ({i+1}/{total_stocks}) - {progress:.1f}%")
                         
                         # 获取股票分析和评分
-                        score = self.get_stock_score_for_batch(code)
-                        
-                        if score is not None:
-                            # 保存评分数据
-                            stock_name = self.stock_info.get(code, {}).get('name', f'股票{code}')
-                            industry = self.stock_info.get(code, {}).get('industry', '未知')
+                        try:
+                            # 获取完整的三时间段数据
+                            comprehensive_data = self.get_comprehensive_stock_data_for_batch(code)
                             
-                            self.batch_scores[code] = {
-                                'name': stock_name,
-                                'score': score,
-                                'industry': industry,
-                                'timestamp': datetime.now().strftime('%H:%M:%S')
-                            }
-                            success_count += 1
-                        else:
+                            if comprehensive_data:
+                                # 保存完整数据用于推荐
+                                self.comprehensive_data[code] = comprehensive_data
+                                
+                                # 保存简化评分数据用于兼容性
+                                score = comprehensive_data['overall_score']
+                                stock_name = comprehensive_data['name']
+                                industry = comprehensive_data['fund_data'].get('industry', '未知')
+                                
+                                self.batch_scores[code] = {
+                                    'name': stock_name,
+                                    'score': float(score),
+                                    'industry': industry,
+                                    'timestamp': datetime.now().strftime('%H:%M:%S')
+                                }
+                                success_count += 1
+                            else:
+                                failed_count += 1
+                                
+                        except Exception as score_error:
+                            print(f"⚠️ 评分失败 {code}: {score_error}")
                             failed_count += 1
                         
-                        # 每50只股票保存一次
-                        if (i + 1) % 50 == 0:
-                            self.save_batch_scores()
+                        # 定期保存和内存清理
+                        if (i + 1) % batch_save_interval == 0:
+                            try:
+                                self.save_batch_scores()
+                                self.save_comprehensive_data()  # 保存完整数据
+                                gc.collect()  # 强制垃圾回收
+                                self.show_progress(f"💾 已保存进度 ({i+1}/{total_stocks})")
+                            except Exception as save_error:
+                                print(f"⚠️ 保存进度失败: {save_error}")
                             
-                        # 避免请求过快
-                        time.sleep(0.1)
+                        # 避免请求过快，增加延迟
+                        time.sleep(0.2)  # 增加到0.2秒
                         
                     except Exception as e:
-                        print(f"❌ 分析股票 {code} 失败: {e}")
+                        print(f"❌ 处理股票 {code} 时发生异常: {e}")
                         failed_count += 1
                         continue
                 
                 # 最终保存
-                self.save_batch_scores()
+                try:
+                    self.save_batch_scores()
+                    self.save_comprehensive_data()  # 保存完整数据
+                    gc.collect()  # 最终垃圾回收
+                except Exception as final_save_error:
+                    print(f"⚠️ 最终保存失败: {final_save_error}")
                 
                 # 显示完成信息
                 self.show_progress(f"✅ 批量评分完成！成功: {success_count}, 失败: {failed_count}")
                 
                 # 更新排行榜
-                self.update_ranking_display()
+                try:
+                    self.update_ranking_display()
+                except Exception as ranking_error:
+                    print(f"⚠️ 更新排行榜失败: {ranking_error}")
                 
                 # 3秒后清除进度信息
                 threading.Timer(3.0, lambda: self.show_progress("")).start()
                 
             except Exception as e:
-                self.show_progress(f"❌ 批量评分失败: {e}")
-                print(f"❌ 批量评分异常: {e}")
+                error_msg = f"❌ 批量评分异常: {str(e)}"
+                self.show_progress(error_msg)
+                print(error_msg)
+                import traceback
+                traceback.print_exc()
+            finally:
+                # 确保状态清理
+                self._batch_running = False
+                if hasattr(self, '_stop_batch'):
+                    delattr(self, '_stop_batch')
+                # 重置停止按钮状态
+                try:
+                    self.stop_batch_btn.config(state="disabled")
+                except:
+                    pass
         
         # 启动后台线程
-        thread = threading.Thread(target=batch_scoring_thread)
-        thread.daemon = True
-        thread.start()
+        try:
+            # 更新按钮状态
+            self.stop_batch_btn.config(state="normal")
+            
+            thread = threading.Thread(target=batch_scoring_thread)
+            thread.daemon = True
+            thread.start()
+        except Exception as e:
+            self.show_progress(f"❌ 启动批量评分失败: {e}")
+            self._batch_running = False
+    
+    def stop_batch_scoring(self):
+        """停止批量评分"""
+        if hasattr(self, '_batch_running') and self._batch_running:
+            self._stop_batch = True
+            self.show_progress("⏹️ 正在停止批量评分...")
+            self.stop_batch_btn.config(state="disabled")
+        else:
+            self.show_progress("⚠️ 没有正在运行的批量评分任务")
     
     def get_stock_score_for_batch(self, stock_code):
         """为批量评分获取单只股票的评分 - 确保一致性"""
@@ -497,6 +798,81 @@ class AShareAnalyzerGUI:
             
         except Exception as e:
             print(f"❌ 获取 {stock_code} 评分失败: {e}")
+            return None
+
+    def get_comprehensive_stock_data_for_batch(self, stock_code):
+        """为批量评分获取单只股票的完整数据 - 包含三时间段详细评分"""
+        try:
+            from datetime import datetime
+            
+            # 生成智能模拟数据
+            tech_data = self._generate_smart_mock_technical_data(stock_code)
+            fund_data = self._generate_smart_mock_fundamental_data(stock_code)
+            stock_info = self.stock_info.get(stock_code, {})
+            
+            # 计算三个时间段的详细评分
+            short_score_data = self._calculate_short_term_score(stock_code, tech_data, fund_data, stock_info)
+            medium_score_data = self._calculate_medium_term_score(stock_code, tech_data, fund_data, stock_info)
+            long_score_data = self._calculate_long_term_score(stock_code, tech_data, fund_data, stock_info)
+            
+            # 计算中期建议数据
+            medium_advice = self.get_medium_term_advice(
+                fund_data['pe_ratio'], 
+                fund_data['pb_ratio'], 
+                fund_data['roe'], 
+                tech_data['rsi'], 
+                tech_data['macd'], 
+                tech_data['signal'], 
+                tech_data['volume_ratio'], 
+                tech_data['ma20'], 
+                tech_data['current_price']
+            )
+            
+            # 组合完整数据
+            comprehensive_data = {
+                'code': stock_code,
+                'name': stock_info.get('name', f'股票{stock_code}'),
+                'current_price': tech_data['current_price'],
+                
+                # 基础数据
+                'tech_data': tech_data,
+                'fund_data': fund_data,
+                
+                # 三时间段评分数据
+                'short_term': {
+                    'score': short_score_data['score'],
+                    'recommendation': short_score_data.get('recommendation', ''),
+                    'confidence': short_score_data.get('confidence', 0),
+                    'factors': short_score_data.get('factors', []),
+                    'risk_level': short_score_data.get('risk_level', '中等')
+                },
+                'medium_term': {
+                    'score': medium_score_data['score'],
+                    'recommendation': medium_advice.get('recommendation', ''),
+                    'confidence': medium_advice.get('confidence', 0),
+                    'factors': medium_advice.get('key_factors', []),
+                    'risk_level': medium_advice.get('risk_level', '中等')
+                },
+                'long_term': {
+                    'score': long_score_data['score'],
+                    'recommendation': long_score_data.get('recommendation', ''),
+                    'confidence': long_score_data.get('confidence', 0),
+                    'factors': long_score_data.get('factors', []),
+                    'risk_level': long_score_data.get('risk_level', '中等')
+                },
+                
+                # 综合评分 (保持兼容性)
+                'overall_score': (short_score_data['score'] + medium_score_data['score'] + long_score_data['score']) / 3,
+                
+                # 时间戳
+                'timestamp': datetime.now().isoformat(),
+                'data_source': 'comprehensive_batch'
+            }
+            
+            return comprehensive_data
+            
+        except Exception as e:
+            print(f"❌ 获取 {stock_code} 完整数据失败: {e}")
             return None
     
     def import_csv_analysis(self):
@@ -937,6 +1313,24 @@ class AShareAnalyzerGUI:
         recommend_frame = tk.Frame(self.root, bg="#f0f0f0")
         recommend_frame.pack(fill="x", padx=20, pady=5)
         
+        # 网络模式选择
+        tk.Label(recommend_frame, text="数据模式:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
+        
+        self.network_mode_var = tk.StringVar(value="auto")
+        network_combo = ttk.Combobox(recommend_frame, 
+                                   textvariable=self.network_mode_var,
+                                   values=["auto", "online", "offline"],
+                                   state="readonly",
+                                   font=("微软雅黑", 9),
+                                   width=8)
+        network_combo.pack(side="left", padx=(5, 15))
+        network_combo.bind("<<ComboboxSelected>>", self.on_network_mode_change)
+        
+        # 网络状态指示器
+        self.network_status_label = tk.Label(recommend_frame, text="🌐 自动", 
+                                            font=("微软雅黑", 9), bg="#f0f0f0")
+        self.network_status_label.pack(side="left", padx=(0, 20))
+        
         # 评分条标签
         tk.Label(recommend_frame, text="推荐评分:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
         
@@ -975,6 +1369,18 @@ class AShareAnalyzerGUI:
                                   command=self.start_batch_scoring,
                                   cursor="hand2")
         batch_score_btn.pack(side="left", padx=10)
+        
+        # 停止批量评分按钮
+        self.stop_batch_btn = tk.Button(recommend_frame, 
+                                       text="停止评分", 
+                                       font=("微软雅黑", 12),
+                                       bg="#e74c3c", 
+                                       fg="white",
+                                       activebackground="#c0392b",
+                                       command=self.stop_batch_scoring,
+                                       cursor="hand2",
+                                       state="disabled")  # 初始状态为禁用
+        self.stop_batch_btn.pack(side="left", padx=5)
         
         # CSV批量分析按钮
         csv_analysis_btn = tk.Button(recommend_frame, 
@@ -2364,31 +2770,48 @@ class AShareAnalyzerGUI:
             return "高风险"
     
     def get_real_technical_indicators(self, ticker):
-        """获取真实的技术指标数据，网络失败时使用智能模拟数据"""
+        """获取真实的技术指标数据，改进的网络模式处理"""
+        
+        # 检查网络模式
+        if not AKSHARE_AVAILABLE or self.network_mode == "offline":
+            print(f"📴 {ticker} 离线模式，使用模拟数据")
+            return self._generate_smart_mock_technical_data(ticker)
+        
+        # 检查网络重试次数
+        if self.network_retry_count >= self.max_network_retries:
+            print(f"🔄 网络重试次数已达上限，{ticker} 切换到离线模式")
+            self.network_mode = "offline"
+            return self._generate_smart_mock_technical_data(ticker)
         
         # 首先尝试获取真实数据
         try:
-            if AKSHARE_AVAILABLE:
+            if self.network_mode in ["auto", "online"]:
                 result = self._try_get_real_technical_data(ticker)
                 if result:
+                    self.network_retry_count = 0  # 重置重试计数
                     return result
+                else:
+                    self.network_retry_count += 1
         except Exception as e:
-            print(f"⚠️ 真实数据获取失败: {e}")
+            print(f"⚠️ {ticker} 真实数据获取失败: 网络问题")
+            self.network_retry_count += 1
         
         # 如果真实数据获取失败，生成智能模拟数据
+        print(f"🎭 {ticker} 使用智能模拟数据")
         return self._generate_smart_mock_technical_data(ticker)
     
     def _try_get_real_technical_data(self, ticker):
-        """尝试获取真实技术数据"""
+        """尝试获取真实技术数据 - 改进的网络处理"""
         import akshare as ak
         import pandas as pd
         import os
         import urllib.request
         import socket
+        import requests
         
-        # 临时禁用代理，避免代理连接问题
+        # 完全禁用代理和SSL验证，避免代理连接问题
         original_proxies = {}
-        proxy_env_vars = ['http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY']
+        proxy_env_vars = ['http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY', 'ftp_proxy', 'FTP_PROXY']
         
         for var in proxy_env_vars:
             if var in os.environ:
@@ -2400,10 +2823,17 @@ class AShareAnalyzerGUI:
         opener = urllib.request.build_opener(proxy_handler)
         urllib.request.install_opener(opener)
         
+        # 设置requests不使用代理
+        session = requests.Session()
+        session.proxies = {}
+        session.verify = False  # 禁用SSL验证
+        
         try:
             # 设置更短的超时时间，快速失败
             socket_timeout = socket.getdefaulttimeout()
-            socket.setdefaulttimeout(5)  # 5秒超时
+            socket.setdefaulttimeout(3)  # 3秒超时，更快失败
+            
+            print(f"📡 尝试获取 {ticker} 实时数据...")
             
             # 获取历史数据计算技术指标
             stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
@@ -2411,6 +2841,7 @@ class AShareAnalyzerGUI:
                                            adjust="qfq")
             
             if stock_hist is not None and not stock_hist.empty:
+                print(f"✓ {ticker} 实时数据获取成功")
                 # 获取最新价格
                 current_price = float(stock_hist['收盘'].iloc[-1])
                 
@@ -2468,14 +2899,23 @@ class AShareAnalyzerGUI:
                 
         except Exception as e:
             error_msg = str(e)
+            # 更详细的错误分类和处理
             if "ProxyError" in error_msg or "proxy" in error_msg.lower():
-                print(f"❌ 代理服务器问题: {ticker}")
+                print(f"🔌 {ticker} 代理服务器问题，切换到离线模式")
             elif "Max retries exceeded" in error_msg:
-                print(f"❌ 网络连接超时: {ticker}")
-            elif "ConnectTimeout" in error_msg:
-                print(f"❌ 连接超时: {ticker}")
+                print(f"🌐 {ticker} 网络连接超时，使用模拟数据")
+            elif "ConnectTimeout" in error_msg or "timeout" in error_msg.lower():
+                print(f"⏰ {ticker} 连接超时，使用模拟数据")
+            elif "SSL" in error_msg or "certificate" in error_msg.lower():
+                print(f"🔐 {ticker} SSL证书问题，使用模拟数据")
+            elif "HTTPSConnectionPool" in error_msg:
+                print(f"🌐 {ticker} HTTPS连接池问题，使用模拟数据")
+            elif "Remote end closed connection" in error_msg:
+                print(f"🔗 {ticker} 远程连接中断，使用模拟数据")
             else:
-                print(f"⚠️ 获取{ticker}技术指标失败: {e}")
+                print(f"⚠️ {ticker} 获取技术指标失败: 网络问题，使用模拟数据")
+            
+            # 网络问题时直接返回None，让程序使用模拟数据
             return None
             
         finally:
@@ -2722,10 +3162,24 @@ class AShareAnalyzerGUI:
                         }
                         
                 except Exception as e:
-                    print(f"⚠️ 获取{ticker}财务数据失败: {e}")
+                    error_msg = str(e)
+                    if "ProxyError" in error_msg or "proxy" in error_msg.lower():
+                        print(f"🔌 {ticker} 财务数据获取-代理问题，使用默认值")
+                    elif "Max retries exceeded" in error_msg or "timeout" in error_msg.lower():
+                        print(f"🌐 {ticker} 财务数据获取-网络超时，使用默认值")
+                    elif "HTTPSConnectionPool" in error_msg:
+                        print(f"🌐 {ticker} 财务数据获取-连接问题，使用默认值")
+                    else:
+                        print(f"⚠️ {ticker} 财务数据获取失败，使用默认值")
                     
         except Exception as e:
-            print(f"⚠️ akshare财务数据获取失败: {e}")
+            error_msg = str(e)
+            if "ProxyError" in error_msg or "proxy" in error_msg.lower():
+                print(f"🔌 akshare财务数据获取-代理问题，使用离线模式")
+            elif "Max retries exceeded" in error_msg or "timeout" in error_msg.lower():
+                print(f"🌐 akshare财务数据获取-网络问题，使用离线模式")
+            else:
+                print(f"⚠️ akshare财务数据获取失败，使用离线模式")
         
         # 如果获取失败，返回合理的默认值
         return {
@@ -2734,8 +3188,179 @@ class AShareAnalyzerGUI:
             'roe': 10  # 合理的默认ROE
         }
     
+    # ==================== 高级技术分析算法 ====================
+    
+    def calculate_kdj(self, kline_data, period=9):
+        """计算KDJ随机指标"""
+        try:
+            import numpy as np
+            
+            if len(kline_data) < period:
+                return 50, 50, 50
+            
+            # 提取高低价数据
+            highs = np.array([float(x.get('high', 0)) for x in kline_data[-period:]])
+            lows = np.array([float(x.get('low', 0)) for x in kline_data[-period:]])
+            closes = np.array([float(x.get('close', 0)) for x in kline_data[-period:]])
+            
+            # 计算最高价和最低价
+            highest_high = np.max(highs)
+            lowest_low = np.min(lows)
+            
+            # 计算RSV
+            if highest_high == lowest_low:
+                rsv = 50
+            else:
+                rsv = (closes[-1] - lowest_low) / (highest_high - lowest_low) * 100
+            
+            # 简化的K、D、J计算
+            k = rsv * 0.6 + 50 * 0.4  # 简化版本
+            d = k * 0.6 + 50 * 0.4
+            j = 3 * k - 2 * d
+            
+            return max(0, min(100, k)), max(0, min(100, d)), max(-100, min(300, j))
+            
+        except Exception as e:
+            print(f"KDJ计算错误: {e}")
+            return 50, 50, 50
+    
+    def calculate_williams_r(self, kline_data, period=14):
+        """计算威廉指标(WR)"""
+        try:
+            import numpy as np
+            
+            if len(kline_data) < period:
+                return -50
+            
+            # 提取数据
+            highs = np.array([float(x.get('high', 0)) for x in kline_data[-period:]])
+            lows = np.array([float(x.get('low', 0)) for x in kline_data[-period:]])
+            close = float(kline_data[-1].get('close', 0))
+            
+            highest_high = np.max(highs)
+            lowest_low = np.min(lows)
+            
+            if highest_high == lowest_low:
+                return -50
+            
+            wr = (highest_high - close) / (highest_high - lowest_low) * (-100)
+            return max(-100, min(0, wr))
+            
+        except Exception as e:
+            print(f"WR计算错误: {e}")
+            return -50
+    
+    def calculate_bollinger_bands(self, kline_data, period=20, std_dev=2):
+        """计算布林带"""
+        try:
+            import numpy as np
+            
+            if len(kline_data) < period:
+                price = float(kline_data[-1].get('close', 100))
+                return price * 1.02, price, price * 0.98
+            
+            # 提取收盘价
+            closes = np.array([float(x.get('close', 0)) for x in kline_data[-period:]])
+            
+            # 计算移动平均线和标准差
+            sma = np.mean(closes)
+            std = np.std(closes)
+            
+            upper_band = sma + (std * std_dev)
+            lower_band = sma - (std * std_dev)
+            
+            return upper_band, sma, lower_band
+            
+        except Exception as e:
+            print(f"布林带计算错误: {e}")
+            price = float(kline_data[-1].get('close', 100)) if kline_data else 100
+            return price * 1.02, price, price * 0.98
+    
+    def calculate_momentum(self, kline_data, period=10):
+        """计算动量指标(MTM)"""
+        try:
+            if len(kline_data) < period + 1:
+                return 0
+            
+            current_price = float(kline_data[-1].get('close', 0))
+            past_price = float(kline_data[-(period+1)].get('close', 0))
+            
+            if past_price == 0:
+                return 0
+            
+            mtm = (current_price - past_price) / past_price * 100
+            return mtm
+            
+        except Exception as e:
+            print(f"MTM计算错误: {e}")
+            return 0
+    
+    def calculate_cci(self, kline_data, period=14):
+        """计算商品通道指标(CCI)"""
+        try:
+            import numpy as np
+            
+            if len(kline_data) < period:
+                return 0
+            
+            # 计算典型价格
+            tp_list = []
+            for data in kline_data[-period:]:
+                high = float(data.get('high', 0))
+                low = float(data.get('low', 0))
+                close = float(data.get('close', 0))
+                tp = (high + low + close) / 3
+                tp_list.append(tp)
+            
+            tp_array = np.array(tp_list)
+            sma_tp = np.mean(tp_array)
+            
+            # 计算平均绝对偏差
+            mad = np.mean(np.abs(tp_array - sma_tp))
+            
+            if mad == 0:
+                return 0
+            
+            cci = (tp_list[-1] - sma_tp) / (0.015 * mad)
+            return max(-300, min(300, cci))
+            
+        except Exception as e:
+            print(f"CCI计算错误: {e}")
+            return 0
+    
+    def calculate_atr(self, kline_data, period=14):
+        """计算平均真实波幅(ATR)"""
+        try:
+            import numpy as np
+            
+            if len(kline_data) < period + 1:
+                return 1.0
+            
+            tr_list = []
+            for i in range(1, min(period + 1, len(kline_data))):
+                current = kline_data[-i]
+                previous = kline_data[-(i+1)]
+                
+                high = float(current.get('high', 0))
+                low = float(current.get('low', 0))
+                prev_close = float(previous.get('close', 0))
+                
+                tr = max(
+                    high - low,
+                    abs(high - prev_close),
+                    abs(low - prev_close)
+                )
+                tr_list.append(tr)
+            
+            atr = np.mean(tr_list) if tr_list else 1.0
+            return max(0.01, atr)
+            
+        except Exception as e:
+            print(f"ATR计算错误: {e}")
+            return 1.0
+
     def generate_investment_advice(self, ticker):
-        """生成短期和长期投资建议"""
+        """生成短期、中期、长期投资预测"""
         stock_info = self.get_stock_info_generic(ticker)
         
         # 获取真实技术指标数据
@@ -2745,6 +3370,7 @@ class AShareAnalyzerGUI:
         ma10 = technical_data.get('ma10', current_price)
         ma20 = technical_data.get('ma20', current_price)
         ma60 = technical_data.get('ma60', current_price)
+        ma120 = technical_data.get('ma120', current_price)  # 添加120日线
         
         rsi = technical_data.get('rsi', 50)
         macd = technical_data.get('macd', 0)
@@ -2757,66 +3383,883 @@ class AShareAnalyzerGUI:
         pb_ratio = financial_data.get('pb_ratio', 2.0)
         roe = financial_data.get('roe', 10)
         
-        # 短期投资建议 (1-7天)
-        short_term_advice = self.get_short_term_advice(rsi, macd, signal, volume_ratio, ma5, ma10, current_price)
+        # 新的三个时间段预测
+        short_term_prediction = self.get_short_term_prediction(
+            rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price
+        )
         
-        # 长期投资建议 (7-90天)
-        long_term_advice = self.get_long_term_advice(pe_ratio, pb_ratio, roe, ma20, ma60, current_price, stock_info)
+        medium_term_prediction = self.get_medium_term_prediction(
+            rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price, 
+            pe_ratio, pb_ratio, roe
+        )
         
-        return short_term_advice, long_term_advice
+        long_term_prediction = self.get_long_term_prediction(
+            pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price, stock_info
+        )
+        
+        return short_term_prediction, medium_term_prediction, long_term_prediction
     
+    def get_short_term_prediction(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price, kline_data=None):
+        """短期预测 (1-7天) - 基于技术指标和量价分析"""
+        try:
+            # 1. 生成模拟K线数据（如果没有提供）
+            if kline_data is None:
+                kline_data = self._generate_mock_kline_data(current_price, ma5, ma10, ma20)
+            
+            # 2. 计算高级技术指标
+            kdj_k, kdj_d, kdj_j = self.calculate_kdj(kline_data)
+            wr = self.calculate_williams_r(kline_data)
+            bb_upper, bb_middle, bb_lower = self.calculate_bollinger_bands(kline_data)
+            bb_position = (current_price - bb_lower) / (bb_upper - bb_lower) if bb_upper != bb_lower else 0.5
+            mtm = self.calculate_momentum(kline_data)
+            
+            # 计算短期预测评分
+            prediction_score = 0
+            signals = []
+            
+            # RSI分析 (权重25%)
+            if rsi < 20:
+                prediction_score += 4
+                signals.append("RSI极度超卖，强反弹概率高")
+            elif rsi < 30:
+                prediction_score += 3
+                signals.append("RSI超卖，反弹信号明确")
+            elif rsi < 45:
+                prediction_score += 1
+                signals.append("RSI偏弱，有企稳迹象")
+            elif rsi > 80:
+                prediction_score -= 4
+                signals.append("RSI极度超买，回调风险大")
+            elif rsi > 70:
+                prediction_score -= 3
+                signals.append("RSI超买，短期见顶风险")
+            elif rsi > 55:
+                prediction_score -= 1
+                signals.append("RSI偏强，注意风险")
+            
+            # MACD分析 (权重25%)
+            macd_diff = macd - signal
+            if macd > 0 and macd_diff > 0.1:
+                prediction_score += 3
+                signals.append("MACD金叉向上，多头趋势强")
+            elif macd > 0 and macd_diff > 0:
+                prediction_score += 2
+                signals.append("MACD零轴上方，趋势向好")
+            elif macd < 0 and macd_diff < -0.1:
+                prediction_score -= 3
+                signals.append("MACD死叉向下，空头趋势强")
+            elif macd < 0 and macd_diff < 0:
+                prediction_score -= 2
+                signals.append("MACD零轴下方，趋势偏弱")
+            
+            # KDJ分析 (权重20%)
+            if kdj_k < 20 and kdj_d < 20:
+                prediction_score += 3
+                signals.append("KDJ超卖区域，反弹概率大")
+            elif kdj_k > 80 and kdj_d > 80:
+                prediction_score -= 3
+                signals.append("KDJ超买区域，调整压力大")
+            elif kdj_k > kdj_d and kdj_j > 100:
+                prediction_score += 2
+                signals.append("KDJ金叉向上")
+            elif kdj_k < kdj_d and kdj_j < 0:
+                prediction_score -= 2
+                signals.append("KDJ死叉向下")
+            
+            # 布林带分析 (权重15%)
+            if bb_position < 0.1:
+                prediction_score += 2
+                signals.append("价格触及布林下轨，超跌反弹")
+            elif bb_position > 0.9:
+                prediction_score -= 2
+                signals.append("价格触及布林上轨，超涨回调")
+            elif 0.3 < bb_position < 0.7:
+                prediction_score += 1
+                signals.append("价格在布林中轨附近，相对安全")
+            
+            # 威廉指标分析 (权重10%)
+            if wr < -80:
+                prediction_score += 2
+                signals.append("WR超卖，短期反弹信号")
+            elif wr > -20:
+                prediction_score -= 2
+                signals.append("WR超买，短期调整风险")
+            
+            # 成交量分析 (权重5%)
+            if volume_ratio > 2.0:
+                prediction_score += 1
+                signals.append("成交量放大，资金关注度高")
+            elif volume_ratio < 0.5:
+                prediction_score -= 1
+                signals.append("成交量萎缩，缺乏资金推动")
+            
+            # 生成预测结果
+            if prediction_score >= 8:
+                trend = "强势上涨"
+                confidence = 85
+                target_range = "+3% ~ +8%"
+                risk_level = "中等"
+            elif prediction_score >= 5:
+                trend = "上涨"
+                confidence = 75
+                target_range = "+1% ~ +5%"
+                risk_level = "中等"
+            elif prediction_score >= 2:
+                trend = "震荡偏强"
+                confidence = 65
+                target_range = "0% ~ +3%"
+                risk_level = "低"
+            elif prediction_score >= -2:
+                trend = "震荡"
+                confidence = 55
+                target_range = "-2% ~ +2%"
+                risk_level = "低"
+            elif prediction_score >= -5:
+                trend = "震荡偏弱"
+                confidence = 65
+                target_range = "-3% ~ 0%"
+                risk_level = "中等"
+            elif prediction_score >= -8:
+                trend = "下跌"
+                confidence = 75
+                target_range = "-5% ~ -1%"
+                risk_level = "中等"
+            else:
+                trend = "强势下跌"
+                confidence = 85
+                target_range = "-8% ~ -3%"
+                risk_level = "高"
+            
+            return {
+                'period': '短期 (1-7天)',
+                'trend': trend,
+                'confidence': confidence,
+                'target_range': target_range,
+                'risk_level': risk_level,
+                'key_signals': signals[:5],  # 最多显示5个关键信号
+                'technical_score': prediction_score,
+                'algorithm': 'KDJ+RSI+MACD+布林带+威廉指标'
+            }
+            
+        except Exception as e:
+            print(f"短期预测计算错误: {e}")
+            return {
+                'period': '短期 (1-7天)',
+                'trend': '数据不足',
+                'confidence': 0,
+                'target_range': '无法预测',
+                'risk_level': '未知',
+                'key_signals': ['技术指标计算失败'],
+                'technical_score': 0,
+                'algorithm': '技术指标组合'
+            }
+    
+    def _generate_mock_kline_data(self, current_price, ma5, ma10, ma20, days=30):
+        """生成模拟K线数据用于技术指标计算"""
+        import random
+        kline_data = []
+        
+        try:
+            # 基于均线生成合理的历史价格
+            base_price = (ma5 + ma10 + ma20) / 3 if (ma5 and ma10 and ma20) else current_price
+            
+            for i in range(days):
+                # 生成随机波动
+                volatility = random.uniform(0.95, 1.05)
+                price = base_price * volatility * (1 + (i - days/2) * 0.001)  # 轻微趋势
+                
+                high = price * random.uniform(1.001, 1.03)
+                low = price * random.uniform(0.97, 0.999)
+                open_price = price * random.uniform(0.995, 1.005)
+                close = price
+                
+                kline_data.append({
+                    'open': open_price,
+                    'high': high,
+                    'low': low,
+                    'close': close,
+                    'volume': random.randint(10000, 100000)
+                })
+            
+            # 确保最后一天的收盘价接近当前价格
+            kline_data[-1]['close'] = current_price
+            
+            return kline_data
+            
+        except Exception as e:
+            print(f"生成模拟K线数据错误: {e}")
+            return [{'open': current_price, 'high': current_price, 'low': current_price, 'close': current_price, 'volume': 50000}]
+    
+    def get_medium_term_prediction(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price, pe_ratio, pb_ratio, roe):
+        """中期预测 (7-30天) - 基于趋势分析和基本面结合"""
+        try:
+            # 计算技术分析评分
+            tech_score = 0
+            tech_signals = []
+            
+            # 均线系统分析 (权重40%)
+            ma5_trend = (ma5 - ma10) / ma10 * 100 if ma10 > 0 else 0
+            ma10_trend = (ma10 - ma20) / ma20 * 100 if ma20 > 0 else 0
+            ma20_trend = (ma20 - ma60) / ma60 * 100 if ma60 > 0 else 0
+            
+            # 多头排列判断
+            if current_price > ma5 > ma10 > ma20 > ma60:
+                tech_score += 4
+                tech_signals.append("完美多头排列，中期趋势强劲")
+            elif current_price > ma5 > ma10 > ma20:
+                tech_score += 3
+                tech_signals.append("短中期多头排列，趋势向好")
+            elif current_price > ma5 > ma10:
+                tech_score += 2
+                tech_signals.append("短期多头排列，有上涨动能")
+            elif current_price < ma5 < ma10 < ma20 < ma60:
+                tech_score -= 4
+                tech_signals.append("完美空头排列，中期趋势偏弱")
+            elif current_price < ma5 < ma10 < ma20:
+                tech_score -= 3
+                tech_signals.append("短中期空头排列，趋势偏弱")
+            elif current_price < ma5 < ma10:
+                tech_score -= 2
+                tech_signals.append("短期空头排列，有下跌压力")
+            
+            # 趋势强度分析
+            if ma5_trend > 2 and ma10_trend > 1:
+                tech_score += 2
+                tech_signals.append("短期均线向上发散，趋势加速")
+            elif ma5_trend < -2 and ma10_trend < -1:
+                tech_score -= 2
+                tech_signals.append("短期均线向下发散，趋势恶化")
+            
+            # MACD中期趋势分析 (权重25%)
+            if macd > 0.2 and (macd - signal) > 0.1:
+                tech_score += 3
+                tech_signals.append("MACD强势金叉，中期看涨")
+            elif macd > 0 and (macd - signal) > 0:
+                tech_score += 2
+                tech_signals.append("MACD零轴上方金叉，趋势向好")
+            elif macd < -0.2 and (macd - signal) < -0.1:
+                tech_score -= 3
+                tech_signals.append("MACD强势死叉，中期看跌")
+            elif macd < 0 and (macd - signal) < 0:
+                tech_score -= 2
+                tech_signals.append("MACD零轴下方死叉，趋势偏弱")
+            
+            # RSI中期状态 (权重20%)
+            if 30 <= rsi <= 70:
+                tech_score += 1
+                tech_signals.append("RSI健康区间，可持续性强")
+            elif rsi > 80:
+                tech_score -= 2
+                tech_signals.append("RSI过度超买，中期调整风险")
+            elif rsi < 20:
+                tech_score += 2
+                tech_signals.append("RSI深度超卖，中期反弹机会")
+            
+            # 成交量趋势 (权重15%)
+            if volume_ratio > 1.5:
+                tech_score += 1
+                tech_signals.append("成交量持续放大，资金认可度高")
+            elif volume_ratio < 0.7:
+                tech_score -= 1
+                tech_signals.append("成交量持续萎缩，缺乏持续动力")
+            
+            # 基本面分析评分
+            fundamental_score = 0
+            fundamental_signals = []
+            
+            # 估值水平分析
+            if pe_ratio < 15:
+                fundamental_score += 2
+                fundamental_signals.append("PE估值偏低，安全边际高")
+            elif pe_ratio > 30:
+                fundamental_score -= 2
+                fundamental_signals.append("PE估值偏高，泡沫风险")
+            
+            if pb_ratio < 1.5:
+                fundamental_score += 1
+                fundamental_signals.append("PB估值合理，价值凸显")
+            elif pb_ratio > 3:
+                fundamental_score -= 1
+                fundamental_signals.append("PB估值偏高，注意风险")
+            
+            # 盈利能力分析
+            if roe > 15:
+                fundamental_score += 2
+                fundamental_signals.append("ROE优秀，盈利能力强")
+            elif roe < 8:
+                fundamental_score -= 1
+                fundamental_signals.append("ROE偏低，盈利能力待改善")
+            
+            # 综合评分
+            total_score = tech_score + fundamental_score
+            all_signals = tech_signals + fundamental_signals
+            
+            # 生成中期预测
+            if total_score >= 6:
+                trend = "强势上涨"
+                confidence = 80
+                target_range = "+8% ~ +20%"
+                risk_level = "中等"
+            elif total_score >= 3:
+                trend = "稳步上涨"
+                confidence = 70
+                target_range = "+3% ~ +12%"
+                risk_level = "中低"
+            elif total_score >= 0:
+                trend = "震荡向上"
+                confidence = 60
+                target_range = "-2% ~ +8%"
+                risk_level = "中等"
+            elif total_score >= -3:
+                trend = "震荡向下"
+                confidence = 60
+                target_range = "-8% ~ +2%"
+                risk_level = "中等"
+            elif total_score >= -6:
+                trend = "稳步下跌"
+                confidence = 70
+                target_range = "-12% ~ -3%"
+                risk_level = "中高"
+            else:
+                trend = "强势下跌"
+                confidence = 80
+                target_range = "-20% ~ -8%"
+                risk_level = "高"
+            
+            return {
+                'period': '中期 (7-30天)',
+                'trend': trend,
+                'confidence': confidence,
+                'target_range': target_range,
+                'risk_level': risk_level,
+                'key_signals': all_signals[:5],
+                'technical_score': tech_score,
+                'fundamental_score': fundamental_score,
+                'total_score': total_score,
+                'algorithm': '均线系统+MACD+基本面分析'
+            }
+            
+        except Exception as e:
+            print(f"中期预测计算错误: {e}")
+            return {
+                'period': '中期 (7-30天)',
+                'trend': '数据不足',
+                'confidence': 0,
+                'target_range': '无法预测',
+                'risk_level': '未知',
+                'key_signals': ['数据计算失败'],
+                'algorithm': '趋势分析+基本面'
+            }
+    
+    def get_long_term_prediction(self, pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price, stock_info, industry_data=None):
+        """长期预测 (30-90天) - 基于基本面分析和宏观趋势"""
+        try:
+            # 基本面深度分析评分
+            fundamental_score = 0
+            fundamental_signals = []
+            
+            # 估值安全边际分析 (权重35%)
+            if pe_ratio < 10:
+                fundamental_score += 4
+                fundamental_signals.append("PE严重低估，投资价值突出")
+            elif pe_ratio < 15:
+                fundamental_score += 3
+                fundamental_signals.append("PE估值偏低，安全边际高")
+            elif pe_ratio < 20:
+                fundamental_score += 1
+                fundamental_signals.append("PE估值合理，风险可控")
+            elif pe_ratio > 35:
+                fundamental_score -= 3
+                fundamental_signals.append("PE估值过高，泡沫风险严重")
+            elif pe_ratio > 25:
+                fundamental_score -= 2
+                fundamental_signals.append("PE估值偏高，回调风险")
+            
+            if pb_ratio < 1.0:
+                fundamental_score += 3
+                fundamental_signals.append("PB破净，资产价值显著低估")
+            elif pb_ratio < 1.5:
+                fundamental_score += 2
+                fundamental_signals.append("PB估值偏低，价值投资机会")
+            elif pb_ratio < 2.5:
+                fundamental_score += 1
+                fundamental_signals.append("PB估值合理")
+            elif pb_ratio > 4:
+                fundamental_score -= 2
+                fundamental_signals.append("PB估值过高，资产泡沫风险")
+            
+            # 盈利质量分析 (权重25%)
+            if roe > 20:
+                fundamental_score += 3
+                fundamental_signals.append("ROE优异，超强盈利能力")
+            elif roe > 15:
+                fundamental_score += 2
+                fundamental_signals.append("ROE优秀，盈利能力强")
+            elif roe > 10:
+                fundamental_score += 1
+                fundamental_signals.append("ROE良好，盈利稳定")
+            elif roe < 5:
+                fundamental_score -= 2
+                fundamental_signals.append("ROE偏低，盈利能力弱")
+            
+            # 长期趋势分析 (权重25%)
+            ma60_trend = (current_price - ma60) / ma60 * 100 if ma60 > 0 else 0
+            ma20_vs_60 = (ma20 - ma60) / ma60 * 100 if ma60 > 0 else 0
+            
+            if ma60_trend > 15 and ma20_vs_60 > 8:
+                fundamental_score += 3
+                fundamental_signals.append("长期强势上升趋势确立")
+            elif ma60_trend > 5 and ma20_vs_60 > 3:
+                fundamental_score += 2
+                fundamental_signals.append("长期趋势向好")
+            elif ma60_trend < -15 and ma20_vs_60 < -8:
+                fundamental_score -= 3
+                fundamental_signals.append("长期弱势下降趋势")
+            elif ma60_trend < -5 and ma20_vs_60 < -3:
+                fundamental_score -= 2
+                fundamental_signals.append("长期趋势偏弱")
+            
+            # 行业景气度分析 (权重15%)
+            industry = stock_info.get('industry', '')
+            
+            # 高景气度行业
+            hot_industries = ['半导体', '芯片', '新能源', '锂电', '光伏', '储能', '人工智能', '5G', '数字经济']
+            if any(keyword in industry for keyword in hot_industries):
+                fundamental_score += 2
+                fundamental_signals.append(f"{industry}行业高景气度，长期成长性强")
+            
+            # 稳定增长行业
+            stable_industries = ['医药', '生物医药', '消费', '白酒', '食品饮料', '家电']
+            if any(keyword in industry for keyword in stable_industries):
+                fundamental_score += 1
+                fundamental_signals.append(f"{industry}行业稳定增长，防御性强")
+            
+            # 周期性行业
+            cyclical_industries = ['钢铁', '煤炭', '有色', '化工', '建筑', '水泥']
+            if any(keyword in industry for keyword in cyclical_industries):
+                fundamental_score -= 1
+                fundamental_signals.append(f"{industry}行业周期性强，注意宏观环境")
+            
+            # 政策敏感行业
+            policy_sensitive = ['房地产', '教育', '游戏', '互联网金融']
+            if any(keyword in industry for keyword in policy_sensitive):
+                fundamental_score -= 1
+                fundamental_signals.append(f"{industry}行业政策敏感，关注政策变化")
+            
+            # 生成长期预测
+            if fundamental_score >= 8:
+                trend = "强势增长"
+                confidence = 85
+                target_range = "+20% ~ +50%"
+                risk_level = "中低"
+                investment_period = "3-6个月持有"
+            elif fundamental_score >= 5:
+                trend = "稳步增长"
+                confidence = 75
+                target_range = "+10% ~ +30%"
+                risk_level = "中等"
+                investment_period = "2-4个月持有"
+            elif fundamental_score >= 2:
+                trend = "温和上涨"
+                confidence = 65
+                target_range = "+5% ~ +15%"
+                risk_level = "中等"
+                investment_period = "1-3个月持有"
+            elif fundamental_score >= -2:
+                trend = "区间震荡"
+                confidence = 60
+                target_range = "-5% ~ +10%"
+                risk_level = "中等"
+                investment_period = "短期持有或观望"
+            elif fundamental_score >= -5:
+                trend = "温和下跌"
+                confidence = 70
+                target_range = "-15% ~ -5%"
+                risk_level = "中高"
+                investment_period = "不建议持有"
+            elif fundamental_score >= -8:
+                trend = "显著下跌"
+                confidence = 80
+                target_range = "-30% ~ -15%"
+                risk_level = "高"
+                investment_period = "建议回避"
+            else:
+                trend = "深度调整"
+                confidence = 85
+                target_range = "-50% ~ -30%"
+                risk_level = "很高"
+                investment_period = "强烈建议回避"
+            
+            return {
+                'period': '长期 (30-90天)',
+                'trend': trend,
+                'confidence': confidence,
+                'target_range': target_range,
+                'risk_level': risk_level,
+                'investment_period': investment_period,
+                'key_signals': fundamental_signals[:6],
+                'fundamental_score': fundamental_score,
+                'algorithm': '基本面分析+行业景气度+长期趋势'
+            }
+            
+        except Exception as e:
+            print(f"长期预测计算错误: {e}")
+            return {
+                'period': '长期 (30-90天)',
+                'trend': '数据不足',
+                'confidence': 0,
+                'target_range': '无法预测',
+                'risk_level': '未知',
+                'investment_period': '数据不足',
+                'key_signals': ['基本面数据不足'],
+                'algorithm': '基本面分析+趋势分析'
+            }
+    
+    # ==================== 股票推荐系统 ====================
+    
+    def get_recommended_stocks_by_period(self, period_type='short', top_n=10):
+        """根据时间段推荐股票 - 优化版本（从本地数据筛选）"""
+        try:
+            print(f"🔍 开始生成{period_type}期推荐股票（从本地数据筛选）...")
+            
+            # 首先检查是否有完整数据
+            if not self.comprehensive_data:
+                print("⚠️ 未找到完整推荐数据，尝试重新加载...")
+                if not self.load_comprehensive_data():
+                    print("❌ 没有可用的推荐数据，请先点击'开始获取评分'")
+                    return []
+            
+            recommendations = []
+            period_key = f"{period_type}_term"
+            
+            # 从保存的数据中筛选
+            for stock_code, stock_data in self.comprehensive_data.items():
+                try:
+                    if period_key in stock_data:
+                        period_data = stock_data[period_key]
+                        score = period_data.get('score', 0)
+                        
+                        if score > 0:  # 只保留有效评分的股票
+                            recommendation_data = {
+                                'code': stock_code,
+                                'name': stock_data.get('name', f'股票{stock_code}'),
+                                'score': score,
+                                'price': stock_data.get('current_price', 0),  # 添加price字段
+                                'current_price': stock_data.get('current_price', 0),
+                                'trend': period_data.get('trend', '未知'),  # 添加trend字段
+                                'target_range': period_data.get('target_range', '未知'),  # 添加target_range字段
+                                'recommendation': period_data.get('recommendation', ''),
+                                'confidence': period_data.get('confidence', 0),
+                                'factors': period_data.get('factors', []),
+                                'key_signals': period_data.get('key_signals', []),  # 添加key_signals字段
+                                'risk_level': period_data.get('risk_level', '中等'),
+                                
+                                # 添加基本面数据
+                                'pe_ratio': stock_data.get('fund_data', {}).get('pe_ratio', 0),
+                                'pb_ratio': stock_data.get('fund_data', {}).get('pb_ratio', 0),
+                                'roe': stock_data.get('fund_data', {}).get('roe', 0),
+                                'industry': stock_data.get('fund_data', {}).get('industry', '未知'),
+                                'concept': self.stock_info.get(stock_code, {}).get('concept', '未知'),  # 添加concept字段
+                                
+                                # 技术指标
+                                'rsi': stock_data.get('tech_data', {}).get('rsi', 50),
+                                'volume_ratio': stock_data.get('tech_data', {}).get('volume_ratio', 1.0),
+                                
+                                # 添加额外评分字段
+                                'tech_score': period_data.get('tech_score', 0),
+                                'fund_score': period_data.get('fund_score', 0),
+                                
+                                'data_source': 'cached'
+                            }
+                            recommendations.append(recommendation_data)
+                    
+                except Exception as e:
+                    print(f"   ⚠️ 处理股票{stock_code}数据失败: {e}")
+                    continue
+            
+            # 按评分排序并返回前N只
+            recommendations.sort(key=lambda x: x['score'], reverse=True)
+            top_recommendations = recommendations[:top_n]
+            
+            print(f"✅ {period_type}期推荐完成，从{len(self.comprehensive_data)}只股票中筛选出{len(top_recommendations)}只推荐股票")
+            return top_recommendations
+            
+        except Exception as e:
+            print(f"❌ 股票推荐生成失败: {e}")
+            return []
+    
+    def _calculate_short_term_score(self, ticker, technical_data, financial_data, stock_info):
+        """计算短期投资评分"""
+        try:
+            current_price = technical_data.get('current_price', 0)
+            ma5 = technical_data.get('ma5', current_price)
+            ma10 = technical_data.get('ma10', current_price)
+            ma20 = technical_data.get('ma20', current_price)
+            rsi = technical_data.get('rsi', 50)
+            macd = technical_data.get('macd', 0)
+            signal = technical_data.get('signal', 0)
+            volume_ratio = technical_data.get('volume_ratio', 1.0)
+            
+            # 使用短期预测算法
+            prediction = self.get_short_term_prediction(
+                rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price
+            )
+            
+            # 计算综合评分
+            base_score = prediction.get('technical_score', 0)
+            confidence = prediction.get('confidence', 0)
+            
+            # 调整评分范围到0-100
+            final_score = max(0, min(100, 50 + base_score * 3 + confidence * 0.3))
+            
+            return {
+                'code': ticker,
+                'name': stock_info.get('name', '未知'),
+                'price': current_price,
+                'score': final_score,
+                'trend': prediction.get('trend', '未知'),
+                'target_range': prediction.get('target_range', '未知'),
+                'confidence': confidence,
+                'risk_level': prediction.get('risk_level', '未知'),
+                'key_signals': prediction.get('key_signals', [])[:3],
+                'period_type': '短期',
+                'industry': stock_info.get('industry', '未知'),
+                'concept': stock_info.get('concept', '未知')
+            }
+            
+        except Exception as e:
+            print(f"短期评分计算错误 {ticker}: {e}")
+            return {'code': ticker, 'score': 0}
+    
+    def _calculate_medium_term_score(self, ticker, technical_data, financial_data, stock_info):
+        """计算中期投资评分"""
+        try:
+            current_price = technical_data.get('current_price', 0)
+            ma5 = technical_data.get('ma5', current_price)
+            ma10 = technical_data.get('ma10', current_price)
+            ma20 = technical_data.get('ma20', current_price)
+            ma60 = technical_data.get('ma60', current_price)
+            rsi = technical_data.get('rsi', 50)
+            macd = technical_data.get('macd', 0)
+            signal = technical_data.get('signal', 0)
+            volume_ratio = technical_data.get('volume_ratio', 1.0)
+            
+            pe_ratio = financial_data.get('pe_ratio', 20)
+            pb_ratio = financial_data.get('pb_ratio', 2.0)
+            roe = financial_data.get('roe', 10)
+            
+            # 使用中期预测算法
+            prediction = self.get_medium_term_prediction(
+                rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price,
+                pe_ratio, pb_ratio, roe
+            )
+            
+            # 计算综合评分
+            tech_score = prediction.get('technical_score', 0)
+            fund_score = prediction.get('fundamental_score', 0)
+            total_score = prediction.get('total_score', 0)
+            confidence = prediction.get('confidence', 0)
+            
+            # 调整评分范围到0-100
+            final_score = max(0, min(100, 50 + total_score * 2.5 + confidence * 0.2))
+            
+            return {
+                'code': ticker,
+                'name': stock_info.get('name', '未知'),
+                'price': current_price,
+                'score': final_score,
+                'trend': prediction.get('trend', '未知'),
+                'target_range': prediction.get('target_range', '未知'),
+                'confidence': confidence,
+                'risk_level': prediction.get('risk_level', '未知'),
+                'key_signals': prediction.get('key_signals', [])[:3],
+                'period_type': '中期',
+                'tech_score': tech_score,
+                'fund_score': fund_score,
+                'industry': stock_info.get('industry', '未知'),
+                'concept': stock_info.get('concept', '未知')
+            }
+            
+        except Exception as e:
+            print(f"中期评分计算错误 {ticker}: {e}")
+            return {'code': ticker, 'score': 0}
+    
+    def _calculate_long_term_score(self, ticker, technical_data, financial_data, stock_info):
+        """计算长期投资评分"""
+        try:
+            current_price = technical_data.get('current_price', 0)
+            ma20 = technical_data.get('ma20', current_price)
+            ma60 = technical_data.get('ma60', current_price)
+            ma120 = technical_data.get('ma120', current_price)
+            
+            pe_ratio = financial_data.get('pe_ratio', 20)
+            pb_ratio = financial_data.get('pb_ratio', 2.0)
+            roe = financial_data.get('roe', 10)
+            
+            # 使用长期预测算法
+            prediction = self.get_long_term_prediction(
+                pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price, stock_info
+            )
+            
+            # 计算综合评分
+            fund_score = prediction.get('fundamental_score', 0)
+            confidence = prediction.get('confidence', 0)
+            
+            # 调整评分范围到0-100
+            final_score = max(0, min(100, 50 + fund_score * 2 + confidence * 0.25))
+            
+            return {
+                'code': ticker,
+                'name': stock_info.get('name', '未知'),
+                'price': current_price,
+                'score': final_score,
+                'trend': prediction.get('trend', '未知'),
+                'target_range': prediction.get('target_range', '未知'),
+                'confidence': confidence,
+                'risk_level': prediction.get('risk_level', '未知'),
+                'investment_period': prediction.get('investment_period', '未知'),
+                'key_signals': prediction.get('key_signals', [])[:3],
+                'period_type': '长期',
+                'fund_score': fund_score,
+                'industry': stock_info.get('industry', '未知'),
+                'concept': stock_info.get('concept', '未知')
+            }
+            
+        except Exception as e:
+            print(f"长期评分计算错误 {ticker}: {e}")
+            return {'code': ticker, 'score': 0}
+    
+    def format_stock_recommendations(self, short_recs, medium_recs, long_recs):
+        """格式化股票推荐报告"""
+        import time
+        
+        def format_stock_list(recommendations, period_name):
+            if not recommendations:
+                return f"暂无{period_name}推荐股票"
+            
+            result = f"📊 {period_name}投资推荐 (Top 10)\n"
+            result += "=" * 50 + "\n\n"
+            
+            for i, stock in enumerate(recommendations, 1):
+                result += f"🏆 第{i}名: {stock['name']} ({stock['code']})\n"
+                result += f"   💰 当前价格: ¥{stock['price']:.2f}\n"
+                result += f"   📈 趋势预测: {stock['trend']}\n"
+                result += f"   🎯 目标区间: {stock['target_range']}\n"
+                result += f"   🔒 置信度: {stock['confidence']}%\n"
+                result += f"   ⚠️  风险等级: {stock['risk_level']}\n"
+                result += f"   🏭 所属行业: {stock['industry']}\n"
+                result += f"   💡 投资概念: {stock['concept']}\n"
+                
+                if stock.get('key_signals'):
+                    result += f"   🔍 关键信号: {' | '.join(stock['key_signals'])}\n"
+                
+                if period_name == '中期' and 'tech_score' in stock:
+                    result += f"   📊 技术评分: {stock['tech_score']:.1f} | 基本面评分: {stock['fund_score']:.1f}\n"
+                elif period_name == '长期' and 'fund_score' in stock:
+                    result += f"   📊 基本面评分: {stock['fund_score']:.1f}\n"
+                
+                result += f"   🎯 综合评分: {stock['score']:.1f}/100\n\n"
+            
+            return result
+        
+        report = f"""
+=========================================================
+            AI智能股票推荐系统 - 三时间段推荐
+=========================================================
+
+{format_stock_list(short_recs, '短期')}
+
+{format_stock_list(medium_recs, '中期')}
+
+{format_stock_list(long_recs, '长期')}
+
+=========================================================
+                   投资策略建议
+=========================================================
+
+🎯 短期投资策略 (1-7天):
+• 适合: 超短线交易者、技术分析爱好者
+• 重点: 关注技术指标信号，快进快出
+• 仓位: 建议总资金的10-30%
+• 止损: 严格设置3-5%止损位
+
+🎯 中期投资策略 (7-30天):
+• 适合: 波段交易者、趋势跟随者
+• 重点: 技术面趋势+基本面支撑
+• 仓位: 建议总资金的30-50%
+• 持有: 关注市场情绪变化，灵活调整
+
+🎯 长期投资策略 (30-90天):
+• 适合: 价值投资者、长线投资者
+• 重点: 基本面分析+行业前景
+• 仓位: 建议总资金的40-70%
+• 持有: 关注公司基本面变化，耐心持有
+
+=========================================================
+                   风险提示
+=========================================================
+
+⚠️ 重要提醒:
+• 以上推荐基于AI算法分析，仅供参考
+• 股市有风险，投资需谨慎，盈亏自负
+• 建议分散投资，避免重仓单一股票
+• 请根据个人风险承受能力理性投资
+• 定期回顾投资组合，适时调整策略
+
+📊 算法说明:
+• 短期推荐: 基于KDJ+RSI+MACD+布林带等技术指标
+• 中期推荐: 结合技术面趋势和基本面分析
+• 长期推荐: 深度基本面分析+行业景气度评估
+
+生成时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+推荐算法: TradingAI v2.0 三时间段智能推荐系统
+"""
+        
+        return report
+
     def get_short_term_advice(self, rsi, macd, signal, volume_ratio, ma5, ma10, current_price):
         """生成短期投资建议 (1-7天)"""
         
-        # 计算信号强度 (范围更宽，确保不同结果)
         signal_strength = 0
         factors = []
         
-        # RSI分析 (更精细的区间划分)
-        if rsi < 25:
-            signal_strength += 3
-            factors.append(f"RSI({rsi:.1f})严重超卖，强烈反弹信号")
-        elif rsi < 35:
+        # RSI分析
+        if rsi < 30:
             signal_strength += 2
-            factors.append(f"RSI({rsi:.1f})超卖，反弹概率高")
-        elif rsi < 45:
+            factors.append(f"RSI({rsi:.1f})超卖，反弹机会大")
+        elif rsi < 50:
             signal_strength += 1
-            factors.append(f"RSI({rsi:.1f})偏弱，有企稳迹象")
-        elif rsi <= 55:
-            signal_strength += 0
-            factors.append(f"RSI({rsi:.1f})中性区间")
-        elif rsi < 65:
-            signal_strength -= 1
-            factors.append(f"RSI({rsi:.1f})偏强，注意高位风险")
-        elif rsi < 75:
+            factors.append(f"RSI({rsi:.1f})偏低，有上涨空间")
+        elif rsi > 70:
             signal_strength -= 2
-            factors.append(f"RSI({rsi:.1f})超买，回调压力大")
+            factors.append(f"RSI({rsi:.1f})超买，回调风险高")
+        elif rsi > 60:
+            signal_strength -= 1
+            factors.append(f"RSI({rsi:.1f})偏高，注意回调")
         else:
-            signal_strength -= 3
-            factors.append(f"RSI({rsi:.1f})严重超买，高风险区域")
+            factors.append(f"RSI({rsi:.1f})中性")
         
-        # MACD分析 (更详细的判断)
-        macd_diff = macd - signal
-        if macd > 0 and macd_diff > 0.1:
+        # MACD分析
+        if macd > signal and macd > 0:
             signal_strength += 2
             factors.append("MACD金叉且强势向上")
-        elif macd > 0 and macd_diff > 0:
+        elif macd > signal:
             signal_strength += 1
-            factors.append("MACD位于零轴上方")
-        elif macd < 0 and macd_diff < -0.1:
+            factors.append("MACD金叉，向上信号")
+        elif macd < signal and macd < 0:
             signal_strength -= 2
             factors.append("MACD死叉且弱势向下")
-        elif macd < 0 and macd_diff < 0:
+        elif macd < signal:
             signal_strength -= 1
-            factors.append("MACD位于零轴下方")
+            factors.append("MACD死叉，向下信号")
         
-        # 均线分析 (更详细的位置关系)
-        ma_distance_5 = (current_price - ma5) / ma5 * 100
-        ma_distance_10 = (current_price - ma10) / ma10 * 100
+        # 均线分析
+        ma_distance_5 = ((current_price - ma5) / ma5) * 100
+        ma_distance_10 = ((current_price - ma10) / ma10) * 100
         
         if ma_distance_5 > 3 and ma_distance_10 > 3:
             signal_strength += 2
-            factors.append("价格大幅站上短期均线")
+            factors.append("价格强势突破短期均线")
         elif ma_distance_5 > 0 and ma_distance_10 > 0:
             signal_strength += 1
             factors.append("价格稳站短期均线")
@@ -2827,16 +4270,13 @@ class AShareAnalyzerGUI:
             signal_strength -= 1
             factors.append("价格跌破短期均线")
         
-        # 成交量分析 (更精细分级)
+        # 成交量分析
         if volume_ratio > 2.0:
             signal_strength += 2
             factors.append(f"成交量大幅放大({volume_ratio:.1f}倍)，资金高度活跃")
         elif volume_ratio > 1.5:
             signal_strength += 1
             factors.append(f"成交量放大({volume_ratio:.1f}倍)，资金活跃")
-        elif volume_ratio > 1.2:
-            signal_strength += 0
-            factors.append(f"成交量正常({volume_ratio:.1f}倍)")
         elif volume_ratio < 0.6:
             signal_strength -= 2
             factors.append(f"成交量严重萎缩({volume_ratio:.1f}倍)，观望情绪浓厚")
@@ -2844,7 +4284,7 @@ class AShareAnalyzerGUI:
             signal_strength -= 1
             factors.append(f"成交量萎缩({volume_ratio:.1f}倍)，缺乏资金关注")
         
-        # 生成建议 (扩大信号强度范围，确保差异化)
+        # 生成建议
         if signal_strength >= 4:
             recommendation = '强烈买入'
             confidence = min(90, 70 + signal_strength * 3)
@@ -2899,7 +4339,7 @@ class AShareAnalyzerGUI:
             'period': '短期 (1-7天)',
             'recommendation': recommendation,
             'confidence': confidence,
-            'signal_strength': signal_strength,  # 添加信号强度用于调试
+            'signal_strength': signal_strength,
             'key_factors': factors,
             'entry_strategy': entry_strategy,
             'exit_strategy': exit_strategy,
@@ -2907,6 +4347,117 @@ class AShareAnalyzerGUI:
             'target_return': target_return
         }
     
+    def get_medium_term_advice(self, pe_ratio, pb_ratio, roe, rsi, macd, signal, volume_ratio, ma20, current_price):
+        """生成中期投资建议 (7-30天)"""
+        
+        # 技术面评分 (60%)
+        tech_score = 0
+        factors = []
+        
+        # RSI分析
+        if 30 <= rsi <= 50:
+            tech_score += 2
+            factors.append(f"RSI({rsi:.1f})健康区间，上涨空间充足")
+        elif rsi < 30:
+            tech_score += 1
+            factors.append(f"RSI({rsi:.1f})超卖，中期反弹概率大")
+        elif rsi > 70:
+            tech_score -= 2
+            factors.append(f"RSI({rsi:.1f})超买，中期调整风险")
+        
+        # MACD趋势分析
+        if macd > signal:
+            tech_score += 1
+            factors.append("MACD金叉，中期趋势向好")
+        else:
+            tech_score -= 1
+            factors.append("MACD死叉，中期趋势偏弱")
+        
+        # 均线趋势
+        ma_distance = ((current_price - ma20) / ma20) * 100
+        if ma_distance > 5:
+            tech_score += 2
+            factors.append("价格强势站上中期均线")
+        elif ma_distance > 0:
+            tech_score += 1
+            factors.append("价格站上中期均线")
+        elif ma_distance < -5:
+            tech_score -= 2
+            factors.append("价格大幅跌破中期均线")
+        else:
+            tech_score -= 1
+            factors.append("价格跌破中期均线")
+        
+        # 基本面评分 (40%)
+        fundamental_score = 0
+        
+        # ROE分析
+        if roe > 15:
+            fundamental_score += 2
+            factors.append(f"ROE({roe:.1f}%)优秀，盈利能力强")
+        elif roe > 10:
+            fundamental_score += 1
+            factors.append(f"ROE({roe:.1f}%)良好")
+        elif roe < 5:
+            fundamental_score -= 1
+            factors.append(f"ROE({roe:.1f}%)偏低，盈利能力待改善")
+        
+        # 估值分析
+        if pe_ratio < 15 and pb_ratio < 2:
+            fundamental_score += 2
+            factors.append("估值合理，安全边际较高")
+        elif pe_ratio < 25 and pb_ratio < 3:
+            fundamental_score += 1
+            factors.append("估值可接受")
+        elif pe_ratio > 40 or pb_ratio > 5:
+            fundamental_score -= 2
+            factors.append("估值偏高，投资风险较大")
+        
+        # 综合评分
+        total_score = tech_score * 0.6 + fundamental_score * 0.4
+        
+        # 生成建议
+        if total_score >= 3:
+            recommendation = '买入'
+            confidence = min(85, 60 + total_score * 8)
+            entry_strategy = '分2-3批建仓，控制风险'
+            exit_strategy = '中线获利8-15%止盈'
+            risk_level = '中等'
+            target_return = '8-20%'
+        elif total_score >= 1:
+            recommendation = '谨慎买入'
+            confidence = min(75, 50 + total_score * 10)
+            entry_strategy = '小仓位试探，观察趋势'
+            exit_strategy = '获利5-10%分批止盈'
+            risk_level = '中等'
+            target_return = '5-12%'
+        elif total_score >= -1:
+            recommendation = '观望'
+            confidence = 50
+            entry_strategy = '等待更好买点'
+            exit_strategy = '暂不建议操作'
+            risk_level = '低'
+            target_return = '0%'
+        else:
+            recommendation = '回避'
+            confidence = min(80, 60 + abs(total_score) * 8)
+            entry_strategy = '暂不建议买入'
+            exit_strategy = '持有者考虑减仓'
+            risk_level = '高'
+            target_return = '-5-5%'
+        
+        return {
+            'period': '中期 (7-30天)',
+            'recommendation': recommendation,
+            'confidence': confidence,
+            'signal_strength': total_score,
+            'key_factors': factors,
+            'entry_strategy': entry_strategy,
+            'exit_strategy': exit_strategy,
+            'risk_level': risk_level,
+            'target_return': target_return
+        }
+
     def get_long_term_advice(self, pe_ratio, pb_ratio, roe, ma20, ma60, current_price, stock_info):
         """生成长期投资建议 (7-90天)"""
         
@@ -3072,8 +4623,8 @@ class AShareAnalyzerGUI:
             'target_return': target_return
         }
     
-    def format_investment_advice(self, short_term_advice, long_term_advice, ticker):
-        """格式化投资建议显示"""
+    def format_investment_advice(self, short_term_prediction, medium_term_prediction, long_term_prediction, ticker):
+        """格式化三时间段投资预测显示"""
         import time
         
         stock_info = self.get_stock_info_generic(ticker)
@@ -3092,7 +4643,7 @@ class AShareAnalyzerGUI:
         
         recommendation = """
 =========================================================
-              时间周期投资建议报告
+          AI智能股票预测分析报告 (三时间段预测)
 =========================================================
 
 股票信息
@@ -3106,73 +4657,95 @@ class AShareAnalyzerGUI:
 {}
 
 =========================================================
-                短期投资建议 (1-7天)
+                短期预测 (1-7天)
 =========================================================
+📊 算法模型: {}
+🎯 趋势预测: {}
+📈 预期涨跌: {}
+🔒 置信度: {}%
+⚠️  风险等级: {}
 
-投资建议: {}
-置信度: {}%
-风险等级: {}
-预期收益: {}
-
-关键因素分析:
+🔍 关键技术信号:
 {}
 
-操作策略:
-• 入场策略: {}
-• 退出策略: {}
-• 仓位管理: 建议短线投资仓位不超过总资金的20%
-• 止损设置: 建议设置3-5%的止损位
+💡 短期操作建议:
+• 适合超短线交易者和技术分析爱好者
+• 重点关注技术指标和量价关系
+• 严格设置止盈止损，控制单次风险
+• 仓位建议：总资金的10-20%
 
 =========================================================
-                长期投资建议 (7-90天)
+                中期预测 (7-30天)
 =========================================================
+📊 算法模型: {}
+🎯 趋势预测: {}
+📈 预期涨跌: {}
+🔒 置信度: {}%
+⚠️  风险等级: {}
+⏰ 持有周期: {}
 
-投资建议: {}
-置信度: {}%
-风险等级: {}
-预期收益: {}
-
-关键因素分析:
+🔍 关键分析因子:
 {}
 
-投资策略:
-• 建仓策略: {}
-• 持有策略: {}
-• 仓位管理: 根据风险承受能力合理配置
-• 调仓频率: 建议每月评估一次，根据基本面变化调整
+💡 中期投资策略:
+• 适合波段交易者和趋势跟随者
+• 结合技术面趋势和基本面支撑
+• 关注市场情绪和行业轮动
+• 仓位建议：总资金的20-40%
 
 =========================================================
-                   风险提示
+                长期预测 (30-90天)
 =========================================================
+📊 算法模型: {}
+🎯 趋势预测: {}
+📈 预期涨跌: {}
+🔒 置信度: {}%
+⚠️  风险等级: {}
+⏰ 建议持有: {}
 
-• 市场有风险，投资需谨慎
-• 以上建议仅供参考，不构成投资承诺
-• 请根据自身风险承受能力合理投资
-• 建议分散投资，不要把所有资金投入单一股票
-• 保持理性，避免情绪化交易
+🔍 基本面分析要点:
+{}
 
-=========================================================
-                   投资要点
-=========================================================
-
-短期操作要点:
-• 关注技术面信号，把握短线交易机会
-• 严格执行止盈止损策略
-• 控制单次交易仓位，避免重仓
-• 适当关注市场情绪和资金流向
-
-长期投资要点:
+💡 长期投资策略:
+• 适合价值投资者和长线投资者
 • 重点关注公司基本面和行业前景
-• 选择优质企业进行长期配置
-• 保持足够的投资耐心
-• 定期评估投资标的，适时调整组合
+• 关注估值安全边际和盈利质量
+• 仓位建议：总资金的40-70%
 
-建议操作周期:
-• 短期建议: 适合有经验的短线交易者
-• 长期建议: 适合价值投资和成长投资者
-• 组合投资: 建议短期和长期策略相结合
+=========================================================
+                   智能投资建议
+=========================================================
 
-最后更新时间: {}
+🎯 综合评级: 基于多时间段分析，该股票短期、中期、长期表现预期
+
+📊 投资组合建议:
+• 激进型投资者: 可参考短期+中期预测，快进快出
+• 稳健型投资者: 重点参考中期+长期预测，稳扎稳打
+• 保守型投资者: 主要关注长期预测，价值投资
+
+⚠️  风险管控:
+• 分时间段配置资金，降低单一预测风险
+• 定期回顾预测准确性，调整投资策略
+• 市场环境变化时及时调整仓位配置
+• 严格遵守风险管理原则，保护本金安全
+
+🔄 动态调整:
+• 短期预测: 每1-3天重新评估
+• 中期预测: 每周重新评估  
+• 长期预测: 每月重新评估
+
+=========================================================
+                   免责声明
+=========================================================
+
+• 本预测基于AI算法分析，仅供投资参考
+• 股市有风险，投资需谨慎，盈亏自负
+• 预测结果不构成投资建议或收益保证
+• 请结合个人风险承受能力理性投资
+• 建议咨询专业投资顾问意见
+
+分析生成时间: {}
+预测算法版本: TradingAI v2.0 (高级技术分析+基本面分析)
 """.format(
             ticker,
             stock_info.get('name', '未知'),
@@ -3180,20 +4753,33 @@ class AShareAnalyzerGUI:
             stock_info.get('concept', '未知'),
             price_display,
             comprehensive_index,
-            short_term_advice['recommendation'],
-            short_term_advice['confidence'],
-            short_term_advice['risk_level'],
-            short_term_advice['target_return'],
-            '\n'.join(['• ' + factor for factor in short_term_advice['key_factors']]),
-            short_term_advice['entry_strategy'],
-            short_term_advice['exit_strategy'],
-            long_term_advice['recommendation'],
-            long_term_advice['confidence'],
-            long_term_advice['risk_level'],
-            long_term_advice['target_return'],
-            '\n'.join(['• ' + factor for factor in long_term_advice['key_factors']]),
-            long_term_advice['entry_strategy'],
-            long_term_advice['exit_strategy'],
+            
+            # 短期预测
+            short_term_prediction.get('algorithm', '技术指标组合'),
+            short_term_prediction.get('trend', '未知'),
+            short_term_prediction.get('target_range', '无法预测'),
+            short_term_prediction.get('confidence', 0),
+            short_term_prediction.get('risk_level', '未知'),
+            '\n'.join(['• ' + signal for signal in short_term_prediction.get('key_signals', ['无'])]),
+            
+            # 中期预测
+            medium_term_prediction.get('algorithm', '趋势分析+基本面'),
+            medium_term_prediction.get('trend', '未知'),
+            medium_term_prediction.get('target_range', '无法预测'),
+            medium_term_prediction.get('confidence', 0),
+            medium_term_prediction.get('risk_level', '未知'),
+            medium_term_prediction.get('period', '7-30天'),
+            '\n'.join(['• ' + signal for signal in medium_term_prediction.get('key_signals', ['无'])]),
+            
+            # 长期预测
+            long_term_prediction.get('algorithm', '基本面分析+趋势'),
+            long_term_prediction.get('trend', '未知'),
+            long_term_prediction.get('target_range', '无法预测'),
+            long_term_prediction.get('confidence', 0),
+            long_term_prediction.get('risk_level', '未知'),
+            long_term_prediction.get('investment_period', '30-90天'),
+            '\n'.join(['• ' + signal for signal in long_term_prediction.get('key_signals', ['无'])]),
+            
             time.strftime("%Y-%m-%d %H:%M:%S")
         )
         
@@ -3533,6 +5119,22 @@ CSV批量分析使用方法:
         self.overview_text.delete('1.0', tk.END)
         self.overview_text.insert('1.0', welcome_msg)
     
+    def on_network_mode_change(self, event=None):
+        """网络模式变更处理"""
+        new_mode = self.network_mode_var.get()
+        self.network_mode = new_mode
+        self.network_retry_count = 0  # 重置重试计数
+        
+        # 更新状态指示器
+        if new_mode == "auto":
+            self.network_status_label.config(text="🌐 自动")
+        elif new_mode == "online":
+            self.network_status_label.config(text="🔗 在线")
+        elif new_mode == "offline":
+            self.network_status_label.config(text="📴 离线")
+        
+        print(f"数据模式已切换到: {new_mode}")
+    
     def start_analysis(self):
         """开始分析"""
         ticker = self.ticker_var.get().strip()
@@ -3648,37 +5250,52 @@ CSV批量分析使用方法:
             try:
                 print("开始生成投资建议...")
                 
-                # 获取短期和长期建议
-                short_advice = self.get_short_term_advice(
-                    tech_data['rsi'], 
-                    tech_data['macd'], 
-                    tech_data['signal'], 
-                    tech_data['volume_ratio'], 
-                    tech_data['ma5'], 
-                    tech_data['ma10'], 
-                    tech_data['current_price']
-                )
+                # 使用新的三时间段预测系统
+                short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
                 
-                long_advice = self.get_long_term_advice(
-                    fund_data['pe_ratio'], 
-                    fund_data['pb_ratio'], 
-                    fund_data['roe'], 
-                    tech_data['ma20'], 
-                    tech_data['ma60'], 
-                    tech_data['current_price'], 
-                    stock_info
-                )
+                # 计算综合评分（基于三个时间段的技术分析评分）
+                short_score = short_prediction.get('technical_score', 0)
+                medium_score = medium_prediction.get('total_score', 0)
+                long_score = long_prediction.get('fundamental_score', 0)
                 
-                # 使用与批量评分相同的方法计算评分
-                short_score = self._extract_score_from_advice(short_advice, 'short_term')
-                long_score = self._extract_score_from_advice(long_advice, 'long_term')
-                final_score = (short_score + long_score) / 2
+                # 加权平均：短期30%，中期40%，长期30%
+                final_score = (short_score * 0.3 + medium_score * 0.4 + long_score * 0.3)
+                # 转换为1-10评分
+                final_score = max(1.0, min(10.0, 5.0 + final_score * 0.5))
                 
-                print(f"✅ 步骤6完成: 投资建议生成 - 综合评分{final_score:.1f}/10")
+                print(f"✅ 步骤6完成: 三时间段预测完成 - 综合评分{final_score:.1f}/10")
+                print(f"   短期评分: {short_score}, 中期评分: {medium_score}, 长期评分: {long_score}")
             except Exception as e:
                 print(f"❌ 步骤6出错: {e}")
-                short_advice = {"advice": f"短期建议暂时不可用: {str(e)[:100]}"}
-                long_advice = {"advice": f"长期建议暂时不可用: {str(e)[:100]}"}
+                # 使用默认预测结果
+                short_prediction = {
+                    'period': '短期 (1-7天)',
+                    'trend': '数据不足',
+                    'confidence': 0,
+                    'target_range': '无法预测',
+                    'risk_level': '未知',
+                    'key_signals': [f'预测生成失败: {str(e)[:50]}'],
+                    'algorithm': '技术指标组合'
+                }
+                medium_prediction = {
+                    'period': '中期 (7-30天)',
+                    'trend': '数据不足',
+                    'confidence': 0,
+                    'target_range': '无法预测',
+                    'risk_level': '未知',
+                    'key_signals': [f'预测生成失败: {str(e)[:50]}'],
+                    'algorithm': '趋势分析+基本面'
+                }
+                long_prediction = {
+                    'period': '长期 (30-90天)',
+                    'trend': '数据不足',
+                    'confidence': 0,
+                    'target_range': '无法预测',
+                    'risk_level': '未知',
+                    'investment_period': '数据不足',
+                    'key_signals': [f'预测生成失败: {str(e)[:50]}'],
+                    'algorithm': '基本面分析+趋势'
+                }
                 final_score = 5.0
             
             # 生成最终报告
@@ -3689,7 +5306,7 @@ CSV批量分析使用方法:
                 stock_info['price'] = tech_data['current_price']
                 
                 overview = self.generate_overview_from_data(ticker, stock_info, tech_data, fund_data, final_score)
-                recommendation = self.format_investment_advice_from_data(short_advice, long_advice, ticker, final_score)
+                recommendation = self.format_investment_advice(short_prediction, medium_prediction, long_prediction, ticker)
                 
                 print(f"✅ 报告生成完成")
                 
@@ -3698,13 +5315,16 @@ CSV批量分析使用方法:
                     'ticker': ticker,
                     'name': stock_info['name'],
                     'price': tech_data['current_price'],
-                    'technical_score': short_score,
-                    'fundamental_score': long_score,
+                    'technical_score': short_prediction.get('technical_score', 0),
+                    'fundamental_score': long_prediction.get('fundamental_score', 0),
                     'final_score': final_score,
                     'overview': overview,
                     'technical': technical_analysis,
                     'fundamental': fundamental_analysis,
-                    'recommendation': recommendation
+                    'recommendation': recommendation,
+                    'short_prediction': short_prediction,
+                    'medium_prediction': medium_prediction,
+                    'long_prediction': long_prediction
                 }
                 self.save_stock_to_cache(ticker, analysis_data)
                 
@@ -5076,7 +6696,7 @@ A股特色分析
                 else:
                     level = "⚠️ 谨慎"
                 
-                report += f"{i:2d}. {stock['ticker']} ({stock['name']}) - {level}\n"
+                report += f"{i:2d}. {stock['code']} ({stock['name']}) - {level}\n"
                 report += f"    💰 当前价格: ¥{stock['price']:.2f}\n"
                 report += f"    📊 综合评分: {stock['total_score']:.1f}分 {stars}\n"
                 report += f"    📈 技术分析: {stock['technical_score']:.1f}分 | 💼 基本面: {stock['fundamental_score']:.1f}分\n"
@@ -5603,7 +7223,7 @@ A股特色分析
             recommend_mark = "✅推荐" if stock['score'] >= score_threshold else "  观察"
             
             report += f"""
-{i:2d}. {cache_indicator} {stock['ticker']} - {stock['name']} {recommend_mark}
+{i:2d}. {cache_indicator} {stock['code']} - {stock['name']} {recommend_mark}
     {score_star} 评分: {stock['score']:.2f}/10.0
     🏭 行业: {stock['industry']}
     💡 概念: {stock['concept']}
@@ -5626,7 +7246,7 @@ A股特色分析
             for i, stock in enumerate(high_score_stocks, 1):
                 cache_indicator = "💾" if stock.get('cache_time') else "🔄"
                 report += f"""
-{i}. {cache_indicator} {stock['ticker']} - {stock['name']}
+{i}. {cache_indicator} {stock['code']} - {stock['name']}
    ⭐ 评分: {stock['score']:.2f}/10.0  |  💰 价格: ¥{stock['price']:.2f}
    🏭 {stock['industry']}  |  💡 {stock['concept']}
 
@@ -5703,7 +7323,7 @@ A股特色分析
         for i, stock in enumerate(stocks, 1):
             cache_indicator = "💾" if stock.get('cache_time') else "🔄"
             report += f"""
-{i:2d}. {cache_indicator} {stock['ticker']} - {stock['name']}
+{i:2d}. {cache_indicator} {stock['code']} - {stock['name']}
     评分: {stock['score']:.2f}/10.0 ⭐
     行业: {stock['industry']}
     概念: {stock['concept']}
@@ -5769,7 +7389,7 @@ A股特色分析
 💡 使用提示：双击任意股票代码行查看详细分析
 
 推荐股票代码清单：
-{', '.join([stock['ticker'] for stock in stocks])}
+{', '.join([stock['code'] for stock in stocks])}
 
 =========================================================
                     详细推荐列表
@@ -5779,19 +7399,19 @@ A股特色分析
         
         for i, stock in enumerate(stocks, 1):
             # 获取实时价格
-            real_price = self.get_stock_price(stock['ticker'])
+            real_price = self.get_stock_price(stock['code'])
             if real_price is not None:
                 price_display = f"¥{real_price:.2f} (实时)"
             else:
                 price_display = "网络获取失败"
             
             report += f"""
-【{i:02d}】 {stock['ticker']} - {stock['name']}
+【{i:02d}】 {stock['code']} - {stock['name']}
     评分: {stock['score']:.2f}/10.0
     行业: {stock['industry']}
     价格: {price_display}
     理由: {stock['recommendation_reason']}
-    >>> 双击股票代码 {stock['ticker']} 查看详细分析 <<<
+    >>> 双击股票代码 {stock['code']} 查看详细分析 <<<
 
 """
         
@@ -6313,7 +7933,7 @@ A股特色分析
         
         for i, stock in enumerate(qualified_stocks[:20], 1):  # 显示前20只
             stars = "⭐" * min(5, int(stock['total_score'] / 2))
-            report += f"{i:2d}. {stock['ticker']} ({stock['name']})\n"
+            report += f"{i:2d}. {stock['code']} ({stock['name']})\n"
             report += f"    💰 当前价格: ¥{stock['price']:.2f}\n"
             report += f"    📊 综合评分: {stock['total_score']:.1f}分 {stars}\n"
             report += f"    📈 技术分析: {stock['technical_score']:.1f}分\n" 
@@ -6554,6 +8174,83 @@ A股特色分析
 📞 如需更详细的分析，建议咨询专业投资顾问。
 """
         return recommendation
+
+    def generate_stock_recommendations(self):
+        """生成股票推荐"""
+        try:
+            # 显示进度条
+            self.show_progress("正在生成三时间段股票推荐，请稍候...")
+            
+            # 在后台线程中执行推荐
+            recommend_thread = threading.Thread(target=self._perform_stock_recommendations)
+            recommend_thread.daemon = True
+            recommend_thread.start()
+            
+        except Exception as e:
+            self.hide_progress()
+            messagebox.showerror("推荐失败", f"股票推荐生成失败：{str(e)}")
+    
+    def _perform_stock_recommendations(self):
+        """执行股票推荐（后台线程）"""
+        try:
+            print("🚀 开始生成三时间段股票推荐...")
+            
+            # 生成三个时间段的推荐
+            short_recommendations = self.get_recommended_stocks_by_period('short', 10)
+            medium_recommendations = self.get_recommended_stocks_by_period('medium', 10)
+            long_recommendations = self.get_recommended_stocks_by_period('long', 10)
+            
+            print(f"📊 推荐数量 - 短期: {len(short_recommendations)}, 中期: {len(medium_recommendations)}, 长期: {len(long_recommendations)}")
+            
+            # 格式化推荐报告
+            recommendation_report = self.format_stock_recommendations(
+                short_recommendations, 
+                medium_recommendations, 
+                long_recommendations
+            )
+            
+            print(f"📄 生成报告长度: {len(recommendation_report)} 字符")
+            
+            # 在主线程中显示结果
+            self.root.after(0, self._display_recommendations, recommendation_report)
+            
+        except Exception as e:
+            print(f"❌ 股票推荐生成失败: {e}")
+            import traceback
+            traceback.print_exc()
+            self.root.after(0, self.show_error, f"股票推荐生成失败：{str(e)}")
+    
+    def _display_recommendations(self, recommendation_report):
+        """显示推荐结果"""
+        try:
+            print("🔧 开始显示推荐结果...")
+            print(f"📄 报告长度: {len(recommendation_report)} 字符")
+            
+            # 隐藏进度条
+            self.hide_progress()
+            
+            # 切换到投资建议页面显示推荐结果
+            if hasattr(self, 'recommendation_text'):
+                print("✅ 找到投资建议文本组件")
+                self.recommendation_text.delete('1.0', tk.END)
+                self.recommendation_text.insert('1.0', recommendation_report)
+                
+                # 切换到投资建议标签页
+                self.notebook.select(3)  # 投资建议是第4个标签页（索引3）
+                print("✅ 已切换到投资建议标签页")
+            else:
+                print("⚠️ 未找到投资建议文本组件，使用概览页面")
+                # 如果没有投资建议页面，在概览页面显示
+                self.overview_text.delete('1.0', tk.END)
+                self.overview_text.insert('1.0', recommendation_report)
+            
+            print("✅ 股票推荐显示完成")
+            
+        except Exception as e:
+            print(f"❌ 推荐结果显示失败: {e}")
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("显示失败", f"推荐结果显示失败：{str(e)}")
 
 def main():
     """主函数"""

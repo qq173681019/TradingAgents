@@ -1,0 +1,181 @@
+{
+  "date": "2025-11-05",
+  "timestamp": "2025-11-05 21:48:15",
+  "scores": {
+    "688733": {
+      "name": "股票688733",
+      "score": 4.9,
+      "industry": "未知",
+      "timestamp": "19:38:05"
+    },
+    "688737": {
+      "name": "股票688737",
+      "score": 7.0,
+      "industry": "未知",
+      "timestamp": "19:38:06"
+    },
+    "688739": {
+      "name": "股票688739",
+      "score": 4.5,
+      "industry": "未知",
+      "timestamp": "19:38:06"
+    },
+    "688750": {
+      "name": "股票688750",
+      "score": 6.7,
+      "industry": "未知",
+      "timestamp": "19:38:06"
+    },
+    "688755": {
+      "name": "股票688755",
+      "score": 8.0,
+      "industry": "未知",
+      "timestamp": "19:38:07"
+    },
+    "688757": {
+      "name": "股票688757",
+      "score": 5.8,
+      "industry": "未知",
+      "timestamp": "19:38:07"
+    },
+    "688758": {
+      "name": "股票688758",
+      "score": 4.9,
+      "industry": "未知",
+      "timestamp": "19:38:08"
+    },
+    "688759": {
+      "name": "股票688759",
+      "score": 7.0,
+      "industry": "未知",
+      "timestamp": "19:38:08"
+    },
+    "688765": {
+      "name": "股票688765",
+      "score": 6.2,
+      "industry": "未知",
+      "timestamp": "19:38:08"
+    },
+    "688766": {
+      "name": "股票688766",
+      "score": 4.9,
+      "industry": "未知",
+      "timestamp": "19:38:09"
+    },
+    "688767": {
+      "name": "股票688767",
+      "score": 8.8,
+      "industry": "未知",
+      "timestamp": "19:38:09"
+    },
+    "688768": {
+      "name": "股票688768",
+      "score": 6.7,
+      "industry": "未知",
+      "timestamp": "19:38:09"
+    },
+    "688772": {
+      "name": "股票688772",
+      "score": 4.5,
+      "industry": "未知",
+      "timestamp": "19:38:10"
+    },
+    "688775": {
+      "name": "股票688775",
+      "score": 6.7,
+      "industry": "未知",
+      "timestamp": "19:38:10"
+    },
+    "688776": {
+      "name": "股票688776",
+      "score": 7.1,
+      "industry": "未知",
+      "timestamp": "19:38:10"
+    },
+    "688777": {
+      "name": "股票688777",
+      "score": 4.9,
+      "industry": "未知",
+      "timestamp": "19:38:11"
+    },
+    "688778": {
+      "name": "股票688778",
+      "score": 6.7,
+      "industry": "未知",
+      "timestamp": "19:38:11"
+    },
+    "688779": {
+      "name": "股票688779",
+      "score": 7.0,
+      "industry": "未知",
+      "timestamp": "19:38:11"
+    },
+    "688783": {
+      "name": "股票688783",
+      "score": 6.7,
+      "industry": "未知",
+      "timestamp": "19:38:12"
+    },
+    "688786": {
+      "name": "股票688786",
+      "score": 7.9,
+      "industry": "未知",
+      "timestamp": "19:38:12"
+    },
+    "688787": {
+      "name": "股票688787",
+      "score": 8.0,
+      "industry": "未知",
+      "timestamp": "19:38:13"
+    },
+    "688788": {
+      "name": "股票688788",
+      "score": 6.1,
+      "industry": "未知",
+      "timestamp": "19:38:13"
+    },
+    "688789": {
+      "name": "股票688789",
+      "score": 6.6,
+      "industry": "未知",
+      "timestamp": "19:38:13"
+    },
+    "688793": {
+      "name": "股票688793",
+      "score": 5.8,
+      "industry": "未知",
+      "timestamp": "19:38:14"
+    },
+    "688798": {
+      "name": "股票688798",
+      "score": 4.9,
+      "industry": "未知",
+      "timestamp": "19:38:14"
+    },
+    "688799": {
+      "name": "股票688799",
+      "score": 4.9,
+      "industry": "未知",
+      "timestamp": "19:38:14"
+    },
+    "688800": {
+      "name": "股票688800",
+      "score": 5.8,
+      "industry": "未知",
+      "timestamp": "19:38:15"
+    },
+    "688819": {
+      "name": "股票688819",
+      "score": 4.9,
+      "industry": "未知",
+      "timestamp": "19:38:15"
+    },
+    "688981": {
+      "name": "中芯国际",
+      "score": 6.7,
+      "industry": "半导体制造",
+      "timestamp": "19:38:16"
+    }
+  },
+  "count": 29
+}
