@@ -754,45 +754,26 @@ class AShareAnalyzerGUI:
             self.show_progress("⚠️ 没有正在运行的批量评分任务")
     
     def get_stock_score_for_batch(self, stock_code):
-        """为批量评分获取单只股票的评分 - 确保一致性"""
+        """为批量评分获取单只股票的评分 - 与单独分析使用相同算法"""
         try:
-            # 总是重新计算，确保使用最新的评分算法
-            # 不使用缓存，避免不一致问题
+            # 使用与单独分析相同的三时间段预测算法
+            short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(stock_code)
             
-            # 生成智能模拟数据并分析
-            tech_data = self._generate_smart_mock_technical_data(stock_code)
-            fund_data = self._generate_smart_mock_fundamental_data(stock_code)
+            # 使用与单独分析相同的简单评分算法
+            short_score = short_prediction.get('technical_score', 0)
+            medium_score = medium_prediction.get('total_score', 0)
+            long_score = long_prediction.get('fundamental_score', 0)
             
-            # 获取分析建议 - 使用正确的参数
-            short_advice = self.get_short_term_advice(
-                tech_data['rsi'], 
-                tech_data['macd'], 
-                tech_data['signal'], 
-                tech_data['volume_ratio'], 
-                tech_data['ma5'], 
-                tech_data['ma10'], 
-                tech_data['current_price']
-            )
-            long_advice = self.get_long_term_advice(
-                fund_data['pe_ratio'], 
-                fund_data['pb_ratio'], 
-                fund_data['roe'], 
-                tech_data['ma20'], 
-                tech_data['ma60'], 
-                tech_data['current_price'], 
-                self.stock_info.get(stock_code, {})
-            )
+            # 简单平均算法（与单独分析相同）
+            if medium_score != 0:
+                # 如果中期评分存在，使用简单平均
+                final_score = (short_score + medium_score + long_score) / 3
+            else:
+                # 如果中期评分不存在，使用短期和长期平均
+                final_score = (short_score + long_score) / 2
             
-            # 提取评分
-            short_score = self._extract_score_from_advice(short_advice, 'short_term')
-            long_score = self._extract_score_from_advice(long_advice, 'long_term')
-            
-            # 确保分数是数字类型
-            short_score = float(short_score) if short_score is not None else 5.0
-            long_score = float(long_score) if long_score is not None else 5.0
-            
-            # 计算最终评分
-            final_score = (short_score + long_score) / 2
+            # 确保评分在合理范围内 (1-10)
+            final_score = max(1.0, min(10.0, abs(final_score) if final_score != 0 else 5.0))
             
             return round(final_score, 1)
             
@@ -2648,66 +2629,51 @@ class AShareAnalyzerGUI:
         return None
     
     def calculate_recommendation_index(self, ticker):
-        """计算投资推荐指数"""
-        stock_info = self.get_stock_info_generic(ticker)
-        
-        # 基础评分因子
-        base_score = random.uniform(60, 85)
-        
-        # 行业加成
-        industry = stock_info.get("industry", "")
-        industry_bonus = 0
-        if "半导体" in industry:
-            industry_bonus = random.uniform(5, 15)  # 科技成长性加成
-        elif "银行" in industry:
-            industry_bonus = random.uniform(0, 8)   # 稳健性加成
-        elif "白酒" in industry:
-            industry_bonus = random.uniform(3, 12)  # 消费概念加成
-        elif "新能源" in industry:
-            industry_bonus = random.uniform(8, 18)  # 新能源概念加成
-        elif "房地产" in industry:
-            industry_bonus = random.uniform(-5, 5)  # 政策敏感性
-        else:
-            industry_bonus = random.uniform(0, 10)
-        
-        # 板块加成
-        board_bonus = 0
-        if ticker.startswith('688'):
-            board_bonus = random.uniform(5, 10)  # 科创板创新加成
-        elif ticker.startswith('300'):
-            board_bonus = random.uniform(3, 8)   # 创业板成长加成
-        elif ticker.startswith('60'):
-            board_bonus = random.uniform(2, 6)   # 主板稳定加成
-        elif ticker.startswith('00'):
-            board_bonus = random.uniform(1, 7)   # 深市加成
-        
-        # 计算总分
-        total_score = base_score + industry_bonus + board_bonus
-        total_score = min(100, max(0, total_score))  # 限制在0-100之间
-        
-        # 生成推荐指数显示
-        index_display = self.format_recommendation_index(total_score, ticker)
-        
-        return index_display
+        """计算投资推荐指数（使用与单独分析相同的算法）"""
+        try:
+            # 使用与单独分析和批量评分相同的三时间段预测算法
+            short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
+            
+            # 计算综合评分（基于三个时间段的技术分析评分）
+            short_score = short_prediction.get('technical_score', 0)
+            medium_score = medium_prediction.get('total_score', 0)
+            long_score = long_prediction.get('fundamental_score', 0)
+            
+            # 加权平均：短期30%，中期40%，长期30% (与单独分析相同算法)
+            final_score = (short_score * 0.3 + medium_score * 0.4 + long_score * 0.3)
+            # 转换为1-10评分 (与单独分析相同算法)
+            total_score = max(1.0, min(10.0, 5.0 + final_score * 0.5))
+            
+            # 生成推荐指数显示
+            index_display = self.format_recommendation_index(total_score, ticker)
+            
+            return index_display
+            
+        except Exception as e:
+            print(f"❌ 计算推荐指数失败 {ticker}: {e}")
+            # 如果出错，返回默认评分
+            total_score = 5.0
+            index_display = self.format_recommendation_index(total_score, ticker)
+            return index_display
     
     def format_recommendation_index(self, score, ticker):
-        """格式化推荐指数显示"""
+        """格式化推荐指数显示（10分制）"""
         stock_info = self.get_stock_info_generic(ticker)
         
-        # 确定评级
-        if score >= 85:
+        # 确定评级（基于10分制）
+        if score >= 8.5:
             rating = "强烈推荐"
             stars = "★★★★★"
             color_desc = "深绿色"
-        elif score >= 75:
+        elif score >= 7.5:
             rating = "推荐"
             stars = "★★★★☆"
             color_desc = "绿色"
-        elif score >= 65:
+        elif score >= 6.5:
             rating = "中性"
             stars = "★★★☆☆"
             color_desc = "黄色"
-        elif score >= 50:
+        elif score >= 5.0:
             rating = "谨慎"
             stars = "★★☆☆☆"
             color_desc = "橙色"
@@ -2716,14 +2682,14 @@ class AShareAnalyzerGUI:
             stars = "★☆☆☆☆"
             color_desc = "红色"
         
-        # 生成进度条
+        # 生成进度条（基于10分制）
         bar_length = 30
-        filled_length = int(score / 100 * bar_length)
+        filled_length = int(score / 10.0 * bar_length)
         bar = "█" * filled_length + "░" * (bar_length - filled_length)
         
         # 生成详细指数信息
         index_info = """
-投资推荐指数: {:.1f}/100  {}
+投资推荐指数: {:.1f}/10  {}
 {}
 [{}] {}
 
@@ -2744,27 +2710,27 @@ class AShareAnalyzerGUI:
         return index_info
     
     def get_investor_type(self, score):
-        """根据评分获取适合的投资者类型"""
-        if score >= 80:
+        """根据评分获取适合的投资者类型（10分制）"""
+        if score >= 8.0:
             return "成长型投资者、价值投资者"
-        elif score >= 70:
+        elif score >= 7.0:
             return "稳健型投资者、成长型投资者"
-        elif score >= 60:
+        elif score >= 6.0:
             return "稳健型投资者"
-        elif score >= 50:
+        elif score >= 5.0:
             return "风险偏好型投资者"
         else:
             return "高风险偏好投资者（不建议）"
     
     def get_risk_level(self, score):
-        """根据评分获取风险等级"""
-        if score >= 80:
+        """根据评分获取风险等级（10分制）"""
+        if score >= 8.0:
             return "中低风险"
-        elif score >= 70:
+        elif score >= 7.0:
             return "中等风险"
-        elif score >= 60:
+        elif score >= 6.0:
             return "中等风险"
-        elif score >= 50:
+        elif score >= 5.0:
             return "中高风险"
         else:
             return "高风险"
@@ -3929,29 +3895,51 @@ class AShareAnalyzerGUI:
                     print("❌ 没有可用的推荐数据，请先点击'开始获取评分'")
                     return []
             
+            print(f"📂 找到comprehensive_data，共{len(self.comprehensive_data)}只股票")
+            
+            # 检查数据结构
+            if self.comprehensive_data:
+                sample_code = list(self.comprehensive_data.keys())[0]
+                sample_data = self.comprehensive_data[sample_code]
+                print(f"📋 数据结构示例 ({sample_code}):")
+                print(f"   Keys: {list(sample_data.keys())}")
+                if 'short_term' in sample_data:
+                    print(f"   short_term keys: {list(sample_data['short_term'].keys())}")
+                if 'medium_term' in sample_data:
+                    print(f"   medium_term keys: {list(sample_data['medium_term'].keys())}")
+                if 'long_term' in sample_data:
+                    print(f"   long_term keys: {list(sample_data['long_term'].keys())}")
+            
             recommendations = []
             period_key = f"{period_type}_term"
+            print(f"🔎 查找期间键: {period_key}")
             
             # 从保存的数据中筛选
+            total_stocks = len(self.comprehensive_data)
+            valid_scores = []
+            
             for stock_code, stock_data in self.comprehensive_data.items():
                 try:
                     if period_key in stock_data:
                         period_data = stock_data[period_key]
                         score = period_data.get('score', 0)
+                        valid_scores.append(score)
+                        
+                        print(f"   📊 {stock_code}: {period_type}期评分 = {score}")
                         
                         if score > 0:  # 只保留有效评分的股票
                             recommendation_data = {
                                 'code': stock_code,
                                 'name': stock_data.get('name', f'股票{stock_code}'),
                                 'score': score,
-                                'price': stock_data.get('current_price', 0),  # 添加price字段
+                                'price': stock_data.get('current_price', 0),
                                 'current_price': stock_data.get('current_price', 0),
-                                'trend': period_data.get('trend', '未知'),  # 添加trend字段
-                                'target_range': period_data.get('target_range', '未知'),  # 添加target_range字段
+                                'trend': period_data.get('trend', '未知'),
+                                'target_range': period_data.get('target_range', '未知'),
                                 'recommendation': period_data.get('recommendation', ''),
                                 'confidence': period_data.get('confidence', 0),
                                 'factors': period_data.get('factors', []),
-                                'key_signals': period_data.get('key_signals', []),  # 添加key_signals字段
+                                'key_signals': period_data.get('key_signals', []),
                                 'risk_level': period_data.get('risk_level', '中等'),
                                 
                                 # 添加基本面数据
@@ -3959,15 +3947,11 @@ class AShareAnalyzerGUI:
                                 'pb_ratio': stock_data.get('fund_data', {}).get('pb_ratio', 0),
                                 'roe': stock_data.get('fund_data', {}).get('roe', 0),
                                 'industry': stock_data.get('fund_data', {}).get('industry', '未知'),
-                                'concept': self.stock_info.get(stock_code, {}).get('concept', '未知'),  # 添加concept字段
+                                'concept': self.stock_info.get(stock_code, {}).get('concept', '未知'),
                                 
                                 # 技术指标
                                 'rsi': stock_data.get('tech_data', {}).get('rsi', 50),
                                 'volume_ratio': stock_data.get('tech_data', {}).get('volume_ratio', 1.0),
-                                
-                                # 添加额外评分字段
-                                'tech_score': period_data.get('tech_score', 0),
-                                'fund_score': period_data.get('fund_score', 0),
                                 
                                 'data_source': 'cached'
                             }
@@ -3981,7 +3965,15 @@ class AShareAnalyzerGUI:
             recommendations.sort(key=lambda x: x['score'], reverse=True)
             top_recommendations = recommendations[:top_n]
             
-            print(f"✅ {period_type}期推荐完成，从{len(self.comprehensive_data)}只股票中筛选出{len(top_recommendations)}只推荐股票")
+            print(f"✅ {period_type}期推荐完成:")
+            print(f"   📊 总股票数: {total_stocks}")
+            print(f"   📈 有效评分数: {len(valid_scores)}")
+            print(f"   🔢 评分范围: {min(valid_scores) if valid_scores else 0:.1f} ~ {max(valid_scores) if valid_scores else 0:.1f}")
+            print(f"   🏆 推荐股票数: {len(top_recommendations)}")
+            if top_recommendations:
+                print(f"   🥇 最高评分: {top_recommendations[0]['score']:.1f}")
+                print(f"   🥉 最低推荐评分: {top_recommendations[-1]['score']:.1f}")
+            
             return top_recommendations
             
         except Exception as e:
@@ -4009,8 +4001,8 @@ class AShareAnalyzerGUI:
             base_score = prediction.get('technical_score', 0)
             confidence = prediction.get('confidence', 0)
             
-            # 调整评分范围到0-100
-            final_score = max(0, min(100, 50 + base_score * 3 + confidence * 0.3))
+            # 调整评分范围到1-10分制
+            final_score = max(1.0, min(10.0, 5.0 + base_score * 0.3 + confidence * 0.03))
             
             return {
                 'code': ticker,
@@ -4060,8 +4052,8 @@ class AShareAnalyzerGUI:
             total_score = prediction.get('total_score', 0)
             confidence = prediction.get('confidence', 0)
             
-            # 调整评分范围到0-100
-            final_score = max(0, min(100, 50 + total_score * 2.5 + confidence * 0.2))
+            # 调整评分范围到1-10分制
+            final_score = max(1.0, min(10.0, 5.0 + total_score * 0.25 + confidence * 0.02))
             
             return {
                 'code': ticker,
@@ -4105,8 +4097,8 @@ class AShareAnalyzerGUI:
             fund_score = prediction.get('fundamental_score', 0)
             confidence = prediction.get('confidence', 0)
             
-            # 调整评分范围到0-100
-            final_score = max(0, min(100, 50 + fund_score * 2 + confidence * 0.25))
+            # 调整评分范围到1-10分制
+            final_score = max(1.0, min(10.0, 5.0 + fund_score * 0.2 + confidence * 0.025))
             
             return {
                 'code': ticker,
@@ -4158,7 +4150,7 @@ class AShareAnalyzerGUI:
                 elif period_name == '长期' and 'fund_score' in stock:
                     result += f"   📊 基本面评分: {stock['fund_score']:.1f}\n"
                 
-                result += f"   🎯 综合评分: {stock['score']:.1f}/100\n\n"
+                result += f"   🎯 综合评分: {stock['score']:.1f}/10\n\n"
             
             return result
         
@@ -4216,6 +4208,127 @@ class AShareAnalyzerGUI:
 """
         
         return report
+
+    def format_single_period_recommendations(self, recommendations, period_name, period_type):
+        """格式化单一时间段的股票推荐报告"""
+        import time
+        
+        if not recommendations:
+            return f"暂无{period_name}推荐股票"
+        
+        # 根据时间段确定要显示的评分类型
+        if period_type == 'short':
+            score_label = "短期评分"
+            detail_label = "技术指标评分"
+        elif period_type == 'medium':
+            score_label = "中期评分"
+            detail_label = "趋势+基本面评分"
+        else:  # long
+            score_label = "长期评分"
+            detail_label = "基本面评分"
+        
+        report = f"""
+=========================================================
+            📊 {period_name}投资推荐报告 (Top 10)
+=========================================================
+
+"""
+        
+        for i, stock in enumerate(recommendations, 1):
+            # 计算综合评分（使用个股分析的简单平均算法）
+            comprehensive_score = self.calculate_comprehensive_score_for_display(stock, period_type)
+            
+            report += f"""🏆 第{i}名: {stock['name']} ({stock['code']})
+   💰 当前价格: ¥{stock.get('price', stock.get('current_price', 0)):.2f}
+   📈 趋势预测: {stock['trend']}
+   🎯 目标区间: {stock['target_range']}
+   🔒 置信度: {stock['confidence']}%
+   ⚠️  风险等级: {stock['risk_level']}
+   🏭 所属行业: {stock['industry']}
+   💡 投资概念: {stock.get('concept', '未知')}"""
+            
+            if stock.get('key_signals'):
+                report += f"\n   🔍 关键信号: {' | '.join(stock['key_signals'])}"
+            
+            # 显示当前时间段的评分和综合评分
+            report += f"""
+   📊 {score_label}: {stock['score']:.1f}/10
+   🎯 综合评分: {comprehensive_score:.1f}/10
+
+"""
+        
+        # 添加投资策略建议
+        if period_type == 'short':
+            strategy = """
+🎯 短期投资策略 (1-7天):
+• 适合: 超短线交易者、技术分析爱好者
+• 重点: 关注技术指标信号，快进快出
+• 仓位: 建议总资金的10-30%
+• 止损: 严格设置3-5%止损位
+• 操作: 盘中关注量价配合，及时获利了结"""
+        elif period_type == 'medium':
+            strategy = """
+🎯 中期投资策略 (7-30天):
+• 适合: 波段交易者、趋势跟随者
+• 重点: 技术面趋势+基本面支撑
+• 仓位: 建议总资金的30-50%
+• 持有: 关注市场情绪变化，灵活调整
+• 操作: 顺势而为，逢低加仓，逢高减仓"""
+        else:  # long
+            strategy = """
+🎯 长期投资策略 (30-90天):
+• 适合: 价值投资者、长线投资者
+• 重点: 基本面分析，价值挖掘
+• 仓位: 建议总资金的40-70%
+• 持有: 耐心持有，关注基本面变化
+• 操作: 分批建仓，定期审视，长期持有"""
+        
+        report += f"""
+=========================================================
+                   投资策略建议
+=========================================================
+{strategy}
+
+⚠️  风险提示:
+• 投资有风险，入市需谨慎
+• 以上推荐仅供参考，不构成投资建议
+• 请根据自身风险承受能力调整仓位
+• 建议合理分散投资，控制单一标的风险
+
+=========================================================
+生成时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+推荐算法: TradingAI v2.0 {period_name}智能推荐系统
+=========================================================
+"""
+        
+        return report
+    
+    def calculate_comprehensive_score_for_display(self, stock, period_type):
+        """为显示计算综合评分（使用与个股分析相同的算法）"""
+        try:
+            # 从股票数据中获取三个时间段的评分
+            comprehensive_data = self.comprehensive_data.get(stock['code'], {})
+            
+            short_score = comprehensive_data.get('short_term', {}).get('score', 0)
+            medium_score = comprehensive_data.get('medium_term', {}).get('score', 0)
+            long_score = comprehensive_data.get('long_term', {}).get('score', 0)
+            
+            # 使用与个股分析相同的简单平均算法
+            if medium_score != 0:
+                # 如果中期评分存在，使用简单平均
+                final_score = (short_score + medium_score + long_score) / 3
+            else:
+                # 如果中期评分不存在，使用短期和长期平均
+                final_score = (short_score + long_score) / 2
+            
+            # 确保评分在合理范围内 (1-10)
+            final_score = max(1.0, min(10.0, abs(final_score) if final_score != 0 else 5.0))
+            
+            return final_score
+            
+        except Exception as e:
+            print(f"计算综合评分失败: {e}")
+            return 5.0  # 默认返回5.0
 
     def get_short_term_advice(self, rsi, macd, signal, volume_ratio, ma5, ma10, current_price):
         """生成短期投资建议 (1-7天)"""
@@ -4831,36 +4944,36 @@ class AShareAnalyzerGUI:
         elif ma5 < ma10 < ma20 < ma60:
             score -= 15  # 空头排列
         
-        # 限制在0-100之间
-        score = min(100, max(0, score))
+        # 限制在1-10分之间并转换为10分制
+        score = min(10.0, max(1.0, score / 10.0))
         
         return self.format_technical_index(score)
     
     def format_technical_index(self, score):
-        """格式化技术面推荐指数"""
-        if score >= 80:
+        """格式化技术面推荐指数（10分制）"""
+        if score >= 8.0:
             rating = "技术面强势"
             signal = "买入信号"
-        elif score >= 65:
+        elif score >= 6.5:
             rating = "技术面偏强"
             signal = "可考虑买入"
-        elif score >= 50:
+        elif score >= 5.0:
             rating = "技术面中性"
             signal = "持有观望"
-        elif score >= 35:
+        elif score >= 3.5:
             rating = "技术面偏弱"
             signal = "谨慎操作"
         else:
             rating = "技术面疲弱"
             signal = "回避风险"
         
-        # 生成进度条
+        # 生成进度条（基于10分制）
         bar_length = 25
-        filled_length = int(score / 100 * bar_length)
+        filled_length = int(score * bar_length / 10)
         bar = "█" * filled_length + "░" * (bar_length - filled_length)
         
         return """
-技术面指数: {:.1f}/100
+技术面指数: {:.1f}/10
 [{}] {}
 操作信号: {}
 """.format(score, bar, rating, signal)
@@ -4913,36 +5026,36 @@ class AShareAnalyzerGUI:
         elif "银行" in industry or "白酒" in industry:
             score += 3  # 稳定行业加成
         
-        # 限制在0-100之间
-        score = min(100, max(0, score))
+        # 限制在1-10分之间并转换为10分制
+        score = min(10.0, max(1.0, score / 10.0))
         
         return self.format_fundamental_index(score)
     
     def format_fundamental_index(self, score):
-        """格式化基本面推荐指数"""
-        if score >= 80:
+        """格式化基本面推荐指数（10分制）"""
+        if score >= 8.0:
             rating = "基本面优秀"
             quality = "高质量公司"
-        elif score >= 65:
+        elif score >= 6.5:
             rating = "基本面良好"
             quality = "质地较好"
-        elif score >= 50:
+        elif score >= 5.0:
             rating = "基本面一般"
             quality = "中等质地"
-        elif score >= 35:
+        elif score >= 3.5:
             rating = "基本面偏弱"
             quality = "质地偏弱"
         else:
             rating = "基本面较差"
             quality = "需谨慎"
         
-        # 生成进度条
+        # 生成进度条（基于10分制）
         bar_length = 25
-        filled_length = int(score / 100 * bar_length)
+        filled_length = int(score * bar_length / 10)
         bar = "█" * filled_length + "░" * (bar_length - filled_length)
         
         return """
-基本面指数: {:.1f}/100
+基本面指数: {:.1f}/10
 [{}] {}
 公司质地: {}
 """.format(score, bar, rating, quality)
@@ -6908,20 +7021,66 @@ A股特色分析
         try:
             import time
             
+            # 生成智能模拟数据
+            tech_data = self._generate_smart_mock_technical_data(ticker)
+            fund_data = self._generate_smart_mock_fundamental_data(ticker)
+            
             # 获取股票信息
-            stock_info = self.get_stock_info_generic(ticker)
+            stock_info = self.stock_info.get(ticker, {
+                "name": f"股票{ticker}",
+                "industry": "未知行业",
+                "concept": "A股",
+                "price": tech_data['current_price']
+            })
             
             # 生成详细分析
             overview = self.generate_overview(ticker)
             technical_analysis = self.technical_analysis(ticker)
             fundamental_analysis = self.fundamental_analysis(ticker)
             
-            # 生成投资建议
-            short_term_advice = self.generate_short_term_advice(ticker)
-            long_term_advice = self.generate_long_term_advice(ticker)
+            # 生成投资建议 - 使用与批量评分相同的三时间段算法
+            short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
+            
+            # 使用最初的简单评分算法
+            # 直接从预测结果获取基础评分
+            short_score = short_prediction.get('technical_score', 0)
+            medium_score = medium_prediction.get('total_score', 0) 
+            long_score = long_prediction.get('fundamental_score', 0)
+            
+            # 简单平均算法（最初版本）
+            if medium_score != 0:
+                # 如果中期评分存在，使用简单平均
+                final_score = (short_score + medium_score + long_score) / 3
+            else:
+                # 如果中期评分不存在，使用短期和长期平均
+                final_score = (short_score + long_score) / 2
+            
+            # 确保评分在合理范围内 (1-10)
+            final_score = max(1.0, min(10.0, abs(final_score) if final_score != 0 else 5.0))
+            
+            print(f"🔍 原始评分调试 - {ticker}:")
+            print(f"   短期评分: {short_score}")
+            print(f"   中期评分: {medium_score}")  
+            print(f"   长期评分: {long_score}")
+            print(f"   最终评分: {final_score}")
+            print(f"   评分算法: 简单平均算法")
+            print("="*50)
+            
+            # 为了向后兼容，从三时间段预测中提取短期和长期建议
+            short_term_advice = {
+                'advice': short_prediction.get('trend', '持有观望'),
+                'confidence': short_prediction.get('confidence', 50),
+                'signals': short_prediction.get('key_signals', [])
+            }
+            
+            long_term_advice = {
+                'advice': long_prediction.get('trend', '持有观望'), 
+                'confidence': long_prediction.get('confidence', 50),
+                'period': long_prediction.get('investment_period', '长期持有')
+            }
             
             # 格式化完整报告
-            detailed_report = self.format_investment_advice(short_term_advice, long_term_advice, ticker)
+            detailed_report = self.format_investment_advice_from_data(short_term_advice, long_term_advice, ticker, final_score)
             
             # 在主线程中更新文本
             self.root.after(0, self.update_detailed_text, text_widget, detailed_report)
@@ -8195,18 +8354,28 @@ A股特色分析
         try:
             print("🚀 开始生成三时间段股票推荐...")
             
-            # 生成三个时间段的推荐
-            short_recommendations = self.get_recommended_stocks_by_period('short', 10)
-            medium_recommendations = self.get_recommended_stocks_by_period('medium', 10)
-            long_recommendations = self.get_recommended_stocks_by_period('long', 10)
+            # 获取用户选择的时间段
+            selected_period = self.period_var.get()
+            print(f"📅 用户选择的时间段: {selected_period}")
             
-            print(f"📊 推荐数量 - 短期: {len(short_recommendations)}, 中期: {len(medium_recommendations)}, 长期: {len(long_recommendations)}")
+            # 根据选择生成对应的推荐
+            if selected_period == "短期":
+                period_type = 'short'
+                period_name = '短期'
+            elif selected_period == "中期":
+                period_type = 'medium'
+                period_name = '中期'
+            else:  # 长期
+                period_type = 'long'
+                period_name = '长期'
             
-            # 格式化推荐报告
-            recommendation_report = self.format_stock_recommendations(
-                short_recommendations, 
-                medium_recommendations, 
-                long_recommendations
+            # 生成指定时间段的推荐
+            main_recommendations = self.get_recommended_stocks_by_period(period_type, 10)
+            print(f"📊 {period_name}推荐数量: {len(main_recommendations)}")
+            
+            # 格式化推荐报告（单一时间段版本）
+            recommendation_report = self.format_single_period_recommendations(
+                main_recommendations, period_name, period_type
             )
             
             print(f"📄 生成报告长度: {len(recommendation_report)} 字符")
