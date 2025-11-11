@@ -8930,4 +8930,16 @@ def main():
     root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        print(f"❌ 程序启动失败: {e}")
+        traceback.print_exc()
+        # 如果是打包版本，显示错误对话框
+        try:
+            import tkinter.messagebox as msgbox
+            msgbox.showerror("程序启动失败", f"错误信息：{e}\n\n请检查系统环境或重新安装程序。")
+        except:
+            pass
+        input("按回车键退出...")
