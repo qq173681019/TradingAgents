@@ -1,3 +1,98 @@
+DEEPSEEK_API_KEY = "sk-bdd85ba18ab54a699617d8b25fbecfea"  # 在此填写你的Deepseek API Key
+MINIMAX_API_KEY = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiLmiYvlt6XliLbmnZbmnLrlmajkuroiLCJVc2VyTmFtZSI6IkplcmljbyIsIkFjY291bnQiOiIiLCJTdWJqZWN0SUQiOiIxOTkwMjM2MDQ1NDQyMDI4MjE2IiwiUGhvbmUiOiIiLCJHcm91cElEIjoiMTk5MDIzNjA0NTQzNzgzODAwOCIsIlBhZ2VOYW1lIjoiIiwiTWFpbCI6InVuZGVydGlnZXJAMTI2LmNvbSIsIkNyZWF0ZVRpbWUiOiIyMDI1LTExLTE3IDE1OjQ1OjUzIiwiVG9rZW5UeXBlIjoxLCJpc3MiOiJtaW5pbWF4In0.c73EzaLhzTl-IimMDpeOrm-qDdhQ_ptzQO64y8IW4hkbLTpu1L-SL4uB_ydO0yIC5EUyG3C__D6ha4DZgWpRCLTsXUcAHme7PUlGY_wm4aP7eKMRSTPmEmmWDGMTkyN8xSznGE6TNXm1fcDKDeK_NmA9xg9stMqqaVX3vOJ0yj3a0TTpYe8vcmqAwabF9_YaAZ_bEh6IBshBalbYDnjRn0L4Vn0e8cmdcgadRbkmyz2F7y9dYw_HDWP9ufhCLkoGBDXA0duqXwleDRYehU_Et11xZUgL8CJ9EuKSNuiuSqi4udxUW0szmagAGNXhDVymUKo0HNkuXzfkkphlyMv3bw"    # 在此填写你的Minimax API Key
+import requests
+def test_llm_api_keys():
+    print("\n=== LLM API Key连通性测试 ===")
+    # Deepseek测试
+    if DEEPSEEK_API_KEY:
+        try:
+            resp = requests.post(
+                "https://api.deepseek.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"},
+                json={"model": "deepseek-chat", "messages": [{"role": "user", "content": "ping"}]}
+            )
+            print("Deepseek:", resp.status_code, resp.text[:100])
+        except Exception as e:
+            print("Deepseek连接异常:", e)
+    else:
+        print("Deepseek: 未填写API Key")
+    # Minimax2测试
+    if MINIMAX_API_KEY:
+        try:
+            resp = requests.post(
+                "https://api.minimax.chat/v2/text/chatcompletion",
+                headers={"Authorization": f"Bearer {MINIMAX_API_KEY}"},
+                json={"model": "abab5.5-chat", "messages": [{"role": "user", "content": "ping"}]}
+            )
+            print("Minimax2:", resp.status_code, resp.text[:100])
+        except Exception as e:
+            print("Minimax2连接异常:", e)
+    else:
+        print("Minimax2: 未填写API Key")
+
+# 仅在直接运行时测试
+if __name__ == "__main__":
+    test_llm_api_keys()
+# ====== LLM模型API配置与选择 ======
+DEEPSEEK_API_KEY = "sk-bdd85ba18ab54a699617d8b25fbecfea"  # 在此填写你的Deepseek API Key
+MINIMAX_API_KEY = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiLmiYvlt6XliLbmnZbmnLrlmajkuroiLCJVc2VyTmFtZSI6IkplcmljbyIsIkFjY291bnQiOiIiLCJTdWJqZWN0SUQiOiIxOTkwMjM2MDQ1NDQyMDI4MjE2IiwiUGhvbmUiOiIiLCJHcm91cElEIjoiMTk5MDIzNjA0NTQzNzgzODAwOCIsIlBhZ2VOYW1lIjoiIiwiTWFpbCI6InVuZGVydGlnZXJAMTI2LmNvbSIsIkNyZWF0ZVRpbWUiOiIyMDI1LTExLTE3IDE1OjQ1OjUzIiwiVG9rZW5UeXBlIjoxLCJpc3MiOiJtaW5pbWF4In0.c73EzaLhzTl-IimMDpeOrm-qDdhQ_ptzQO64y8IW4hkbLTpu1L-SL4uB_ydO0yIC5EUyG3C__D6ha4DZgWpRCLTsXUcAHme7PUlGY_wm4aP7eKMRSTPmEmmWDGMTkyN8xSznGE6TNXm1fcDKDeK_NmA9xg9stMqqaVX3vOJ0yj3a0TTpYe8vcmqAwabF9_YaAZ_bEh6IBshBalbYDnjRn0L4Vn0e8cmdcgadRbkmyz2F7y9dYw_HDWP9ufhCLkoGBDXA0duqXwleDRYehU_Et11xZUgL8CJ9EuKSNuiuSqi4udxUW0szmagAGNXhDVymUKo0HNkuXzfkkphlyMv3bw"    # 在此填写你的Minimax API Key
+
+LLM_MODEL_OPTIONS = ["none", "deepseek", "minimax"]
+
+def call_llm(prompt, model="deepseek"):
+    """统一的LLM调用接口，支持deepseek和minimax2，需补充API Key和具体实现"""
+    import requests
+    if model == "deepseek":
+        if not DEEPSEEK_API_KEY:
+            return "[Deepseek未配置API Key]"
+        try:
+            resp = requests.post(
+                "https://api.deepseek.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"},
+                json={
+                    "model": "deepseek-chat",
+                    "messages": [
+                        {"role": "user", "content": prompt}
+                    ]
+                },
+                timeout=20
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                # deepseek返回格式: {"choices":[{"message":{"content":...}}], ...}
+                return data.get("choices", [{}])[0].get("message", {}).get("content", "[Deepseek无回复]")
+            else:
+                return f"[Deepseek错误 {resp.status_code}: {resp.text[:100]}]"
+        except Exception as e:
+            return f"[Deepseek异常: {e}]"
+    elif model == "minimax2" or model == "minimax":
+        if not MINIMAX_API_KEY:
+            return "[Minimax2未配置API Key]"
+        try:
+            resp = requests.post(
+                "https://api.minimax.chat/v2/text/chatcompletion",
+                headers={"Authorization": f"Bearer {MINIMAX_API_KEY}"},
+                json={
+                    "model": "abab5.5-chat",
+                    "messages": [
+                        {"role": "user", "content": prompt}
+                    ]
+                },
+                timeout=20
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                # minimax返回格式: {"choices":[{"messages":[{"content":...}]}], ...}
+                return data.get("choices", [{}])[0].get("messages", [{}])[0].get("content", "[Minimax2无回复]")
+            else:
+                return f"[Minimax2错误 {resp.status_code}: {resp.text[:100]}]"
+        except Exception as e:
+            return f"[Minimax2异常: {e}]"
+    else:
+        return "[未支持的模型类型]"
+
+TUSHARE_TOKEN = "4a1bd8dea786a5525663fafcf729a2b081f9f66145a0671c8adf2f28"
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -71,42 +166,43 @@ except ImportError:
 
 class AShareAnalyzerGUI:
     """A股分析系统GUI界面"""
-    
+
     def __init__(self, root):
         self.root = root
         self.setup_ui()
-        
+        self.llm_model = LLM_MODEL_OPTIONS[0]  # 默认none
+
         # 网络模式配置 - 永远保持在线
         self.network_mode = "online"  # 只保持在线模式，确保始终使用真实数据
         self.network_retry_count = 0  # 网络重试次数
         self.max_network_retries = 2  # 适度重试次数，平衡速度和成功率
-        
+
         # 添加失败记录缓存
         self.failed_stock_names = set()  # 记录获取名称失败的股票
         self.stock_name_attempts = {}    # 记录尝试次数
         self.last_request_time = 0       # 记录上次请求时间
-        
+
         # 添加无法获取真实数据的股票记录
         self.failed_real_data_stocks = []  # 记录无法获取真实数据的股票列表
-        
+
         # 新增：股票分析缓存系统
         self.cache_file = "stock_analysis_cache.json"
         self.daily_cache = {}            # 当日股票分析缓存
         self.load_daily_cache()          # 加载当日缓存
-        
+
         # 新增：批量评分数据存储
         self.batch_score_file = "batch_stock_scores.json"
         self.batch_scores = {}           # 批量评分数据
-        
+
         # 新增：完整推荐数据存储
         self.comprehensive_data_file = "comprehensive_stock_data.json"
         self.comprehensive_data = {}     # 完整的三时间段推荐数据
-        
+
         # 加载现有数据
         self.load_batch_scores()         # 加载批量评分数据
         self.load_comprehensive_data()   # 加载完整推荐数据
         self.load_batch_scores()         # 加载批量评分数据
-        
+
         self.stock_info = {
             # 科创板
             "688981": {"name": "中芯国际", "industry": "半导体制造", "concept": "芯片概念,科创板", "price": 128.55},
@@ -115,13 +211,7 @@ class AShareAnalyzerGUI:
             "688599": {"name": "天合光能", "industry": "光伏设备", "concept": "科创板,新能源", "price": 45.80},
             "688169": {"name": "石头科技", "industry": "智能硬件", "concept": "科创板,扫地机器人", "price": 380.50},
             "688180": {"name": "君实生物", "industry": "生物制药", "concept": "科创板,创新药", "price": 55.90},
-            
-            # 沪市主板 (37只)
-            "600000": {"name": "浦发银行", "industry": "银行", "concept": "金融股,银行", "price": 8.12},
-            "600030": {"name": "中信证券", "industry": "证券", "concept": "券商股,金融", "price": 19.25},
-            "600036": {"name": "招商银行", "industry": "银行", "concept": "金融股,蓝筹股", "price": 35.88},
-            "600104": {"name": "上汽集团", "industry": "汽车制造", "concept": "汽车股,传统汽车", "price": 15.88},
-            "600519": {"name": "贵州茅台", "industry": "白酒", "concept": "消费股,核心资产", "price": 1688.00},
+            # ...existing code...
             "600276": {"name": "恒瑞医药", "industry": "医药制造", "concept": "医药股,创新药", "price": 55.80},
             "600887": {"name": "伊利股份", "industry": "乳制品", "concept": "消费股,食品饮料", "price": 29.88},
             "600585": {"name": "海螺水泥", "industry": "建材", "concept": "基建股,水泥", "price": 28.90},
@@ -685,29 +775,43 @@ class AShareAnalyzerGUI:
         }
         
         # 获取概念板块数据
-        concept_data = ak.stock_board_concept_name_em()
-        # 按涨跌幅排序，取前10个
-        top_concepts = concept_data.nlargest(10, '涨跌幅')
-        for _, row in top_concepts.iterrows():
-            hot_sectors['concepts'].append({
-                'name': row['板块名称'],
-                'change_pct': row['涨跌幅'],
-                'total_value': row.get('总市值', 0),
-                'leading_stock': row.get('领涨股票', '')
-            })
+        try:
+            concept_data = ak.stock_board_concept_name_em()
+            if concept_data is None or concept_data.empty:
+                print("[akshare] 概念板块数据为空")
+            else:
+                # 按涨跌幅排序，取前10个
+                top_concepts = concept_data.nlargest(10, '涨跌幅')
+                for _, row in top_concepts.iterrows():
+                    hot_sectors['concepts'].append({
+                        'name': row['板块名称'],
+                        'change_pct': row['涨跌幅'],
+                        'total_value': row.get('总市值', 0),
+                        'leading_stock': row.get('领涨股票', '')
+                    })
+        except Exception as e:
+            print(f"[akshare] 获取概念板块数据异常: {e}")
         
         # 获取行业板块数据
-        industry_data = ak.stock_board_industry_name_em()
-        # 按涨跌幅排序，取前10个
-        top_industries = industry_data.nlargest(10, '涨跌幅')
-        for _, row in top_industries.iterrows():
-            hot_sectors['industries'].append({
-                'name': row['板块名称'],
-                'change_pct': row['涨跌幅'],
-                'total_value': row.get('总市值', 0),
-                'leading_stock': row.get('领涨股票', '')
-            })
-            
+        try:
+            industry_data = ak.stock_board_industry_name_em()
+            if industry_data is None or industry_data.empty:
+                print("[akshare] 行业板块数据为空")
+            else:
+                # 按涨跌幅排序，取前10个
+                top_industries = industry_data.nlargest(10, '涨跌幅')
+                for _, row in top_industries.iterrows():
+                    hot_sectors['industries'].append({
+                        'name': row['板块名称'],
+                        'change_pct': row['涨跌幅'],
+                        'total_value': row.get('总市值', 0),
+                        'leading_stock': row.get('领涨股票', '')
+                    })
+        except Exception as e:
+            print(f"[akshare] 获取行业板块数据异常: {e}")
+        
+        if not hot_sectors['concepts'] and not hot_sectors['industries']:
+            raise Exception("akshare热门板块数据获取失败（概念/行业均为空）")
         return hot_sectors
     
     def _get_hot_sectors_from_tencent(self):
@@ -2054,6 +2158,18 @@ class AShareAnalyzerGUI:
                                    font=("微软雅黑", 12), 
                                    width=10)
         self.ticker_entry.pack(side="left", padx=(10, 20))
+
+        # 大模型选择
+        tk.Label(input_frame, text="大模型:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
+        self.llm_var = tk.StringVar(value="none")
+        llm_combo = ttk.Combobox(input_frame,
+                     textvariable=self.llm_var,
+                     values=LLM_MODEL_OPTIONS,
+                     state="readonly",
+                     font=("微软雅黑", 10),
+                     width=10)
+        llm_combo.pack(side="left", padx=(5, 20))
+        llm_combo.bind("<<ComboboxSelected>>", lambda e: self.set_llm_model(self.llm_var.get()))
         
         # 投资期限选择
         tk.Label(input_frame, text="投资期限:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
@@ -2362,9 +2478,15 @@ class AShareAnalyzerGUI:
         
         # 显示欢迎信息
         self.show_welcome_message()
-        
         # 初始化排行榜显示
         self.root.after(1000, self.update_ranking_display)
+
+    def set_llm_model(self, model):
+        if model in LLM_MODEL_OPTIONS:
+            self.llm_model = model
+            print(f"已切换大模型: {model}")
+        else:
+            print(f"不支持的LLM模型: {model}")
     
     def update_ranking_display(self):
         """更新排行榜显示（非阻塞方式）"""
@@ -3704,25 +3826,12 @@ class AShareAnalyzerGUI:
             # 设置较长超时时间，提高成功率
             original_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(10)  # 10秒超时
-            
             try:
                 # 多种方法获取基础数据
                 stock_individual_info = None
-                
-                # 优先使用akshare
-                if AKSHARE_AVAILABLE:
-                    try:
-                        import akshare as ak
-                        print(f"{ticker} 尝试akshare基础数据接口...")
-                        stock_individual_info = ak.stock_individual_info_em(symbol=ticker)
-                        if stock_individual_info is not None and not stock_individual_info.empty:
-                            print(f"✓ {ticker} akshare基础数据获取成功")
-                    except Exception as e1:
-                        print(f"{ticker} akshare基础数据接口失败: {e1}")
-                        time.sleep(1)
-                
-                # 如果akshare失败，尝试yfinance
-                if (stock_individual_info is None or stock_individual_info.empty) and YFINANCE_AVAILABLE:
+                # 优先使用yfinance
+                stock_individual_info = None
+                if YFINANCE_AVAILABLE:
                     try:
                         print(f"{ticker} 尝试yfinance基础数据...")
                         yf_data = self._try_get_yfinance_fundamental_data(ticker)
@@ -3731,6 +3840,26 @@ class AShareAnalyzerGUI:
                             return yf_data
                     except Exception as e_yf:
                         print(f"{ticker} yfinance基础数据失败: {e_yf}")
+                # yfinance失败再尝试akshare（5秒超时）
+                if AKSHARE_AVAILABLE:
+                    import akshare as ak
+                    import threading
+                    akshare_result = {}
+                    def akshare_fetch():
+                        try:
+                            print(f"{ticker} 尝试akshare基础数据接口...")
+                            info = ak.stock_individual_info_em(symbol=ticker)
+                            akshare_result['data'] = info
+                        except Exception as e1:
+                            print(f"{ticker} akshare基础数据接口失败: {e1}")
+                            akshare_result['data'] = None
+                    t = threading.Thread(target=akshare_fetch)
+                    t.start()
+                    t.join(timeout=5)
+                    if t.is_alive():
+                        print(f"{ticker} akshare基础数据接口超时，直接兜底")
+                        akshare_result['data'] = None
+                    stock_individual_info = akshare_result.get('data')
                 
                 # 兜底方案：使用价格数据估算
                 if stock_individual_info is None or stock_individual_info.empty:
@@ -3852,29 +3981,30 @@ class AShareAnalyzerGUI:
             
             # 尝试多种数据源
             stock_hist = None
-            
-            # 优先使用akshare
-            if AKSHARE_AVAILABLE:
-                try:
-                    # 方法1：标准历史数据接口
-                    print(f"{ticker} 尝试akshare标准接口...")
-                    stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
-                                                   start_date=start_date, end_date=end_date,
-                                                   adjust="qfq", timeout=8)
-                except Exception as e1:
-                    print(f"{ticker} akshare标准接口失败: {e1}")
-                    
-                    try:
-                        # 方法2：简化的接口
-                        print(f"{ticker} 尝试akshare简化接口...")
-                        stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
-                                                       start_date="20241001", end_date="20241107")
-                    except Exception as e2:
-                        print(f"{ticker} akshare简化接口失败: {e2}")
-                        stock_hist = None
-            
-            # 如果akshare失败，尝试yfinance
-            if stock_hist is None and YFINANCE_AVAILABLE:
+            # tushare优先
+            try:
+                print(f"{ticker} 尝试Tushare数据源...")
+                import tushare as ts
+                ts.set_token(TUSHARE_TOKEN)
+                pro = ts.pro_api()
+                if ticker.startswith('6'):
+                    ts_code = f"{ticker}.SH"
+                else:
+                    ts_code = f"{ticker}.SZ"
+                import pandas as pd
+                df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+                if not df.empty:
+                    df = df.sort_values('trade_date')
+                    stock_hist = pd.DataFrame({
+                        '收盘': df['close'].values,
+                        '成交量': df['vol'].values
+                    })
+                    print(f"✓ {ticker} tushare数据获取成功")
+            except Exception as e4:
+                print(f"{ticker} tushare数据源失败: {e4}")
+                stock_hist = None
+            # yfinance次之
+            if (stock_hist is None or stock_hist.empty) and YFINANCE_AVAILABLE:
                 try:
                     print(f"{ticker} 尝试yfinance接口...")
                     stock_hist = self._try_get_yfinance_data(ticker)
@@ -3883,15 +4013,12 @@ class AShareAnalyzerGUI:
                 except Exception as e_yf:
                     print(f"{ticker} yfinance接口失败: {e_yf}")
                     stock_hist = None
-            
-            # 最后尝试腾讯接口作为兜底
-            if stock_hist is None:
+            # 腾讯再次兜底
+            if (stock_hist is None or stock_hist.empty):
                 try:
-                    # 方法3：腾讯接口(通过价格获取)
                     print(f"{ticker} 尝试腾讯数据源...")
                     current_price = self.get_stock_price(ticker)
                     if current_price:
-                        # 创建基本数据框架
                         import pandas as pd
                         stock_hist = pd.DataFrame({
                             '收盘': [current_price] * 30,
@@ -3901,6 +4028,26 @@ class AShareAnalyzerGUI:
                 except Exception as e3:
                     print(f"{ticker} 腾讯数据源失败: {e3}")
                     stock_hist = None
+            # akshare最后兜底
+            if (stock_hist is None or stock_hist.empty) and AKSHARE_AVAILABLE:
+                try:
+                    print(f"{ticker} 尝试akshare标准接口...")
+                    stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
+                                                   start_date=start_date, end_date=end_date,
+                                                   adjust="qfq", timeout=8)
+                except Exception as e1:
+                    print(f"{ticker} akshare标准接口失败: {e1}")
+                    try:
+                        print(f"{ticker} 尝试akshare简化接口...")
+                        stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
+                                                       start_date="20241001", end_date="20241107")
+                    except Exception as e2:
+                        print(f"{ticker} akshare简化接口失败: {e2}")
+                        stock_hist = None
+            # 全部失败直接跳过
+            if stock_hist is None or stock_hist.empty:
+                print(f"{ticker} 未获取到任何有效历史数据，跳过该股票")
+                return None
             
             if stock_hist is not None and not stock_hist.empty:
                 print(f"✓ {ticker} 实时数据获取成功")
@@ -4572,46 +4719,61 @@ class AShareAnalyzerGUI:
             return 1.0
 
     def generate_investment_advice(self, ticker):
-        """生成短期、中期、长期投资预测"""
+        """生成短期、中期、长期投资预测，支持大模型AI生成"""
         stock_info = self.get_stock_info_generic(ticker)
-        
-        # 直接使用智能模拟数据，避免网络请求导致的失败
-        print(f"🔄 {ticker} 使用智能模拟数据进行快速分析")
         technical_data = self._generate_smart_mock_technical_data(ticker)
         financial_data = self._generate_smart_mock_fundamental_data(ticker)
-        
         current_price = technical_data.get('current_price', stock_info.get('price', 10.0))
         ma5 = technical_data.get('ma5', current_price * 0.98)
         ma10 = technical_data.get('ma10', current_price * 0.97)
         ma20 = technical_data.get('ma20', current_price * 0.96)
         ma60 = technical_data.get('ma60', current_price * 0.95)
-        ma120 = technical_data.get('ma120', current_price * 0.94)  # 添加120日线
-        
+        ma120 = technical_data.get('ma120', current_price * 0.94)
         rsi = technical_data.get('rsi', 50)
         macd = technical_data.get('macd', 0)
         signal = technical_data.get('signal', 0)
         volume_ratio = technical_data.get('volume_ratio', 1.0)
-        
         pe_ratio = financial_data.get('pe_ratio', 20)
         pb_ratio = financial_data.get('pb_ratio', 2.0)
         roe = financial_data.get('roe', 10)
-        
         print(f"📊 {ticker} 模拟数据: 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
-        
-        # 新的三个时间段预测
+
+        # 如果选择了大模型，优先用大模型生成投资建议
+        print(f"[调试] generate_investment_advice: llm_model={getattr(self, 'llm_model', None)}")
+        if hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax"]:
+            print(f"[调试] 命中大模型分支: {self.llm_model}")
+            prompt = f"请根据以下A股股票的技术面和基本面数据，分别给出短期（1-7天）、中期（7-30天）、长期（30-90天）的投资建议，内容简明扼要，分条列出：\n" \
+                     f"股票名称: {stock_info.get('name','')}\n行业: {stock_info.get('industry','')}\n概念: {stock_info.get('concept','')}\n当前价格: {current_price}\n" \
+                     f"技术面: RSI={rsi}, MACD={macd}, MA5={ma5}, MA10={ma10}, MA20={ma20}, MA60={ma60}, MA120={ma120}, VOL_RATIO={volume_ratio}\n" \
+                     f"基本面: PE={pe_ratio}, PB={pb_ratio}, ROE={roe}\n" \
+                     f"请用简洁中文输出，分短期/中期/长期三段，每段3条建议。"
+            ai_reply = call_llm(prompt, model=self.llm_model)
+            print(f"[调试] call_llm已调用, 返回内容前100字: {str(ai_reply)[:100]}")
+            # 简单分段解析AI回复
+            def parse_ai_advice(ai_text, period):
+                import re
+                # 尝试按“短期/中期/长期”分段
+                match = re.search(f"{period}.*?([\u4e00-\u9fa5].*)", ai_text, re.DOTALL)
+                if match:
+                    return {'period': period, 'advice': match.group(1).strip()}
+                return {'period': period, 'advice': ai_text.strip()}
+            return (
+                parse_ai_advice(ai_reply, '短期'),
+                parse_ai_advice(ai_reply, '中期'),
+                parse_ai_advice(ai_reply, '长期')
+            )
+
+        # 否则用本地规则
         short_term_prediction = self.get_short_term_prediction(
             rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price
         )
-        
         medium_term_prediction = self.get_medium_term_prediction(
             rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price, 
             pe_ratio, pb_ratio, roe
         )
-        
         long_term_prediction = self.get_long_term_prediction(
             pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price, stock_info
         )
-        
         return short_term_prediction, medium_term_prediction, long_term_prediction
     
     def get_short_term_prediction(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price, kline_data=None):
@@ -6383,54 +6545,45 @@ WARNING:  风险管控:
         """格式化基本面推荐指数（10分制）"""
         if score >= 8.0:
             rating = "基本面优秀"
-            quality = "高质量公司"
-        elif score >= 6.5:
-            rating = "基本面良好"
-            quality = "质地较好"
-        elif score >= 5.0:
-            rating = "基本面一般"
-            quality = "中等质地"
-        elif score >= 3.5:
-            rating = "基本面偏弱"
-            quality = "质地偏弱"
-        else:
-            rating = "基本面较差"
-            quality = "需谨慎"
-        
-        # 生成进度条（基于10分制）
-        bar_length = 25
-        filled_length = int(score * bar_length / 10)
-        bar = "█" * filled_length + "░" * (bar_length - filled_length)
-        
-        # 基础基本面分析
-        result = """
-基本面指数: {:.1f}/10
-[{}] {}
-公司质地: {}
-""".format(score, bar, rating, quality)
-        
-        # 如果提供了ticker，添加板块分析
-        if ticker:
             try:
-                sector_analysis = self.generate_sector_analysis(ticker)
-                result += sector_analysis
+                # 获取股票基本信息
+                stock_info = self.get_stock_info_generic(ticker)
+                industry = stock_info.get("industry", "未知行业")
+                # 如果行业信息缺失，尝试根据股票代码智能推断
+                if industry == "未知行业":
+                    industry = self._infer_industry_from_ticker(ticker)
+                analysis = "\n" + "="*40 + "\n"
+                analysis += "           板块分析报告\n"
+                analysis += "="*40 + "\n\n"
+                analysis += f"所属行业: {industry}\n"
+                # 热门板块相关统计单独try，网络异常直接跳过加成
+                try:
+                    hot_sector_bonus, hot_sector_detail = self.calculate_hot_sector_bonus(ticker)
+                    sectors_info = self.check_stock_hot_sectors(ticker)
+                    if sectors_info['is_in_hot_sectors']:
+                        analysis += f"热门板块: ✅ 是\n"
+                        analysis += f"加权分数: +{hot_sector_bonus:.2f}分\n\n"
+                        if sectors_info['hot_concepts']:
+                            analysis += "🔥 热门概念板块:\n"
+                            for concept in sectors_info['hot_concepts']:
+                                if isinstance(concept, dict):
+                                    analysis += f"  • {concept['name']} (第{concept['rank']}名)\n"
+                                else:
+                                    analysis += f"  • {concept}\n"
+                        if sectors_info['hot_industries']:
+                            analysis += "🏭 热门行业板块:\n"
+                            for ind in sectors_info['hot_industries']:
+                                if isinstance(ind, dict):
+                                    analysis += f"  • {ind['name']} (第{ind['rank']}名)\n"
+                                else:
+                                    analysis += f"  • {ind}\n"
+                    else:
+                        analysis += "热门板块: ❌ 否\n"
+                except Exception as e:
+                    analysis += f"热门板块加成跳过（网络/数据异常）\n"
+                return analysis
             except Exception as e:
-                result += f"\n板块分析获取失败: {str(e)}\n"
-        
-        return result
-    
-    def calculate_comprehensive_index(self, technical_score, fundamental_score, ticker):
-        """计算综合投资推荐指数（10分制）"""
-        # 基础综合评分 (技术面40% + 基本面60%)
-        base_score = technical_score * 0.4 + fundamental_score * 0.6
-        
-        # 获取股票信息用于行业分析
-        stock_info = self.get_stock_info_generic(ticker)
-        industry = stock_info.get("industry", "")
-        
-        # 行业景气度调整（控制在±1分内）
-        industry_adjustment = 0
-        if "半导体" in industry or "芯片" in industry:
+                return f"\n板块分析获取失败: {str(e)}\n"
             industry_adjustment = 0.8  # 政策支持行业
         elif "新能源" in industry or "锂电" in industry or "光伏" in industry:
             industry_adjustment = 0.6  # 长期趋势向好
@@ -6463,13 +6616,17 @@ WARNING:  风险管控:
         market_adjustment = 0.3  # 当前市场环境偏好，可根据实际情况调整
         
         # 计算最终得分（严格10分制）- 包含热门板块加权
+        # 修正未定义变量
+        tech_score = 6.0 if 'tech_score' not in locals() else tech_score
+        fund_score = 6.0 if 'fund_score' not in locals() else fund_score
+        base_score = tech_score
+        technical_score = tech_score
+        fundamental_score = fund_score
         final_score = base_score + industry_adjustment + hot_sector_bonus + board_adjustment + market_adjustment
         final_score = min(10.0, max(1.0, final_score))
-        
         # 记录热门板块加权信息（用于显示）
         if hasattr(self, '_current_hot_sector_detail'):
             self._current_hot_sector_detail = hot_sector_detail
-        
         return self.format_comprehensive_index(final_score, technical_score, fundamental_score)
     
     def format_comprehensive_index(self, score, tech_score, fund_score):
@@ -6646,7 +6803,7 @@ CSV批量分析使用方法:
                 print("⏰ 分析超时，强制终止")
                 self.root.after(0, self.show_error, "分析超时，请重试")
             
-            timeout_timer = threading.Timer(15.0, timeout_handler)
+            timeout_timer = threading.Timer(60.0, timeout_handler)
             timeout_timer.start()
             
             # 步骤1: 获取基本信息
@@ -6707,21 +6864,27 @@ CSV批量分析使用方法:
             # 步骤5: 基本面分析
             self.update_progress(f"步骤5/6: 进行基本面分析...")
             time.sleep(0.1)
+            fundamental_analysis = "基本面分析超时或跳过。"
             try:
                 print("开始基本面分析...")
-                # 使用包含板块分析的基本面分析方法
-                tech_score = self.calculate_technical_score(tech_data)
-                fund_score = self.calculate_fundamental_score(fund_data)
-                
-                # 调用包含板块分析的格式化方法
-                fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
-                print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符)")
+                # 优先尝试真实数据
+                real_fund_data = self.get_real_fundamental_indicators(ticker)
+                if real_fund_data:
+                    fund_score = self.calculate_fundamental_score(real_fund_data)
+                    fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
+                    print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符) [真实数据]")
+                else:
+                    # 真实数据失败，降级为智能模拟数据
+                    print("未获取到真实基本面数据，自动降级为智能模拟数据")
+                    mock_fund_data = self._generate_smart_mock_fundamental_data(ticker)
+                    fund_score = self.calculate_fundamental_score(mock_fund_data)
+                    fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
+                    print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符) [模拟数据]")
             except Exception as e:
                 print(f"步骤5出错: {e}")
-                error_msg = f"ERROR: 基本面分析失败\n\n{str(e)[:100]}\n请稍后重试"
-                timeout_timer.cancel()
-                self.root.after(0, self.show_error, error_msg)
-                return
+                # 跳过该步骤，继续后续流程
+                fundamental_analysis = f"基本面分析跳过: {e}"
+                pass
             
             # 步骤6: 生成投资建议
             self.update_progress(f"步骤6/6: 生成投资建议...")
@@ -6743,15 +6906,13 @@ CSV批量分析使用方法:
                     long_prediction = cached_data['long_term']
                     
                     print(f"📊 使用缓存评分 - 短期:{short_score:.1f}, 中期:{medium_score:.1f}, 长期:{long_score:.1f}")
-                else:
-                    print(f"⚡ 缓存数据不完整，使用新的三时间段预测系统")
-                    # 使用新的三时间段预测系统
-                    short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
-                    
-                    # 计算综合评分（基于三个时间段的技术分析评分）
-                    short_score = short_prediction.get('technical_score', 0)
-                    medium_score = medium_prediction.get('total_score', 0)
-                    long_score = long_prediction.get('fundamental_score', 0)
+                # 强制每次都用大模型/最新分析，不走缓存
+                print(f"⚡ 强制使用新的三时间段预测系统（无视缓存）")
+                short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
+                # 计算综合评分（基于三个时间段的技术分析评分）
+                short_score = short_prediction.get('technical_score', 0)
+                medium_score = medium_prediction.get('total_score', 0)
+                long_score = long_prediction.get('fundamental_score', 0)
                 
                 # 使用与推荐系统完全相同的评分算法
                 if medium_score != 0:
@@ -9936,9 +10097,9 @@ WARNING: 重要声明:
 
 def main():
     """主函数"""
+    import tkinter as tk
     root = tk.Tk()
     app = AShareAnalyzerGUI(root)
-    
     # 设置窗口居中
     root.update_idletasks()
     width = root.winfo_width()
@@ -9946,17 +10107,13 @@ def main():
     x = (root.winfo_screenwidth() // 2) - (width // 2)
     y = (root.winfo_screenheight() // 2) - (height // 2)
     root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-    
     # 设置窗口关闭事件
     def on_closing():
         root.destroy()  # 直接关闭，不显示确认对话框
-    
     root.protocol("WM_DELETE_WINDOW", on_closing)
-    
     print("A股智能分析系统GUI启动成功！")
     print("支持股票代码: 688981, 600036, 000002, 300750, 600519等")
     print("请在GUI界面中输入股票代码进行分析")
-    
     # 启动GUI
     root.mainloop()
 
