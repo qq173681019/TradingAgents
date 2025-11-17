@@ -197,6 +197,10 @@ class AShareAnalyzerGUI:
         # 新增：完整推荐数据存储
         self.comprehensive_data_file = "comprehensive_stock_data.json"
         self.comprehensive_data = {}     # 完整的三时间段推荐数据
+        
+        # 新增：数据收集相关属性
+        self.data_collection_active = False  # 数据收集是否正在进行
+        self.data_collection_thread = None   # 数据收集线程
 
         # 加载现有数据
         self.load_batch_scores()         # 加载批量评分数据
@@ -2335,6 +2339,32 @@ class AShareAnalyzerGUI:
                                    cursor="hand2",
                                    width=12)
         hot_sectors_btn.pack(side="left", padx=5)
+        
+        # 数据收集按钮组
+        data_collection_frame = tk.Frame(self.root, bg="#f0f0f0")
+        data_collection_frame.pack(fill="x", padx=20, pady=5)
+        
+        tk.Label(data_collection_frame, text="数据收集:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=8, anchor="w").pack(side="left", padx=(0, 10))
+        
+        # 获取全部数据按钮
+        collect_all_data_btn = tk.Button(data_collection_frame, 
+                                        text="获取全部数据", 
+                                        font=("微软雅黑", 11),
+                                        bg="#27ae60", 
+                                        fg="white",
+                                        activebackground="#229954",
+                                        command=self.start_comprehensive_data_collection,
+                                        cursor="hand2",
+                                        width=15)
+        collect_all_data_btn.pack(side="left", padx=5)
+        
+        # 数据收集状态标签
+        self.data_collection_status_label = tk.Label(data_collection_frame, 
+                                                     text="就绪", 
+                                                     font=("微软雅黑", 10),
+                                                     fg="#2c3e50", 
+                                                     bg="#f0f0f0")
+        self.data_collection_status_label.pack(side="left", padx=10)
         
         # 示例代码
         example_frame = tk.Frame(self.root, bg="#f0f0f0")
@@ -10039,6 +10069,70 @@ WARNING: 重要声明:
         except Exception as e:
             print(f"显示推荐结果失败: {e}")
             self.hide_progress()
+    
+    def start_comprehensive_data_collection(self):
+        """开始全面数据收集"""
+        if self.data_collection_active:
+            messagebox.showinfo("提示", "数据收集正在进行中，请等待完成")
+            return
+        
+        try:
+            self.data_collection_active = True
+            self.data_collection_status_label.config(text="正在收集数据...", fg="#e67e22")
+            
+            # 在后台线程中运行数据收集
+            import threading
+            self.data_collection_thread = threading.Thread(target=self._run_data_collection)
+            self.data_collection_thread.daemon = True
+            self.data_collection_thread.start()
+            
+        except Exception as e:
+            print(f"启动数据收集失败: {e}")
+            self.data_collection_active = False
+            self.data_collection_status_label.config(text="启动失败", fg="#e74c3c")
+            messagebox.showerror("错误", f"启动数据收集失败：{str(e)}")
+    
+    def _run_data_collection(self):
+        """在后台线程中运行数据收集"""
+        try:
+            # 导入并使用comprehensive_data_collector
+            import os
+            import sys
+            
+            # 添加当前目录到Python路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            sys.path.insert(0, current_dir)
+            
+            # 导入数据收集器
+            from comprehensive_data_collector import ComprehensiveDataCollector
+            
+            # 创建收集器实例
+            collector = ComprehensiveDataCollector()
+            
+            def update_status(message):
+                """更新状态显示"""
+                self.root.after(0, lambda: self.data_collection_status_label.config(text=message, fg="#27ae60"))
+            
+            # 开始收集数据
+            update_status("正在收集股票基本信息...")
+            collector.run_batch_collection(batch_size=15, total_batches=20)  # 收集300只股票
+            
+            # 收集完成
+            update_status("数据收集完成")
+            self.data_collection_active = False
+            
+            # 显示完成消息
+            self.root.after(0, lambda: messagebox.showinfo("完成", "全部数据收集完成！\n数据已保存到 data/comprehensive_stock_data.json"))
+            
+        except Exception as e:
+            print(f"数据收集过程出错: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            self.data_collection_active = False
+            error_msg = f"数据收集失败：{str(e)}"
+            self.root.after(0, lambda: self.data_collection_status_label.config(text="收集失败", fg="#e74c3c"))
+            self.root.after(0, lambda: messagebox.showerror("错误", error_msg))
     
     def show_hot_sectors_analysis(self):
         """显示热门板块分析"""
