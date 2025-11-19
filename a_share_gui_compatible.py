@@ -1307,28 +1307,31 @@ class AShareAnalyzerGUI:
                 try:
                     all_codes = self.get_all_stock_codes(stock_type)
                     total_stocks = len(all_codes)
+                    print(f"[DEBUG] 批量分析股票数: {total_stocks}")
                 except Exception as e:
                     self.show_progress(f"ERROR: 获取股票列表失败: {e}")
+                    print(f"[DEBUG] 获取股票列表失败: {e}")
                     return
-                
                 if total_stocks == 0:
                     self.show_progress(f"ERROR: 未找到{stock_type}类型的股票代码")
+                    print(f"[DEBUG] 未找到{stock_type}类型的股票代码")
                     return
-                
                 # 限制最大处理数量，防止内存溢出
                 max_process = min(total_stocks, 5000)  # 最多处理5000只
                 if total_stocks > max_process:
                     self.show_progress(f"WARNING: 股票数量过多，本次处理前{max_process}只")
+                    print(f"[DEBUG] 股票数量过多，本次处理前{max_process}只")
                     all_codes = all_codes[:max_process]
                     total_stocks = max_process
-                
                 self.show_progress(f"DATA: 准备分析 {total_stocks} 只{stock_type}股票...")
+                print(f"[DEBUG] 最终将分析股票数: {total_stocks}")
                 
                 success_count = 0
                 failed_count = 0
                 batch_save_interval = 20  # 每20只保存一次，减少频率
                 
                 for i, code in enumerate(all_codes):
+                    print(f"[DEBUG] 分析第{i+1}只: {code}")
                     try:
                         # 检查是否需要停止
                         if hasattr(self, '_stop_batch') and self._stop_batch:
@@ -1940,8 +1943,11 @@ class AShareAnalyzerGUI:
             report += f"DATA: CSV批量分析结果 ({len(results)} 只股票)\n"
             report += "=" * 100 + "\n\n"
             
-            # 按评分排序
-            sorted_results = sorted(results, key=lambda x: float(x['综合评分']), reverse=True)
+            # 按勾选框决定是否排序
+            if hasattr(self, 'sort_csv_var') and hasattr(self.sort_csv_var, 'get') and not self.sort_csv_var.get():
+                sorted_results = results  # 不排序，保持原顺序
+            else:
+                sorted_results = sorted(results, key=lambda x: float(x['综合评分']), reverse=True)
             
             # 显示Top 10
             report += "评分排行榜 (Top 10):\n"
@@ -1999,8 +2005,24 @@ class AShareAnalyzerGUI:
             report += f"{'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'RSI':<6} {'趋势':<10} {'行业':<12}\n"
             report += "=" * 100 + "\n"
             
+            # 先插入表头
+            start_line = self.overview_text.index(tk.END)
             for stock in sorted_results:
-                report += f"{stock['股票代码']:<8} {stock['股票名称']:<12} {stock['综合评分']:<6} {stock['技术面评分']:<6} {stock['基本面评分']:<6} {stock['RSI状态']:<6} {stock['趋势']:<10} {stock['所属行业']:<12}\n"
+                trend = stock['趋势']
+                line = f"{stock['股票代码']:<8} {stock['股票名称']:<12} {stock['综合评分']:<6} {stock['技术面评分']:<6} {stock['基本面评分']:<6} {stock['RSI状态']:<6} {trend:<10} {stock['所属行业']:<12}\n"
+                # 判断趋势关键词
+                tag = None
+                if any(key in trend for key in ["偏空", "下跌", "消极", "弱势", "空头"]):
+                    tag = "neg_trend"
+                elif any(key in trend for key in ["偏多", "上涨", "积极", "强势", "多头"]):
+                    tag = "pos_trend"
+                cur_index = self.overview_text.index(tk.END)
+                self.overview_text.insert(tk.END, line)
+                if tag:
+                    self.overview_text.tag_add(tag, cur_index, f"{cur_index} lineend")
+            # 配置tag颜色（始终生效）
+            self.overview_text.tag_configure("neg_trend", foreground="#d32f2f")  # 红色
+            self.overview_text.tag_configure("pos_trend", foreground="#388e3c")  # 绿色
             
             report += "\n" + "=" * 100 + "\n"
             report += "IDEA: 投资建议:\n"
@@ -2133,6 +2155,10 @@ class AShareAnalyzerGUI:
         self.root.geometry("1200x800")
         self.root.configure(bg="#f0f0f0")
         
+        # 进度条相关属性初始化（必须在所有分析操作前定义）
+        self.progress_var = tk.StringVar()
+        self.progress_bar = ttk.Progressbar(self.root, variable=self.progress_var, mode="indeterminate")
+
         # 设置样式
         style = ttk.Style()
         style.theme_use('clam')
@@ -2143,60 +2169,11 @@ class AShareAnalyzerGUI:
         title_frame.pack_propagate(False)
         
         title_label = tk.Label(title_frame, 
-                              text="A股智能分析系统", 
-                              font=("微软雅黑", 18, "bold"), 
-                              fg="white", 
-                              bg="#2c3e50")
+                      text="A股智能分析系统", 
+                      font=("微软雅黑", 18, "bold"), 
+                      fg="white", 
+                      bg="#2c3e50")
         title_label.pack(expand=True)
-        
-        # 输入区域
-        input_frame = tk.Frame(self.root, bg="#f0f0f0")
-        input_frame.pack(fill="x", padx=20, pady=10)
-        
-        # 股票代码输入
-        tk.Label(input_frame, text="股票代码:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
-        
-        self.ticker_var = tk.StringVar()
-        self.ticker_entry = tk.Entry(input_frame, 
-                                   textvariable=self.ticker_var, 
-                                   font=("微软雅黑", 12), 
-                                   width=10)
-        self.ticker_entry.pack(side="left", padx=(10, 20))
-
-        # 大模型选择
-        tk.Label(input_frame, text="大模型:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
-        self.llm_var = tk.StringVar(value="none")
-        llm_combo = ttk.Combobox(input_frame,
-                     textvariable=self.llm_var,
-                     values=LLM_MODEL_OPTIONS,
-                     state="readonly",
-                     font=("微软雅黑", 10),
-                     width=10)
-        llm_combo.pack(side="left", padx=(5, 20))
-        llm_combo.bind("<<ComboboxSelected>>", lambda e: self.set_llm_model(self.llm_var.get()))
-        
-        # 投资期限选择
-        tk.Label(input_frame, text="投资期限:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
-        
-        self.period_var = tk.StringVar(value="长期")
-        period_combo = ttk.Combobox(input_frame, 
-                                   textvariable=self.period_var,
-                                   values=["短期", "中期", "长期"],
-                                   state="readonly",
-                                   font=("微软雅黑", 10),
-                                   width=8)
-        period_combo.pack(side="left", padx=(5, 20))
-        
-        # 分析按钮
-        self.analyze_btn = tk.Button(input_frame, 
-                                   text="开始分析", 
-                                   font=("微软雅黑", 12, "bold"),
-                                   bg="#3498db", 
-                                   fg="white",
-                                   activebackground="#2980b9",
-                                   command=self.start_analysis,
-                                   cursor="hand2")
-        self.analyze_btn.pack(side="left", padx=10)
         
         # 推荐配置框架
         recommend_frame = tk.Frame(self.root, bg="#f0f0f0")
@@ -2316,17 +2293,26 @@ class AShareAnalyzerGUI:
                                     width=12)
         etf_recommend_btn.pack(side="left", padx=5)
         
-        # CSV批量分析按钮
+        # CSV批量分析按钮及排序勾选框
         csv_analysis_btn = tk.Button(recommend_button_frame, 
-                                   text="CSV批量分析", 
-                                   font=("微软雅黑", 11),
-                                   bg="#f39c12", 
-                                   fg="white",
-                                   activebackground="#e67e22",
-                                   command=self.import_csv_analysis,
-                                   cursor="hand2",
-                                   width=12)
+                       text="CSV批量分析", 
+                       font=("微软雅黑", 11),
+                       bg="#f39c12", 
+                       fg="white",
+                       activebackground="#e67e22",
+                       command=self.import_csv_analysis,
+                       cursor="hand2",
+                       width=12)
         csv_analysis_btn.pack(side="left", padx=5)
+
+        # 新增：批量分析结果排序勾选框
+        self.sort_csv_var = tk.BooleanVar(value=True)
+        self.sort_csv_checkbox = tk.Checkbutton(recommend_button_frame,
+                            text="按评分排序",
+                            variable=self.sort_csv_var,
+                            font=("微软雅黑", 10),
+                            bg="#f0f0f0")
+        self.sort_csv_checkbox.pack(side="left", padx=5)
         
         # 热门板块分析按钮
         hot_sectors_btn = tk.Button(recommend_button_frame, 
@@ -2365,131 +2351,6 @@ class AShareAnalyzerGUI:
                                                      fg="#2c3e50", 
                                                      bg="#f0f0f0")
         self.data_collection_status_label.pack(side="left", padx=10)
-        
-        # 示例代码
-        example_frame = tk.Frame(self.root, bg="#f0f0f0")
-        example_frame.pack(fill="x", padx=20)
-        
-        tk.Label(example_frame, 
-                text="支持所有A股代码: 沪市60XXXX | 科创板688XXX | 深市000XXX/002XXX | 创业板300XXX", 
-                font=("微软雅黑", 10), 
-                fg="#7f8c8d", 
-                bg="#f0f0f0").pack()
-        
-        # 进度条
-        self.progress_frame = tk.Frame(self.root, bg="#f0f0f0")
-        self.progress_frame.pack(fill="x", padx=20, pady=10)
-        
-        self.progress_var = tk.StringVar()
-        self.progress_label = tk.Label(self.progress_frame, 
-                                     textvariable=self.progress_var, 
-                                     font=("微软雅黑", 10), 
-                                     bg="#f0f0f0")
-        self.progress_label.pack()
-        
-        self.progress_bar = ttk.Progressbar(self.progress_frame, 
-                                          mode='indeterminate')
-        
-        # 结果显示区域
-        result_frame = tk.Frame(self.root, bg="#f0f0f0")
-        result_frame.pack(fill="both", expand=True, padx=20, pady=10)
-        
-        # 创建Notebook用于分页显示
-        self.notebook = ttk.Notebook(result_frame)
-        self.notebook.pack(fill="both", expand=True)
-        
-        # 概览页面
-        self.overview_frame = tk.Frame(self.notebook, bg="white")
-        self.notebook.add(self.overview_frame, text="股票概览")
-        
-        self.overview_text = scrolledtext.ScrolledText(self.overview_frame, 
-                                                     font=("Consolas", 10),
-                                                     wrap=tk.WORD,
-                                                     bg="white")
-        self.overview_text.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        # 技术分析页面
-        self.technical_frame = tk.Frame(self.notebook, bg="white")
-        self.notebook.add(self.technical_frame, text="技术分析")
-        
-        self.technical_text = scrolledtext.ScrolledText(self.technical_frame, 
-                                                      font=("Consolas", 10),
-                                                      wrap=tk.WORD,
-                                                      bg="white")
-        self.technical_text.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        # 基本面分析页面
-        self.fundamental_frame = tk.Frame(self.notebook, bg="white")
-        self.notebook.add(self.fundamental_frame, text="基本面分析")
-        
-        self.fundamental_text = scrolledtext.ScrolledText(self.fundamental_frame, 
-                                                        font=("Consolas", 10),
-                                                        wrap=tk.WORD,
-                                                        bg="white")
-        self.fundamental_text.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        # 投资建议页面
-        self.recommendation_frame = tk.Frame(self.notebook, bg="white")
-        self.notebook.add(self.recommendation_frame, text="投资建议")
-        
-        self.recommendation_text = scrolledtext.ScrolledText(self.recommendation_frame, 
-                                                           font=("Consolas", 10),
-                                                           wrap=tk.WORD,
-                                                           bg="white")
-        self.recommendation_text.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        # 绑定双击事件到推荐文本框
-        self.recommendation_text.bind("<Double-Button-1>", self.on_recommendation_double_click)
-        
-        # 评分排行页面
-        self.ranking_frame = tk.Frame(self.notebook, bg="white")
-        self.notebook.add(self.ranking_frame, text="评分排行")
-        
-        # 排行榜控制框架
-        ranking_control_frame = tk.Frame(self.ranking_frame, bg="white")
-        ranking_control_frame.pack(fill="x", padx=10, pady=5)
-        
-        tk.Label(ranking_control_frame, text="股票类型:", font=("微软雅黑", 10), bg="white").pack(side="left")
-        self.ranking_type_var = tk.StringVar(value="全部")
-        ranking_type_combo = ttk.Combobox(ranking_control_frame, 
-                                        textvariable=self.ranking_type_var,
-                                        values=["全部", "60/00", "68科创板", "ETF"],
-                                        state="readonly",
-                                        font=("微软雅黑", 9),
-                                        width=10)
-        ranking_type_combo.pack(side="left", padx=(5, 20))
-        
-        tk.Label(ranking_control_frame, text="显示数量:", font=("微软雅黑", 10), bg="white").pack(side="left")
-        self.ranking_count_var = tk.StringVar(value="20")
-        ranking_count_combo = ttk.Combobox(ranking_control_frame, 
-                                         textvariable=self.ranking_count_var,
-                                         values=["10", "20", "30", "50"],
-                                         state="readonly",
-                                         font=("微软雅黑", 9),
-                                         width=8)
-        ranking_count_combo.pack(side="left", padx=(5, 20))
-        
-        # 刷新按钮
-        refresh_ranking_btn = tk.Button(ranking_control_frame, 
-                                       text="刷新排行",
-                                       font=("微软雅黑", 10),
-                                       bg="#3498db", 
-                                       fg="white",
-                                       activebackground="#2980b9",
-                                       command=self.refresh_ranking,
-                                       cursor="hand2")
-        refresh_ranking_btn.pack(side="left", padx=10)
-        
-        self.ranking_text = scrolledtext.ScrolledText(self.ranking_frame, 
-                                                    font=("Consolas", 10),
-                                                    wrap=tk.WORD,
-                                                    bg="white")
-        self.ranking_text.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        # 绑定双击事件到排行榜文本框
-        self.ranking_text.bind("<Double-Button-1>", self.on_ranking_double_click)
-        
-        # 状态栏
         status_frame = tk.Frame(self.root, bg="#ecf0f1", height=30)
         status_frame.pack(fill="x")
         status_frame.pack_propagate(False)
@@ -2503,11 +2364,39 @@ class AShareAnalyzerGUI:
                               anchor="w")
         status_label.pack(fill="x", padx=10, pady=5)
         
-        # 绑定回车键
-        self.ticker_entry.bind('<Return>', lambda event: self.start_analysis())
         
-        # 显示欢迎信息
+        # --- 主体Notebook及各页面控件唯一初始化 ---
+        # 创建Notebook
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(fill="both", expand=True, padx=20, pady=10)
+
+        # 概览页面
+        self.overview_frame = tk.Frame(self.notebook, bg="white")
+        self.notebook.add(self.overview_frame, text="股票概览")
+        self.overview_text = scrolledtext.ScrolledText(self.overview_frame, 
+                     font=("Consolas", 10),
+                     wrap=tk.WORD,
+                     bg="white")
+        self.overview_text.pack(fill="both", expand=True, padx=10, pady=10)
+        # 显示欢迎信息（必须在 overview_text 创建后）
         self.show_welcome_message()
+
+        # 技术面分析页面
+        self.technical_frame = tk.Frame(self.notebook, bg="white")
+        self.notebook.add(self.technical_frame, text="技术面分析")
+
+        # 基本面分析页面
+        self.fundamental_frame = tk.Frame(self.notebook, bg="white")
+        self.notebook.add(self.fundamental_frame, text="基本面分析")
+
+        # 投资建议页面
+        self.recommendation_frame = tk.Frame(self.notebook, bg="white")
+        self.notebook.add(self.recommendation_frame, text="投资建议")
+
+        # 排行榜页面
+        self.ranking_frame = tk.Frame(self.notebook, bg="white")
+        self.notebook.add(self.ranking_frame, text="排行榜")
+
         # 初始化排行榜显示
         self.root.after(1000, self.update_ranking_display)
 
