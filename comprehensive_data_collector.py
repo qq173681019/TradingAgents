@@ -23,6 +23,9 @@ except ImportError:
     AKSHARE_AVAILABLE = False
     print("[WARN] akshare 未安装")
 
+# AKShare连通性测试
+AKSHARE_CONNECTED = False
+
 try:
     import tushare as ts
     TUSHARE_AVAILABLE = True
@@ -64,6 +67,33 @@ except ImportError:
     ALPHA_VANTAGE_AVAILABLE = False
     print("[WARN] Alpha Vantage API 未找到")
 
+# Polygon.io API 支持
+try:
+    from polygon_api import PolygonAPI
+    POLYGON_AVAILABLE = True
+    print("[INFO] Polygon.io API 已加载")
+except ImportError:
+    POLYGON_AVAILABLE = False
+    print("[WARN] Polygon.io API 未安装")
+
+# FMP API 支持
+try:
+    from fmp_api_new import FinancialModelingPrepAPI
+    FMP_AVAILABLE = True
+    print("[INFO] FMP API 已加载")
+except ImportError:
+    FMP_AVAILABLE = False
+    print("[WARN] FMP API 未安装")
+
+# 腾讯K线API支持
+try:
+    from tencent_kline_api import TencentKlineAPI
+    TENCENT_KLINE_AVAILABLE = True
+    print("[INFO] 腾讯K线API 已加载")
+except ImportError:
+    TENCENT_KLINE_AVAILABLE = False
+    print("[WARN] 腾讯K线API 未找到")
+
 # JoinQuant API 支持
 try:
     from joinquant_api import JoinQuantAPI
@@ -72,6 +102,13 @@ try:
 except ImportError:
     JOINQUANT_AVAILABLE = False
     print("[WARN] JoinQuant API 未找到")
+
+print(f"[INFO] JoinQuant分析: 由于公开API可能不稳定，建议用于其他数据类型获取：")
+print(f"       - 基本信息: 可能有效（公司概况、行业分类）")  
+print(f"       - 财务数据: 可能有效（财报数据）")
+print(f"       - K线数据: 不稳定，已用腾讯API替代")
+print(f"       - 实时数据: 建议用腾讯/新浪API")
+print(f"       - 建议角色: 作为财务和基本信息的后备数据源")
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -172,12 +209,46 @@ class ComprehensiveDataCollector:
         else:
             self.ts_pro = None
         
-        # 初始化 JoinQuant API
+        # 初始化 Polygon.io API（美股数据）
+        self.polygon = None
+        if POLYGON_AVAILABLE:
+            try:
+                self.polygon = PolygonAPI()
+                if self.polygon.is_available:
+                    print("[INFO] Polygon.io API 初始化成功（美股数据）")
+                else:
+                    print("[WARN] Polygon.io API 无有效密钥，功能受限")
+            except Exception as e:
+                print(f"[WARN] Polygon.io API 初始化失败: {e}")
+        
+        # 初始化 FMP API（美股数据）
+        self.fmp = None
+        if FMP_AVAILABLE:
+            try:
+                self.fmp = FinancialModelingPrepAPI("ykbw0oJfMt9t5sDaMLfZWCvJlc9Q0GzQ")
+                print("[INFO] FMP API 初始化成功（美股财务数据）")
+            except Exception as e:
+                print(f"[WARN] FMP API 初始化失败: {e}")
+        
+        # 初始化 腾讯K线API
+        self.tencent_kline = None
+        if TENCENT_KLINE_AVAILABLE:
+            try:
+                self.tencent_kline = TencentKlineAPI()
+                print("[INFO] 腾讯K线API 初始化成功")
+            except Exception as e:
+                print(f"[WARN] 腾讯K线API 初始化失败: {e}")
+        
+        # API轮换状态控制（避免12秒等待）
+        self.api_rotation_index = 0  # 0: Alpha Vantage, 1: Polygon.io
+        self.last_api_switch_time = time.time()
+        
+        # 初始化 JoinQuant API（降级为后备数据源）
         self.joinquant = None
         if JOINQUANT_AVAILABLE:
             try:
                 self.joinquant = JoinQuantAPI()
-                print("[INFO] JoinQuant API 初始化成功")
+                print("[INFO] JoinQuant API 初始化成功（作为财务数据后备）")
             except Exception as e:
                 print(f"[WARN] JoinQuant API 初始化失败: {e}")
         
@@ -198,13 +269,419 @@ class ComprehensiveDataCollector:
         
         # 确保输出目录存在
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
+        
+        # 测试AKShare连通性
+        self._test_akshare_connectivity()
+    
+    def _get_next_api(self):
+        """
+        API轮换选择器 - 避免Alpha Vantage的12秒等待
+        在Alpha Vantage和Polygon.io之间轮换使用
+        """
+        current_time = time.time()
+        
+        # 如果距离上次切换已经过了足够时间，可以切换API
+        if current_time - self.last_api_switch_time > 1:  # 1秒间隔切换
+            self.api_rotation_index = 1 - self.api_rotation_index  # 0<->1 切换
+            self.last_api_switch_time = current_time
+            print(f"[DEBUG] API轮换切换到索引: {self.api_rotation_index}")
+            
+        # 返回当前选择的API
+        if self.api_rotation_index == 0 and self.alpha_vantage:
+            return 'alpha_vantage', self.alpha_vantage
+        elif self.api_rotation_index == 1 and self.polygon and self.polygon.is_available:
+            return 'polygon', self.polygon
+        
+        # 如果首选API不可用，尝试另一个
+        if self.alpha_vantage:
+            return 'alpha_vantage', self.alpha_vantage
+        elif self.polygon and self.polygon.is_available:
+            return 'polygon', self.polygon
+        
+        return None, None
+    
+    def _is_us_stock(self, code: str) -> bool:
+        """判断是否为美股代码"""
+        if not code:
+            return False
+            
+        # 美股代码通常是字母组合
+        if code.isalpha() and len(code) >= 1:
+            return True
+        
+        # 排除明显的A股代码格式
+        if code.isdigit() and len(code) == 6:
+            return False
+            
+        # 包含.的可能是美股或其他市场
+        if '.' in code:
+            return True
+            
+        return False
+    
+    def _detect_market(self, code: str) -> str:
+        """
+        检测股票代码所属市场
+        
+        Returns:
+            'cn': 中国A股
+            'us': 美股
+            'other': 其他市场
+        """
+        if not code:
+            return 'other'
+        
+        code = code.upper().strip()
+        
+        # A股代码模式：6位数字
+        if code.isdigit() and len(code) == 6:
+            return 'cn'
+        
+        # 带交易所后缀的代码
+        if '.' in code:
+            base_code, suffix = code.split('.', 1)
+            suffix = suffix.upper()
+            if suffix in ['SS', 'SZ', 'HK']:  # 上交所、深交所、港交所
+                return 'cn'
+            elif suffix in ['US', 'NASDAQ', 'NYSE']:  # 美股
+                return 'us'
+            # 如果后缀不明确，继续根据基础代码判断
+            code = base_code
+        
+        # 美股代码模式：1-5位字母
+        if code.isalpha() and 1 <= len(code) <= 5:
+            return 'us'
+        
+        # 混合字母数字的复杂情况
+        if code.isdigit():
+            return 'cn'  # 纯数字倾向于A股
+        elif code.isalpha():
+            return 'us'  # 纯字母倾向于美股
+        
+        return 'other'
+    
+    def collect_multi_market_kline_data(self, codes: List[str], days: int = 30) -> Dict[str, Any]:
+        """
+        多市场K线数据收集（支持A股和美股）
+        
+        Args:
+            codes: 股票代码列表，可包含A股和美股代码
+            days: 获取天数
+            
+        Returns:
+            包含K线数据的字典，按市场分类
+        """
+        print(f"[INFO] 多市场K线数据收集: {len(codes)} 只股票")
+        
+        # 按市场分类股票代码
+        cn_stocks = []  # A股
+        us_stocks = []  # 美股
+        other_stocks = []  # 其他
+        
+        for code in codes:
+            market = self._detect_market(code)
+            if market == 'cn':
+                cn_stocks.append(code)
+            elif market == 'us':
+                us_stocks.append(code)
+            else:
+                other_stocks.append(code)
+        
+        print(f"[INFO] 市场分类: A股 {len(cn_stocks)} 只, 美股 {len(us_stocks)} 只, 其他 {len(other_stocks)} 只")
+        
+        result = {
+            'cn_data': {},  # A股数据
+            'us_data': {},  # 美股数据
+            'summary': {
+                'total_codes': len(codes),
+                'cn_count': len(cn_stocks),
+                'us_count': len(us_stocks),
+                'other_count': len(other_stocks),
+                'cn_success': 0,
+                'us_success': 0
+            }
+        }
+        
+        # 收集A股数据（使用现有方法）
+        if cn_stocks:
+            print(f"\n[INFO] 收集A股数据: {len(cn_stocks)} 只")
+            try:
+                cn_data = self.collect_batch_kline_data(cn_stocks)
+                result['cn_data'] = cn_data
+                result['summary']['cn_success'] = len(cn_data)
+                print(f"[SUCCESS] A股数据收集完成: {len(cn_data)}/{len(cn_stocks)}")
+            except Exception as e:
+                print(f"[ERROR] A股数据收集异常: {e}")
+        
+        # 收集美股数据（优先使用FMP，Polygon.io作为备选）
+        if us_stocks:
+            print(f"\n[INFO] 收集美股数据: {len(us_stocks)} 只")
+            us_data = {}
+            
+            # 优先尝试FMP API
+            if self.fmp:
+                print(f"[INFO] 使用FMP API获取美股K线数据")
+                try:
+                    fmp_data = self.fmp.batch_get_klines(us_stocks, days)
+                    us_data.update(fmp_data)
+                    print(f"[SUCCESS] FMP获取 {len(fmp_data)}/{len(us_stocks)} 只股票数据")
+                except Exception as e:
+                    print(f"[WARN] FMP API获取失败: {e}")
+            
+            # 如果FMP获取不全，使用Polygon.io补充
+            remaining_stocks = [code for code in us_stocks if code not in us_data]
+            if remaining_stocks and self.polygon and self.polygon.is_available:
+                print(f"[INFO] 使用Polygon.io补充剩余 {len(remaining_stocks)} 只股票")
+                try:
+                    polygon_data = self.polygon.batch_get_us_klines(remaining_stocks, days)
+                    us_data.update(polygon_data)
+                    print(f"[SUCCESS] Polygon.io补充 {len(polygon_data)} 只股票数据")
+                except Exception as e:
+                    print(f"[ERROR] Polygon.io数据收集异常: {e}")
+            
+            result['us_data'] = us_data
+            result['summary']['us_success'] = len(us_data)
+            print(f"[SUCCESS] 美股数据收集完成: {len(us_data)}/{len(us_stocks)}")
+        elif us_stocks:
+            print(f"[WARN] 发现 {len(us_stocks)} 只美股代码，但美股API不可用")
+        
+        # 其他市场提示
+        if other_stocks:
+            print(f"[WARN] 发现 {len(other_stocks)} 只其他市场代码，暂不支持: {other_stocks[:5]}")
+        
+        # 生成总结报告
+        total_success = result['summary']['cn_success'] + result['summary']['us_success']
+        success_rate = total_success / len(codes) * 100 if codes else 0
+        
+        print(f"\n[SUMMARY] 多市场数据收集完成:")
+        print(f"  总计: {total_success}/{len(codes)} ({success_rate:.1f}%)")
+        print(f"  A股: {result['summary']['cn_success']}/{result['summary']['cn_count']}")
+        print(f"  美股: {result['summary']['us_success']}/{result['summary']['us_count']}")
+        
+        return result
+    
+    def collect_multi_market_basic_info(self, codes: List[str]) -> Dict[str, Any]:
+        """
+        多市场基本信息收集（支持A股和美股）
+        
+        Args:
+            codes: 股票代码列表，可包含A股和美股代码
+            
+        Returns:
+            包含基本信息的字典，按市场分类
+        """
+        print(f"[INFO] 多市场基本信息收集: {len(codes)} 只股票")
+        
+        # 按市场分类
+        cn_stocks = []
+        us_stocks = []
+        
+        for code in codes:
+            market = self._detect_market(code)
+            if market == 'cn':
+                cn_stocks.append(code)
+            elif market == 'us':
+                us_stocks.append(code)
+        
+        result = {
+            'cn_data': {},
+            'us_data': {},
+            'summary': {
+                'cn_success': 0,
+                'us_success': 0
+            }
+        }
+        
+        # 收集A股基本信息
+        if cn_stocks:
+            print(f"[INFO] 收集A股基本信息: {len(cn_stocks)} 只")
+            cn_info = self.collect_batch_basic_info(cn_stocks)
+            result['cn_data'] = cn_info
+            result['summary']['cn_success'] = len(cn_info)
+        
+        # 收集美股基本信息（优先使用FMP，Polygon.io作为备选）
+        if us_stocks:
+            print(f"[INFO] 收集美股基本信息: {len(us_stocks)} 只")
+            us_info = {}
+            
+            # 优先使用FMP API获取公司信息
+            if self.fmp:
+                print(f"[INFO] 使用FMP API获取公司信息")
+                for symbol in us_stocks:
+                    try:
+                        info = self.fmp.get_company_profile(symbol)
+                        if info:
+                            us_info[symbol] = info
+                    except Exception as e:
+                        print(f"[WARN] FMP获取 {symbol} 信息失败: {e}")
+                
+                print(f"[SUCCESS] FMP获取 {len(us_info)}/{len(us_stocks)} 只股票信息")
+            
+            # 如果FMP获取不全，使用Polygon.io补充
+            remaining_stocks = [code for code in us_stocks if code not in us_info]
+            if remaining_stocks and self.polygon and self.polygon.is_available:
+                print(f"[INFO] 使用Polygon.io补充剩余 {len(remaining_stocks)} 只股票")
+                for symbol in remaining_stocks:
+                    try:
+                        info = self.polygon.get_company_info(symbol)
+                        if info:
+                            us_info[symbol] = info
+                    except Exception as e:
+                        print(f"[WARN] Polygon.io获取 {symbol} 信息失败: {e}")
+            
+            result['us_data'] = us_info
+            result['summary']['us_success'] = len(us_info)
+            print(f"[SUCCESS] 美股信息收集完成: {len(us_info)}/{len(us_stocks)}")
+        
+        return result
+            
+        # A股代码模式
+        if code.isdigit() and len(code) == 6:
+            return 'cn'
+            
+        # 美股代码模式
+        if code.isalpha() and 1 <= len(code) <= 5:
+            return 'us'
+            
+        # 带交易所后缀的代码
+        if '.' in code:
+            suffix = code.split('.')[-1].upper()
+            if suffix in ['SS', 'SZ', 'HK']:  # 上交所、深交所、港交所
+                return 'cn'
+            elif suffix in ['US', 'NASDAQ', 'NYSE']:  # 美股
+                return 'us'
+                
+        # 默认按字母数字比例判断
+        if code.isalpha():
+            return 'us'
+        elif code.isdigit():
+            return 'cn'
+            
+        return 'other'
+    
+    def _test_akshare_connectivity(self) -> bool:
+        """
+        测试AKShare连通性，如果失败则禁用AKShare
+        
+        Returns:
+            bool: True表示连接成功，False表示连接失败
+        """
+        global AKSHARE_CONNECTED
+        
+        if not AKSHARE_AVAILABLE:
+            print("[INFO] AKShare未安装，跳过连通性测试")
+            AKSHARE_CONNECTED = False
+            return False
+        
+        print("[INFO] 开始测试AKShare连通性...")
+        
+        # 测试用例：简单的股票信息查询
+        test_cases = [
+            {
+                'name': '股票代码列表',
+                'function': lambda: ak.stock_info_a_code_name().head(1),
+                'timeout': 10
+            },
+            {
+                'name': '实时行情',
+                'function': lambda: ak.stock_zh_a_spot_em().head(1), 
+                'timeout': 8
+            },
+            {
+                'name': '基本信息',
+                'function': lambda: ak.stock_individual_info_em(symbol="000001"),
+                'timeout': 8
+            }
+        ]
+        
+        success_count = 0
+        total_tests = len(test_cases)
+        
+        for i, test_case in enumerate(test_cases):
+            try:
+                print(f"  [{i+1}/{total_tests}] 测试{test_case['name']}...", end="")
+                
+                # 设置超时机制
+                import signal
+                def timeout_handler(signum, frame):
+                    raise TimeoutError("测试超时")
+                
+                # Windows系统使用线程超时
+                if os.name == 'nt':
+                    import threading
+                    result = [None]
+                    exception = [None]
+                    
+                    def test_thread():
+                        try:
+                            result[0] = test_case['function']()
+                        except Exception as e:
+                            exception[0] = e
+                    
+                    thread = threading.Thread(target=test_thread)
+                    thread.daemon = True
+                    thread.start()
+                    thread.join(timeout=test_case['timeout'])
+                    
+                    if thread.is_alive():
+                        print(" ❌ 超时")
+                        continue
+                    elif exception[0]:
+                        print(f" ❌ 异常: {type(exception[0]).__name__}")
+                        continue
+                    elif result[0] is not None and not result[0].empty:
+                        print(" ✅ 成功")
+                        success_count += 1
+                    else:
+                        print(" ❌ 无数据")
+                else:
+                    # Unix系统使用signal超时
+                    signal.signal(signal.SIGALRM, timeout_handler)
+                    signal.alarm(test_case['timeout'])
+                    
+                    try:
+                        result = test_case['function']()
+                        signal.alarm(0)
+                        
+                        if result is not None and not result.empty:
+                            print(" ✅ 成功")
+                            success_count += 1
+                        else:
+                            print(" ❌ 无数据")
+                    except TimeoutError:
+                        print(" ❌ 超时")
+                        signal.alarm(0)
+                    except Exception as e:
+                        print(f" ❌ 异常: {type(e).__name__}")
+                        signal.alarm(0)
+                        
+            except Exception as e:
+                print(f" ❌ 测试失败: {type(e).__name__}")
+                continue
+            
+            # 测试间隔
+            time.sleep(1)
+        
+        # 评估连通性
+        success_rate = success_count / total_tests
+        
+        if success_rate >= 0.8:  # 80%以上测试成功才认为连接正常
+            AKSHARE_CONNECTED = True
+            print(f"[SUCCESS] AKShare连通性测试通过 ({success_count}/{total_tests}, {success_rate*100:.0f}%)")
+            print("[INFO] AKShare将作为数据源使用")
+            return True
+        else:
+            AKSHARE_CONNECTED = False
+            print(f"[WARN] AKShare连通性测试失败 ({success_count}/{total_tests}, {success_rate*100:.0f}%)")
+            print("[INFO] AKShare将被跳过，使用其他数据源")
+            return False
     
     def get_stock_list_excluding_cyb(self, limit: int = 50) -> List[str]:
         """获取股票列表，只保留主板股票（排除创业板300和科创板688）"""
         stock_codes = []
         
         # 优先从 akshare 获取完整列表
-        if AKSHARE_AVAILABLE:
+        if AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
             try:
                 print("[INFO] 尝试从 akshare 获取股票列表...")
                 df = ak.stock_info_a_code_name()
@@ -261,7 +738,7 @@ class ComprehensiveDataCollector:
         stock_codes = []
         
         # 优先从 akshare 获取完整列表
-        if AKSHARE_AVAILABLE:
+        if AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
             try:
                 df = ak.stock_info_a_code_name()
                 all_codes = df['code'].astype(str).tolist()
@@ -355,12 +832,12 @@ class ComprehensiveDataCollector:
             return df
     
     def collect_batch_kline_data(self, codes: List[str], source: str = 'auto') -> Dict[str, pd.DataFrame]:
-        """批量采集K线数据 - 新策略: TUSHARE与AKShare轮流批量获取 → JoinQuant替代 → Alpha Vantage兜底"""
+        """批量采集K线数据 - 新策略: 基于时间控制的TUSHARE优先 → AKShare替代 → 腾讯K线兜底"""
         result = {}
         total_codes = len(codes)
         
         print(f"[INFO] 开始采集K线数据，共 {total_codes} 只股票")
-        print(f"[INFO] 新采集策略: TUSHARE与AKShare轮流批量 → JoinQuant替代 → Alpha Vantage兜底")
+        print(f"[INFO] 新采集策略: 基于时间控制的TUSHARE优先 → AKShare替代 → 腾讯K线兜底")
         
         # 计算日期范围
         end_date = datetime.now()
@@ -372,75 +849,286 @@ class ComprehensiveDataCollector:
         
         print(f"[INFO] 获取日期范围: {start_iso} 到 {end_iso} ({self.kline_days}天)")
         
-        # 分配数据源：TUSHARE和AKShare轮流处理，每次15个
-        tushare_codes = []
-        akshare_codes = []
+        # 检查上次TUSHARE调用时间，决定使用哪个数据源
+        current_time = time.time()
+        time_since_last_tushare = current_time - self.last_tushare_call
+        can_use_tushare = time_since_last_tushare >= 60  # 1分钟间隔
         
-        for i, code in enumerate(codes):
-            if i % 2 == 0:  # 偶数索引使用TUSHARE
-                tushare_codes.append(code)
-            else:  # 奇数索引使用AKShare
-                akshare_codes.append(code)
+        if can_use_tushare:
+            print(f"[INFO] 距离上次TUSHARE调用已过 {time_since_last_tushare:.1f} 秒，优先使用TUSHARE获取全部 {total_codes} 只")
+            primary_source = 'tushare'
+            primary_codes = codes.copy()
+            fallback_codes = []
+        elif AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
+            wait_time = 60 - time_since_last_tushare
+            print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，使用AKShare获取全部 {total_codes} 只")
+            primary_source = 'akshare'
+            primary_codes = codes.copy()
+            fallback_codes = []
+        else:
+            # 如果AKShare不可用，使用腾讯API
+            wait_time = 60 - time_since_last_tushare
+            print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，AKShare不可用，使用腾讯API获取全部 {total_codes} 只")
+            primary_source = 'tencent'
+            primary_codes = codes.copy()
+            fallback_codes = []
         
-        print(f"[INFO] 轮流分配: TUSHARE处理 {len(tushare_codes)} 只，AKShare处理 {len(akshare_codes)} 只")
+        print(f"[INFO] 主要数据源: {primary_source.upper()}处理 {len(primary_codes)} 只")
         
-        # 1. TUSHARE批量处理
-        tushare_success = []
-        if tushare_codes and TUSHARE_AVAILABLE and self.tushare_token:
-            print(f"[INFO] TUSHARE 批量处理 {len(tushare_codes)} 只股票...")
+        # 1. 主要数据源处理
+        primary_success = []
+        if primary_source == 'tushare' and TUSHARE_AVAILABLE and self.tushare_token:
+            print(f"[INFO] TUSHARE 批量处理 {len(primary_codes)} 只股票...")
             try:
                 pro = ts.pro_api(self.tushare_token)
                 
-                for code in tushare_codes:
+                # 更新TUSHARE调用时间
+                self.last_tushare_call = time.time()
+                
+                for code in primary_codes:
                     try:
                         ts_code = f"{code}.SZ" if code.startswith(('000', '002', '300')) else f"{code}.SH"
                         df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
                         if not df.empty:
                             df = self.standardize_kline_columns(df, 'tushare')
                             result[code] = df
-                            tushare_success.append(code)
+                            primary_success.append(code)
                         time.sleep(0.1)  # TUSHARE请求间隔
                     except Exception as e:
                         print(f"[WARN] TUSHARE获取{code}失败: {e}")
+                        fallback_codes.append(code)
                         continue
                 
-                print(f"[SUCCESS] TUSHARE 成功: {len(tushare_success)}/{len(tushare_codes)} 只")
+                print(f"[SUCCESS] TUSHARE 成功: {len(primary_success)}/{len(primary_codes)} 只")
             except Exception as e:
                 print(f"[ERROR] TUSHARE 批量处理异常: {e}")
-        else:
-            print(f"[WARN] TUSHARE 不可用，跳过 {len(tushare_codes)} 只股票")
+                fallback_codes.extend(primary_codes)
         
-        # 2. AKShare批量处理
-        akshare_success = []
-        if akshare_codes and AKSHARE_AVAILABLE:
-            print(f"[INFO] AKShare 批量处理 {len(akshare_codes)} 只股票...")
+        elif primary_source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
+            print(f"[INFO] AKShare 批量处理 {len(primary_codes)} 只股票...")
             try:
-                for code in akshare_codes:
+                for code in primary_codes:
                     try:
                         df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_iso, end_date=end_iso)
                         if not df.empty:
                             df = self.standardize_kline_columns(df, 'akshare')
                             result[code] = df
-                            akshare_success.append(code)
+                            primary_success.append(code)
                         time.sleep(0.2)  # AKShare请求间隔
                     except Exception as e:
                         print(f"[WARN] AKShare获取{code}失败: {e}")
+                        fallback_codes.append(code)
                         continue
                 
-                print(f"[SUCCESS] AKShare 成功: {len(akshare_success)}/{len(akshare_codes)} 只")
+                print(f"[SUCCESS] AKShare 成功: {len(primary_success)}/{len(primary_codes)} 只")
             except Exception as e:
                 print(f"[ERROR] AKShare 批量处理异常: {e}")
+                fallback_codes.extend(primary_codes)
         else:
-            print(f"[WARN] AKShare 不可用，跳过 {len(akshare_codes)} 只股票")
+            print(f"[WARN] {primary_source.upper()} 不可用，将所有股票转为后备处理")
+            fallback_codes.extend(primary_codes)
         
-        # 3. JoinQuant替代处理失败的股票
-        failed_codes = [code for code in codes if code not in result]
+        # 2. 失败股票的多级后备处理：腾讯K线 → AlphaVantage → yfinance
+        if fallback_codes:
+            print(f"[INFO] 有 {len(fallback_codes)} 只股票需要后备数据源处理")
+            print(f"[INFO] 后备处理顺序: 腾讯K线 → AlphaVantage → yfinance")
+            remaining_codes = fallback_codes.copy()
+            
+            # 第一级：腾讯K线替代处理
+            tencent_success = []
+            if remaining_codes and self.tencent_kline:
+                print(f"[INFO] 腾讯K线API 替代处理 {len(remaining_codes)} 只失败股票...")
+                try:
+                    # 使用腾讯K线API批量获取
+                    tencent_results = self.tencent_kline.batch_get_klines(remaining_codes, start_iso, end_iso)
+                    
+                    temp_remaining = []
+                    for code in remaining_codes:
+                        if code in tencent_results:
+                            df = tencent_results[code]
+                            if df is not None and not df.empty:
+                                df = self.standardize_kline_columns(df, 'tencent')
+                                if not df.empty:
+                                    result[code] = df
+                                    tencent_success.append(code)
+                                    continue
+                        temp_remaining.append(code)
+                    
+                    remaining_codes = temp_remaining
+                    print(f"[SUCCESS] 腾讯K线API 替代成功: {len(tencent_success)}/{len(fallback_codes)} 只")
+                except Exception as e:
+                    print(f"[ERROR] 腾讯K线API 替代处理异常: {e}")
+            elif remaining_codes and not self.tencent_kline:
+                print(f"[WARN] 腾讯K线API未初始化，跳过处理 {len(remaining_codes)} 只股票")
+            
+            # 第二级：API轮换替代处理 (Alpha Vantage + Polygon.io)
+            api_rotation_success = []
+            if remaining_codes and (self.alpha_vantage or (self.polygon and self.polygon.is_available)):
+                print(f"[INFO] API轮换替代处理 {len(remaining_codes)} 只失败股票...")
+                try:
+                    temp_remaining = []
+                    for code in remaining_codes:
+                        try:
+                            # 获取下一个可用API
+                            api_name, api_instance = self._get_next_api()
+                            
+                            if not api_instance:
+                                temp_remaining.append(code)
+                                continue
+                            
+                            df = None
+                            
+                            # 根据API类型调用相应方法
+                            if api_name == 'alpha_vantage':
+                                print(f"[INFO] {code}: 使用 Alpha Vantage")
+                                df = api_instance.get_daily_kline(code, outputsize='compact')
+                            elif api_name == 'polygon':
+                                print(f"[INFO] {code}: 使用 Polygon.io") 
+                                df = api_instance.get_us_stock_kline(code, days=30)  # Polygon.io使用正确的方法名
+                            
+                            if df is not None and not df.empty:
+                                # 处理数据格式
+                                df = df.reset_index()
+                                if 'index' in df.columns:
+                                    df = df.rename(columns={'index': 'date'})
+                                
+                                # 按日期范围过滤
+                                if 'date' in df.columns:
+                                    df['date'] = pd.to_datetime(df['date'])
+                                    mask = (df['date'] >= start_date) & (df['date'] <= end_date)
+                                    df = df[mask]
+                                
+                                if not df.empty:
+                                    df = self.standardize_kline_columns(df, api_name)
+                                    result[code] = df
+                                    api_rotation_success.append(code)
+                                    print(f"[SUCCESS] {code}: {api_name}获取成功")
+                                    continue
+                            
+                            temp_remaining.append(code)
+                            
+                        except Exception as e:
+                            print(f"[WARN] API轮换获取{code}失败: {e}")
+                            temp_remaining.append(code)
+                            time.sleep(0.5)  # 减少等待时间
+                    
+                    remaining_codes = temp_remaining
+                    print(f"[SUCCESS] API轮换替代成功: {len(api_rotation_success)}/{len(fallback_codes)} 只")
+                except Exception as e:
+                    print(f"[ERROR] API轮换替代处理异常: {e}")
+            elif remaining_codes and not (self.alpha_vantage or (self.polygon and self.polygon.is_available)):
+                print(f"[WARN] API轮换不可用，跳过处理 {len(remaining_codes)} 只股票")
+            
+            # 第三级：yfinance最终兜底处理
+            yfinance_success = []
+            if remaining_codes:
+                print(f"[INFO] yfinance 最终兜底处理 {len(remaining_codes)} 只失败股票...")
+                try:
+                    # 使用yfinance批量获取
+                    yf_results = self._collect_batch_basic_info_with_yfinance(remaining_codes)
+                    
+                    temp_remaining = []
+                    for code in remaining_codes:
+                        if code in yf_results and 'kline_data' in yf_results[code]:
+                            df = yf_results[code]['kline_data']
+                            if df is not None and not df.empty:
+                                # 按日期范围过滤
+                                if 'date' in df.columns:
+                                    df['date'] = pd.to_datetime(df['date'])
+                                    mask = (df['date'] >= start_date) & (df['date'] <= end_date)
+                                    df = df[mask]
+                                
+                                if not df.empty:
+                                    result[code] = df
+                                    yfinance_success.append(code)
+                                    continue
+                        temp_remaining.append(code)
+                    
+                    remaining_codes = temp_remaining
+                    print(f"[SUCCESS] yfinance 兜底成功: {len(yfinance_success)}/{len(fallback_codes)} 只")
+                except Exception as e:
+                    print(f"[ERROR] yfinance 兜底处理异常: {e}")
+            
+            final_failed_codes = remaining_codes
+        else:
+            joinquant_success = []
+            alpha_success = []
+            yfinance_success = []
+            final_failed_codes = []
+            
+            # 先尝试用另一个数据源
+            secondary_source = 'akshare' if primary_source == 'tushare' else 'tushare'
+            secondary_success = []
+            remaining_codes = fallback_codes.copy()
+            
+            if secondary_source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
+                print(f"[INFO] AKShare 替代处理 {len(remaining_codes)} 只失败股票...")
+                temp_remaining = []
+                for code in remaining_codes:
+                    try:
+                        df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_iso, end_date=end_iso)
+                        if not df.empty:
+                            df = self.standardize_kline_columns(df, 'akshare')
+                            result[code] = df
+                            secondary_success.append(code)
+                        else:
+                            temp_remaining.append(code)
+                        time.sleep(0.2)
+                    except Exception as e:
+                        print(f"[WARN] AKShare替代获取{code}失败: {e}")
+                        temp_remaining.append(code)
+                remaining_codes = temp_remaining
+                print(f"[SUCCESS] AKShare 替代成功: {len(secondary_success)}/{len(fallback_codes)} 只")
+            
+            elif secondary_source == 'tushare' and TUSHARE_AVAILABLE and self.tushare_token:
+                # 检查是否需要等待，如果需要等待则跳过TUSHARE，直接进入下一级
+                current_time = time.time()
+                if current_time - self.last_tushare_call < 60:
+                    wait_time = 60 - (current_time - self.last_tushare_call)
+                    print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，跳过直接使用yfinance替代...")
+                    # 不等待，直接将codes加入remaining_codes进入下一级处理
+                    remaining_codes = fallback_codes.copy()
+                else:
+                    print(f"[INFO] TUSHARE 替代处理 {len(remaining_codes)} 只失败股票...")
+                    pro = ts.pro_api(self.tushare_token)
+                    self.last_tushare_call = time.time()
+                    
+                    temp_remaining = []
+                    for code in remaining_codes:
+                        try:
+                            ts_code = f"{code}.SZ" if code.startswith(('000', '002', '300')) else f"{code}.SH"
+                            df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
+                            if not df.empty:
+                                df = self.standardize_kline_columns(df, 'tushare')
+                                result[code] = df
+                                secondary_success.append(code)
+                            else:
+                                temp_remaining.append(code)
+                            time.sleep(0.1)
+                        except Exception as e:
+                            print(f"[WARN] TUSHARE替代获取{code}失败: {e}")
+                            temp_remaining.append(code)
+                    remaining_codes = temp_remaining
+                    print(f"[SUCCESS] TUSHARE 替代成功: {len(secondary_success)}/{len(fallback_codes)} 只")
+            
+            # 最后尝试JoinQuant
+            final_failed_codes = remaining_codes
+        
+        # 现在所有处理逻辑已完成，统计最终结果
+        if not 'joinquant_success' in locals():
+            joinquant_success = []
+        if not 'alpha_success' in locals():
+            alpha_success = []  
+        if not 'yfinance_success' in locals():
+            yfinance_success = []
+        
+        # 3. JoinQuant最终兜底处理
         joinquant_success = []
-        if failed_codes and self.joinquant:
-            print(f"[INFO] JoinQuant 替代处理 {len(failed_codes)} 只失败股票...")
+        if final_failed_codes and self.joinquant:
+            print(f"[INFO] JoinQuant 兜底处理 {len(final_failed_codes)} 只最终失败股票...")
             try:
                 # 使用JoinQuant批量获取
-                jq_results = self.joinquant.batch_get_klines(failed_codes, start_iso, end_iso)
+                jq_results = self.joinquant.batch_get_klines(final_failed_codes, start_iso, end_iso)
                 
                 for code, df in jq_results.items():
                     if df is not None and not df.empty:
@@ -449,19 +1137,19 @@ class ComprehensiveDataCollector:
                             result[code] = df
                             joinquant_success.append(code)
                 
-                print(f"[SUCCESS] JoinQuant 替代成功: {len(joinquant_success)}/{len(failed_codes)} 只")
+                print(f"[SUCCESS] JoinQuant 兜底成功: {len(joinquant_success)}/{len(final_failed_codes)} 只")
             except Exception as e:
-                print(f"[ERROR] JoinQuant 替代处理异常: {e}")
-        elif failed_codes and not self.joinquant:
-            print(f"[WARN] JoinQuant API未初始化，无法替代处理 {len(failed_codes)} 只股票")
+                print(f"[ERROR] JoinQuant 兜底处理异常: {e}")
+        elif final_failed_codes and not self.joinquant:
+            print(f"[WARN] JoinQuant API未初始化，无法兜底处理 {len(final_failed_codes)} 只股票")
         
-        # 4. Alpha Vantage兜底处理仍然失败的股票
-        final_failed = [code for code in codes if code not in result]
+        # 4. Alpha Vantage最终兜底处理
+        still_failed = [code for code in codes if code not in result]
         alpha_success = []
-        if final_failed and self.alpha_vantage:
-            print(f"[INFO] Alpha Vantage 兜底处理 {len(final_failed)} 只股票...")
+        if still_failed and self.alpha_vantage:
+            print(f"[INFO] Alpha Vantage 最终兜底处理 {len(still_failed)} 只股票...")
             try:
-                for code in final_failed:
+                for code in still_failed:
                     try:
                         df = self.alpha_vantage.get_daily_kline(code, outputsize='compact')
                         if df is not None and not df.empty:
@@ -499,10 +1187,19 @@ class ComprehensiveDataCollector:
         
         # 按数据源统计成功情况
         print(f"[DETAIL] 各数据源表现:")
-        print(f"  TUSHARE: {len(tushare_success)}/{len(tushare_codes)} ({len(tushare_success)/len(tushare_codes)*100:.1f}%)" if tushare_codes else "  TUSHARE: 0/0")
-        print(f"  AKShare: {len(akshare_success)}/{len(akshare_codes)} ({len(akshare_success)/len(akshare_codes)*100:.1f}%)" if akshare_codes else "  AKShare: 0/0")
-        print(f"  JoinQuant: {len(joinquant_success)}/{len(failed_codes) if failed_codes else 0}")
-        print(f"  Alpha Vantage: {len(alpha_success)}/{len(final_failed) if final_failed else 0}")
+        if primary_source == 'tushare':
+            print(f"  TUSHARE(主): {len(primary_success)}/{len(primary_codes)} ({len(primary_success)/len(primary_codes)*100:.1f}%)" if primary_codes else "  TUSHARE(主): 0/0")
+            if 'secondary_success' in locals():
+                print(f"  AKShare(备): {len(secondary_success)}/{len(fallback_codes)} ({len(secondary_success)/len(fallback_codes)*100:.1f}%)" if fallback_codes else "  AKShare(备): 0/0")
+        else:
+            print(f"  AKShare(主): {len(primary_success)}/{len(primary_codes)} ({len(primary_success)/len(primary_codes)*100:.1f}%)" if primary_codes else "  AKShare(主): 0/0")
+            if 'secondary_success' in locals():
+                print(f"  TUSHARE(备): {len(secondary_success)}/{len(fallback_codes)} ({len(secondary_success)/len(fallback_codes)*100:.1f}%)" if fallback_codes else "  TUSHARE(备): 0/0")
+        
+        if 'final_failed_codes' in locals() and final_failed_codes:
+            print(f"  JoinQuant(兜底): {len(joinquant_success)}/{len(final_failed_codes)}")
+        if 'still_failed' in locals() and still_failed:
+            print(f"  Alpha Vantage(最终): {len(alpha_success)}/{len(still_failed)}")
         
         return result
     
@@ -659,7 +1356,7 @@ class ComprehensiveDataCollector:
         
         # 4. AKShare兜底：处理前面数据源失败的股票
         failed_codes = [code for code in codes if code not in result or not result[code].get('name')]
-        if failed_codes and AKSHARE_AVAILABLE:
+        if failed_codes and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
             print(f"[INFO] AKShare兜底：处理失败股票 {len(failed_codes)} 只...")
             try:
                 for code in failed_codes:
@@ -1005,8 +1702,8 @@ class ComprehensiveDataCollector:
         """使用akshare批量采集K线数据"""
         result = {}
         
-        if not AKSHARE_AVAILABLE:
-            print(f"[WARN] akshare不可用，跳过批量K线采集")
+        if not AKSHARE_AVAILABLE or not AKSHARE_CONNECTED:
+            print(f"[WARN] akshare不可用或连接失败，跳过批量K线采集")
             return result
         
         print(f"[INFO] 使用akshare获取{len(codes)}只股票K线数据")
@@ -1066,7 +1763,7 @@ class ComprehensiveDataCollector:
                 # 尝试使用可用的数据源
                 kline_data = None
                 
-                if AKSHARE_AVAILABLE:
+                if AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
                     kline_data = self.collect_kline_data(code, 'akshare')
                 elif YFINANCE_AVAILABLE:
                     kline_data = self.collect_kline_data(code, 'yfinance')
@@ -1126,7 +1823,7 @@ class ComprehensiveDataCollector:
                 except Exception as e:
                     print(f"[WARN] 腾讯API基础信息获取失败: {e}")
             
-            elif source == 'akshare' and AKSHARE_AVAILABLE:
+            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
                 df = ak.stock_individual_info_em(symbol=code)
                 if df is not None and not df.empty:
                     info = dict(zip(df['item'], df['value']))
@@ -1160,12 +1857,12 @@ class ComprehensiveDataCollector:
         return basic_info
     
     def collect_batch_basic_info(self, codes: List[str], source: str = 'auto') -> Dict[str, Dict[str, Any]]:
-        """批量采集基础信息 - 新策略：Baostock为主，腾讯补充，AKShare兜底"""
+        """批量采集基础信息 - 新策略：Baostock为主 → JoinQuant为辅 → 腾讯补充 → AKShare兜底"""
         result = {}
         total_codes = len(codes)
         
         print(f"[INFO] 批量采集基础信息，共 {total_codes} 只股票")
-        print(f"[INFO] 基础信息策略: Baostock(行业分类) → 腾讯(实时补充) → AKShare(兜底)")
+        print(f"[INFO] 基础信息策略: Baostock(主) → JoinQuant(辅) → 腾讯(补充) → AKShare(兜底)")
         
         # 1. Baostock主力：标准行业分类和基础信息
         baostock_success = []
@@ -1197,27 +1894,54 @@ class ComprehensiveDataCollector:
                         print(f"[DEBUG] Baostock {code}: {e}")
                         continue
                 
-                print(f"[SUCCESS] Baostock基础信息: {len(baostock_success)}/{total_codes}")
+                print(f"[SUCCESS] Baostock基础信息: {len(baostock_success)}/{total_codes} 只")
             except Exception as e:
-                print(f"[ERROR] Baostock批量基础信息异常: {e}")
+                print(f"[ERROR] Baostock基础信息异常: {e}")
+        else:
+            print(f"[WARN] Baostock不可用，跳过基础信息采集")
         
-        # 2. 腾讯补充：实时价格和市场数据
+        # 2. JoinQuant为辅：获取失败股票的基础信息
         failed_codes = [code for code in codes if code not in result]
-        if failed_codes and REQUESTS_AVAILABLE:
-            print(f"[INFO] 腾讯补充基础信息 {len(failed_codes)} 只...")
+        joinquant_success = []
+        if failed_codes and self.joinquant:
+            print(f"[INFO] JoinQuant为辅基础信息采集 {len(failed_codes)} 只...")
+            try:
+                for code in failed_codes:
+                    try:
+                        # JoinQuant获取基础信息
+                        stock_info = self._get_joinquant_stock_info(code)
+                        if stock_info:
+                            result[code] = stock_info
+                            joinquant_success.append(code)
+                        time.sleep(0.1)
+                    except Exception as e:
+                        print(f"[DEBUG] JoinQuant {code}: {e}")
+                        continue
+                
+                print(f"[SUCCESS] JoinQuant基础信息: {len(joinquant_success)}/{len(failed_codes)} 只")
+            except Exception as e:
+                print(f"[ERROR] JoinQuant基础信息异常: {e}")
+        elif failed_codes and not self.joinquant:
+            print(f"[WARN] JoinQuant API未初始化，跳过 {len(failed_codes)} 只股票")
+        
+        # 3. 腾讯补充：实时价格和市场数据
+        still_failed = [code for code in codes if code not in result]
+        tencent_success = []
+        if still_failed and REQUESTS_AVAILABLE:
+            print(f"[INFO] 腾讯补充基础信息 {len(still_failed)} 只...")
             try:
                 # 腾讯支持批量查询
-                batch_symbols = ','.join([f's_{code}' for code in failed_codes])
+                batch_symbols = ','.join([f's_{code}' for code in still_failed])
                 url = f'https://qt.gtimg.cn/q={batch_symbols}'
                 
                 response = requests.get(url, timeout=15)
                 if response.status_code == 200:
                     lines = response.text.split('\\n')
                     for i, line in enumerate(lines):
-                        if i >= len(failed_codes) or not line.strip():
+                        if i >= len(still_failed) or not line.strip():
                             continue
                         
-                        code = failed_codes[i]
+                        code = still_failed[i]
                         try:
                             parts = line.split('~')
                             if len(parts) > 5:
@@ -1229,14 +1953,18 @@ class ComprehensiveDataCollector:
                                     'volume': self._safe_float(parts[6]),
                                     'source': 'tencent'
                                 }
+                                tencent_success.append(code)
                         except Exception as e:
                             print(f"[DEBUG] 腾讯解析 {code}: {e}")
                             continue
+                            
+                print(f"[SUCCESS] 腾讯补充基础信息: {len(tencent_success)}/{len(still_failed)} 只")
             except Exception as e:
                 print(f"[ERROR] 腾讯批量补充异常: {e}")
         
-        # 3. AKShare兜底：完整信息获取
+        # 4. AKShare兜底：完整信息获取
         final_failed = [code for code in codes if code not in result]
+        akshare_success = []
         if final_failed and AKSHARE_AVAILABLE:
             print(f"[INFO] AKShare兜底基础信息 {len(final_failed)} 只...")
             try:
@@ -1253,16 +1981,22 @@ class ComprehensiveDataCollector:
                                 'area': info_dict.get('地区'),
                                 'source': 'akshare'
                             }
+                            akshare_success.append(code)
                         time.sleep(0.3)
                     except Exception as e:
                         print(f"[DEBUG] AKShare {code}: {e}")
                         continue
+                        
+                print(f"[SUCCESS] AKShare兜底基础信息: {len(akshare_success)}/{len(final_failed)} 只")
             except Exception as e:
                 print(f"[ERROR] AKShare兜底异常: {e}")
         
+        # 统计结果
         success_count = len(result)
         success_rate = success_count / total_codes * 100 if total_codes > 0 else 0
-        print(f"[SUMMARY] 基础信息采集完成: {success_count}/{total_codes} ({success_rate:.1f}%)")
+        
+        print(f"[SUMMARY] 基础信息采集完成: {success_count}/{total_codes} 只 ({success_rate:.1f}%)")
+        print(f"[DETAIL] Baostock: {len(baostock_success)}, JoinQuant: {len(joinquant_success)}, 腾讯: {len(tencent_success)}, AKShare: {len(akshare_success)}")
         
         return result
     
@@ -1340,6 +2074,230 @@ class ComprehensiveDataCollector:
                         }
         
         return result
+    
+    def _get_joinquant_stock_info(self, code: str) -> Optional[Dict[str, Any]]:
+        """
+        使用JoinQuant获取单只股票的基础信息
+        
+        Args:
+            code: 股票代码，如 '000001'
+            
+        Returns:
+            股票基础信息字典，失败返回None
+        """
+        if not self.joinquant:
+            return None
+        
+        try:
+            # JoinQuant可能的基础信息获取端点
+            endpoints = [
+                "/data/stock/info",
+                "/data/stock/basic",
+                "/stock/info",
+                "/stock/basic_info"
+            ]
+            
+            for endpoint in endpoints:
+                try:
+                    url = f"{self.joinquant.base_url}{endpoint}"
+                    params = {
+                        'code': code,
+                        'symbol': code
+                    }
+                    
+                    response = self.joinquant.session.get(url, params=params, timeout=10)
+                    
+                    if response.status_code == 200 and len(response.text) > 50:
+                        # 尝试解析响应
+                        stock_info = self._parse_joinquant_basic_info(response.text, code)
+                        if stock_info:
+                            return stock_info
+                            
+                except Exception as e:
+                    print(f"[DEBUG] JoinQuant端点{endpoint}失败{code}: {e}")
+                    continue
+            
+            # 如果所有端点都失败，返回基本信息
+            return {
+                'code': code,
+                'name': f'股票{code}',
+                'source': 'joinquant_fallback'
+            }
+            
+        except Exception as e:
+            print(f"[ERROR] JoinQuant获取{code}基础信息异常: {e}")
+            return None
+    
+    def _parse_joinquant_basic_info(self, content: str, code: str) -> Optional[Dict[str, Any]]:
+        """
+        解析JoinQuant基础信息响应
+        
+        Args:
+            content: API响应内容
+            code: 股票代码
+            
+        Returns:
+            解析后的基础信息字典
+        """
+        try:
+            import json
+            
+            # 尝试JSON解析
+            if content.strip().startswith('{') or content.strip().startswith('['):
+                try:
+                    data = json.loads(content)
+                    
+                    # 处理不同的JSON结构
+                    if isinstance(data, dict):
+                        if 'data' in data:
+                            stock_data = data['data']
+                        elif 'result' in data:
+                            stock_data = data['result']
+                        else:
+                            stock_data = data
+                        
+                        # 提取基础信息
+                        if isinstance(stock_data, dict):
+                            return {
+                                'code': code,
+                                'name': stock_data.get('name', stock_data.get('display_name', f'股票{code}')),
+                                'industry': stock_data.get('industry'),
+                                'sector': stock_data.get('sector'),
+                                'exchange': stock_data.get('exchange'),
+                                'listing_date': stock_data.get('start_date', stock_data.get('listing_date')),
+                                'source': 'joinquant'
+                            }
+                        
+                except json.JSONDecodeError:
+                    pass
+            
+            # 尝试从HTML中提取信息
+            if '股票' in content or 'stock' in content.lower():
+                # 简单的文本解析
+                return {
+                    'code': code,
+                    'name': f'股票{code}',
+                    'source': 'joinquant_html'
+                }
+            
+            return None
+            
+        except Exception as e:
+            print(f"[DEBUG] JoinQuant响应解析失败{code}: {e}")
+            return None
+    
+    def _get_joinquant_financial_info(self, code: str) -> Optional[Dict[str, Any]]:
+        """
+        使用JoinQuant获取单只股票的财务数据
+        
+        Args:
+            code: 股票代码，如 '000001'
+            
+        Returns:
+            股票财务数据字典，失败返回None
+        """
+        if not self.joinquant:
+            return None
+        
+        try:
+            # JoinQuant可能的财务数据获取端点
+            endpoints = [
+                "/data/stock/fundamental",
+                "/data/stock/financial",
+                "/stock/fundamental",
+                "/stock/finance"
+            ]
+            
+            for endpoint in endpoints:
+                try:
+                    url = f"{self.joinquant.base_url}{endpoint}"
+                    params = {
+                        'code': code,
+                        'symbol': code,
+                        'period': 'quarter'  # 季报
+                    }
+                    
+                    response = self.joinquant.session.get(url, params=params, timeout=10)
+                    
+                    if response.status_code == 200 and len(response.text) > 50:
+                        # 尝试解析响应
+                        financial_info = self._parse_joinquant_financial_info(response.text, code)
+                        if financial_info:
+                            return financial_info
+                            
+                except Exception as e:
+                    print(f"[DEBUG] JoinQuant财务端点{endpoint}失败{code}: {e}")
+                    continue
+            
+            # 如果所有端点都失败，返回基本财务信息
+            return {
+                'code': code,
+                'source': 'joinquant_fallback'
+            }
+            
+        except Exception as e:
+            print(f"[ERROR] JoinQuant获取{code}财务数据异常: {e}")
+            return None
+    
+    def _parse_joinquant_financial_info(self, content: str, code: str) -> Optional[Dict[str, Any]]:
+        """
+        解析JoinQuant财务数据响应
+        
+        Args:
+            content: API响应内容
+            code: 股票代码
+            
+        Returns:
+            解析后的财务数据字典
+        """
+        try:
+            import json
+            
+            # 尝试JSON解析
+            if content.strip().startswith('{') or content.strip().startswith('['):
+                try:
+                    data = json.loads(content)
+                    
+                    # 处理不同的JSON结构
+                    if isinstance(data, dict):
+                        if 'data' in data:
+                            financial_data = data['data']
+                        elif 'result' in data:
+                            financial_data = data['result']
+                        else:
+                            financial_data = data
+                        
+                        # 提取财务信息
+                        if isinstance(financial_data, dict):
+                            return {
+                                'code': code,
+                                'revenue': financial_data.get('total_operating_revenue'),
+                                'net_income': financial_data.get('net_profit'),
+                                'total_assets': financial_data.get('total_assets'),
+                                'total_equity': financial_data.get('total_owner_equities'),
+                                'market_cap': financial_data.get('market_cap'),
+                                'pe_ratio': financial_data.get('pe_ratio'),
+                                'pb_ratio': financial_data.get('pb_ratio'),
+                                'roe': financial_data.get('roe'),
+                                'source': 'joinquant'
+                            }
+                        
+                except json.JSONDecodeError:
+                    pass
+            
+            # 如果包含财务关键词，返回基础信息
+            financial_keywords = ['revenue', 'profit', 'asset', 'equity', '营收', '利润', '资产']
+            if any(keyword in content.lower() for keyword in financial_keywords):
+                return {
+                    'code': code,
+                    'source': 'joinquant_partial'
+                }
+            
+            return None
+            
+        except Exception as e:
+            print(f"[DEBUG] JoinQuant财务响应解析失败{code}: {e}")
+            return None
     
     def _collect_batch_basic_info_with_yfinance(self, codes: List[str]) -> Dict[str, Dict[str, Any]]:
         """使用yfinance批量采集基础信息"""
@@ -1427,12 +2385,12 @@ class ComprehensiveDataCollector:
         return result
     
     def collect_batch_financial_data(self, codes: List[str], source: str = 'auto') -> Dict[str, Dict[str, Any]]:
-        """批量采集财务数据 - 新策略：Baostock专业财务数据为主，YFinance国际化补充，腾讯实时估值"""
+        """批量采集财务数据 - 新策略：Baostock专业财务为主 → JoinQuant为辅 → YFinance补充 → 腾讯估值"""
         result = {}
         total_codes = len(codes)
         
         print(f"[INFO] 批量采集财务数据，共 {total_codes} 只股票")
-        print(f"[INFO] 财务数据策略: Baostock(专业财务) → YFinance(国际估值) → 腾讯(实时) → AKShare(兜底)")
+        print(f"[INFO] 财务数据策略: Baostock(主) → JoinQuant(辅) → YFinance(补充) → 腾讯(估值) → AKShare(兜底)")
         
         # 1. Baostock主力：专业的中国A股财务数据
         baostock_success = []
@@ -1482,16 +2440,43 @@ class ComprehensiveDataCollector:
                         print(f"[DEBUG] Baostock {code}: {e}")
                         continue
                 
-                print(f"[SUCCESS] Baostock财务数据: {len(baostock_success)}/{total_codes}")
+                print(f"[SUCCESS] Baostock财务数据: {len(baostock_success)}/{total_codes} 只")
             except Exception as e:
                 print(f"[ERROR] Baostock财务数据异常: {e}")
+        else:
+            print(f"[WARN] Baostock不可用，跳过财务数据采集")
         
-        # 2. YFinance补充：国际化估值指标
+        # 2. JoinQuant为辅：获取失败股票的财务数据
         failed_codes = [code for code in codes if code not in result]
-        if failed_codes and YFINANCE_AVAILABLE:
-            print(f"[INFO] YFinance估值补充 {len(failed_codes)} 只...")
+        joinquant_success = []
+        if failed_codes and self.joinquant:
+            print(f"[INFO] JoinQuant为辅财务数据采集 {len(failed_codes)} 只...")
             try:
                 for code in failed_codes:
+                    try:
+                        # JoinQuant获取财务数据
+                        financial_info = self._get_joinquant_financial_info(code)
+                        if financial_info and self._has_valid_financial_data(financial_info):
+                            result[code] = financial_info
+                            joinquant_success.append(code)
+                        time.sleep(0.1)
+                    except Exception as e:
+                        print(f"[DEBUG] JoinQuant财务 {code}: {e}")
+                        continue
+                
+                print(f"[SUCCESS] JoinQuant财务数据: {len(joinquant_success)}/{len(failed_codes)} 只")
+            except Exception as e:
+                print(f"[ERROR] JoinQuant财务数据异常: {e}")
+        elif failed_codes and not self.joinquant:
+            print(f"[WARN] JoinQuant API未初始化，跳过财务数据采集 {len(failed_codes)} 只股票")
+        
+        # 3. YFinance补充：国际化估值指标
+        still_failed = [code for code in codes if code not in result]
+        yfinance_success = []
+        if still_failed and YFINANCE_AVAILABLE:
+            print(f"[INFO] YFinance估值补充 {len(still_failed)} 只...")
+            try:
+                for code in still_failed:
                     try:
                         symbol = f"{code}.SZ" if code.startswith(('000', '002', '300')) else f"{code}.SS"
                         ticker = yf.Ticker(symbol)
@@ -1798,7 +2783,7 @@ class ComprehensiveDataCollector:
         
         # 2. AKShare补充：个股详细资金流向
         failed_codes = [code for code in codes if code not in result]
-        if failed_codes and AKSHARE_AVAILABLE and len(failed_codes) <= 8:  # 限制数量避免频率问题
+        if failed_codes and AKSHARE_AVAILABLE and AKSHARE_CONNECTED and len(failed_codes) <= 8:  # 限制数量避免频率问题
             print(f"[INFO] AKShare资金流向补充 {len(failed_codes)} 只...")
             try:
                 for code in failed_codes:
@@ -1884,7 +2869,7 @@ class ComprehensiveDataCollector:
                         'low': 'low', 'close': 'close', 'vol': 'volume', 'amount': 'amount'
                     })
             
-            elif source == 'akshare' and AKSHARE_AVAILABLE:
+            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
                 start_str = start_date.strftime('%Y%m%d')
                 end_str = end_date.strftime('%Y%m%d')
                 
@@ -1967,7 +2952,7 @@ class ComprehensiveDataCollector:
                 except Exception as e:
                     print(f"[DEBUG] baostock杜邦数据获取失败: {e}")
             
-            elif source == 'akshare' and AKSHARE_AVAILABLE:
+            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
                 # 基础财务指标
                 info_df = ak.stock_individual_info_em(symbol=code)
                 if info_df is not None and not info_df.empty:
@@ -2219,7 +3204,7 @@ class ComprehensiveDataCollector:
                 except Exception as e:
                     print(f"[DEBUG] baostock行业信息获取失败: {e}")
             
-            elif source == 'akshare' and AKSHARE_AVAILABLE:
+            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
                 # 通过个股信息获取行业概念
                 try:
                     df = ak.stock_individual_info_em(symbol=code)
@@ -2301,7 +3286,7 @@ class ComprehensiveDataCollector:
                 except Exception as e:
                     print(f"[DEBUG] 腾讯资金流向获取失败: {e}")
             
-            elif source == 'akshare' and AKSHARE_AVAILABLE:
+            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
                 # 个股资金流向
                 try:
                     fund_df = ak.stock_individual_fund_flow(stock=code, market="sh" if code.startswith('6') else "sz")
@@ -2504,7 +3489,7 @@ class ComprehensiveDataCollector:
     def _collect_kline_with_akshare(self, code: str, start_str: str, end_str: str) -> Optional[pd.DataFrame]:
         """使用akshare获取K线数据"""
         try:
-            if not AKSHARE_AVAILABLE:
+            if not AKSHARE_AVAILABLE or not AKSHARE_CONNECTED:
                 return None
             
             import akshare as ak
