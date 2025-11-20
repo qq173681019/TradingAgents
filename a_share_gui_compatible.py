@@ -197,6 +197,10 @@ class AShareAnalyzerGUI:
         # 新增：完整推荐数据存储
         self.comprehensive_data_file = "comprehensive_stock_data.json"
         self.comprehensive_data = {}     # 完整的三时间段推荐数据
+        # 新增：内存缓存（分离收集/评分/推荐）
+        self.comprehensive_stock_data = {}  # 从收集器加载的原始完整数据（供评分/推荐复用）
+        self.scores_cache = {}               # 单只股票评分缓存，优先使用以减少重复请求
+        self.comprehensive_data_loaded = False
         
         # 新增：数据收集相关属性
         self.data_collection_active = False  # 数据收集是否正在进行
@@ -206,6 +210,11 @@ class AShareAnalyzerGUI:
         self.load_batch_scores()         # 加载批量评分数据
         self.load_comprehensive_data()   # 加载完整推荐数据
         self.load_batch_scores()         # 加载批量评分数据
+        # 额外尝试加载来自数据收集器的完整数据到内存缓存（优先从data/目录）
+        try:
+            self.load_comprehensive_stock_data()
+        except Exception:
+            pass
 
         self.stock_info = {
             # 科创板
@@ -649,6 +658,55 @@ class AShareAnalyzerGUI:
         except Exception as e:
             print(f"加载完整推荐数据失败: {e}")
             return False
+
+    def load_comprehensive_stock_data(self):
+        """尝试将数据收集器生成的完整数据加载到内存缓存中，优先从 data/ 目录查找"""
+        import json
+        import os
+
+        candidates = []
+        # 优先尝试 data/ 子目录（comprehensive_data_collector 常保存到 data/）
+        candidates.append(os.path.join('data', self.comprehensive_data_file))
+        candidates.append(self.comprehensive_data_file)
+
+        for path in candidates:
+            try:
+                if os.path.exists(path):
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+
+                    # 支持两种格式：直接为 dict 或者 {'data': {...}}
+                    if isinstance(data, dict):
+                        if 'data' in data and isinstance(data['data'], dict):
+                            loaded = data['data']
+                        else:
+                            loaded = data
+
+                        # 写入内存缓存
+                        self.comprehensive_stock_data = loaded
+                        # 为兼容现有推荐逻辑，同步到 self.comprehensive_data
+                        try:
+                            self.comprehensive_data = loaded
+                        except Exception:
+                            pass
+                        self.comprehensive_data_loaded = True
+                        count = len(self.comprehensive_stock_data)
+                        print(f"已加载完整数据到内存缓存: {count} 条 (来源: {path})")
+                        # 同步部分评分缓存（如果数据包含 overall_score）
+                        for code, item in self.comprehensive_stock_data.items():
+                            try:
+                                score = item.get('overall_score')
+                                if score is not None:
+                                    self.scores_cache[code] = float(score)
+                            except Exception:
+                                continue
+                        return True
+            except Exception as e:
+                print(f"尝试加载 {path} 失败: {e}")
+                continue
+
+        print("未找到完整数据文件以加载到内存缓存")
+        return False
     
     def is_stock_type_match(self, code, stock_type):
         """判断股票代码是否符合指定类型"""
@@ -1590,6 +1648,12 @@ class AShareAnalyzerGUI:
     def get_stock_score_for_batch(self, stock_code):
         """为批量评分获取单只股票的评分 - 与单独分析使用相同算法"""
         try:
+            # 优先使用评分缓存
+            if stock_code in getattr(self, 'scores_cache', {}):
+                try:
+                    return float(self.scores_cache[stock_code])
+                except Exception:
+                    pass
             # 使用与单独分析相同的三时间段预测算法
             short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(stock_code)
             
@@ -1602,6 +1666,11 @@ class AShareAnalyzerGUI:
             raw_score = (short_score * 0.3 + medium_score * 0.4 + long_score * 0.3)
             # 转换为1-10评分
             final_score = max(1.0, min(10.0, 5.0 + raw_score * 0.5))
+            # 缓存计算结果以便后续复用
+            try:
+                self.scores_cache[stock_code] = round(final_score, 1)
+            except Exception:
+                pass
             
             return round(final_score, 1)
             
@@ -1612,6 +1681,21 @@ class AShareAnalyzerGUI:
     def get_comprehensive_stock_data_for_batch(self, stock_code):
         """为批量评分获取单只股票的完整数据 - 只使用真实数据"""
         try:
+            # 优先使用内存缓存中的收集数据，避免重复网络请求
+            if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
+                try:
+                    cached = self.comprehensive_stock_data.get(stock_code)
+                    # 如果缓存中包含 overall_score，则也填充评分缓存
+                    if isinstance(cached, dict) and 'overall_score' in cached:
+                        try:
+                            self.scores_cache[stock_code] = float(cached['overall_score'])
+                        except Exception:
+                            pass
+                    return cached
+                except Exception as e:
+                    print(f"从内存缓存读取 {stock_code} 失败: {e}")
+                    # 回退到实时抓取
+
             from datetime import datetime
             
             # 获取真实技术指标数据
@@ -1788,9 +1872,15 @@ class AShareAnalyzerGUI:
                         score = self.get_stock_score_for_batch(code)
                         
                         if score is not None:
-                            # 尝试获取技术面和基本面数据 - 只使用真实数据
-                            tech_data = self.get_real_technical_indicators(code)
-                            fund_data = self.get_real_fundamental_indicators(code)
+                            # 优先使用已收集的完整数据（避免重复网络请求）
+                            if getattr(self, 'comprehensive_data_loaded', False) and code in self.comprehensive_stock_data:
+                                cached_item = self.comprehensive_stock_data.get(code, {})
+                                tech_data = cached_item.get('tech_data')
+                                fund_data = cached_item.get('fund_data')
+                            else:
+                                # 尝试获取技术面和基本面数据 - 只使用真实数据
+                                tech_data = self.get_real_technical_indicators(code)
+                                fund_data = self.get_real_fundamental_indicators(code)
                             
                             if tech_data is None:
                                 print(f"{code} 无法获取真实技术数据，跳过")
@@ -2151,6 +2241,9 @@ class AShareAnalyzerGUI:
 
     def setup_ui(self):
         """设置用户界面"""
+        # 确保ttk已导入（避免UnboundLocalError）
+        from tkinter import ttk
+        
         self.root.title("A股智能分析系统 v2.0")
         self.root.geometry("1200x800")
         self.root.configure(bg="#f0f0f0")
@@ -2175,6 +2268,32 @@ class AShareAnalyzerGUI:
                       bg="#2c3e50")
         title_label.pack(expand=True)
         
+        # 输入和快速操作区域（股票代码输入、开始分析、批量评分、期限选择）
+        input_frame = tk.Frame(self.root, bg="#f0f0f0")
+        input_frame.pack(fill="x", padx=20, pady=5)
+
+        tk.Label(input_frame, text="股票代码:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
+        self.ticker_var = tk.StringVar()
+        self.ticker_entry = tk.Entry(input_frame, textvariable=self.ticker_var, font=("微软雅黑", 11), width=12)
+        self.ticker_entry.pack(side="left", padx=8)
+
+        # 开始分析按钮
+        self.analyze_btn = tk.Button(input_frame, text="开始分析", font=("微软雅黑", 11), bg="#27ae60", fg="white", command=self.start_analysis, cursor="hand2", width=12)
+        self.analyze_btn.pack(side="left", padx=5)
+
+        # 批量评分快捷按钮
+        self.batch_analyze_btn = tk.Button(input_frame, text="开始批量评分", font=("微软雅黑", 11), bg="#2980b9", fg="white", command=lambda: self.start_batch_scoring_by_type("全部"), cursor="hand2", width=14)
+        self.batch_analyze_btn.pack(side="left", padx=5)
+
+        # 投资期限选择（短期/中期/长期）
+        tk.Label(input_frame, text="期限:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(10, 0))
+        self.period_var = tk.StringVar(value="中期")
+        try:
+            period_menu = ttk.Combobox(input_frame, textvariable=self.period_var, values=["短期", "中期", "长期"], width=6, state='readonly', font=("微软雅黑", 11))
+            period_menu.pack(side="left", padx=5)
+        except Exception:
+            # 如果 ttk 不可用，回退为普通 OptionMenu
+            tk.OptionMenu(input_frame, self.period_var, "短期", "中期", "长期").pack(side="left", padx=5)
         # 推荐配置框架
         recommend_frame = tk.Frame(self.root, bg="#f0f0f0")
         recommend_frame.pack(fill="x", padx=20, pady=5)
@@ -2351,6 +2470,29 @@ class AShareAnalyzerGUI:
                                                      fg="#2c3e50", 
                                                      bg="#f0f0f0")
         self.data_collection_status_label.pack(side="left", padx=10)
+        
+        # 数据收集进度条框架
+        progress_frame = tk.Frame(data_collection_frame, bg="#f0f0f0")
+        progress_frame.pack(side="left", padx=10, fill="x", expand=True)
+        
+        # 进度条
+        self.data_collection_progress = ttk.Progressbar(
+            progress_frame,
+            length=300,
+            mode='determinate',
+            style='TProgressbar'
+        )
+        self.data_collection_progress.pack(side="top", fill="x", pady=2)
+        
+        # 进度详情标签
+        self.data_collection_detail_label = tk.Label(
+            progress_frame,
+            text="",
+            font=("微软雅黑", 9),
+            fg="#7f8c8d",
+            bg="#f0f0f0"
+        )
+        self.data_collection_detail_label.pack(side="top", fill="x")
         status_frame = tk.Frame(self.root, bg="#ecf0f1", height=30)
         status_frame.pack(fill="x")
         status_frame.pack_propagate(False)
@@ -2384,18 +2526,62 @@ class AShareAnalyzerGUI:
         # 技术面分析页面
         self.technical_frame = tk.Frame(self.notebook, bg="white")
         self.notebook.add(self.technical_frame, text="技术面分析")
+        # 技术面分析文本区
+        try:
+            self.technical_text = scrolledtext.ScrolledText(self.technical_frame,
+                                                           font=("Consolas", 10),
+                                                           wrap=tk.WORD,
+                                                           bg="white")
+            self.technical_text.pack(fill="both", expand=True, padx=10, pady=10)
+        except Exception:
+            # 如果scrolledtext不可用，退回为普通Text
+            self.technical_text = tk.Text(self.technical_frame, font=("Consolas", 10), wrap=tk.WORD, bg="white")
+            self.technical_text.pack(fill="both", expand=True, padx=10, pady=10)
 
         # 基本面分析页面
         self.fundamental_frame = tk.Frame(self.notebook, bg="white")
         self.notebook.add(self.fundamental_frame, text="基本面分析")
+        # 基本面分析文本区
+        try:
+            self.fundamental_text = scrolledtext.ScrolledText(self.fundamental_frame,
+                                                             font=("Consolas", 10),
+                                                             wrap=tk.WORD,
+                                                             bg="white")
+            self.fundamental_text.pack(fill="both", expand=True, padx=10, pady=10)
+        except Exception:
+            # 如果scrolledtext不可用，退回为普通Text
+            self.fundamental_text = tk.Text(self.fundamental_frame, font=("Consolas", 10), wrap=tk.WORD, bg="white")
+            self.fundamental_text.pack(fill="both", expand=True, padx=10, pady=10)
 
         # 投资建议页面
         self.recommendation_frame = tk.Frame(self.notebook, bg="white")
         self.notebook.add(self.recommendation_frame, text="投资建议")
+        # 投资建议文本区（用于显示生成的推荐报告）
+        try:
+            self.recommendation_text = scrolledtext.ScrolledText(self.recommendation_frame,
+                                                                 font=("Consolas", 11),
+                                                                 wrap=tk.WORD,
+                                                                 bg="white")
+            self.recommendation_text.pack(fill="both", expand=True, padx=10, pady=10)
+        except Exception:
+            # 如果scrolledtext不可用，退回为普通Text
+            self.recommendation_text = tk.Text(self.recommendation_frame, font=("Consolas", 11), wrap=tk.WORD, bg="white")
+            self.recommendation_text.pack(fill="both", expand=True, padx=10, pady=10)
 
         # 排行榜页面
         self.ranking_frame = tk.Frame(self.notebook, bg="white")
         self.notebook.add(self.ranking_frame, text="排行榜")
+        # 排行榜文本区
+        try:
+            self.ranking_text = scrolledtext.ScrolledText(self.ranking_frame,
+                                                         font=("Consolas", 10),
+                                                         wrap=tk.WORD,
+                                                         bg="white")
+            self.ranking_text.pack(fill="both", expand=True, padx=10, pady=10)
+        except Exception:
+            # 如果scrolledtext不可用，退回为普通Text
+            self.ranking_text = tk.Text(self.ranking_frame, font=("Consolas", 10), wrap=tk.WORD, bg="white")
+            self.ranking_text.pack(fill="both", expand=True, padx=10, pady=10)
 
         # 初始化排行榜显示
         self.root.after(1000, self.update_ranking_display)
@@ -9953,8 +10139,13 @@ WARNING: 重要声明:
             else:
                 print("未找到投资建议文本组件，使用概览页面")
                 # 如果没有投资建议页面，在概览页面显示
-                self.overview_text.delete('1.0', recommendation_report)
-                self.overview_text.insert('1.0', recommendation_report)
+                try:
+                    self.overview_text.delete('1.0', tk.END)
+                    self.overview_text.insert('1.0', recommendation_report)
+                    # 切换到概览标签页
+                    self.notebook.select(0)
+                except Exception as e:
+                    print(f"将推荐显示到概览页面失败: {e}")
         except Exception as e:
             print(f"显示推荐结果失败: {e}")
             self.hide_progress()
@@ -9998,20 +10189,43 @@ WARNING: 重要声明:
             # 创建收集器实例
             collector = ComprehensiveDataCollector()
             
-            def update_status(message):
+            def update_status(message, progress=None, detail=""):
                 """更新状态显示"""
                 self.root.after(0, lambda: self.data_collection_status_label.config(text=message, fg="#27ae60"))
+                if detail:
+                    self.root.after(0, lambda: self.data_collection_detail_label.config(text=detail))
+                if progress is not None:
+                    self.root.after(0, lambda: self.data_collection_progress.config(value=progress))
+            
+            # 初始化进度条
+            update_status("开始数据采集...", 0, "准备获取主板股票列表...")
             
             # 开始收集数据
-            update_status("正在收集股票基本信息...")
-            collector.run_batch_collection(batch_size=15, total_batches=20)  # 收集300只股票
+            collector.run_batch_collection_with_progress(
+                batch_size=15, 
+                total_batches=166,  # 收集2500只主板股票，每批15只避免API错误（主板总数3036只，覆盖82.3%）
+                progress_callback=update_status
+            )
             
             # 收集完成
-            update_status("数据收集完成")
+            update_status("数据收集完成", 100, "正在加载数据到内存缓存...")
             self.data_collection_active = False
             
-            # 显示完成消息
-            self.root.after(0, lambda: messagebox.showinfo("完成", "全部数据收集完成！\n数据已保存到 data/comprehensive_stock_data.json"))
+            # 尝试将收集器生成的数据加载到内存缓存，便于后续评分/推荐复用
+            try:
+                loaded = self.load_comprehensive_stock_data()
+                if loaded:
+                    # 在主线程更新状态与显示完成消息
+                    count = len(self.comprehensive_stock_data)
+                    update_status("收集完成", 100, f"已成功加载 {count} 条数据到内存缓存")
+                    self.root.after(0, lambda: messagebox.showinfo("完成", f"全部数据收集完成！\n已加载 {count} 条数据到内存缓存。"))
+                else:
+                    update_status("收集完成", 100, "数据已保存，但未能自动加载到内存")
+                    self.root.after(0, lambda: messagebox.showinfo("完成", "全部数据收集完成！\n数据已保存到 data/comprehensive_stock_data.json (未能自动加载)"))
+            except Exception as e:
+                print(f"加载收集结果到内存失败: {e}")
+                update_status("收集完成", 100, "数据已保存，但加载到内存缓存失败")
+                self.root.after(0, lambda: messagebox.showinfo("完成", "全部数据收集完成！\n但加载到内存缓存失败，请手动加载。"))
             
         except Exception as e:
             print(f"数据收集过程出错: {e}")
@@ -10020,7 +10234,10 @@ WARNING: 重要声明:
             
             self.data_collection_active = False
             error_msg = f"数据收集失败：{str(e)}"
+            # 重置进度条并显示错误状态
             self.root.after(0, lambda: self.data_collection_status_label.config(text="收集失败", fg="#e74c3c"))
+            self.root.after(0, lambda: self.data_collection_detail_label.config(text="发生错误，请检查网络连接和API状态"))
+            self.root.after(0, lambda: self.data_collection_progress.config(value=0))
             self.root.after(0, lambda: messagebox.showerror("错误", error_msg))
     
     def show_hot_sectors_analysis(self):
