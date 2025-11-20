@@ -9,3 +9,26 @@ eval_results/
 eval_data/
 *.egg-info/
 .env
+
+# 备份文件
+*.backup
+*.bak
+*~
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+
+# 编译文件
+*.pyc
+*.pyo
+*.pyd
+
+# 测试和评估文档
+evaluation_*.md
+test_*.py
+
+# 数据文件（保留data/目录下的文件）
+/*.json
+!requirements.txt

@@ -94,21 +94,21 @@ except ImportError:
     TENCENT_KLINE_AVAILABLE = False
     print("[WARN] 腾讯K线API 未找到")
 
-# JoinQuant API 支持
+# BaoStock API 支持（免费K线数据兜底）
 try:
-    from joinquant_api import JoinQuantAPI
-    JOINQUANT_AVAILABLE = True
-    print("[INFO] JoinQuant API 已加载")
+    from baostock_api import BaoStockAPI
+    BAOSTOCK_AVAILABLE = True
+    print("[INFO] BaoStock API 已加载")
 except ImportError:
-    JOINQUANT_AVAILABLE = False
-    print("[WARN] JoinQuant API 未找到")
+    BAOSTOCK_AVAILABLE = False
+    print("[WARN] BaoStock API 未找到，请安装: pip install baostock")
 
-print(f"[INFO] JoinQuant分析: 由于公开API可能不稳定，建议用于其他数据类型获取：")
-print(f"       - 基本信息: 可能有效（公司概况、行业分类）")  
-print(f"       - 财务数据: 可能有效（财报数据）")
-print(f"       - K线数据: 不稳定，已用腾讯API替代")
-print(f"       - 实时数据: 建议用腾讯/新浪API")
-print(f"       - 建议角色: 作为财务和基本信息的后备数据源")
+print(f"[INFO] BaoStock分析: 免费稳定的A股K线数据源，作为最终兜底方案：")
+print(f"       - K线数据: 免费稳定（日K线）")
+print(f"       - 历史数据: 覆盖全面（A股全市场）")
+print(f"       - 实时性: 适合历史分析，非实时")
+print(f"       - 使用限制: 免费，但有频率限制")
+print(f"       - 建议角色: K线数据的最终兜底方案")
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -243,29 +243,20 @@ class ComprehensiveDataCollector:
         self.api_rotation_index = 0  # 0: Alpha Vantage, 1: Polygon.io
         self.last_api_switch_time = time.time()
         
-        # 初始化 JoinQuant API（降级为后备数据源）
-        self.joinquant = None
-        if JOINQUANT_AVAILABLE:
-            try:
-                self.joinquant = JoinQuantAPI()
-                print("[INFO] JoinQuant API 初始化成功（作为财务数据后备）")
-            except Exception as e:
-                print(f"[WARN] JoinQuant API 初始化失败: {e}")
-        
-        # 初始化 baostock
-        self.bs_login = False
+        # 初始化 BaoStock API（K线数据兜底方案）
+        self.baostock = None
         if BAOSTOCK_AVAILABLE:
             try:
-                lg = bs.login()
-                if lg.error_code == '0':
-                    self.bs_login = True
-                    print("[INFO] baostock 登录成功")
+                self.baostock = BaoStockAPI()
+                if self.baostock.is_connected:
+                    print("[INFO] BaoStock API 初始化成功（K线数据兜底）")
                 else:
-                    print(f"[WARN] baostock 登录失败: {lg.error_msg}")
+                    print("[WARN] BaoStock API 连接失败")
+                    self.baostock = None
             except Exception as e:
-                print(f"[WARN] baostock 初始化失败: {e}")
+                print(f"[WARN] BaoStock API 初始化失败: {e}")
         else:
-            print("[INFO] baostock 不可用，跳过初始化")
+            print("[INFO] BaoStock 不可用，跳过初始化")
         
         # 确保输出目录存在
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
@@ -1051,7 +1042,7 @@ class ComprehensiveDataCollector:
             
             final_failed_codes = remaining_codes
         else:
-            joinquant_success = []
+            baostock_success = []
             alpha_success = []
             yfinance_success = []
             final_failed_codes = []
@@ -1115,33 +1106,36 @@ class ComprehensiveDataCollector:
             final_failed_codes = remaining_codes
         
         # 现在所有处理逻辑已完成，统计最终结果
-        if not 'joinquant_success' in locals():
-            joinquant_success = []
+        if not 'baostock_success' in locals():
+            baostock_success = []
         if not 'alpha_success' in locals():
             alpha_success = []  
         if not 'yfinance_success' in locals():
             yfinance_success = []
         
-        # 3. JoinQuant最终兜底处理
-        joinquant_success = []
-        if final_failed_codes and self.joinquant:
-            print(f"[INFO] JoinQuant 兜底处理 {len(final_failed_codes)} 只最终失败股票...")
+        # 3. BaoStock最终兜底处理（免费稳定的K线数据）
+        baostock_success = []
+        if final_failed_codes and self.baostock and self.baostock.is_connected:
+            print(f"[INFO] BaoStock 兜底处理 {len(final_failed_codes)} 只最终失败股票...")
             try:
-                # 使用JoinQuant批量获取
-                jq_results = self.joinquant.batch_get_klines(final_failed_codes, start_iso, end_iso)
+                # 计算获取天数
+                days = max(30, self.kline_days)
                 
-                for code, df in jq_results.items():
+                # 使用BaoStock批量获取
+                bs_results = self.baostock.batch_get_klines(final_failed_codes, days)
+                
+                for code, df in bs_results.items():
                     if df is not None and not df.empty:
-                        df = self.standardize_kline_columns(df, 'joinquant')
+                        df = self.standardize_kline_columns(df, 'baostock')
                         if not df.empty:
                             result[code] = df
-                            joinquant_success.append(code)
+                            baostock_success.append(code)
                 
-                print(f"[SUCCESS] JoinQuant 兜底成功: {len(joinquant_success)}/{len(final_failed_codes)} 只")
+                print(f"[SUCCESS] BaoStock 兜底成功: {len(baostock_success)}/{len(final_failed_codes)} 只")
             except Exception as e:
-                print(f"[ERROR] JoinQuant 兜底处理异常: {e}")
-        elif final_failed_codes and not self.joinquant:
-            print(f"[WARN] JoinQuant API未初始化，无法兜底处理 {len(final_failed_codes)} 只股票")
+                print(f"[ERROR] BaoStock 兜底处理异常: {e}")
+        elif final_failed_codes and not (self.baostock and getattr(self.baostock, 'is_connected', False)):
+            print(f"[WARN] BaoStock API未连接，无法兜底处理 {len(final_failed_codes)} 只股票")
         
         # 4. Alpha Vantage最终兜底处理
         still_failed = [code for code in codes if code not in result]
@@ -1173,11 +1167,11 @@ class ComprehensiveDataCollector:
                         print(f"[WARN] Alpha Vantage兜底{code}失败: {e}")
                         continue
                 
-                print(f"[SUCCESS] Alpha Vantage 兜底成功: {len(alpha_success)}/{len(final_failed)} 只")
+                print(f"[SUCCESS] Alpha Vantage 兜底成功: {len(alpha_success)}/{len(still_failed)} 只")
             except Exception as e:
                 print(f"[ERROR] Alpha Vantage 兜底处理异常: {e}")
-        elif final_failed and not self.alpha_vantage:
-            print(f"[WARN] Alpha Vantage API未初始化，无法兜底处理 {len(final_failed)} 只股票")
+        elif still_failed and not self.alpha_vantage:
+            print(f"[WARN] Alpha Vantage API未初始化，无法兜底处理 {len(still_failed)} 只股票")
         
         # 统计最终结果
         success_count = len(result)
@@ -1197,7 +1191,7 @@ class ComprehensiveDataCollector:
                 print(f"  TUSHARE(备): {len(secondary_success)}/{len(fallback_codes)} ({len(secondary_success)/len(fallback_codes)*100:.1f}%)" if fallback_codes else "  TUSHARE(备): 0/0")
         
         if 'final_failed_codes' in locals() and final_failed_codes:
-            print(f"  JoinQuant(兜底): {len(joinquant_success)}/{len(final_failed_codes)}")
+            print(f"  BaoStock(兜底): {len(baostock_success)}/{len(final_failed_codes)}")
         if 'still_failed' in locals() and still_failed:
             print(f"  Alpha Vantage(最终): {len(alpha_success)}/{len(still_failed)}")
         
