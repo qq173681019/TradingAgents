@@ -387,57 +387,6 @@ class AShareAnalyzerGUI:
         
         # 实时保存到文件
         self.save_daily_cache()
-        
-        # 同时保存为comprehensive格式，与批量评分数据保持一致
-        try:
-            comprehensive_format = {
-                'code': ticker,
-                'name': analysis_data.get('name', f'股票{ticker}'),
-                'current_price': analysis_data.get('price', 0),
-                'tech_data': {
-                    'current_price': analysis_data.get('price', 0),
-                    'data_source': 'real_time_analysis'
-                },
-                'fund_data': {
-                    'is_etf': False  # 单独分析默认为普通股票
-                },
-                'short_term': {
-                    'score': analysis_data.get('short_prediction', {}).get('technical_score', 5.0),
-                    'recommendation': analysis_data.get('short_prediction', {}).get('trend', ''),
-                    'confidence': analysis_data.get('short_prediction', {}).get('confidence', 0),
-                    'factors': analysis_data.get('short_prediction', {}).get('key_signals', []),
-                    'risk_level': analysis_data.get('short_prediction', {}).get('risk_level', '中等')
-                },
-                'medium_term': {
-                    'score': analysis_data.get('medium_prediction', {}).get('total_score', 5.0),
-                    'recommendation': analysis_data.get('medium_prediction', {}).get('trend', ''),
-                    'confidence': analysis_data.get('medium_prediction', {}).get('confidence', 0),
-                    'factors': analysis_data.get('medium_prediction', {}).get('key_signals', []),
-                    'risk_level': analysis_data.get('medium_prediction', {}).get('risk_level', '中等')
-                },
-                'long_term': {
-                    'score': analysis_data.get('long_prediction', {}).get('fundamental_score', 5.0),
-                    'recommendation': analysis_data.get('long_prediction', {}).get('trend', ''),
-                    'confidence': analysis_data.get('long_prediction', {}).get('confidence', 0),
-                    'factors': analysis_data.get('long_prediction', {}).get('key_signals', []),
-                    'risk_level': analysis_data.get('long_prediction', {}).get('risk_level', '中等')
-                },
-                'overall_score': analysis_data.get('final_score', 5.0),
-                'timestamp': datetime.now().isoformat(),
-                'data_source': 'real_time_analysis'
-            }
-            
-            # 保存到comprehensive_data内存缓存
-            self.comprehensive_data[ticker] = comprehensive_format
-            if hasattr(self, 'comprehensive_stock_data'):
-                self.comprehensive_stock_data[ticker] = comprehensive_format
-            
-            # 保存到本地JSON文件
-            self.save_single_stock_data(ticker, comprehensive_format)
-            print(f"🔄 已将 {ticker} 的实时分析结果保存为comprehensive格式")
-            
-        except Exception as e:
-            print(f"⚠️ 保存comprehensive格式失败: {e}")
     
     def load_batch_scores(self):
         """加载批量评分数据 - 增强版本"""
@@ -720,29 +669,18 @@ class AShareAnalyzerGUI:
         candidates.append(os.path.join('data', self.comprehensive_data_file))
         candidates.append(self.comprehensive_data_file)
 
-        print(f"🔍 开始加载完整数据，候选路径: {candidates}")
-
         for path in candidates:
             try:
                 if os.path.exists(path):
-                    print(f"📁 找到文件: {path}")
                     with open(path, 'r', encoding='utf-8') as f:
                         data = json.load(f)
 
-                    print(f"📊 原始数据结构: {type(data)}, 顶级键: {list(data.keys())}")
-
-                    # 支持三种格式：直接为 dict、{'data': {...}} 或者 {'stocks': {...}}
+                    # 支持两种格式：直接为 dict 或者 {'data': {...}}
                     if isinstance(data, dict):
                         if 'data' in data and isinstance(data['data'], dict):
                             loaded = data['data']
-                            print("🔄 使用data字段格式")
-                        elif 'stocks' in data and isinstance(data['stocks'], dict):
-                            # 新的保存格式，包含stocks字段
-                            loaded = data['stocks']
-                            print("🔄 使用stocks字段格式")
                         else:
                             loaded = data
-                            print("🔄 使用直接格式")
 
                         # 写入内存缓存
                         self.comprehensive_stock_data = loaded
@@ -753,14 +691,7 @@ class AShareAnalyzerGUI:
                             pass
                         self.comprehensive_data_loaded = True
                         count = len(self.comprehensive_stock_data)
-                        print(f"✅ 已加载完整数据到内存缓存: {count} 条 (来源: {path})")
-                        
-                        # 检查特定股票
-                        if '000001' in loaded:
-                            print(f"✅ 确认000001数据已加载")
-                        else:
-                            print(f"⚠️ 000001不在加载的数据中，可用股票: {list(loaded.keys())[:5]}...")
-                            
+                        print(f"已加载完整数据到内存缓存: {count} 条 (来源: {path})")
                         # 同步部分评分缓存（如果数据包含 overall_score）
                         for code, item in self.comprehensive_stock_data.items():
                             try:
@@ -770,61 +701,12 @@ class AShareAnalyzerGUI:
                             except Exception:
                                 continue
                         return True
-                else:
-                    print(f"❌ 文件不存在: {path}")
             except Exception as e:
-                print(f"❌ 尝试加载 {path} 失败: {e}")
+                print(f"尝试加载 {path} 失败: {e}")
                 continue
 
-        print("❌ 未找到完整数据文件以加载到内存缓存")
+        print("未找到完整数据文件以加载到内存缓存")
         return False
-    
-    def save_single_stock_data(self, stock_code, stock_data):
-        """将单只股票的数据保存到本地文件"""
-        try:
-            import json
-            import os
-            from datetime import datetime
-            
-            # 确定数据文件路径
-            data_file = os.path.join('data', self.comprehensive_data_file)
-            
-            # 确保data目录存在
-            os.makedirs('data', exist_ok=True)
-            
-            # 加载现有数据
-            existing_data = {}
-            if os.path.exists(data_file):
-                try:
-                    with open(data_file, 'r', encoding='utf-8') as f:
-                        existing_data = json.load(f)
-                except Exception as e:
-                    print(f"读取现有数据文件失败: {e}")
-                    existing_data = {}
-            
-            # 确保数据结构正确
-            if 'stocks' not in existing_data:
-                existing_data['stocks'] = {}
-            
-            # 添加新的股票数据
-            existing_data['stocks'][stock_code] = stock_data
-            existing_data['last_updated'] = datetime.now().isoformat()
-            existing_data['total_stocks'] = len(existing_data['stocks'])
-            
-            # 保存到文件
-            with open(data_file, 'w', encoding='utf-8') as f:
-                json.dump(existing_data, f, ensure_ascii=False, indent=2, default=str)
-            
-            # 同步更新内存缓存
-            if hasattr(self, 'comprehensive_stock_data'):
-                self.comprehensive_stock_data[stock_code] = stock_data
-            
-            print(f"已保存 {stock_code} 数据到本地文件: {data_file}")
-            return True
-            
-        except Exception as e:
-            print(f"保存 {stock_code} 数据失败: {e}")
-            return False
     
     def is_stock_type_match(self, code, stock_type):
         """判断股票代码是否符合指定类型"""
@@ -1473,8 +1355,6 @@ class AShareAnalyzerGUI:
         
         # 在后台线程中运行，避免界面卡死
         def batch_scoring_thread():
-            import time
-            start_time = time.time()
             self._batch_running = True
             try:
                 # 获取用户选择的股票类型
@@ -1507,7 +1387,6 @@ class AShareAnalyzerGUI:
                 success_count = 0
                 failed_count = 0
                 batch_save_interval = 20  # 每20只保存一次，减少频率
-                print(f"[INFO] 批量评分开始: 数据将保存用于股票排名显示，而非下次评分缓存")
                 
                 for i, code in enumerate(all_codes):
                     print(f"[DEBUG] 分析第{i+1}只: {code}")
@@ -1517,24 +1396,9 @@ class AShareAnalyzerGUI:
                             self.show_progress("⏹️ 用户停止了批量分析")
                             break
                         
-                        # 更新详细进度信息（第一个函数）
+                        # 更新进度
                         progress = (i + 1) / total_stocks * 100
-                        elapsed_time = time.time() - start_time
-                        
-                        if i > 0 and elapsed_time > 0:
-                            avg_time_per_stock = elapsed_time / (i + 1)
-                            remaining_stocks = total_stocks - (i + 1)
-                            eta_seconds = avg_time_per_stock * remaining_stocks
-                            eta_minutes = eta_seconds / 60
-                            
-                            if eta_minutes >= 1:
-                                eta_str = f" | 预计剩余{eta_minutes:.1f}分钟"
-                            else:
-                                eta_str = f" | 预计剩余{eta_seconds:.0f}秒"
-                        else:
-                            eta_str = ""
-                        
-                        self.show_progress(f"🔍 正在评分: {code} | 进度: {i+1}/{total_stocks} ({progress:.1f}%){eta_str}")
+                        self.show_progress(f"⏳ 分析 {code} ({i+1}/{total_stocks}) - {progress:.1f}%")
                         
                         # 获取股票分析和评分
                         try:
@@ -1545,30 +1409,10 @@ class AShareAnalyzerGUI:
                                 # 保存完整数据用于推荐
                                 self.comprehensive_data[code] = comprehensive_data
                                 
-                                # 安全获取评分，如果缓存中没有评分则计算
-                                score = comprehensive_data.get('overall_score')
-                                if score is None:
-                                    # 如果缓存数据没有评分，尝试计算
-                                    try:
-                                        if 'short_term' in comprehensive_data and 'medium_term' in comprehensive_data and 'long_term' in comprehensive_data:
-                                            short_score = comprehensive_data['short_term'].get('score', 5.0)
-                                            medium_score = comprehensive_data['medium_term'].get('score', 5.0)
-                                            long_score = comprehensive_data['long_term'].get('score', 5.0)
-                                            score = (short_score + medium_score + long_score) / 3
-                                            # 更新缓存中的数据
-                                            comprehensive_data['overall_score'] = score
-                                            print(f"🧠 为 {code} 计算缺失的综合评分: {score:.2f}")
-                                        else:
-                                            print(f"⚠️ {code} 缓存数据不完整，跳过评分")
-                                            failed_count += 1
-                                            continue
-                                    except Exception as calc_error:
-                                        print(f"⚠️ {code} 计算评分失败: {calc_error}，跳过")
-                                        failed_count += 1
-                                        continue
-                                
-                                stock_name = comprehensive_data.get('name', f'股票{code}')
-                                industry = comprehensive_data.get('fund_data', {}).get('industry', '未知')
+                                # 保存简化评分数据用于兼容性
+                                score = comprehensive_data['overall_score']
+                                stock_name = comprehensive_data['name']
+                                industry = comprehensive_data['fund_data'].get('industry', '未知')
                                 
                                 self.batch_scores[code] = {
                                     'name': stock_name,
@@ -1655,7 +1499,7 @@ class AShareAnalyzerGUI:
         """停止批量评分"""
         if hasattr(self, '_batch_running') and self._batch_running:
             self._stop_batch = True
-            self.show_progress("[STOP] 正在停止批量评分...")
+            self.show_progress("⏹️ 正在停止批量评分...")
             # 注意：由于删除了停止按钮，这里注释掉按钮状态更新
             # self.stop_batch_btn.config(state="disabled")
         else:
@@ -1673,20 +1517,8 @@ class AShareAnalyzerGUI:
         
         # 在后台线程中运行，避免界面卡死
         def batch_scoring_thread():
-            import time
-            start_time = time.time()
             self._batch_running = True
             try:
-                # 检查是否有已加载的数据
-                data_loaded = getattr(self, 'comprehensive_data_loaded', False)
-                available_data_count = len(self.comprehensive_stock_data) if data_loaded else 0
-                
-                if data_loaded and available_data_count > 0:
-                    self.show_progress(f"✅ 检测到已加载 {available_data_count} 只股票数据，将优先使用缓存数据进行快速评分")
-                else:
-                    self.show_progress(f"⚠️  未检测到已加载数据，将实时获取数据（速度较慢）")
-                    self.show_progress(f"💡 提示：建议先从文件加载数据，然后再进行评分以提高速度")
-                
                 # 转换股票类型
                 if stock_type == "60/00/68":
                     filter_type = "60/00"  # 使用现有的60/00过滤逻辑（已包含688）
@@ -1707,16 +1539,6 @@ class AShareAnalyzerGUI:
                     self.show_progress(f"ERROR: 未找到{stock_type}类型的股票代码")
                     return
                 
-                # 优化处理顺序：如果有缓存数据，优先处理缓存中的股票
-                if data_loaded and available_data_count > 0:
-                    cached_codes = [code for code in all_codes if code in self.comprehensive_stock_data]
-                    non_cached_codes = [code for code in all_codes if code not in self.comprehensive_stock_data]
-                    
-                    # 重新排列，缓存的在前面
-                    all_codes = cached_codes + non_cached_codes
-                    
-                    self.show_progress(f"DATA: 其中 {len(cached_codes)} 只有缓存数据（快速），{len(non_cached_codes)} 只需实时获取（较慢）")
-                
                 # 限制最大处理数量，防止内存溢出
                 max_process = min(total_stocks, 5000)
                 if total_stocks > max_process:
@@ -1724,40 +1546,22 @@ class AShareAnalyzerGUI:
                     all_codes = all_codes[:max_process]
                     total_stocks = max_process
                 
-                self.show_progress(f"\ud83d\ude80 开始{stock_type}股票评分 - 共{total_stocks}只股票等待处理")
+                self.show_progress(f"DATA: 准备分析 {total_stocks} 只{stock_type}股票...")
                 
-                import time
-                start_time = time.time()
                 success_count = 0
                 failed_count = 0
                 batch_save_interval = 20
-                print(f"[INFO] 按类型评分开始: 数据将保存用于股票排名显示，而非下次评分缓存")
                 
                 for i, code in enumerate(all_codes):
                     try:
                         # 检查是否需要停止
                         if hasattr(self, '_stop_batch') and self._stop_batch:
-                            self.show_progress("[STOP] 用户停止了批量分析")
+                            self.show_progress("⏹️ 用户停止了批量分析")
                             break
                         
-                        # 更新详细进度信息（第二个函数）
+                        # 更新进度
                         progress = (i + 1) / total_stocks * 100
-                        elapsed_time = time.time() - start_time
-                        
-                        if i > 0 and elapsed_time > 0:
-                            avg_time_per_stock = elapsed_time / (i + 1)
-                            remaining_stocks = total_stocks - (i + 1)
-                            eta_seconds = avg_time_per_stock * remaining_stocks
-                            eta_minutes = eta_seconds / 60
-                            
-                            if eta_minutes >= 1:
-                                eta_str = f" | 预计剩余{eta_minutes:.1f}分钟"
-                            else:
-                                eta_str = f" | 预计剩余{eta_seconds:.0f}秒"
-                        else:
-                            eta_str = ""
-                        
-                        self.show_progress(f"[{i+1}/{total_stocks}] 分析 {code} ({i+1}/{total_stocks}) - {progress:.1f}%{eta_str}")
+                        self.show_progress(f"⏳ 分析 {code} ({i+1}/{total_stocks}) - {progress:.1f}%")
                         
                         # 获取股票分析和评分
                         try:
@@ -1875,14 +1679,22 @@ class AShareAnalyzerGUI:
             return None
 
     def get_comprehensive_stock_data_for_batch(self, stock_code):
-        """为批量评分获取单只股票的完整数据 - 每次重新计算评分"""
+        """为批量评分获取单只股票的完整数据 - 只使用真实数据"""
         try:
-            # 批量评分：总是重新计算评分，确保数据最新
-            print(f"🔄 重新计算评分: {stock_code} (批量评分模式)")
-
-            # 如果没有缓存数据，提示用户应该先加载数据
-            if not getattr(self, 'comprehensive_data_loaded', False):
-                print(f"提示: 建议先从文件加载数据，然后进行评分以提高速度")
+            # 优先使用内存缓存中的收集数据，避免重复网络请求
+            if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
+                try:
+                    cached = self.comprehensive_stock_data.get(stock_code)
+                    # 如果缓存中包含 overall_score，则也填充评分缓存
+                    if isinstance(cached, dict) and 'overall_score' in cached:
+                        try:
+                            self.scores_cache[stock_code] = float(cached['overall_score'])
+                        except Exception:
+                            pass
+                    return cached
+                except Exception as e:
+                    print(f"从内存缓存读取 {stock_code} 失败: {e}")
+                    # 回退到实时抓取
 
             from datetime import datetime
             
@@ -1970,66 +1782,13 @@ class AShareAnalyzerGUI:
                 
                 # 时间戳
                 'timestamp': datetime.now().isoformat(),
-                'data_source': 'real_time_scoring'
+                'data_source': 'comprehensive_batch'
             }
-            
-            # 保存实时获取的数据到本地文件，以便下次使用缓存
-            try:
-                self.save_single_stock_data(stock_code, comprehensive_data)
-                print(f"✅ {stock_code} 实时数据已保存到本地，下次评分将使用缓存")
-            except Exception as e:
-                print(f"⚠️ {stock_code} 数据保存失败: {e}")
             
             return comprehensive_data
             
         except Exception as e:
             print(f"获取 {stock_code} 完整数据失败: {e}")
-            return None
-    
-    def get_comprehensive_stock_data_for_recommendation(self, stock_code):
-        """为推荐功能获取单只股票的完整数据 - 优先使用已加载数据"""
-        try:
-            # 推荐功能：优先使用内存缓存中的收集数据，避免重复网络请求
-            if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
-                try:
-                    cached = self.comprehensive_stock_data.get(stock_code)
-                    print(f"使用已缓存数据进行推荐: {stock_code}")
-                    
-                    # 检查缓存数据是否包含 overall_score，如果没有则计算
-                    if isinstance(cached, dict):
-                        if 'overall_score' not in cached or cached['overall_score'] is None:
-                            # 尝试从三个时间段评分计算综合评分
-                            if all(key in cached for key in ['short_term', 'medium_term', 'long_term']):
-                                try:
-                                    short_score = cached['short_term'].get('score', 5.0)
-                                    medium_score = cached['medium_term'].get('score', 5.0) 
-                                    long_score = cached['long_term'].get('score', 5.0)
-                                    overall_score = (short_score + medium_score + long_score) / 3
-                                    cached['overall_score'] = overall_score
-                                    print(f"🧠 为缓存数据 {stock_code} 计算综合评分: {overall_score:.2f}")
-                                except Exception as score_calc_error:
-                                    print(f"⚠️ 计算 {stock_code} 综合评分失败: {score_calc_error}")
-                            else:
-                                print(f"⚠️ {stock_code} 缓存数据不完整，缺少评分数据")
-                        
-                        # 如果缓存中包含 overall_score，则也填充评分缓存
-                        if 'overall_score' in cached and cached['overall_score'] is not None:
-                            try:
-                                self.scores_cache[stock_code] = float(cached['overall_score'])
-                            except Exception:
-                                pass
-                    
-                    return cached
-                except Exception as e:
-                    print(f"从内存缓存读取 {stock_code} 失败: {e}")
-                    return None
-            
-            # 如果没有缓存数据，推荐功能提示用户先进行评分
-            print(f"⚠️ {stock_code} 不在缓存中，请先进行评分后再获取推荐")
-            return None
-            
-        except Exception as e:
-            print(f"获取 {stock_code} 推荐数据失败: {e}")
             return None
     
     def import_csv_analysis(self):
@@ -2394,7 +2153,7 @@ class AShareAnalyzerGUI:
             print(f"CSV分析完成，共分析 {len(results)} 只股票")
     
     def get_stock_name(self, code):
-        """获取股票名称"""
+        """获取股票名称"""11
         # 模拟股票名称数据
         name_map = {
             '000001': '平安银行', '000002': '万科A', '000858': '五粮液',
@@ -2426,7 +2185,7 @@ class AShareAnalyzerGUI:
     def calculate_fundamental_score(self, fund_data):
         """计算基本面评分 (5-10分)"""
         try:
-            score = self.calculate_fundamental_index(
+            score = self.calculate_fundamental_index( 
                 fund_data['pe_ratio'],
                 fund_data['pb_ratio'],
                 fund_data['roe'],
@@ -2522,6 +2281,10 @@ class AShareAnalyzerGUI:
         self.analyze_btn = tk.Button(input_frame, text="开始分析", font=("微软雅黑", 11), bg="#27ae60", fg="white", command=self.start_analysis, cursor="hand2", width=12)
         self.analyze_btn.pack(side="left", padx=5)
 
+        # 批量评分快捷按钮
+        self.batch_analyze_btn = tk.Button(input_frame, text="开始批量评分", font=("微软雅黑", 11), bg="#2980b9", fg="white", command=lambda: self.start_batch_scoring_by_type("全部"), cursor="hand2", width=14)
+        self.batch_analyze_btn.pack(side="left", padx=5)
+
         # 投资期限选择（短期/中期/长期）
         tk.Label(input_frame, text="期限:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(10, 0))
         self.period_var = tk.StringVar(value="中期")
@@ -2569,6 +2332,18 @@ class AShareAnalyzerGUI:
         
         tk.Label(score_button_frame, text="获取评分:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=8, anchor="w").pack(side="left", padx=(0, 10))
         
+        # 获取全部评分按钮
+        get_all_score_btn = tk.Button(score_button_frame, 
+                                    text="获取全部评分", 
+                                    font=("微软雅黑", 11),
+                                    bg="#3498db", 
+                                    fg="white",
+                                    activebackground="#2980b9",
+                                    command=lambda: self.start_batch_scoring_by_type("全部"),
+                                    cursor="hand2",
+                                    width=12)
+        get_all_score_btn.pack(side="left", padx=5)
+        
         # 获取60/00/68评分按钮
         get_main_score_btn = tk.Button(score_button_frame, 
                                      text="获取60/00/68评分", 
@@ -2600,6 +2375,18 @@ class AShareAnalyzerGUI:
         recommend_button_frame.pack(fill="x", padx=20, pady=5)
         
         tk.Label(recommend_button_frame, text="股票推荐:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=8, anchor="w").pack(side="left", padx=(0, 10))
+        
+        # 综合推荐按钮
+        comprehensive_recommend_btn = tk.Button(recommend_button_frame, 
+                                              text="综合推荐", 
+                                              font=("微软雅黑", 11),
+                                              bg="#e74c3c", 
+                                              fg="white",
+                                              activebackground="#c0392b",
+                                              command=lambda: self.generate_stock_recommendations_by_type("全部"),
+                                              cursor="hand2",
+                                              width=12)
+        comprehensive_recommend_btn.pack(side="left", padx=5)
         
         # 推荐60/00/68按钮
         main_recommend_btn = tk.Button(recommend_button_frame, 
@@ -2855,17 +2642,8 @@ class AShareAnalyzerGUI:
         """显示进度条和消息"""
         self.progress_var.set(message)
         self.progress_bar.pack(fill="x", pady=5)
-        self.progress_bar.start(10)  # 设置动画速度
-        # 使进度条更可见
-        self.progress_bar.configure(style="TProgressbar")
+        self.progress_bar.start()
         self.root.update()
-        # 安全打印进度，处理Unicode错误
-        try:
-            print(f"[PROGRESS] {message}")
-        except UnicodeEncodeError:
-            # 如果有Unicode错误，清理消息中的特殊字符
-            clean_message = ''.join(c if ord(c) < 127 else '?' for c in message)
-            print(f"[PROGRESS] {clean_message}")
     
     def hide_progress(self):
         """隐藏进度条"""
@@ -7125,10 +6903,6 @@ CSV批量分析使用方法:
             import threading
             print(f"开始分析股票: {ticker}")
             
-            # 确保进度条显示
-            self.root.after(0, lambda: self.show_progress(f"正在分析 {ticker}，请稍候..."))
-            time.sleep(0.2)  # 给进度条显示时间
-            
             # 设置总体超时时间（15秒）
             def timeout_handler():
                 print("⏰ 分析超时，强制终止")
@@ -7138,29 +6912,23 @@ CSV批量分析使用方法:
             timeout_timer.start()
             
             # 步骤1: 获取基本信息
-            self.update_progress(f">>> 步骤 1/6 (16%): 获取 {ticker} 基本信息...")
-            time.sleep(0.3)
+            self.update_progress(f"步骤1/6: 获取 {ticker} 基本信息...")
+            time.sleep(0.1)
             try:
-                # 检查是否有本地数据
-                if ticker in self.stock_info:
-                    stock_info = self.stock_info[ticker]
-                    print(f"✓ 本地数据: 使用已缓存的{ticker}基本信息 - {stock_info['name']}")
-                else:
-                    stock_info = {
-                        "name": f"股票{ticker}",
-                        "industry": "未知行业",
-                        "concept": "A股",
-                        "price": 0
-                    }
-                    print(f"⚠ 本地数据: {ticker}基本信息不在缓存中，使用默认信息")
+                stock_info = self.stock_info.get(ticker, {
+                    "name": f"股票{ticker}",
+                    "industry": "未知行业",
+                    "concept": "A股",
+                    "price": 0
+                })
                 print(f"步骤1完成: 基本信息获取成功 - {stock_info['name']}")
             except Exception as e:
                 print(f"步骤1出错: {e}")
                 stock_info = {"name": f"股票{ticker}", "industry": "未知行业", "concept": "A股", "price": 0}
             
             # 步骤2: 生成智能模拟技术数据
-            self.update_progress(f">>> 步骤 2/6 (33%): 生成 {ticker} 技术分析数据...")
-            time.sleep(0.3)
+            self.update_progress(f"步骤2/6: 生成 {ticker} 技术分析数据...")
+            time.sleep(0.1)
             try:
                 tech_data = self._generate_smart_mock_technical_data(ticker)
                 print(f"步骤2完成: 技术数据生成成功 - 价格¥{tech_data['current_price']:.2f}")
@@ -7172,8 +6940,8 @@ CSV批量分析使用方法:
                 return
             
             # 步骤3: 生成智能模拟基本面数据
-            self.update_progress(f">>> 步骤 3/6 (50%): 生成 {ticker} 基本面数据...")
-            time.sleep(0.3)
+            self.update_progress(f"步骤3/6: 生成 {ticker} 基本面数据...")
+            time.sleep(0.1)
             try:
                 fund_data = self._generate_smart_mock_fundamental_data(ticker)
                 print(f"步骤3完成: 基本面数据生成成功 - PE{fund_data['pe_ratio']:.1f}")
@@ -7185,8 +6953,8 @@ CSV批量分析使用方法:
                 return
             
             # 步骤4: 技术分析
-            self.update_progress(f">>> 步骤 4/6 (67%): 进行 {ticker} 技术分析...")
-            time.sleep(0.5)
+            self.update_progress(f"步骤4/6: 进行技术分析...")
+            time.sleep(0.1)
             try:
                 print("开始技术分析...")
                 technical_analysis = self.format_technical_analysis_from_data(ticker, tech_data)
@@ -7198,35 +6966,25 @@ CSV批量分析使用方法:
                 self.root.after(0, self.show_error, error_msg)
                 return
 
-            # 步骤5: 基本面分析  
-            self.update_progress(f">>> 步骤 5/6 (83%): 进行 {ticker} 基本面分析...")
-            time.sleep(0.5)
+            # 步骤5: 基本面分析
+            self.update_progress(f"步骤5/6: 进行基本面分析...")
+            time.sleep(0.1)
             fundamental_analysis = "基本面分析超时或跳过。"
             try:
                 print("开始基本面分析...")
-                # 首先检查本地缓存数据
-                if ticker in self.comprehensive_stock_data:
-                    cached_data = self.comprehensive_stock_data[ticker]
-                    print(f"✓ 本地数据: 发现{ticker}的完整缓存数据，数据时间: {cached_data.get('timestamp', '未知')}")
-                    fund_score = cached_data.get('fund_score', 5.0)
+                # 优先尝试真实数据
+                real_fund_data = self.get_real_fundamental_indicators(ticker)
+                if real_fund_data:
+                    fund_score = self.calculate_fundamental_score(real_fund_data)
                     fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
-                    print(f"步骤5完成: 基本面分析使用缓存数据 ({len(fundamental_analysis)}字符) [本地缓存]")
+                    print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符) [真实数据]")
                 else:
-                    print(f"⚠ 本地数据: {ticker}不在完整数据缓存中，尝试获取实时数据")
-                    # 优先尝试真实数据
-                    real_fund_data = self.get_real_fundamental_indicators(ticker)
-                    if real_fund_data:
-                        print(f"✓ 实时数据: 成功获取{ticker}的真实基本面数据")
-                        fund_score = self.calculate_fundamental_score(real_fund_data)
-                        fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
-                        print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符) [真实数据]")
-                    else:
-                        # 真实数据失败，降级为智能模拟数据
-                        print(f"⚠ 实时数据: 未获取到{ticker}真实基本面数据，自动降级为智能模拟数据")
-                        mock_fund_data = self._generate_smart_mock_fundamental_data(ticker)
-                        fund_score = self.calculate_fundamental_score(mock_fund_data)
-                        fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
-                        print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符) [模拟数据]")
+                    # 真实数据失败，降级为智能模拟数据
+                    print("未获取到真实基本面数据，自动降级为智能模拟数据")
+                    mock_fund_data = self._generate_smart_mock_fundamental_data(ticker)
+                    fund_score = self.calculate_fundamental_score(mock_fund_data)
+                    fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
+                    print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符) [模拟数据]")
             except Exception as e:
                 print(f"步骤5出错: {e}")
                 # 跳过该步骤，继续后续流程
@@ -7234,16 +6992,28 @@ CSV批量分析使用方法:
                 pass
             
             # 步骤6: 生成投资建议
-            self.update_progress(f">>> 步骤 6/6 (100%): 生成 {ticker} 投资建议...")
-            time.sleep(0.5)
+            self.update_progress(f"步骤6/6: 生成投资建议...")
             time.sleep(0.1)
             try:
                 print("开始生成投资建议...")
                 
-                # 用户主动点击评分按钮，强制重新计算，不使用缓存
-                print(f"🔄 用户主动评分，强制重新计算 {ticker} 的三时间段评分")
+                # 首先尝试使用缓存的综合数据来保持一致性
+                cached_data = self.comprehensive_data.get(ticker, {})
+                if cached_data and 'short_term' in cached_data and 'medium_term' in cached_data and 'long_term' in cached_data:
+                    print(f"🔄 使用缓存的评分数据来保持与推荐系统的一致性")
+                    short_score = cached_data['short_term'].get('score', 0)
+                    medium_score = cached_data['medium_term'].get('score', 0) 
+                    long_score = cached_data['long_term'].get('score', 0)
+                    
+                    # 获取对应的预测信息
+                    short_prediction = cached_data['short_term']
+                    medium_prediction = cached_data['medium_term']
+                    long_prediction = cached_data['long_term']
+                    
+                    print(f"📊 使用缓存评分 - 短期:{short_score:.1f}, 中期:{medium_score:.1f}, 长期:{long_score:.1f}")
+                # 强制每次都用大模型/最新分析，不走缓存
+                print(f"⚡ 强制使用新的三时间段预测系统（无视缓存）")
                 short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
-                
                 # 计算综合评分（基于三个时间段的技术分析评分）
                 short_score = short_prediction.get('technical_score', 0)
                 medium_score = medium_prediction.get('total_score', 0)
@@ -7260,7 +7030,7 @@ CSV批量分析使用方法:
                     final_score = max(1.0, min(10.0, 5.0 + raw_score * 0.5))
                 
                 print(f"开始分析算法调试 - {ticker}:")
-                print(f"   📊 数据来源: 实时计算")
+                print(f"   📊 数据来源: {'缓存数据' if cached_data else '实时计算'}")
                 print(f"   短期评分: {short_score:.1f}")
                 print(f"   中期评分: {medium_score:.1f}")
                 print(f"   长期评分: {long_score:.1f}")
@@ -7398,7 +7168,7 @@ CSV批量分析使用方法:
                 long_term_advice = {"advice": f"长期建议生成出错: {e}"}
             
             # 步骤6: 生成报告
-            self.update_progress(f">>> 步骤 6/6 (100%): 生成 {ticker} 投资分析报告...")
+            self.update_progress(f"步骤6/6: 生成投资分析报告...")
             time.sleep(0.3)
             try:
                 overview = self.generate_overview(ticker)
@@ -7412,9 +7182,6 @@ CSV批量分析使用方法:
                 recommendation = f"建议格式化出错: {e}"
             
             print(f"🎉 分析完成，准备更新UI")
-            
-            # 显示完成进度
-            self.update_progress(f"[OK] 分析完成！正在更新 {ticker} 的结果...")
             
             # 在主线程中更新UI
             self.root.after(0, self.update_results, overview, technical_analysis, fundamental_analysis, recommendation, ticker)
@@ -7441,26 +7208,7 @@ CSV批量分析使用方法:
     
     def update_progress(self, message):
         """更新进度信息"""
-        def update_ui():
-            self.progress_var.set(message)
-            # 确保进度条可见
-            if not self.progress_bar.winfo_viewable():
-                self.progress_bar.pack(fill="x", pady=5)
-                self.progress_bar.start(10)
-            self.root.update_idletasks()
-            self.root.update()
-            # 安全打印进度，处理Unicode错误
-            try:
-                print(f"[PROGRESS] {message}")
-            except UnicodeEncodeError:
-                # 如果有Unicode错误，清理消息中的特殊字符
-                clean_message = ''.join(c if ord(c) < 127 else '?' for c in message)
-                print(f"[PROGRESS] {clean_message}")
-        
-        if threading.current_thread() == threading.main_thread():
-            update_ui()
-        else:
-            self.root.after(0, update_ui)
+        self.root.after(0, lambda: self.progress_var.set(message))
     
     def update_results(self, overview, technical, fundamental, recommendation, ticker):
         """更新分析结果"""
@@ -8819,7 +8567,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 if cached_analysis:
                     # 使用缓存数据
                     cached_count += 1
-                    self.update_progress(f"[{i}/{len(stock_pool)}] 使用缓存 {ticker} ({i}/{len(stock_pool)}) [缓存:{cached_analysis['cache_time']}]")
+                    self.update_progress(f"使用缓存 {ticker} ({i}/{len(stock_pool)}) [缓存:{cached_analysis['cache_time']}]")
                     
                     # 添加到所有股票列表
                     all_analyzed_stocks.append(cached_analysis)
@@ -8830,7 +8578,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 else:
                     # 实时分析
                     analyzed_count += 1
-                    self.update_progress(f"[{i}/{len(stock_pool)}] 实时分析 {ticker} ({i}/{len(stock_pool)})...")
+                    self.update_progress(f"实时分析 {ticker} ({i}/{len(stock_pool)})...")
                     
                     analysis_result = self.analyze_single_stock(ticker, period, score_threshold)
                     

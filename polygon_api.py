@@ -126,7 +126,8 @@ class PolygonAPI:
             if response.status_code == 200:
                 data = response.json()
                 
-                if data.get('status') == 'OK' and 'results' in data:
+                # 兼容免费版API返回的DELAYED状态
+                if data.get('status') in ['OK', 'DELAYED'] and 'results' in data:
                     results = data['results']
                     
                     # 转换为标准DataFrame格式

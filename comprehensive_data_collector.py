@@ -51,12 +51,29 @@ except ImportError:
     print("[WARN] requests 未安装")
 
 try:
-    import baostock as bs
+    from jina_api import JinaAPI
+    JINA_AVAILABLE = True
+    print("[INFO] JinaAPI 已加载")
+except ImportError:
+    JINA_AVAILABLE = False
+    print("[WARN] JinaAPI 未加载")
+
+try:
+    from baostock_api import BaostockAPI
     BAOSTOCK_AVAILABLE = True
     print("[INFO] baostock 已加载")
 except ImportError:
     BAOSTOCK_AVAILABLE = False
     print("[WARN] baostock 未安装")
+
+# JoinQuant API 支持
+try:
+    from joinquant_api import JoinQuantAPI
+    JOINQUANT_AVAILABLE = True
+    print("[INFO] JoinQuant API 已加载")
+except ImportError:
+    JOINQUANT_AVAILABLE = False
+    print("[WARN] JoinQuant API 未找到")
 
 # Alpha Vantage API 支持
 try:
@@ -75,15 +92,6 @@ try:
 except ImportError:
     POLYGON_AVAILABLE = False
     print("[WARN] Polygon.io API 未安装")
-
-# FMP API 支持
-try:
-    from fmp_api_new import FinancialModelingPrepAPI
-    FMP_AVAILABLE = True
-    print("[INFO] FMP API 已加载")
-except ImportError:
-    FMP_AVAILABLE = False
-    print("[WARN] FMP API 未安装")
 
 # 腾讯K线API支持
 try:
@@ -162,7 +170,7 @@ class ComprehensiveDataCollector:
         self.wait_period_strategy = {
             'industry_concept': ['baostock', 'akshare'],  # 行业概念数据优先使用baostock
             'financial_data': ['tencent', 'baostock', 'akshare'],   # 财务数据：腾讯→baostock→akshare  
-            'basic_info': ['tencent', 'yfinance', 'baostock'], # 基础信息：腾讯→yfinance→baostock
+            'basic_info': ['tencent', 'yfinance', 'baostock', 'jina'], # 基础信息：腾讯→yfinance→baostock→jina
             'fund_flow': ['tencent', 'akshare']          # 资金流向使用腾讯/akshare
         }
         self.collected_data = {}
@@ -195,61 +203,29 @@ class ComprehensiveDataCollector:
             except Exception as e:
                 print(f"[WARN] tushare 初始化失败: {e}")
         
-        # 初始化 Alpha Vantage API
-        self.alpha_vantage = None
-        if ALPHA_VANTAGE_AVAILABLE:
-            alpha_vantage_key = "52N6YLT15MUAA46B"  # 您的API Key
-            if alpha_vantage_key:
-                try:
-                    self.alpha_vantage = AlphaVantageAPI(alpha_vantage_key)
-                    print("[INFO] Alpha Vantage API 初始化成功")
-                except Exception as e:
-                    print(f"[WARN] Alpha Vantage API 初始化失败: {e}")
-                self.ts_pro = None
-        else:
-            self.ts_pro = None
-        
-        # 初始化 Polygon.io API（美股数据）
-        self.polygon = None
-        if POLYGON_AVAILABLE:
+        # 初始化 JoinQuant API
+        self.joinquant = None
+        if JOINQUANT_AVAILABLE:
             try:
-                self.polygon = PolygonAPI()
-                if self.polygon.is_available:
-                    print("[INFO] Polygon.io API 初始化成功（美股数据）")
-                else:
-                    print("[WARN] Polygon.io API 无有效密钥，功能受限")
+                self.joinquant = JoinQuantAPI()
+                print("[INFO] JoinQuant API 初始化成功")
             except Exception as e:
-                print(f"[WARN] Polygon.io API 初始化失败: {e}")
-        
-        # 初始化 FMP API（美股数据）
-        self.fmp = None
-        if FMP_AVAILABLE:
-            try:
-                self.fmp = FinancialModelingPrepAPI("ykbw0oJfMt9t5sDaMLfZWCvJlc9Q0GzQ")
-                print("[INFO] FMP API 初始化成功（美股财务数据）")
-            except Exception as e:
-                print(f"[WARN] FMP API 初始化失败: {e}")
-        
-        # 初始化 腾讯K线API
-        self.tencent_kline = None
-        if TENCENT_KLINE_AVAILABLE:
-            try:
-                self.tencent_kline = TencentKlineAPI()
-                print("[INFO] 腾讯K线API 初始化成功")
-            except Exception as e:
-                print(f"[WARN] 腾讯K线API 初始化失败: {e}")
-        
-        # API轮换状态控制（避免12秒等待）
-        self.api_rotation_index = 0  # 0: Alpha Vantage, 1: Polygon.io
-        self.last_api_switch_time = time.time()
-        
-        # 初始化 BaoStock API（K线数据兜底方案）
-        self.baostock = None
+                print(f"[WARN] JoinQuant API 初始化失败: {e}")
+
+        # 初始化 Jina API
+        self.jina_api_key = "YOUR_JINA_API_KEY" # 请替换为实际的API Key
+        self.jina_api = JinaAPI(self.jina_api_key) if JINA_AVAILABLE else None
+        if self.jina_api:
+            print("[INFO] JinaAPI 初始化成功")
+
+        # 初始化 Baostock API
+        self.bs_login = False
         if BAOSTOCK_AVAILABLE:
             try:
                 self.baostock = BaoStockAPI()
                 if self.baostock.is_connected:
                     print("[INFO] BaoStock API 初始化成功（K线数据兜底）")
+                    self.bs_login = True
                 else:
                     print("[WARN] BaoStock API 连接失败")
                     self.baostock = None
@@ -404,22 +380,12 @@ class ComprehensiveDataCollector:
             except Exception as e:
                 print(f"[ERROR] A股数据收集异常: {e}")
         
-        # 收集美股数据（优先使用FMP，Polygon.io作为备选）
+        # 收集美股数据（Polygon.io作为备选）
         if us_stocks:
             print(f"\n[INFO] 收集美股数据: {len(us_stocks)} 只")
             us_data = {}
             
-            # 优先尝试FMP API
-            if self.fmp:
-                print(f"[INFO] 使用FMP API获取美股K线数据")
-                try:
-                    fmp_data = self.fmp.batch_get_klines(us_stocks, days)
-                    us_data.update(fmp_data)
-                    print(f"[SUCCESS] FMP获取 {len(fmp_data)}/{len(us_stocks)} 只股票数据")
-                except Exception as e:
-                    print(f"[WARN] FMP API获取失败: {e}")
-            
-            # 如果FMP获取不全，使用Polygon.io补充
+            # 使用Polygon.io补充
             remaining_stocks = [code for code in us_stocks if code not in us_data]
             if remaining_stocks and self.polygon and self.polygon.is_available:
                 print(f"[INFO] 使用Polygon.io补充剩余 {len(remaining_stocks)} 只股票")
@@ -490,25 +456,12 @@ class ComprehensiveDataCollector:
             result['cn_data'] = cn_info
             result['summary']['cn_success'] = len(cn_info)
         
-        # 收集美股基本信息（优先使用FMP，Polygon.io作为备选）
+        # 收集美股基本信息（Polygon.io作为备选）
         if us_stocks:
             print(f"[INFO] 收集美股基本信息: {len(us_stocks)} 只")
             us_info = {}
             
-            # 优先使用FMP API获取公司信息
-            if self.fmp:
-                print(f"[INFO] 使用FMP API获取公司信息")
-                for symbol in us_stocks:
-                    try:
-                        info = self.fmp.get_company_profile(symbol)
-                        if info:
-                            us_info[symbol] = info
-                    except Exception as e:
-                        print(f"[WARN] FMP获取 {symbol} 信息失败: {e}")
-                
-                print(f"[SUCCESS] FMP获取 {len(us_info)}/{len(us_stocks)} 只股票信息")
-            
-            # 如果FMP获取不全，使用Polygon.io补充
+            # 使用Polygon.io补充
             remaining_stocks = [code for code in us_stocks if code not in us_info]
             if remaining_stocks and self.polygon and self.polygon.is_available:
                 print(f"[INFO] 使用Polygon.io补充剩余 {len(remaining_stocks)} 只股票")
@@ -1095,7 +1048,6 @@ class ComprehensiveDataCollector:
                                 secondary_success.append(code)
                             else:
                                 temp_remaining.append(code)
-                            time.sleep(0.1)
                         except Exception as e:
                             print(f"[WARN] TUSHARE替代获取{code}失败: {e}")
                             temp_remaining.append(code)
@@ -1341,7 +1293,7 @@ class ComprehensiveDataCollector:
                                 'yfinance_source': True
                             })
                         
-                        time.sleep(0.2)  # yfinance控频
+                        time.sleep(0.2) # yfinance控频
                     except Exception as e:
                         print(f"[WARN] YFinance {code} 失败: {e}")
                         continue
@@ -1703,7 +1655,7 @@ class ComprehensiveDataCollector:
         print(f"[INFO] 使用akshare获取{len(codes)}只股票K线数据")
         
         try:
-            # akshare需要单只股票获取，但可以控制频率
+            # akshare需要单独股票获取，但可以控制频率
             for i, code in enumerate(codes):
                 try:
                     # 获取日K线数据
@@ -1844,6 +1796,14 @@ class ComprehensiveDataCollector:
                             })
                 except Exception as e:
                     print(f"[DEBUG] baostock基础信息获取失败: {e}")
+            
+            elif source == 'jina' and JINA_AVAILABLE and self.jina_api and self.jina_api.api_key and self.jina_api.api_key != "YOUR_JINA_API_KEY":
+                try:
+                    info = self.jina_api.get_company_info_fallback(code, basic_info['name'])
+                    if info:
+                        basic_info.update(info)
+                except Exception as e:
+                    print(f"[WARN] Jina API 基础信息获取失败: {e}")
         
         except Exception as e:
             print(f"[WARN] {code} 基础信息采集失败 ({source}): {e}")
@@ -1891,8 +1851,6 @@ class ComprehensiveDataCollector:
                 print(f"[SUCCESS] Baostock基础信息: {len(baostock_success)}/{total_codes} 只")
             except Exception as e:
                 print(f"[ERROR] Baostock基础信息异常: {e}")
-        else:
-            print(f"[WARN] Baostock不可用，跳过基础信息采集")
         
         # 2. JoinQuant为辅：获取失败股票的基础信息
         failed_codes = [code for code in codes if code not in result]
@@ -1980,8 +1938,6 @@ class ComprehensiveDataCollector:
                     except Exception as e:
                         print(f"[DEBUG] AKShare {code}: {e}")
                         continue
-                        
-                print(f"[SUCCESS] AKShare兜底基础信息: {len(akshare_success)}/{len(final_failed)} 只")
             except Exception as e:
                 print(f"[ERROR] AKShare兜底异常: {e}")
         
@@ -2831,477 +2787,6 @@ class ComprehensiveDataCollector:
         
         return result
     
-    def collect_kline_data(self, code: str, source: str, period: str = 'daily') -> Optional[pd.DataFrame]:
-        """采集K线数据"""
-        try:
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=self.kline_days)  # 使用50天数据
-            
-            if source == 'tushare' and self.ts_pro:
-                # tushare专用于K线数据采集 - 经验证可用
-                # 建议使用collect_batch_kline_data方法更高效
-                ts_code = f"{code}.SH" if code.startswith('6') else f"{code}.SZ"
-                start_str = start_date.strftime('%Y%m%d')
-                end_str = end_date.strftime('%Y%m%d')
-                
-                # 检查频率限制
-                current_time = time.time()
-                if current_time - self.last_tushare_call < 60:
-                    wait_time = 60 - (current_time - self.last_tushare_call)
-                    print(f"[INFO] 等待{wait_time:.1f}秒避免tushare频率限制")
-                    time.sleep(wait_time)
-                
-                df = self.ts_pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
-                self.last_tushare_call = time.time()
-                
-                if df is not None and not df.empty:
-                    df['trade_date'] = pd.to_datetime(df['trade_date'])
-                    df = df.sort_values('trade_date')
-                    print(f"[SUCCESS] tushare获取{code} K线数据 {len(df)}天")
-                    return df.rename(columns={
-                        'trade_date': 'date', 'open': 'open', 'high': 'high',
-                        'low': 'low', 'close': 'close', 'vol': 'volume', 'amount': 'amount'
-                    })
-            
-            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
-                start_str = start_date.strftime('%Y%m%d')
-                end_str = end_date.strftime('%Y%m%d')
-                
-                df = ak.stock_zh_a_hist(symbol=code, period="daily", 
-                                       start_date=start_str, end_date=end_str, adjust="qfq")
-                if df is not None and not df.empty:
-                    return df.rename(columns={
-                        '日期': 'date', '开盘': 'open', '最高': 'high',
-                        '最低': 'low', '收盘': 'close', '成交量': 'volume', '成交额': 'amount'
-                    })
-            
-            elif source == 'yfinance' and YFINANCE_AVAILABLE:
-                symbol = f"{code}.SS" if code.startswith(('60', '68')) else f"{code}.SZ"
-                stock = yf.Ticker(symbol)
-                df = stock.history(period="1y")
-                if df is not None and not df.empty:
-                    df = df.reset_index()
-                    return df.rename(columns={
-                        'Date': 'date', 'Open': 'open', 'High': 'high',
-                        'Low': 'low', 'Close': 'close', 'Volume': 'volume'
-                    })
-        
-        except Exception as e:
-            print(f"[WARN] {code} K线数据采集失败 ({source}): {e}")
-        
-        return None
-    
-    def collect_financial_data(self, code: str, source: str) -> Dict[str, Any]:
-        """采集财务数据"""
-        financial_data = {
-            'pe_ratio': None, 'pb_ratio': None, 'roe': None,
-            'revenue': None, 'net_profit': None, 'eps': None,
-            'debt_ratio': None, 'dividend_yield': None,
-            'source': source
-        }
-        
-        try:
-            if source == 'baostock' and BAOSTOCK_AVAILABLE and self.bs_login:
-                # baostock获取财务数据
-                bs_code = f"sh.{code}" if code.startswith('6') else f"sz.{code}"
-                
-                # 获取季度财务数据
-                try:
-                    rs = bs.query_profit_data(code=bs_code, year="2024", quarter=3)  # 最新季度
-                    if rs.error_code == '0':
-                        profit_data = []
-                        while (rs.next()):
-                            profit_data.append(rs.get_row_data())
-                        
-                        if profit_data:
-                            latest = profit_data[-1]
-                            # baostock返回的是列表，需要通过索引访问
-                            if len(latest) > 5:  # 确保有足够的数据
-                                financial_data.update({
-                                    'revenue': self._safe_float(latest[4]) if len(latest) > 4 else None,
-                                    'net_profit': self._safe_float(latest[5]) if len(latest) > 5 else None
-                                })
-                except Exception as e:
-                    print(f"[DEBUG] baostock财务数据获取失败: {e}")
-                
-                # 获取杜邦数据（包含一些财务比率）
-                try:
-                    rs = bs.query_dupont_data(code=bs_code, year="2024", quarter=3)
-                    if rs.error_code == '0':
-                        dupont_data = []
-                        while (rs.next()):
-                            dupont_data.append(rs.get_row_data())
-                        
-                        if dupont_data:
-                            latest = dupont_data[-1]
-                            if len(latest) > 5:
-                                financial_data.update({
-                                    'roe': self._safe_float(latest[4]) if len(latest) > 4 else None,  # ROE
-                                    'roa': self._safe_float(latest[5]) if len(latest) > 5 else None,  # ROA
-                                    'gross_profit_rate': self._safe_float(latest[6]) if len(latest) > 6 else None  # 毛利率
-                                })
-                            print(f"[DEBUG] {code} baostock杜邦数据获取成功")
-                    else:
-                        print(f"[DEBUG] baostock杜邦数据获取失败: {rs.error_msg}")
-                except Exception as e:
-                    print(f"[DEBUG] baostock杜邦数据获取失败: {e}")
-            
-            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
-                # 基础财务指标
-                info_df = ak.stock_individual_info_em(symbol=code)
-                if info_df is not None and not info_df.empty:
-                    info = dict(zip(info_df['item'], info_df['value']))
-                    financial_data.update({
-                        'pe_ratio': self._safe_float(info.get('市盈率-动态')),
-                        'pb_ratio': self._safe_float(info.get('市净率')),
-                    })
-                
-                # 财务分析指标
-                try:
-                    fin_df = ak.stock_financial_analysis_indicator(symbol=code)
-                    if fin_df is not None and not fin_df.empty:
-                        latest = fin_df.iloc[-1]
-                        roe_val = latest.get('净资产收益率')
-                        if isinstance(roe_val, str) and roe_val.endswith('%'):
-                            financial_data['roe'] = float(roe_val.rstrip('%')) / 100
-                        elif roe_val is not None:
-                            financial_data['roe'] = float(roe_val)
-                except:
-                    pass
-                
-                # 财务摘要
-                try:
-                    abstract_df = ak.stock_financial_abstract(symbol=code)
-                    if abstract_df is not None and not abstract_df.empty:
-                        latest = abstract_df.iloc[-1]
-                        financial_data.update({
-                            'revenue': self._safe_float(latest.get('营业总收入-营业总收入')),
-                            'net_profit': self._safe_float(latest.get('净利润-净利润'))
-                        })
-                except:
-                    pass
-            
-            elif source == 'yfinance' and YFINANCE_AVAILABLE:
-                # yfinance获取财务数据
-                try:
-                    # 添加市场后缀
-                    if code.startswith('6'):
-                        ticker_code = f"{code}.SS"  # 上交所
-                    else:
-                        ticker_code = f"{code}.SZ"  # 深交所
-                    
-                    ticker = yf.Ticker(ticker_code)
-                    info = ticker.info
-                    
-                    if info and info.get('symbol'):
-                        # 获取基本财务指标
-                        financial_data.update({
-                            'pe_ratio': self._safe_float(info.get('trailingPE')),
-                            'pb_ratio': self._safe_float(info.get('priceToBook')),
-                            'roe': self._safe_float(info.get('returnOnEquity')),
-                            'eps': self._safe_float(info.get('trailingEps')),
-                            'dividend_yield': self._safe_float(info.get('dividendYield')),
-                            'market_cap': self._safe_float(info.get('marketCap')),
-                        })
-                        
-                        # 获取收入和净利润数据
-                        try:
-                            financials = ticker.financials
-                            if not financials.empty and 'Total Revenue' in financials.index:
-                                latest_revenue = financials.loc['Total Revenue'].iloc[0] if len(financials.columns) > 0 else None
-                                financial_data['revenue'] = self._safe_float(latest_revenue)
-                                
-                            if not financials.empty and 'Net Income' in financials.index:
-                                latest_profit = financials.loc['Net Income'].iloc[0] if len(financials.columns) > 0 else None
-                                financial_data['net_profit'] = self._safe_float(latest_profit)
-                        except:
-                            pass
-                            
-                        print(f"[DEBUG] {code} yfinance财务数据获取成功")
-                    else:
-                        print(f"[DEBUG] {code} yfinance没有找到有效数据")
-                        
-                except Exception as e:
-                    print(f"[DEBUG] {code} yfinance财务数据获取失败: {e}")
-
-        
-        except Exception as e:
-            print(f"[WARN] {code} 财务数据采集失败 ({source}): {e}")
-        
-        return financial_data
-    
-    def _has_valid_financial_data(self, financial_data: Dict[str, Any]) -> bool:
-        """检查财务数据是否有效（在关键指标中至少有一个非空值）"""
-        if not financial_data:
-            return False
-        
-        # 检查关键财务指标是否存在且非空
-        key_indicators = ['pe_ratio', 'pb_ratio', 'roe', 'revenue', 'net_profit', 'eps', 'roa', 'gross_profit_rate']
-        
-        for indicator in key_indicators:
-            value = financial_data.get(indicator)
-            if value is not None and value != '' and str(value).strip() != '' and str(value) != 'nan':
-                try:
-                    # 尝试转换为数值来验证有效性
-                    float_val = float(value)
-                    if not (float_val == 0.0 or abs(float_val) == float('inf') or float_val != float_val):  # 排除0、无穷、NaN
-                        return True
-                except (ValueError, TypeError):
-                    continue
-        
-        return False
-    
-    def collect_technical_indicators(self, kline_data: Optional[pd.DataFrame]) -> Dict[str, Any]:
-        """计算技术指标"""
-        indicators = {
-            'ma5': None, 'ma10': None, 'ma20': None, 'ma60': None,
-            'rsi': None, 'macd': None, 'signal': None,
-            'bollinger_upper': None, 'bollinger_lower': None,
-            'kdj_k': None, 'kdj_d': None, 'kdj_j': None,
-            'volume_ratio': None, 'price_change_1d': None,
-            'price_change_5d': None, 'price_change_20d': None
-        }
-        
-        if kline_data is None or kline_data.empty:
-            return indicators
-        
-        try:
-            kline_data = kline_data.sort_values('date')
-            
-            # 安全获取价格列
-            close = None
-            for col in ['close', '收盘', 'Close']:
-                if col in kline_data.columns:
-                    close = kline_data[col]
-                    break
-            
-            if close is None:
-                print("[WARN] 无法找到收盘价列，跳过技术指标计算")
-                return {}
-            
-            # 安全获取成交量列
-            volume = None
-            for col in ['volume', '成交量', 'Volume']:
-                if col in kline_data.columns:
-                    volume = kline_data[col]
-                    break
-            
-            # 移动平均线
-            if len(close) >= 5:
-                indicators['ma5'] = float(close.tail(5).mean())
-            if len(close) >= 10:
-                indicators['ma10'] = float(close.tail(10).mean())
-            if len(close) >= 20:
-                indicators['ma20'] = float(close.tail(20).mean())
-            if len(close) >= 60:
-                indicators['ma60'] = float(close.tail(60).mean())
-            
-            # RSI
-            if len(close) >= 14:
-                delta = close.diff()
-                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                rs = gain / loss
-                rsi = 100 - (100 / (1 + rs))
-                indicators['rsi'] = float(rsi.iloc[-1]) if not pd.isna(rsi.iloc[-1]) else None
-            
-            # MACD
-            if len(close) >= 26:
-                ema12 = close.ewm(span=12).mean()
-                ema26 = close.ewm(span=26).mean()
-                macd = ema12 - ema26
-                signal = macd.ewm(span=9).mean()
-                indicators['macd'] = float(macd.iloc[-1])
-                indicators['signal'] = float(signal.iloc[-1])
-            
-            # 布林带
-            if len(close) >= 20:
-                ma20 = close.rolling(20).mean()
-                std20 = close.rolling(20).std()
-                indicators['bollinger_upper'] = float((ma20 + 2 * std20).iloc[-1])
-                indicators['bollinger_lower'] = float((ma20 - 2 * std20).iloc[-1])
-            
-            # KDJ（简化版）
-            if len(kline_data) >= 9:
-                # 安全获取最高价和最低价列
-                high = None
-                low = None
-                for col in ['high', '最高', 'High']:
-                    if col in kline_data.columns:
-                        high = kline_data[col]
-                        break
-                for col in ['low', '最低', 'Low']:
-                    if col in kline_data.columns:
-                        low = kline_data[col]
-                        break
-                
-                if high is not None and low is not None:
-                    lowest_low = low.rolling(9).min()
-                    highest_high = high.rolling(9).max()
-                    
-                    k_percent = 100 * ((close - lowest_low) / (highest_high - lowest_low))
-                    k_percent = k_percent.fillna(50)
-                    
-                    indicators['kdj_k'] = float(k_percent.iloc[-1]) if not pd.isna(k_percent.iloc[-1]) else None
-            
-            # 成交量比率
-            if volume is not None and len(volume) >= 5:
-                avg_volume = volume.tail(20).mean() if len(volume) >= 20 else volume.mean()
-                current_volume = volume.iloc[-1]
-                if avg_volume > 0:
-                    indicators['volume_ratio'] = float(current_volume / avg_volume)
-            
-            # 涨跌幅
-            if len(close) >= 2:
-                indicators['price_change_1d'] = float((close.iloc[-1] - close.iloc[-2]) / close.iloc[-2] * 100)
-            if len(close) >= 6:
-                indicators['price_change_5d'] = float((close.iloc[-1] - close.iloc[-6]) / close.iloc[-6] * 100)
-            if len(close) >= 21:
-                indicators['price_change_20d'] = float((close.iloc[-1] - close.iloc[-21]) / close.iloc[-21] * 100)
-        
-        except Exception as e:
-            print(f"[WARN] 技术指标计算失败: {e}")
-        
-        return indicators
-    
-    def collect_industry_concept_info(self, code: str, source: str) -> Dict[str, Any]:
-        """采集行业概念信息"""
-        info = {
-            'industry': None,
-            'industry_pe': None,
-            'concepts': [],
-            'hot_concepts': [],
-            'sector': None,
-            'industry_performance': None,
-            'source': source
-        }
-        
-        try:
-            if source == 'baostock' and BAOSTOCK_AVAILABLE and self.bs_login:
-                # baostock获取行业信息
-                bs_code = f"sh.{code}" if code.startswith('6') else f"sz.{code}"
-                
-                try:
-                    rs = bs.query_stock_industry(code=bs_code)
-                    if rs.error_code == '0':
-                        industry_data = []
-                        while (rs.next()):
-                            industry_data.append(rs.get_row_data())
-                        
-                        if industry_data:
-                            latest = industry_data[-1]
-                            if len(latest) > 2:
-                                info.update({
-                                    'industry': latest[1] if len(latest) > 1 else None,
-                                    'sector': latest[2] if len(latest) > 2 else None
-                                })
-                except Exception as e:
-                    print(f"[DEBUG] baostock行业信息获取失败: {e}")
-            
-            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
-                # 通过个股信息获取行业概念
-                try:
-                    df = ak.stock_individual_info_em(symbol=code)
-                    if df is not None and not df.empty:
-                        stock_info = dict(zip(df['item'], df['value']))
-                        info.update({
-                            'industry': stock_info.get('行业'),
-                            'sector': stock_info.get('概念'),
-                        })
-                        
-                        # 如果有概念信息，转换为列表
-                        concepts_str = stock_info.get('概念')
-                        if concepts_str:
-                            info['concepts'] = [c.strip() for c in str(concepts_str).split(',')]
-                except:
-                    pass
-                
-                # 获取概念板块信息
-                try:
-                    concept_df = ak.stock_board_concept_name_em()
-                    if concept_df is not None and not concept_df.empty:
-                        # 取涨幅前10的概念
-                        top_concepts = concept_df.nlargest(10, '涨跌幅')
-                        info['hot_concepts'] = [
-                            {'name': row['板块名称'], 'change_pct': row['涨跌幅']}
-                            for _, row in top_concepts.iterrows()
-                        ]
-                except:
-                    pass
-                
-                # 获取行业板块信息
-                try:
-                    industry_df = ak.stock_board_industry_name_em()
-                    if industry_df is not None and not industry_df.empty:
-                        info['industry_performance'] = industry_df.to_dict('records')[:20]  # 前20个行业
-                        
-                        # 查找该股票所属行业的PE
-                        industry_name = info.get('industry')
-                        if industry_name:
-                            matching_industry = industry_df[industry_df['板块名称'] == industry_name]
-                            if not matching_industry.empty:
-                                info['industry_pe'] = self._safe_float(matching_industry.iloc[0].get('平均市盈率'))
-                except:
-                    pass
-        
-        except Exception as e:
-            print(f"[WARN] {code} 行业概念信息采集失败 ({source}): {e}")
-        
-        return info
-    
-    def collect_fund_flow_data(self, code: str, source: str) -> Dict[str, Any]:
-        """采集资金流向数据"""
-        fund_flow = {
-            'main_fund_inflow': None,
-            'super_fund_inflow': None,
-            'large_fund_inflow': None,
-            'medium_fund_inflow': None,
-            'small_fund_inflow': None,
-            'north_fund_inflow': None,
-            'source': source
-        }
-        
-        try:
-            if source == 'tencent' and REQUESTS_AVAILABLE:
-                # 腾讯资金流向数据
-                try:
-                    # 腾讯资金流向接口
-                    url = f'https://qt.gtimg.cn/q=ff_{code}'
-                    response = requests.get(url, timeout=10)
-                    if response.status_code == 200:
-                        data = response.text.split('~')
-                        if len(data) > 10:
-                            fund_flow.update({
-                                'main_fund_inflow': self._safe_float(data[1]) if len(data) > 1 else None,
-                                'large_fund_inflow': self._safe_float(data[2]) if len(data) > 2 else None,
-                                'medium_fund_inflow': self._safe_float(data[3]) if len(data) > 3 else None,
-                                'small_fund_inflow': self._safe_float(data[4]) if len(data) > 4 else None
-                            })
-                except Exception as e:
-                    print(f"[DEBUG] 腾讯资金流向获取失败: {e}")
-            
-            elif source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
-                # 个股资金流向
-                try:
-                    fund_df = ak.stock_individual_fund_flow(stock=code, market="sh" if code.startswith('6') else "sz")
-                    if fund_df is not None and not fund_df.empty:
-                        latest = fund_df.iloc[-1] if len(fund_df) > 0 else None
-                        if latest is not None:
-                            fund_flow.update({
-                                'main_fund_inflow': self._safe_float(latest.get('主力净流入-净流入')),
-                                'super_fund_inflow': self._safe_float(latest.get('超大单净流入-净流入')),
-                                'large_fund_inflow': self._safe_float(latest.get('大单净流入-净流入')),
-                                'medium_fund_inflow': self._safe_float(latest.get('中单净流入-净流入')),
-                                'small_fund_inflow': self._safe_float(latest.get('小单净流入-净流入'))
-                            })
-                except:
-                    pass
-        
-        except Exception as e:
-            print(f"[WARN] {code} 资金流向数据采集失败 ({source}): {e}")
-        
-        return fund_flow
-    
     def collect_news_announcements(self, code: str, source: str) -> Dict[str, Any]:
         """采集新闻公告数据"""
         news_data = {
@@ -3312,6 +2797,41 @@ class ComprehensiveDataCollector:
         }
         
         try:
+            # 优先使用 Jina API 获取新闻
+            if JINA_AVAILABLE and self.jina_api and self.jina_api.api_key and self.jina_api.api_key != "YOUR_JINA_API_KEY":
+                try:
+                    # 获取股票名称
+                    name = f"股票{code}"
+                    # 尝试从已收集的数据中获取名称
+                    if code in self.collected_data and 'name' in self.collected_data[code]:
+                        name = self.collected_data[code]['name']
+                    elif code in self.wait_period_data and 'basic_info' in self.wait_period_data[code]:
+                        name = self.wait_period_data[code]['basic_info'].get('name', name)
+                        
+                    jina_news = self.jina_api.get_stock_news(code, name)
+                    if jina_news:
+                        news_data['recent_announcements'] = jina_news
+                        news_data['source'] = 'jina_search'
+                        # 简单的关键词情感分析
+                        sentiment_score = 0
+                        for item in jina_news:
+                            title = item.get('title', '')
+                            if '利好' in title or '上涨' in title or '增长' in title:
+                                sentiment_score += 1
+                            if '利空' in title or '下跌' in title or '亏损' in title:
+                                sentiment_score -= 1
+                        
+                        if sentiment_score > 0:
+                            news_data['news_sentiment'] = 'positive'
+                        elif sentiment_score < 0:
+                            news_data['news_sentiment'] = 'negative'
+                        else:
+                            news_data['news_sentiment'] = 'neutral'
+                            
+                        return news_data
+                except Exception as e:
+                    print(f"[WARN] Jina API 新闻采集失败: {e}")
+
             if source == 'akshare' and AKSHARE_AVAILABLE:
                 # 获取公司公告
                 try:
@@ -3521,7 +3041,7 @@ class ComprehensiveDataCollector:
         results = {}
         
         print(f"[INFO] 开始采集 {len(codes)} 只股票的综合数据 (专门化API分配策略)")
-        print(f"[INFO] 数据源分配: Baostock专业基础面 | Tencent实时资金流 | YFinance国际估值 | AKShare兜底")
+        print(f"[INFO] 数据源策略: Baostock基本面 | Tencent实时资金 | YFinance估值 | AKShare兜底")
         
         # 1. 批量采集K线数据 (保持原有轮换策略: tushare ↔ akshare → JoinQuant → Alpha Vantage)
         print(f"[INFO] 步骤1: 批量采集K线数据 (轮换策略)...")
@@ -3534,7 +3054,7 @@ class ComprehensiveDataCollector:
         print(f"[INFO] 基础信息采集完成，获得 {len(batch_basic_info)} 只股票 (专业数据源)")
         
         # 3. 批量采集财务数据 - 专门化分配：Baostock → YFinance → Tencent → AKShare
-        print(f"[INFO] 步骤3: 批量采集财务数据 (Baostock基本面 → YFinance估值 → Tencent实时 → AKShare兜底)...")
+        print(f"[INFO] 步骤3: 批量采集财务数据 (Baostock基本面 → YFinance估值 → Tencent → AKShare)...")
         batch_financial_data = self.collect_batch_financial_data(codes, 'baostock')
         print(f"[INFO] 财务数据采集完成，获得 {len(batch_financial_data)} 只股票 (多层专业源)")
         
