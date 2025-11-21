@@ -590,6 +590,9 @@ class AShareAnalyzerGUI:
         from datetime import datetime
         import os
         
+        # 修改保存路径，避免覆盖原始采集数据
+        save_file = os.path.join('data', 'stock_analysis_results.json')
+        
         try:
             # 数据验证
             if not hasattr(self, 'comprehensive_data') or not self.comprehensive_data:
@@ -604,28 +607,25 @@ class AShareAnalyzerGUI:
                 'count': len(self.comprehensive_data)
             }
             
+            # 确保目录存在
+            os.makedirs(os.path.dirname(save_file), exist_ok=True)
+            
             # 创建备份
-            backup_file = f"{self.comprehensive_data_file}.backup"
-            if os.path.exists(self.comprehensive_data_file):
+            backup_file = f"{save_file}.backup"
+            if os.path.exists(save_file):
                 try:
                     import shutil
-                    shutil.copy2(self.comprehensive_data_file, backup_file)
+                    shutil.copy2(save_file, backup_file)
                 except Exception as backup_error:
                     print(f"创建完整数据备份失败: {backup_error}")
             
-            # 保存主文件
-            with open(self.comprehensive_data_file, 'w', encoding='utf-8') as f:
+            # 保存文件
+            with open(save_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             
-            print(f"💾 完整推荐数据已保存：{len(self.comprehensive_data)}只股票")
+            print(f"💾 完整分析数据已保存到: {save_file} (包含 {len(self.comprehensive_data)} 只股票)")
             return True
             
-        except PermissionError:
-            print("保存完整数据失败: 文件被占用或权限不足")
-            return False
-        except OSError as e:
-            print(f"保存完整数据失败: 磁盘空间不足或IO错误 - {e}")
-            return False
         except Exception as e:
             print(f"保存完整数据失败: {e}")
             return False
@@ -640,7 +640,7 @@ class AShareAnalyzerGUI:
             if not os.path.exists(self.comprehensive_data_file):
                 print("完整推荐数据文件不存在")
                 return False
-            
+             
             with open(self.comprehensive_data_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
@@ -660,25 +660,87 @@ class AShareAnalyzerGUI:
             return False
 
     def load_comprehensive_stock_data(self):
-        """尝试将数据收集器生成的完整数据加载到内存缓存中，优先从 data/ 目录查找"""
+        """尝试将数据收集器生成的完整数据加载到内存缓存中，支持分卷文件和单文件"""
         import json
         import os
+        import glob
+ 
+        print("\033[1;34m[INFO] 正在尝试加载完整数据缓存...\033[0m")
+        
+        self.comprehensive_stock_data = {}
+        loaded_count = 0
+        
+        # 1. 尝试加载分卷数据 (comprehensive_stock_data_part_*.json)
+        data_dir = 'data'
+        base_name = self.comprehensive_data_file.replace('.json', '')
+        # 处理可能包含路径的情况
+        if os.path.dirname(self.comprehensive_data_file):
+            data_dir = os.path.dirname(self.comprehensive_data_file)
+            base_name = os.path.basename(self.comprehensive_data_file).replace('.json', '')
+            
+        part_pattern = os.path.join(data_dir, f"{base_name}_part_*.json")
+        part_files = glob.glob(part_pattern)
+        
+        if part_files:
+            print(f"\033[1;33m[DEBUG] 发现 {len(part_files)} 个分卷数据文件\033[0m")
+            for path in part_files:
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        
+                    loaded_part = {}
+                    if isinstance(data, dict):
+                        if 'data' in data and isinstance(data['data'], dict):
+                            loaded_part = data['data']
+                        elif 'stocks' in data and isinstance(data['stocks'], dict):
+                            loaded_part = data['stocks']
+                        else:
+                            loaded_part = data
+                    
+                    self.comprehensive_stock_data.update(loaded_part)
+                    loaded_count += len(loaded_part)
+                    print(f"\033[1;32m[INFO] 已加载分卷: {os.path.basename(path)} ({len(loaded_part)} 条)\033[0m")
+                except Exception as e:
+                    print(f"\033[1;31m[ERROR] 加载分卷 {path} 失败: {e}\033[0m")
+            
+            if loaded_count > 0:
+                # 同步到 self.comprehensive_data
+                try:
+                    self.comprehensive_data = self.comprehensive_stock_data
+                except Exception:
+                    pass
+                self.comprehensive_data_loaded = True
+                print(f"\033[1;32m[SUCCESS] 已加载所有分卷数据: 共 {loaded_count} 条\033[0m")
+                
+                # 同步评分缓存
+                for code, item in self.comprehensive_stock_data.items():
+                    try:
+                        score = item.get('overall_score')
+                        if score is not None:
+                            self.scores_cache[code] = float(score)
+                    except Exception:
+                        continue
+                return True
 
+        # 2. 如果没有分卷数据，尝试加载单文件 (兼容旧模式)
         candidates = []
-        # 优先尝试 data/ 子目录（comprehensive_data_collector 常保存到 data/）
         candidates.append(os.path.join('data', self.comprehensive_data_file))
         candidates.append(self.comprehensive_data_file)
 
         for path in candidates:
+            print(f"\033[1;33m[DEBUG] 检查单体数据文件: {path}\033[0m")
             try:
                 if os.path.exists(path):
+                    print(f"\033[1;32m[INFO] 发现数据文件: {path}\033[0m")
                     with open(path, 'r', encoding='utf-8') as f:
                         data = json.load(f)
 
-                    # 支持两种格式：直接为 dict 或者 {'data': {...}}
+                    # 支持两种格式：直接为 dict 或者 {'data': {...}} 或者 {'stocks': {...}}
                     if isinstance(data, dict):
                         if 'data' in data and isinstance(data['data'], dict):
                             loaded = data['data']
+                        elif 'stocks' in data and isinstance(data['stocks'], dict):
+                            loaded = data['stocks']
                         else:
                             loaded = data
 
@@ -691,7 +753,7 @@ class AShareAnalyzerGUI:
                             pass
                         self.comprehensive_data_loaded = True
                         count = len(self.comprehensive_stock_data)
-                        print(f"已加载完整数据到内存缓存: {count} 条 (来源: {path})")
+                        print(f"\033[1;32m[SUCCESS] 已加载完整数据到内存缓存: {count} 条 (来源: {path})\033[0m")
                         # 同步部分评分缓存（如果数据包含 overall_score）
                         for code, item in self.comprehensive_stock_data.items():
                             try:
@@ -701,11 +763,14 @@ class AShareAnalyzerGUI:
                             except Exception:
                                 continue
                         return True
+                else:
+                    # print(f"\033[1;33m[DEBUG] 文件不存在: {path}\033[0m")
+                    pass
             except Exception as e:
-                print(f"尝试加载 {path} 失败: {e}")
+                print(f"\033[1;31m[ERROR] 尝试加载 {path} 失败: {e}\033[0m")
                 continue
 
-        print("未找到完整数据文件以加载到内存缓存")
+        print("\033[1;31m[WARNING] 未找到完整数据文件以加载到内存缓存\033[0m")
         return False
     
     def is_stock_type_match(self, code, stock_type):
@@ -1527,6 +1592,15 @@ class AShareAnalyzerGUI:
                 
                 self.show_progress(f"START: 开始获取{stock_type}股票评分...")
                 
+                # 检查缓存状态
+                if getattr(self, 'comprehensive_data_loaded', False):
+                    cache_count = len(self.comprehensive_stock_data)
+                    print(f"\033[1;34m[INFO] 批量评分开始，当前内存缓存中有 {cache_count} 条数据\033[0m")
+                    self.show_progress(f"INFO: 已加载 {cache_count} 条本地数据，将优先使用")
+                else:
+                    print(f"\033[1;33m[WARNING] 批量评分开始，内存缓存未加载，将使用实时数据\033[0m")
+                    self.show_progress(f"WARNING: 未检测到本地数据，将使用实时网络获取")
+
                 # 获取符合类型要求的股票代码
                 try:
                     all_codes = self.get_all_stock_codes(filter_type)
@@ -1548,6 +1622,13 @@ class AShareAnalyzerGUI:
                 
                 self.show_progress(f"DATA: 准备分析 {total_stocks} 只{stock_type}股票...")
                 
+                # 切换到确定性进度条模式
+                def init_determinate_progress():
+                    self.progress_bar.stop()
+                    self.progress_bar.config(mode='determinate', maximum=100, value=0)
+                    self.progress_bar.pack(fill="x", pady=5)
+                self.root.after(0, init_determinate_progress)
+                
                 success_count = 0
                 failed_count = 0
                 batch_save_interval = 20
@@ -1561,7 +1642,15 @@ class AShareAnalyzerGUI:
                         
                         # 更新进度
                         progress = (i + 1) / total_stocks * 100
-                        self.show_progress(f"⏳ 分析 {code} ({i+1}/{total_stocks}) - {progress:.1f}%")
+                        
+                        # 使用自定义更新函数，避免调用show_progress重置为indeterminate模式
+                        def update_determinate_progress(msg, val):
+                            self.progress_var.set(msg)
+                            self.progress_bar['value'] = val
+                            self.root.update_idletasks()
+                            
+                        self.root.after(0, lambda p=progress, c=code, idx=i, t=total_stocks: 
+                                      update_determinate_progress(f"⏳ 分析 {c} ({idx+1}/{t}) - {p:.1f}%", p))
                         
                         # 获取股票分析和评分
                         try:
@@ -1594,7 +1683,8 @@ class AShareAnalyzerGUI:
                                 self.save_batch_scores()
                                 self.save_comprehensive_data()
                                 gc.collect()
-                                self.show_progress(f"💾 已保存进度 ({i+1}/{total_stocks})")
+                                # 仅更新文字，不重置进度条
+                                self.root.after(0, lambda idx=i, t=total_stocks: self.progress_var.set(f"💾 已保存进度 ({idx+1}/{t})"))
                             except Exception as save_error:
                                 print(f"保存进度失败: {save_error}")
                             
@@ -1604,6 +1694,11 @@ class AShareAnalyzerGUI:
                         print(f"处理股票 {code} 时发生异常: {e}")
                         failed_count += 1
                         continue
+                
+                # 恢复进度条模式
+                def reset_progress_mode():
+                    self.progress_bar.config(mode='indeterminate')
+                self.root.after(0, reset_progress_mode)
                 
                 # 最终保存
                 try:
@@ -1691,10 +1786,16 @@ class AShareAnalyzerGUI:
                             self.scores_cache[stock_code] = float(cached['overall_score'])
                         except Exception:
                             pass
+                    print(f"\033[1;32m[CACHE] 命中缓存数据: {stock_code}\033[0m")
                     return cached
                 except Exception as e:
-                    print(f"从内存缓存读取 {stock_code} 失败: {e}")
+                    print(f"\033[1;31m[ERROR] 从内存缓存读取 {stock_code} 失败: {e}\033[0m")
                     # 回退到实时抓取
+            else:
+                if not getattr(self, 'comprehensive_data_loaded', False):
+                    print(f"\033[1;33m[MISS] 缓存未加载，将实时获取: {stock_code}\033[0m")
+                else:
+                    print(f"\033[1;33m[MISS] 缓存中未找到: {stock_code}\033[0m")
 
             from datetime import datetime
             
@@ -2153,7 +2254,7 @@ class AShareAnalyzerGUI:
             print(f"CSV分析完成，共分析 {len(results)} 只股票")
     
     def get_stock_name(self, code):
-        """获取股票名称"""11
+        """获取股票名称"""
         # 模拟股票名称数据
         name_map = {
             '000001': '平安银行', '000002': '万科A', '000858': '五粮液',

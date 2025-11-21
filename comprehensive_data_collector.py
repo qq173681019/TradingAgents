@@ -234,6 +234,15 @@ class ComprehensiveDataCollector:
         else:
             print("[INFO] BaoStock 不可用，跳过初始化")
         
+        # 初始化 Tencent Kline API
+        self.tencent_kline = None
+        if TENCENT_KLINE_AVAILABLE:
+            try:
+                self.tencent_kline = TencentKlineAPI()
+                print("[INFO] 腾讯K线API 初始化成功")
+            except Exception as e:
+                print(f"[WARN] 腾讯K线API 初始化失败: {e}")
+
         # 确保输出目录存在
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
         
@@ -638,7 +647,39 @@ class ComprehensiveDataCollector:
                 return stock_codes
             except Exception as e:
                 print(f"[ERROR] akshare 获取股票列表失败: {type(e).__name__}: {e}")
-                print(f"[INFO] 切换到备用主板股票池...")
+        
+        # 尝试从 Baostock 获取
+        if BAOSTOCK_AVAILABLE:
+            try:
+                print(f"[INFO] 尝试从 Baostock 获取股票列表...")
+                import baostock as bs
+                # 确保已登录
+                lg = bs.login()
+                
+                # 获取所有A股
+                rs = bs.query_all_stock(day=datetime.now().strftime('%Y-%m-%d'))
+                if rs.error_code == '0':
+                    all_codes = []
+                    while rs.next():
+                        row = rs.get_row_data()
+                        # row: code, tradeStatus, code_name
+                        # code format: sh.600000
+                        if len(row) > 0:
+                            full_code = row[0]
+                            if '.' in full_code:
+                                code = full_code.split('.')[1]
+                                all_codes.append(code)
+                    
+                    main_board_codes = [code for code in all_codes 
+                                      if code.startswith('60') or code.startswith('000') or code.startswith('002')]
+                    stock_codes = main_board_codes[:limit]
+                    if stock_codes:
+                        print(f"[SUCCESS] 从 Baostock 获取 {len(stock_codes)} 只主板股票")
+                        return stock_codes
+            except Exception as e:
+                print(f"[ERROR] Baostock 获取股票列表失败: {e}")
+        
+        print(f"[INFO] 切换到备用主板股票池...")
         
         # 备选：扩展的内置主板股票池 - 提供更多可靠股票
         fallback_codes = [
@@ -1119,7 +1160,7 @@ class ComprehensiveDataCollector:
                         print(f"[WARN] Alpha Vantage兜底{code}失败: {e}")
                         continue
                 
-                print(f"[SUCCESS] Alpha Vantage 兜底成功: {len(alpha_success)}/{len(still_failed)} 只")
+                print(f"[SUCCESS] Alpha Vantage 兜底成功: {len(alpha_success)}/{len(still_failed)}")
             except Exception as e:
                 print(f"[ERROR] Alpha Vantage 兜底处理异常: {e}")
         elif still_failed and not self.alpha_vantage:
@@ -1823,6 +1864,14 @@ class ComprehensiveDataCollector:
         if BAOSTOCK_AVAILABLE and self.bs_login:
             print(f"[INFO] Baostock基础信息采集 {total_codes} 只...")
             try:
+                # 确保baostock已导入
+                import baostock as bs
+                
+                # 确保已登录
+                lg = bs.login()
+                if lg.error_code != '0':
+                    print(f"[WARN] Baostock登录失败: {lg.error_msg}")
+                
                 for code in codes:
                     try:
                         bs_code = f"sz.{code}" if code.startswith(('000', '002', '300')) else f"sh.{code}"
@@ -1831,14 +1880,15 @@ class ComprehensiveDataCollector:
                         if rs.error_code == '0':
                             while rs.next():
                                 row = rs.get_row_data()
-                                if len(row) > 6:
+                                # Baostock query_stock_basic 返回: code, code_name, ipoDate, outDate, type, status
+                                if len(row) >= 6:
                                     result[code] = {
                                         'code': code,
                                         'name': row[1],
-                                        'type': row[2],
-                                        'status': row[3],
-                                        'industry': row[4],  # Baostock标准行业分类
-                                        'listing_date': row[6],
+                                        'type': row[4],
+                                        'status': row[5],
+                                        'industry': '未知',  # query_stock_basic 不包含行业信息
+                                        'listing_date': row[2],
                                         'source': 'baostock'
                                     }
                                     baostock_success.append(code)
@@ -1848,7 +1898,10 @@ class ComprehensiveDataCollector:
                         print(f"[DEBUG] Baostock {code}: {e}")
                         continue
                 
-                print(f"[SUCCESS] Baostock基础信息: {len(baostock_success)}/{total_codes} 只")
+                # 保持登录状态供后续步骤使用
+                # bs.logout()
+                
+                print(f"[SUCCESS] Baostock基础信息: {len(baostock_success)}/{total_codes}")
             except Exception as e:
                 print(f"[ERROR] Baostock基础信息异常: {e}")
         
@@ -2334,6 +2387,20 @@ class ComprehensiveDataCollector:
         print(f"[INFO] yfinance基础信息采集完成: {len(valid_results)}/{len(codes)} 有效成功")
         return result
     
+    def _has_valid_financial_data(self, data: Dict[str, Any]) -> bool:
+        """检查财务数据是否有效"""
+        if not data:
+            return False
+        
+        # 至少包含一些关键指标
+        key_metrics = ['revenue', 'net_profit', 'pe_ratio', 'pb_ratio', 'roe', 'market_cap']
+        valid_count = 0
+        for metric in key_metrics:
+            if metric in data and data[metric] is not None:
+                valid_count += 1
+        
+        return valid_count >= 1
+
     def collect_batch_financial_data(self, codes: List[str], source: str = 'auto') -> Dict[str, Dict[str, Any]]:
         """批量采集财务数据 - 新策略：Baostock专业财务为主 → JoinQuant为辅 → YFinance补充 → 腾讯估值"""
         result = {}
@@ -2347,6 +2414,7 @@ class ComprehensiveDataCollector:
         if BAOSTOCK_AVAILABLE and self.bs_login:
             print(f"[INFO] Baostock专业财务数据 {total_codes} 只...")
             try:
+                import baostock as bs
                 for code in codes:
                     try:
                         bs_code = f"sz.{code}" if code.startswith(('000', '002', '300')) else f"sh.{code}"
@@ -2544,6 +2612,7 @@ class ComprehensiveDataCollector:
         if BAOSTOCK_AVAILABLE and self.bs_login:
             print(f"[INFO] Baostock标准行业分类映射...")
             try:
+                import baostock as bs
                 # 获取完整行业分类映射表（效率更高）
                 rs = bs.query_stock_industry()
                 industry_mapping = {}
@@ -2592,7 +2661,7 @@ class ComprehensiveDataCollector:
         
         # 2. AKShare补充：热门概念和详细分类
         concept_codes = codes.copy()  # 所有股票都需要概念补充
-        if concept_codes and AKSHARE_AVAILABLE and len(concept_codes) <= 10:  # 限制数量
+        if concept_codes and AKSHARE_AVAILABLE and len(concept_codes) <= 10: # 限制数量
             print(f"[INFO] AKShare热门概念补充 {len(concept_codes)} 只...")
             try:
                 for code in concept_codes:
@@ -2733,7 +2802,7 @@ class ComprehensiveDataCollector:
         
         # 2. AKShare补充：个股详细资金流向
         failed_codes = [code for code in codes if code not in result]
-        if failed_codes and AKSHARE_AVAILABLE and AKSHARE_CONNECTED and len(failed_codes) <= 8:  # 限制数量避免频率问题
+        if failed_codes and AKSHARE_AVAILABLE and AKSHARE_CONNECTED and len(failed_codes) <= 8: # 限制数量避免频率问题
             print(f"[INFO] AKShare资金流向补充 {len(failed_codes)} 只...")
             try:
                 for code in failed_codes:
@@ -3025,6 +3094,41 @@ class ComprehensiveDataCollector:
         
         return None
 
+    def collect_kline_data(self, code: str, source: str = 'auto', days: int = None) -> Optional[pd.DataFrame]:
+        """收集单个股票的K线数据"""
+        if days is None:
+            days = self.kline_days
+            
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        # 准备不同格式的日期
+        start_compact = start_date.strftime('%Y%m%d')
+        end_compact = end_date.strftime('%Y%m%d')
+        start_iso = start_date.strftime('%Y-%m-%d')
+        end_iso = end_date.strftime('%Y-%m-%d')
+        
+        # 1. AKShare
+        if source == 'akshare' or (source == 'auto' and AKSHARE_AVAILABLE):
+            return self._collect_kline_with_akshare(code, start_compact, end_compact)
+            
+        # 2. Tushare
+        if source == 'tushare' or (source == 'auto' and TUSHARE_AVAILABLE and self.tushare_token):
+            try:
+                pro = ts.pro_api(self.tushare_token)
+                ts_code = f"{code}.SZ" if code.startswith(('000', '002', '300')) else f"{code}.SH"
+                df = pro.daily(ts_code=ts_code, start_date=start_compact, end_date=end_compact)
+                if not df.empty:
+                    return self.standardize_kline_columns(df, 'tushare')
+            except Exception as e:
+                print(f"[WARN] Tushare获取单股K线失败 {code}: {e}")
+        
+        # 3. Tencent (作为兜底)
+        if self.tencent_kline:
+            return self.tencent_kline.get_stock_kline(code, start_iso, end_iso)
+            
+        return None
+
     def _safe_float(self, value) -> Optional[float]:
         """安全转换为浮点数"""
         if value in (None, "", "--", "-", "NaN"):
@@ -3036,6 +3140,77 @@ class ComprehensiveDataCollector:
         except:
             return None
     
+    def collect_technical_indicators(self, kline_df: pd.DataFrame) -> Dict[str, Any]:
+        """根据K线数据计算技术指标"""
+        try:
+            if kline_df is None or kline_df.empty:
+                return {'status': 'no_data'}
+            
+            # 确保按日期排序
+            if 'date' in kline_df.columns:
+                df = kline_df.sort_values('date')
+            else:
+                df = kline_df
+            
+            # 获取收盘价序列
+            # 兼容不同的列名
+            close_col = next((col for col in ['close', '收盘', 'Close'] if col in df.columns), None)
+            volume_col = next((col for col in ['volume', '成交量', 'Volume'] if col in df.columns), None)
+            
+            if not close_col:
+                return {'status': 'missing_close_price'}
+                
+            closes = df[close_col]
+            current_price = float(closes.iloc[-1])
+            
+            # 计算移动平均线
+            ma5 = float(closes.rolling(window=5).mean().iloc[-1]) if len(closes) >= 5 else current_price
+            ma10 = float(closes.rolling(window=10).mean().iloc[-1]) if len(closes) >= 10 else current_price
+            ma20 = float(closes.rolling(window=20).mean().iloc[-1]) if len(closes) >= 20 else current_price
+            ma60 = float(closes.rolling(window=60).mean().iloc[-1]) if len(closes) >= 60 else current_price
+            
+            # 计算RSI
+            delta = closes.diff()
+            gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+            rs = gain / loss
+            rsi = 100 - (100 / (1 + rs))
+            rsi_val = float(rsi.iloc[-1]) if not pd.isna(rsi.iloc[-1]) else 50.0
+            
+            # 计算MACD
+            exp12 = closes.ewm(span=12, adjust=False).mean()
+            exp26 = closes.ewm(span=26, adjust=False).mean()
+            macd_line = exp12 - exp26
+            signal_line = macd_line.ewm(span=9, adjust=False).mean()
+            macd_val = float(macd_line.iloc[-1])
+            signal_val = float(signal_line.iloc[-1])
+            
+            # 计算量比
+            volume_ratio = 1.0
+            if volume_col and len(df) >= 6:
+                volumes = df[volume_col]
+                current_vol = float(volumes.iloc[-1])
+                avg_vol = float(volumes.iloc[-6:-1].mean())
+                if avg_vol > 0:
+                    volume_ratio = current_vol / avg_vol
+            
+            return {
+                'current_price': current_price,
+                'ma5': ma5,
+                'ma10': ma10,
+                'ma20': ma20,
+                'ma60': ma60,
+                'rsi': rsi_val,
+                'macd': macd_val,
+                'signal': signal_val,
+                'volume_ratio': volume_ratio,
+                'status': 'calculated'
+            }
+            
+        except Exception as e:
+            print(f"[ERROR] 计算技术指标失败: {e}")
+            return {'status': 'calculation_error', 'error': str(e)}
+
     def collect_comprehensive_data(self, codes: List[str], batch_size: int = 15) -> Dict[str, Any]:
         """采集综合数据 - 专门化数据源分配策略"""
         results = {}
@@ -3045,28 +3220,48 @@ class ComprehensiveDataCollector:
         
         # 1. 批量采集K线数据 (保持原有轮换策略: tushare ↔ akshare → JoinQuant → Alpha Vantage)
         print(f"[INFO] 步骤1: 批量采集K线数据 (轮换策略)...")
-        batch_kline_data = self.collect_batch_kline_data(codes, 'auto')
-        print(f"[INFO] K线数据采集完成，获得 {len(batch_kline_data)} 只股票 (多源轮换)")
+        try:
+            batch_kline_data = self.collect_batch_kline_data(codes, 'auto')
+            print(f"[INFO] K线数据采集完成，获得 {len(batch_kline_data)} 只股票 (多源轮换)")
+        except Exception as e:
+            print(f"[ERROR] 批量采集K线数据失败: {e}")
+            batch_kline_data = {}
         
         # 2. 批量采集基础信息 - 专门化分配：Baostock → Tencent → AKShare
         print(f"[INFO] 步骤2: 批量采集基础信息 (Baostock专业 → Tencent实时 → AKShare兜底)...")
-        batch_basic_info = self.collect_batch_basic_info(codes, 'baostock')
-        print(f"[INFO] 基础信息采集完成，获得 {len(batch_basic_info)} 只股票 (专业数据源)")
+        try:
+            batch_basic_info = self.collect_batch_basic_info(codes, 'baostock')
+            print(f"[INFO] 基础信息采集完成，获得 {len(batch_basic_info)} 只股票 (专业数据源)")
+        except Exception as e:
+            print(f"[ERROR] 批量采集基础信息失败: {e}")
+            batch_basic_info = {}
         
         # 3. 批量采集财务数据 - 专门化分配：Baostock → YFinance → Tencent → AKShare
         print(f"[INFO] 步骤3: 批量采集财务数据 (Baostock基本面 → YFinance估值 → Tencent → AKShare)...")
-        batch_financial_data = self.collect_batch_financial_data(codes, 'baostock')
-        print(f"[INFO] 财务数据采集完成，获得 {len(batch_financial_data)} 只股票 (多层专业源)")
+        try:
+            batch_financial_data = self.collect_batch_financial_data(codes, 'baostock')
+            print(f"[INFO] 财务数据采集完成，获得 {len(batch_financial_data)} 只股票 (多层专业源)")
+        except Exception as e:
+            print(f"[ERROR] 批量采集财务数据失败: {e}")
+            batch_financial_data = {}
         
         # 4. 批量采集行业概念数据 - 专门化分配：Baostock映射 → AKShare热点概念
         print(f"[INFO] 步骤4: 批量采集行业概念 (Baostock标准分类 → AKShare概念热点)...")
-        batch_industry_data = self.collect_batch_industry_concept(codes, 'baostock')
-        print(f"[INFO] 行业概念采集完成，获得 {len(batch_industry_data)} 只股票 (标准+热点)")
+        try:
+            batch_industry_data = self.collect_batch_industry_concept(codes, 'baostock')
+            print(f"[INFO] 行业概念采集完成，获得 {len(batch_industry_data)} 只股票 (标准+热点)")
+        except Exception as e:
+            print(f"[ERROR] 批量采集行业概念失败: {e}")
+            batch_industry_data = {}
         
         # 5. 批量采集资金流向数据 - 专门化分配：Tencent → AKShare
         print(f"[INFO] 步骤5: 批量采集资金流向 (Tencent实时流向 → AKShare个股资金)...")
-        batch_fund_flow_data = self.collect_batch_fund_flow(codes, 'tencent')
-        print(f"[INFO] 资金流向采集完成，获得 {len(batch_fund_flow_data)} 只股票 (实时专业)")
+        try:
+            batch_fund_flow_data = self.collect_batch_fund_flow(codes, 'tencent')
+            print(f"[INFO] 资金流向采集完成，获得 {len(batch_fund_flow_data)} 只股票 (实时专业)")
+        except Exception as e:
+            print(f"[ERROR] 批量采集资金流向失败: {e}")
+            batch_fund_flow_data = {}
         
         # 6. 整合数据并补充其他信息
         print(f"[INFO] 步骤6: 整合专门化数据并补充实时信息...")
@@ -3076,6 +3271,7 @@ class ComprehensiveDataCollector:
             stock_data = {
                 'code': code,
                 'timestamp': datetime.now().isoformat(),
+                'collection_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'data_source': 'specialized_distribution_v2',
                 'api_strategy': {
                     'kline': 'tushare_akshare_rotation',
@@ -3200,40 +3396,153 @@ class ComprehensiveDataCollector:
         print(f"  行业概念: {successful_collections['industry']}/{total_stocks} ({successful_collections['industry']/total_stocks*100:.1f}%)")
         print(f"  资金流向: {successful_collections['fund_flow']}/{total_stocks} ({successful_collections['fund_flow']/total_stocks*100:.1f}%)")
         
+        # 确保Baostock登出，释放资源
+        if BAOSTOCK_AVAILABLE and self.bs_login:
+            try:
+                import baostock as bs
+                bs.logout()
+            except:
+                pass
+        
         return results
     
     def save_data(self, data: Dict[str, Any], filename: Optional[str] = None) -> None:
-        """保存数据到JSON文件"""
-        if filename is None:
-            filename = self.output_file
+        """保存数据到JSON文件 - 分卷存储模式 (每卷最多200只股票)"""
+        # 忽略传入的 filename，使用分卷逻辑
+        base_filename = self.output_file # data/comprehensive_stock_data.json
+        base_dir = os.path.dirname(base_filename)
+        base_name = os.path.basename(base_filename).replace('.json', '')
+        index_file = os.path.join(base_dir, 'stock_file_index.json')
         
-        # 确保数据目录存在
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        # 确保目录存在
+        os.makedirs(base_dir, exist_ok=True)
         
-        # 加载已有数据
-        existing_data = {}
-        if os.path.exists(filename):
+        # 加载索引
+        stock_index = {}
+        if os.path.exists(index_file):
             try:
-                with open(filename, 'r', encoding='utf-8') as f:
-                    existing_data = json.load(f)
+                with open(index_file, 'r', encoding='utf-8') as f:
+                    stock_index = json.load(f)
             except:
-                existing_data = {}
+                pass
         
-        # 合并数据
-        if 'stocks' not in existing_data:
-            existing_data['stocks'] = {}
-        
-        # 清理数据以避免JSON序列化错误
+        # 清理待保存数据
         cleaned_data = DateTimeEncoder.clean_data_for_json(data)
-        existing_data['stocks'].update(cleaned_data)
-        existing_data['last_updated'] = datetime.now().isoformat()
-        existing_data['total_stocks'] = len(existing_data['stocks'])
         
-        # 保存数据 - 使用自定义编码器处理日期对象
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(existing_data, f, ensure_ascii=False, indent=2, cls=DateTimeEncoder)
+        # 按目标文件分组待保存的数据
+        files_to_update = {} # filename -> {code: data}
         
-        print(f"[SUCCESS] 数据已保存到 {filename}")
+        # 查找现有的分卷文件
+        import glob
+        part_files = glob.glob(os.path.join(base_dir, f"{base_name}_part_*.json"))
+        part_files.sort(key=lambda x: int(x.split('_part_')[-1].replace('.json', '')))
+        
+        # 确定当前最新的分卷文件
+        current_file = None
+        current_file_count = 0
+        
+        if part_files:
+            current_file = part_files[-1]
+            # 简单读取一下数量，或者我们信任索引？
+            # 为了准确，读取一下最后这个文件
+            try:
+                with open(current_file, 'r', encoding='utf-8') as f:
+                    content = json.load(f)
+                    if 'stocks' in content:
+                        current_file_count = len(content['stocks'])
+            except:
+                current_file_count = 0
+        else:
+            # 初始化第一个文件
+            current_file = os.path.join(base_dir, f"{base_name}_part_1.json")
+            current_file_count = 0
+            
+        # 分配数据到文件
+        for code, stock_info in cleaned_data.items():
+            target_file = None
+            
+            # 1. 检查是否已存在于某个文件中 (更新)
+            if code in stock_index:
+                # 索引中存储的是相对路径或文件名，我们需要确保它是完整的路径
+                indexed_file = stock_index[code]
+                # 如果索引只存了文件名
+                if os.path.dirname(indexed_file) == '':
+                    target_file = os.path.join(base_dir, indexed_file)
+                else:
+                    target_file = indexed_file
+            else:
+                # 2. 新增数据
+                # 检查当前文件是否已满
+                if current_file_count >= 200:
+                    # 创建新分卷
+                    next_part = 1
+                    if part_files:
+                        try:
+                            last_part_num = int(part_files[-1].split('_part_')[-1].replace('.json', ''))
+                            next_part = last_part_num + 1
+                        except:
+                            pass
+                    elif current_file:
+                         try:
+                            last_part_num = int(current_file.split('_part_')[-1].replace('.json', ''))
+                            next_part = last_part_num + 1
+                         except:
+                            pass
+
+                    new_file = os.path.join(base_dir, f"{base_name}_part_{next_part}.json")
+                    part_files.append(new_file) # 更新列表
+                    current_file = new_file
+                    current_file_count = 0
+                
+                target_file = current_file
+                current_file_count += 1
+                # 更新索引 (存文件名即可，方便移植)
+                stock_index[code] = os.path.basename(target_file)
+            
+            if target_file not in files_to_update:
+                files_to_update[target_file] = {}
+            files_to_update[target_file][code] = stock_info
+            
+        # 执行保存
+        for filepath, stocks_data in files_to_update.items():
+            file_content = {'stocks': {}}
+            if os.path.exists(filepath):
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        file_content = json.load(f)
+                except:
+                    pass
+            
+            if 'stocks' not in file_content:
+                file_content['stocks'] = {}
+                
+            file_content['stocks'].update(stocks_data)
+            file_content['last_updated'] = datetime.now().isoformat()
+            file_content['total_stocks'] = len(file_content['stocks'])
+            
+            # 原子写入
+            temp_filename = filepath + '.tmp'
+            try:
+                with open(temp_filename, 'w', encoding='utf-8') as f:
+                    json.dump(file_content, f, ensure_ascii=False, indent=2, cls=DateTimeEncoder)
+                
+                if os.path.exists(filepath):
+                    os.replace(temp_filename, filepath)
+                else:
+                    os.rename(temp_filename, filepath)
+                print(f"[SUCCESS] 数据已保存到 {os.path.basename(filepath)}")
+            except Exception as e:
+                print(f"[ERROR] 保存分卷 {os.path.basename(filepath)} 失败: {e}")
+                if os.path.exists(temp_filename):
+                    try: os.remove(temp_filename) 
+                    except: pass
+
+        # 保存索引
+        try:
+            with open(index_file, 'w', encoding='utf-8') as f:
+                json.dump(stock_index, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[WARN] 保存索引失败: {e}")
     
     def run_batch_collection_with_progress(self, batch_size: int = 15, total_batches: int = 166, progress_callback=None):
         """运行专门化数据源分配批量采集，支持进度回调"""
@@ -3246,6 +3555,13 @@ class ComprehensiveDataCollector:
         # 获取股票列表（只包含主板股票）
         all_codes = self.get_stock_list_excluding_cyb(limit=batch_size * total_batches)
         actual_total = len(all_codes)
+        
+        if actual_total < batch_size * total_batches:
+            msg = f"注意：获取到的股票数量 ({actual_total}) 少于计划数量 ({batch_size * total_batches})，将只处理可用股票。"
+            print(f"[WARN] {msg}")
+            if progress_callback:
+                progress_callback("股票列表警告", 0, msg)
+                time.sleep(2) # 让用户看到警告
         
         if progress_callback:
             progress_callback("开始专门化数据采集...", 2, f"获得 {actual_total} 只股票，使用专门化API分配策略...")
