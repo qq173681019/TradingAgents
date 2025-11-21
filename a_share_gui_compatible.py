@@ -585,13 +585,16 @@ class AShareAnalyzerGUI:
             return False
 
     def save_comprehensive_data(self):
-        """保存完整的三时间段推荐数据"""
+        """保存完整的三时间段推荐数据 - 支持分卷存储"""
         import json
         from datetime import datetime
         import os
+        import glob
         
         # 修改保存路径，避免覆盖原始采集数据
-        save_file = os.path.join('data', 'stock_analysis_results.json')
+        base_filename = 'stock_analysis_results.json'
+        save_file = os.path.join('data', base_filename)
+        base_name = base_filename.replace('.json', '')
         
         try:
             # 数据验证
@@ -599,31 +602,76 @@ class AShareAnalyzerGUI:
                 print("没有完整数据需要保存")
                 return False
             
-            data = {
-                'date': datetime.now().strftime('%Y-%m-%d'),
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'version': '2.0',
-                'data': self.comprehensive_data,
-                'count': len(self.comprehensive_data)
-            }
-            
             # 确保目录存在
             os.makedirs(os.path.dirname(save_file), exist_ok=True)
             
-            # 创建备份
-            backup_file = f"{save_file}.backup"
-            if os.path.exists(save_file):
+            # 准备数据
+            stocks_data = self.comprehensive_data
+            stock_codes = sorted(list(stocks_data.keys()))
+            total_stocks = len(stock_codes)
+            
+            # 分卷配置
+            max_per_file = 200
+            chunks = [stock_codes[i:i + max_per_file] for i in range(0, total_stocks, max_per_file)]
+            
+            print(f"正在保存分析结果: 共 {total_stocks} 只股票，分 {len(chunks)} 卷保存...")
+            
+            # 清理旧的分卷文件 (为了保持整洁，先删除旧的part文件)
+            old_parts = glob.glob(os.path.join('data', f"{base_name}_part_*.json"))
+            for old_part in old_parts:
                 try:
-                    import shutil
-                    shutil.copy2(save_file, backup_file)
-                except Exception as backup_error:
-                    print(f"创建完整数据备份失败: {backup_error}")
+                    os.remove(old_part)
+                except:
+                    pass
             
-            # 保存文件
+            # 保存分卷
+            for i, chunk in enumerate(chunks):
+                part_num = i + 1
+                part_filename = os.path.join('data', f"{base_name}_part_{part_num}.json")
+                
+                part_stocks = {code: stocks_data[code] for code in chunk}
+                
+                part_data = {
+                    'date': datetime.now().strftime('%Y-%m-%d'),
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'version': '2.0',
+                    'data': part_stocks,
+                    'count': len(part_stocks),
+                    'part': part_num,
+                    'total_parts': len(chunks)
+                }
+                
+                # 原子写入
+                temp_filename = part_filename + '.tmp'
+                try:
+                    with open(temp_filename, 'w', encoding='utf-8') as f:
+                        json.dump(part_data, f, ensure_ascii=False, indent=2)
+                    
+                    if os.path.exists(part_filename):
+                        os.replace(temp_filename, part_filename)
+                    else:
+                        os.rename(temp_filename, part_filename)
+                    print(f"  - 已保存分卷 {part_num}: {part_filename} ({len(part_stocks)} 只)")
+                except Exception as e:
+                    print(f"  - 保存分卷 {part_num} 失败: {e}")
+                    if os.path.exists(temp_filename):
+                        try: os.remove(temp_filename) 
+                        except: pass
+            
+            # 同时保存一个索引文件或主文件，指向分卷（可选，为了兼容性可以保存一个空的或者只包含元数据的主文件）
+            meta_data = {
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'version': '2.0',
+                'total_count': total_stocks,
+                'split_storage': True,
+                'parts': len(chunks),
+                'file_pattern': f"{base_name}_part_*.json"
+            }
             with open(save_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            
-            print(f"💾 完整分析数据已保存到: {save_file} (包含 {len(self.comprehensive_data)} 只股票)")
+                json.dump(meta_data, f, ensure_ascii=False, indent=2)
+                
+            print(f"💾 完整分析数据已分卷保存到 data/ 目录")
             return True
             
         except Exception as e:
@@ -631,17 +679,54 @@ class AShareAnalyzerGUI:
             return False
 
     def load_comprehensive_data(self):
-        """加载完整的三时间段推荐数据"""
+        """加载完整的三时间段推荐数据 - 支持分卷加载"""
         import json
         from datetime import datetime
         import os
+        import glob
         
+        # 1. 尝试加载分卷数据
+        base_filename = 'stock_analysis_results.json'
+        base_name = base_filename.replace('.json', '')
+        part_pattern = os.path.join('data', f"{base_name}_part_*.json")
+        part_files = glob.glob(part_pattern)
+        
+        if part_files:
+            print(f"发现 {len(part_files)} 个分析结果分卷文件，正在加载...")
+            self.comprehensive_data = {}
+            loaded_count = 0
+            latest_date = "未知"
+            
+            for path in part_files:
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    if 'data' in data and isinstance(data['data'], dict):
+                        self.comprehensive_data.update(data['data'])
+                        loaded_count += len(data['data'])
+                        if 'date' in data:
+                            latest_date = data['date']
+                except Exception as e:
+                    print(f"加载分卷 {path} 失败: {e}")
+            
+            if loaded_count > 0:
+                print(f"已加载完整推荐数据：{loaded_count}只股票 (日期: {latest_date})")
+                return True
+
+        # 2. 尝试加载旧的单体文件
         try:
-            if not os.path.exists(self.comprehensive_data_file):
-                print("完整推荐数据文件不存在")
+            # 检查是否存在旧的单体文件（或者元数据文件）
+            target_file = self.comprehensive_data_file # 这里通常指向 stock_analysis_results.json
+            # 如果 self.comprehensive_data_file 指向的是采集数据，我们需要修正为分析结果文件
+            if 'comprehensive_stock_data' in target_file:
+                 target_file = os.path.join('data', 'stock_analysis_results.json')
+
+            if not os.path.exists(target_file):
+                # print("完整推荐数据文件不存在")
                 return False
              
-            with open(self.comprehensive_data_file, 'r', encoding='utf-8') as f:
+            with open(target_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
             # 验证数据格式
@@ -651,8 +736,12 @@ class AShareAnalyzerGUI:
                 count = len(self.comprehensive_data)
                 print(f"加载完整推荐数据：{count}只股票 (日期: {data_date})")
                 return True
+            elif 'split_storage' in data and data['split_storage']:
+                # 这是一个元数据文件，说明分卷加载失败或者没有分卷文件
+                print("发现元数据文件，但未找到分卷数据")
+                return False
             else:
-                print("完整推荐数据格式错误")
+                # print("完整推荐数据格式错误或为空")
                 return False
                 
         except Exception as e:
@@ -1626,7 +1715,7 @@ class AShareAnalyzerGUI:
                 def init_determinate_progress():
                     self.progress_bar.stop()
                     self.progress_bar.config(mode='determinate', maximum=100, value=0)
-                    self.progress_bar.pack(fill="x", pady=5)
+                    self.progress_frame.pack(fill="x", pady=5)
                 self.root.after(0, init_determinate_progress)
                 
                 success_count = 0
@@ -1645,8 +1734,8 @@ class AShareAnalyzerGUI:
                         
                         # 使用自定义更新函数，避免调用show_progress重置为indeterminate模式
                         def update_determinate_progress(msg, val):
-                            self.progress_var.set(msg)
-                            self.progress_bar['value'] = val
+                            self.progress_msg_var.set(msg)
+                            self.progress_val_var.set(val)
                             self.root.update_idletasks()
                             
                         self.root.after(0, lambda p=progress, c=code, idx=i, t=total_stocks: 
@@ -1684,7 +1773,7 @@ class AShareAnalyzerGUI:
                                 self.save_comprehensive_data()
                                 gc.collect()
                                 # 仅更新文字，不重置进度条
-                                self.root.after(0, lambda idx=i, t=total_stocks: self.progress_var.set(f"💾 已保存进度 ({idx+1}/{t})"))
+                                self.root.after(0, lambda idx=i, t=total_stocks: self.progress_msg_var.set(f"💾 已保存进度 ({idx+1}/{t})"))
                             except Exception as save_error:
                                 print(f"保存进度失败: {save_error}")
                             
@@ -2350,8 +2439,20 @@ class AShareAnalyzerGUI:
         self.root.configure(bg="#f0f0f0")
         
         # 进度条相关属性初始化（必须在所有分析操作前定义）
-        self.progress_var = tk.StringVar()
-        self.progress_bar = ttk.Progressbar(self.root, variable=self.progress_var, mode="indeterminate")
+        self.progress_msg_var = tk.StringVar()
+        self.progress_val_var = tk.DoubleVar()
+        
+        # 进度显示区域容器
+        self.progress_frame = tk.Frame(self.root, bg="#f0f0f0")
+        # 注意：progress_frame 不在这里 pack，而是在 show_progress 时 pack
+        
+        # 进度文字标签
+        self.progress_label = tk.Label(self.progress_frame, textvariable=self.progress_msg_var, font=("微软雅黑", 10), bg="#f0f0f0", anchor="w")
+        self.progress_label.pack(fill="x", padx=20, pady=(5, 0))
+        
+        # 进度条
+        self.progress_bar = ttk.Progressbar(self.progress_frame, variable=self.progress_val_var, mode="indeterminate")
+        self.progress_bar.pack(fill="x", padx=20, pady=5)
 
         # 设置样式
         style = ttk.Style()
@@ -2741,21 +2842,22 @@ class AShareAnalyzerGUI:
     
     def show_progress(self, message):
         """显示进度条和消息"""
-        self.progress_var.set(message)
-        self.progress_bar.pack(fill="x", pady=5)
+        self.progress_msg_var.set(message)
+        self.progress_frame.pack(fill="x", pady=5)
+        self.progress_bar.config(mode="indeterminate")
         self.progress_bar.start()
         self.root.update()
     
     def hide_progress(self):
         """隐藏进度条"""
         self.progress_bar.stop()
-        self.progress_bar.pack_forget()
-        self.progress_var.set("")
+        self.progress_frame.pack_forget()
+        self.progress_msg_var.set("")
         self.root.update()
     
     def update_progress(self, message):
         """更新进度消息"""
-        self.progress_var.set(message)
+        self.progress_msg_var.set(message)
         self.root.update()
     
     def fetch_stock_list_from_api(self, stock_type):
@@ -7309,7 +7411,7 @@ CSV批量分析使用方法:
     
     def update_progress(self, message):
         """更新进度信息"""
-        self.root.after(0, lambda: self.progress_var.set(message))
+        self.root.after(0, lambda: self.progress_msg_var.set(message))
     
     def update_results(self, overview, technical, fundamental, recommendation, ticker):
         """更新分析结果"""
@@ -7337,9 +7439,7 @@ CSV批量分析使用方法:
         self.recommendation_text.insert('1.0', recommendation)
         
         # 隐藏进度条
-        self.progress_bar.stop()
-        self.progress_bar.pack_forget()
-        self.progress_var.set("")
+        self.hide_progress()
         
         # 启用分析按钮
         self.analyze_btn.config(state="normal")
@@ -7352,9 +7452,7 @@ CSV批量分析使用方法:
     
     def show_error(self, error_msg):
         """显示错误信息"""
-        self.progress_bar.stop()
-        self.progress_bar.pack_forget()
-        self.progress_var.set("")
+        self.hide_progress()
         self.analyze_btn.config(state="normal")
         
         self.status_var.set("分析失败")
