@@ -190,7 +190,7 @@ class TencentKlineAPI:
         将腾讯K线数据转换为DataFrame
         
         Args:
-            klines: K线数据列表，格式：[[日期, 开盘, 收盘, 最高, 最低, 成交量], ...]
+            klines: K线数据列表，格式：[[日期, 开盘, 收盘, 最高, 最低, 成交量, 成交额], ...]
             code: 股票代码
             
         Returns:
@@ -200,8 +200,20 @@ class TencentKlineAPI:
             if not klines:
                 return pd.DataFrame()
             
-            # 创建DataFrame
-            df = pd.DataFrame(klines, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
+            # 检查数据列数并动态处理
+            first_row = klines[0] if klines else []
+            num_cols = len(first_row)
+            
+            # 腾讯API可能返回6列或7列数据
+            if num_cols == 7:
+                # 7列：日期, 开盘, 收盘, 最高, 最低, 成交量, 成交额
+                df = pd.DataFrame(klines, columns=['date', 'open', 'close', 'high', 'low', 'volume', 'amount'])
+            elif num_cols == 6:
+                # 6列：日期, 开盘, 收盘, 最高, 最低, 成交量
+                df = pd.DataFrame(klines, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
+            else:
+                print(f"[ERROR] 腾讯K线数据列数异常{code}: 期望6或7列, 实际{num_cols}列")
+                return pd.DataFrame()
             
             # 数据类型转换
             df['date'] = pd.to_datetime(df['date'])
@@ -210,6 +222,10 @@ class TencentKlineAPI:
             df['high'] = pd.to_numeric(df['high'], errors='coerce')
             df['low'] = pd.to_numeric(df['low'], errors='coerce')
             df['volume'] = pd.to_numeric(df['volume'], errors='coerce')
+            
+            # 如果有成交额列，也转换为数值
+            if 'amount' in df.columns:
+                df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
             
             # 添加股票代码
             df['code'] = code
@@ -220,7 +236,7 @@ class TencentKlineAPI:
             # 去除无效数据
             df = df.dropna(subset=['open', 'close', 'high', 'low'])
             
-            print(f"[DEBUG] 腾讯K线转换完成{code}: {len(df)}条记录, 日期范围: {df['date'].min()} ~ {df['date'].max()}")
+            print(f"[DEBUG] 腾讯K线转换完成{code}: {len(df)}条记录 ({num_cols}列), 日期范围: {df['date'].min()} ~ {df['date'].max()}")
             
             return df
             

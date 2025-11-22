@@ -242,6 +242,24 @@ class ComprehensiveDataCollector:
                 print("[INFO] 腾讯K线API 初始化成功")
             except Exception as e:
                 print(f"[WARN] 腾讯K线API 初始化失败: {e}")
+        
+        # 初始化 Alpha Vantage API
+        self.alpha_vantage = None
+        if ALPHA_VANTAGE_AVAILABLE:
+            try:
+                self.alpha_vantage = AlphaVantageAPI()
+                print("[INFO] Alpha Vantage API 初始化成功")
+            except Exception as e:
+                print(f"[WARN] Alpha Vantage API 初始化失败: {e}")
+        
+        # 初始化 Polygon API
+        self.polygon = None
+        if POLYGON_AVAILABLE:
+            try:
+                self.polygon = PolygonAPI()
+                print("[INFO] Polygon API 初始化成功")
+            except Exception as e:
+                print(f"[WARN] Polygon API 初始化失败: {e}")
 
         # 确保输出目录存在
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
@@ -680,43 +698,72 @@ class ComprehensiveDataCollector:
                 print(f"[ERROR] Baostock 获取股票列表失败: {e}")
         
         print(f"[INFO] 切换到备用主板股票池...")
+        print(f"[WARN] akshare 和 Baostock 均获取失败，使用扩展备用股票池（1000+只主板股票）")
         
-        # 备选：扩展的内置主板股票池 - 提供更多可靠股票
-        fallback_codes = [
-            # 沪市主板 - 大盘蓝筹
-            '600000', '600036', '600519', '600276', '600887', '600585', '600309', '600028',
-            '601318', '601166', '601328', '601398', '601288', '601939', '601988', '601012',
-            '600031', '600048', '600196', '600688', '600745', '600547', '600900', '600660',
-            '600104', '600150', '600340', '600372', '600383', '600406', '600482', '600498',
-            '600570', '600588', '600598', '600637', '600703', '600739', '600741', '600795',
-            '600837', '600867', '600886', '600919', '600958', '600999', '601006', '601088',
-            '601117', '601138', '601169', '601186', '601211', '601229', '601238', '601319',
-            '601336', '601390', '601600', '601628', '601633', '601668', '601688', '601766',
-            '601818', '601828', '601857', '601872', '601888', '601898', '601919', '601985',
-            
-            # 深市主板 - 优质标的  
-            '000001', '000002', '000063', '000100', '000157', '000166', '000568', '000596',
-            '000625', '000651', '000725', '000858', '000876', '000895', '000938', '000977',
-            '000009', '000012', '000039', '000060', '000069', '000089', '000333', '000338',
-            '000401', '000423', '000425', '000503', '000538', '000559', '000581', '000629',
-            '000630', '000656', '000661', '000671', '000709', '000712', '000717', '000729',
-            '000750', '000766', '000776', '000783', '000792', '000800', '000825', '000839',
-            '000848', '000860', '000869', '000877', '000883', '000888', '000898', '000912',
-            '000921', '000948', '000959', '000963', '000983', '000998',
-            
-            # 深市中小板 - 优质标的
-            '002001', '002027', '002050', '002120', '002129', '002142', '002304', '002352',
-            '002714', '002415', '002594', '002174', '002475', '002007', '002008', '002024',
-            '002032', '002038', '002051', '002065', '002081', '002092', '002106', '002146',
-            '002153', '002179', '002230', '002236', '002241', '002252', '002292', '002311',
-            '002372', '002375', '002385', '002410', '002422', '002456', '002460', '002466',
-            '002493', '002508', '002511', '002555', '002558', '002572', '002673', '002705',
-            '002709', '002736', '002739', '002747', '002797', '002821', '002831', '002841',
-            '002920', '002938'
-            # 注意：已移除科创板股票（688开头）
-        ]
+        # 备选：扩展的内置主板股票池 - 提供更多可靠股票（1000+只）
+        fallback_codes = []
+        
+        # 沪市主板 - 600开头（生成600000-600999）
+        for i in range(1000):
+            code = f"60{i:04d}"
+            fallback_codes.append(code)
+        
+        # 沪市主板 - 601开头（生成601000-601999）
+        for i in range(1000, 2000):
+            code = f"60{i:04d}"
+            fallback_codes.append(code)
+        
+        # 深市主板 - 000开头（生成000001-000999，排除30开头）
+        for i in range(1, 1000):
+            code = f"000{i:03d}"
+            fallback_codes.append(code)
+        
+        # 深市中小板 - 002开头（生成002001-002999）
+        for i in range(1, 1000):
+            code = f"002{i:03d}"
+            fallback_codes.append(code)
+        
+        print(f"[INFO] 备用股票池共生成 {len(fallback_codes)} 只主板股票代码")
         
         return fallback_codes[:limit]
+    
+    def get_stock_list_by_type(self, stock_type: str = "主板", limit: int = 50) -> List[str]:
+        """根据股票类型获取股票列表"""
+        if stock_type == "主板":
+            # 主板股票：60/000/002开头，排除30创业板和688科创板
+            return self.get_stock_list_excluding_cyb(limit)
+        elif stock_type == "全部":
+            # 获取所有股票（包括创业板和科创板）
+            return self.get_all_stock_list(limit)
+        elif stock_type == "ETF":
+            # 获取ETF列表
+            return self.get_etf_list(limit)
+        else:
+            # 默认返回主板
+            return self.get_stock_list_excluding_cyb(limit)
+    
+    def get_etf_list(self, limit: int = 50) -> List[str]:
+        """获取ETF列表"""
+        etf_codes = []
+        
+        if AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
+            try:
+                print("[INFO] 尝试从 akshare 获取ETF列表...")
+                df = ak.fund_etf_spot_em()
+                all_codes = df['代码'].astype(str).tolist()
+                etf_codes = all_codes[:limit]
+                print(f"[SUCCESS] 从 akshare 获取 {len(etf_codes)} 只ETF")
+                return etf_codes
+            except Exception as e:
+                print(f"[ERROR] akshare 获取ETF列表失败: {e}")
+        
+        # 备选ETF列表
+        fallback_etf = [
+            '510050', '510300', '510500', '510880', '512100', '512690', '512880',
+            '513050', '515050', '515790', '516160', '518880', '159915', '159919',
+            '159949', '159995', '159996'
+        ]
+        return fallback_etf[:limit]
     
     def get_all_stock_list(self, limit: int = 4000) -> List[str]:
         """获取完整股票列表，包含创业板"""
@@ -3544,16 +3591,170 @@ class ComprehensiveDataCollector:
         except Exception as e:
             print(f"[WARN] 保存索引失败: {e}")
     
-    def run_batch_collection_with_progress(self, batch_size: int = 15, total_batches: int = 166, progress_callback=None):
+    def update_kline_data_only(self, batch_size: int = 20, total_batches: int = 150, stock_type: str = "主板", progress_callback=None):
+        """只更新K线数据和技术指标（高效模式）"""
+        print(f"[INFO] 开始K线数据更新 (每批 {batch_size} 只股票，共 {total_batches} 批)")
+        print(f"[INFO] 股票类型: {stock_type}")
+        print(f"[INFO] 更新策略: 只更新K线数据和技术指标，保留其他数据不变")
+        
+        if progress_callback:
+            progress_callback("获取股票列表...", 1, f"准备获取 {total_batches * batch_size} 只{stock_type}股票")
+        
+        # 获取股票列表
+        all_codes = self.get_stock_list_by_type(stock_type, limit=batch_size * total_batches)
+        actual_total = len(all_codes)
+        
+        if actual_total < batch_size * total_batches:
+            msg = f"注意：获取到的股票数量 ({actual_total}) 少于计划数量 ({batch_size * total_batches})，将只处理可用股票。"
+            print(f"[WARN] {msg}")
+            if progress_callback:
+                progress_callback("股票列表警告", 0, msg)
+                time.sleep(2)
+        
+        if progress_callback:
+            progress_callback("开始K线更新...", 2, f"获得 {actual_total} 只股票，开始K线数据更新...")
+        
+        # 加载现有数据
+        existing_data = self.load_existing_data()
+        
+        for batch_num in range(total_batches):
+            start_idx = batch_num * batch_size
+            end_idx = start_idx + batch_size
+            batch_codes = all_codes[start_idx:end_idx]
+            
+            if not batch_codes:
+                break
+            
+            # 计算进度
+            progress_pct = ((batch_num + 1) / total_batches) * 100
+            completed_count = min((batch_num + 1) * batch_size, actual_total)
+            current_batch_info = f"第 {batch_num + 1}/{total_batches} 批"
+            stock_info = f"处理股票: {', '.join(batch_codes[:3])}{'...' if len(batch_codes) > 3 else ''}"
+            progress_text = f"{completed_count}/{actual_total}"
+            
+            if progress_callback:
+                progress_callback(f"K线更新中 ({progress_text})", progress_pct, f"{current_batch_info} - {stock_info}")
+            
+            print(f"\n{'='*50}")
+            print(f"第 {batch_num + 1} 批 / 共 {total_batches} 批 (K线更新)")
+            print(f"股票代码: {', '.join(batch_codes)}")
+            print(f"{'='*50}")
+            
+            # 批量采集K线数据
+            try:
+                batch_kline_data = self.collect_batch_kline_data(batch_codes, 'auto')
+                print(f"[INFO] 本批K线数据采集完成，获得 {len(batch_kline_data)} 只股票")
+                
+                # 更新每只股票的K线数据
+                for code in batch_codes:
+                    if code in batch_kline_data:
+                        kline_df = batch_kline_data[code]
+                        if kline_df is not None and not kline_df.empty:
+                            # 计算技术指标
+                            tech_indicators = self.collect_technical_indicators(kline_df)
+                            
+                            # 获取最新价格
+                            latest_price = None
+                            for col in ['close', '收盘', 'Close']:
+                                if col in kline_df.columns:
+                                    try:
+                                        latest_price = float(kline_df[col].iloc[-1])
+                                        break
+                                    except:
+                                        continue
+                            
+                            # 更新K线数据
+                            if code in existing_data:
+                                # 保留原有数据，只更新K线和技术指标
+                                existing_data[code]['kline_data'] = {
+                                    'daily': kline_df.to_dict('records'),
+                                    'latest_price': latest_price,
+                                    'data_points': len(kline_df),
+                                    'source': 'updated',
+                                    'update_time': datetime.now().isoformat()
+                                }
+                                existing_data[code]['technical_indicators'] = tech_indicators
+                                existing_data[code]['last_kline_update'] = datetime.now().isoformat()
+                                print(f"    ✓ {code}: 更新K线 {len(kline_df)}天")
+                            else:
+                                # 如果是新股票，创建基本结构
+                                existing_data[code] = {
+                                    'code': code,
+                                    'name': f'股票{code}',
+                                    'kline_data': {
+                                        'daily': kline_df.to_dict('records'),
+                                        'latest_price': latest_price,
+                                        'data_points': len(kline_df),
+                                        'source': 'new',
+                                        'update_time': datetime.now().isoformat()
+                                    },
+                                    'technical_indicators': tech_indicators,
+                                    'last_kline_update': datetime.now().isoformat(),
+                                    'timestamp': datetime.now().isoformat()
+                                }
+                                print(f"    + {code}: 新增K线 {len(kline_df)}天")
+                
+                # 批次保存
+                self.save_data(existing_data)
+                
+                if progress_callback:
+                    detail_info = f"{current_batch_info} 完成 - 已保存 {len(batch_kline_data)} 只K线数据"
+                    progress_callback(f"K线更新中 ({progress_text})", progress_pct, detail_info)
+                
+            except Exception as e:
+                error_msg = f"{current_batch_info} 失败: {str(e)}"
+                print(f"[ERROR] {error_msg}")
+                if progress_callback:
+                    progress_callback("K线更新出错", progress_pct, error_msg)
+            
+            # 批次间休息
+            if batch_num < total_batches - 1:
+                if progress_callback:
+                    progress_callback("批次间休息...", progress_pct, f"{current_batch_info} 完成，休息3秒后继续...")
+                print(f"\n[INFO] 批次完成，休息 3 秒后继续...")
+                time.sleep(3)
+        
+        if progress_callback:
+            progress_callback("K线更新完成", 100, f"所有 {total_batches} 批次K线数据更新完成！")
+        
+        print(f"\n[SUCCESS] 所有批次K线数据更新完成！")
+    
+    def load_existing_data(self):
+        """加载现有数据"""
+        import os
+        import json
+        
+        # 尝试从分卷文件加载
+        data_dir = 'data'
+        all_data = {}
+        
+        if os.path.exists(data_dir):
+            for i in range(1, 6):
+                part_file = os.path.join(data_dir, f'comprehensive_stock_data_part_{i}.json')
+                if os.path.exists(part_file):
+                    try:
+                        with open(part_file, 'r', encoding='utf-8') as f:
+                            content = json.load(f)
+                            if 'stocks' in content:
+                                all_data.update(content['stocks'])
+                                print(f"[INFO] 加载分卷 {i}: {len(content['stocks'])} 只股票")
+                    except Exception as e:
+                        print(f"[WARN] 加载 {part_file} 失败: {e}")
+        
+        print(f"[INFO] 加载现有数据: {len(all_data)} 只股票")
+        return all_data
+    
+    def run_batch_collection_with_progress(self, batch_size: int = 15, total_batches: int = 166, stock_type: str = "主板", progress_callback=None):
         """运行专门化数据源分配批量采集，支持进度回调"""
         print(f"[INFO] 开始专门化数据源分配批量采集 (每批 {batch_size} 只股票，共 {total_batches} 批)")
+        print(f"[INFO] 股票类型: {stock_type}")
         print(f"[INFO] 数据源策略: Baostock基本面 | Tencent实时资金 | YFinance估值 | AKShare兜底")
         
         if progress_callback:
-            progress_callback("获取股票列表...", 1, f"准备获取 {total_batches * batch_size} 只主板股票")
+            progress_callback("获取股票列表...", 1, f"准备获取 {total_batches * batch_size} 只{stock_type}股票")
         
-        # 获取股票列表（只包含主板股票）
-        all_codes = self.get_stock_list_excluding_cyb(limit=batch_size * total_batches)
+        # 获取股票列表（根据类型过滤）
+        all_codes = self.get_stock_list_by_type(stock_type, limit=batch_size * total_batches)
         actual_total = len(all_codes)
         
         if actual_total < batch_size * total_batches:
@@ -3574,13 +3775,15 @@ class ComprehensiveDataCollector:
             if not batch_codes:
                 break
             
-            # 计算进度百分比
+            # 计算进度百分比和已完成数量
             progress_pct = ((batch_num + 1) / total_batches) * 100
+            completed_count = min((batch_num + 1) * batch_size, actual_total)
             current_batch_info = f"第 {batch_num + 1}/{total_batches} 批"
             stock_info = f"处理股票: {', '.join(batch_codes[:3])}{'...' if len(batch_codes) > 3 else ''}"
+            progress_text = f"{completed_count}/{actual_total}"
             
             if progress_callback:
-                progress_callback(f"专门化采集中...", progress_pct, f"{current_batch_info} - {stock_info}")
+                progress_callback(f"采集中 ({progress_text})", progress_pct, f"{current_batch_info} - {stock_info}")
             
             print(f"\n{'='*50}")
             print(f"第 {batch_num + 1} 批 / 共 {total_batches} 批 (专门化API分配)")

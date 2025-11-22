@@ -1,0 +1,1018 @@
+{
+  "stocks": {
+    "601800": {
+      "code": "601800",
+      "timestamp": "2025-11-22T19:49:03.539676",
+      "collection_time": "2025-11-22 19:49:03",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601800",
+        "name": "中国交建",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2012-03-09",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601800",
+        "source": "baostock",
+        "revenue": 0.039118,
+        "net_profit": 0.115364,
+        "eps": 20992188998.0,
+        "roe": 1.456663,
+        "total_profit": null,
+        "roa": 5.811227,
+        "gross_profit_rate": 0.299246,
+        "net_profit_rate": 0.775263,
+        "debt_ratio": 0.039118
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601800",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601800",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:03.541250",
+        "success_rate": 0.8
+      }
+    },
+    "601801": {
+      "code": "601801",
+      "timestamp": "2025-11-22T19:49:03.841533",
+      "collection_time": "2025-11-22 19:49:03",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601801",
+        "name": "皖新传媒",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2010-01-18",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601801",
+        "source": "baostock",
+        "revenue": 0.098856,
+        "net_profit": 0.241497,
+        "eps": 824228837.05,
+        "roe": 0.390308,
+        "total_profit": null,
+        "roa": 1.682388,
+        "gross_profit_rate": 0.424521,
+        "net_profit_rate": 0.985138,
+        "debt_ratio": 0.098856
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601801",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601801",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:03.843317",
+        "success_rate": 0.8
+      }
+    },
+    "601802": {
+      "code": "601802",
+      "timestamp": "2025-11-22T19:49:04.143660",
+      "collection_time": "2025-11-22 19:49:04",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601802",
+        "name": "股票601802",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601802",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601802",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601802",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:04.144176",
+        "success_rate": 0.6
+      }
+    },
+    "601803": {
+      "code": "601803",
+      "timestamp": "2025-11-22T19:49:04.444431",
+      "collection_time": "2025-11-22 19:49:04",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601803",
+        "name": "股票601803",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601803",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601803",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601803",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:04.444876",
+        "success_rate": 0.6
+      }
+    },
+    "601804": {
+      "code": "601804",
+      "timestamp": "2025-11-22T19:49:04.745020",
+      "collection_time": "2025-11-22 19:49:04",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601804",
+        "name": "股票601804",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601804",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601804",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601804",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:04.745537",
+        "success_rate": 0.6
+      }
+    },
+    "601805": {
+      "code": "601805",
+      "timestamp": "2025-11-22T19:49:05.046052",
+      "collection_time": "2025-11-22 19:49:05",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601805",
+        "name": "股票601805",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601805",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601805",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601805",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:05.046519",
+        "success_rate": 0.6
+      }
+    },
+    "601806": {
+      "code": "601806",
+      "timestamp": "2025-11-22T19:49:05.347121",
+      "collection_time": "2025-11-22 19:49:05",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601806",
+        "name": "股票601806",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601806",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601806",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601806",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:05.347572",
+        "success_rate": 0.6
+      }
+    },
+    "601807": {
+      "code": "601807",
+      "timestamp": "2025-11-22T19:49:05.648422",
+      "collection_time": "2025-11-22 19:49:05",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601807",
+        "name": "股票601807",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601807",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601807",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601807",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:05.648990",
+        "success_rate": 0.6
+      }
+    },
+    "601808": {
+      "code": "601808",
+      "timestamp": "2025-11-22T19:49:05.949420",
+      "collection_time": "2025-11-22 19:49:05",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601808",
+        "name": "中海油服",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2007-09-28",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601808",
+        "source": "baostock",
+        "revenue": 0.078325,
+        "net_profit": 0.172437,
+        "eps": 2636517124.0,
+        "roe": 0.667405,
+        "total_profit": null,
+        "roa": 1.956354,
+        "gross_profit_rate": 0.405599,
+        "net_profit_rate": 0.927262,
+        "debt_ratio": 0.078325
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601808",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601808",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:05.950258",
+        "success_rate": 0.8
+      }
+    },
+    "601809": {
+      "code": "601809",
+      "timestamp": "2025-11-22T19:49:06.250885",
+      "collection_time": "2025-11-22 19:49:06",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601809",
+        "name": "股票601809",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601809",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601809",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601809",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:06.253603",
+        "success_rate": 0.6
+      }
+    },
+    "601810": {
+      "code": "601810",
+      "timestamp": "2025-11-22T19:49:06.553899",
+      "collection_time": "2025-11-22 19:49:06",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601810",
+        "name": "股票601810",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601810",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601810",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601810",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:06.554598",
+        "success_rate": 0.6
+      }
+    },
+    "601811": {
+      "code": "601811",
+      "timestamp": "2025-11-22T19:49:06.855106",
+      "collection_time": "2025-11-22 19:49:06",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601811",
+        "name": "新华文轩",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2016-08-08",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601811",
+        "source": "baostock",
+        "revenue": 0.110721,
+        "net_profit": 0.357276,
+        "eps": 934229222.15,
+        "roe": 1.239914,
+        "total_profit": null,
+        "roa": 1.68589,
+        "gross_profit_rate": 0.371983,
+        "net_profit_rate": 0.953922,
+        "debt_ratio": 0.110721
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601811",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601811",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:06.855641",
+        "success_rate": 0.8
+      }
+    },
+    "601812": {
+      "code": "601812",
+      "timestamp": "2025-11-22T19:49:07.156541",
+      "collection_time": "2025-11-22 19:49:07",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601812",
+        "name": "股票601812",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601812",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601812",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601812",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:07.157201",
+        "success_rate": 0.6
+      }
+    },
+    "601813": {
+      "code": "601813",
+      "timestamp": "2025-11-22T19:49:07.457665",
+      "collection_time": "2025-11-22 19:49:07",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601813",
+        "name": "股票601813",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601813",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601813",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601813",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:07.458137",
+        "success_rate": 0.6
+      }
+    },
+    "601814": {
+      "code": "601814",
+      "timestamp": "2025-11-22T19:49:07.758668",
+      "collection_time": "2025-11-22 19:49:07",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "601814",
+        "name": "股票601814",
+        "source": "joinquant_fallback"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "601814",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "601814",
+        "source": "baostock_default",
+        "industry": "大型国企",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "601814",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "joinquant_fallback",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-11-22T19:49:07.759119",
+        "success_rate": 0.6
+      }
+    }
+  },
+  "last_updated": "2025-11-22T19:49:08.099355",
+  "total_stocks": 15
+}
