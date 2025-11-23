@@ -529,6 +529,32 @@ class AShareAnalyzerGUI:
             import traceback
             traceback.print_exc()
             return False
+    
+    def show_cache_miss_summary(self, cache_miss_list, stock_type):
+        """显示缓存未命中股票统计信息"""
+        if not cache_miss_list:
+            return
+        
+        miss_count = len(cache_miss_list)
+        print(f"\n{'='*80}")
+        print(f"📊 {stock_type}评分 - 缓存未命中统计 (共 {miss_count} 只)")
+        print(f"{'='*80}")
+        print(f"{'序号':<6} {'股票代码':<10} {'股票名称':<30}")
+        print(f"{'-'*80}")
+        
+        for i, stock in enumerate(cache_miss_list, 1):
+            code = stock['code']
+            name = stock['name'][:25] + '...' if len(stock['name']) > 25 else stock['name']
+            print(f"{i:<6} {code:<10} {name:<30}")
+        
+        print(f"{'='*80}")
+        print(f"提示: 这些股票不在本地缓存中，已使用实时数据获取")
+        print(f"建议: 如需加快下次评分速度，可先运行'获取全部数据'收集这些股票的数据")
+        print(f"{'='*80}\n")
+        
+        # 同时在界面显示简要信息
+        if hasattr(self, 'show_progress'):
+            self.show_progress(f"INFO: {miss_count} 只股票未在缓存中，已实时获取数据")
 
     def save_comprehensive_data(self):
         """保存完整的三时间段推荐数据 - 支持分卷存储"""
@@ -1736,6 +1762,9 @@ class AShareAnalyzerGUI:
                 batch_save_interval = 20
                 start_time = time.time()  # 记录开始时间用于计算 ETA
                 
+                # 记录未命中缓存的股票
+                cache_miss_stocks = []
+                
                 for i, code in enumerate(all_codes):
                     try:
                         # 检查是否需要停止
@@ -1776,9 +1805,21 @@ class AShareAnalyzerGUI:
                             if comprehensive_data:
                                 self.comprehensive_data[code] = comprehensive_data
                                 
-                                score = comprehensive_data['overall_score']
-                                stock_name = comprehensive_data['name']
-                                industry = comprehensive_data['fund_data'].get('industry', '未知')
+                                # 获取评分：优先从缓存数据中取，如果没有则重新计算
+                                score = comprehensive_data.get('overall_score')
+                                if score is None:
+                                    # 缓存数据中没有评分，尝试重新计算
+                                    print(f"[WARN] 缓存数据无评分，重新计算: {code}")
+                                    score = self.get_stock_score_for_batch(code)
+                                    if score is not None:
+                                        comprehensive_data['overall_score'] = score
+                                    else:
+                                        print(f"[ERROR] 无法计算评分: {code}")
+                                        failed_count += 1
+                                        continue
+                                
+                                stock_name = comprehensive_data.get('name', self.stock_info.get(code, {}).get('name', '未知'))
+                                industry = comprehensive_data.get('fund_data', {}).get('industry', '未知')
                                 
                                 self.batch_scores[code] = {
                                     'name': stock_name,
@@ -1833,6 +1874,10 @@ class AShareAnalyzerGUI:
                 # 显示完成信息
                 self.show_progress(f"SUCCESS: {stock_type}评分完成！成功: {success_count}, 失败: {failed_count}")
                 
+                # 显示缓存未命中统计
+                if hasattr(self, '_current_batch_cache_miss') and self._current_batch_cache_miss:
+                    self.show_cache_miss_summary(self._current_batch_cache_miss, stock_type)
+                
                 # 更新排行榜
                 try:
                     self.update_ranking_display()
@@ -1852,6 +1897,8 @@ class AShareAnalyzerGUI:
                 self._batch_running = False
                 if hasattr(self, '_stop_batch'):
                     delattr(self, '_stop_batch')
+                if hasattr(self, '_current_batch_cache_miss'):
+                    delattr(self, '_current_batch_cache_miss')
         
         # 启动后台线程
         try:
@@ -1918,6 +1965,14 @@ class AShareAnalyzerGUI:
                     print(f"\033[1;33m[MISS] 缓存未加载，将实时获取: {stock_code}\033[0m")
                 else:
                     print(f"\033[1;33m[MISS] 缓存中未找到: {stock_code}\033[0m")
+                
+                # 记录缓存未命中的股票
+                if hasattr(self, '_current_batch_cache_miss'):
+                    stock_name = self.stock_info.get(stock_code, {}).get('name', '未知')
+                    self._current_batch_cache_miss.append({
+                        'code': stock_code,
+                        'name': stock_name
+                    })
 
             from datetime import datetime
             
@@ -4656,8 +4711,18 @@ class AShareAnalyzerGUI:
         seed = int(hashlib.md5(ticker.encode()).hexdigest()[:8], 16)
         random.seed(seed)
         
-        # 尝试获取实时价格
-        current_price = self.get_stock_price(ticker)
+        # 优先从缓存获取价格，避免不必要的网络请求
+        current_price = None
+        if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
+            cached = self.comprehensive_stock_data.get(ticker, {})
+            tech_data = cached.get('tech_data', {})
+            if tech_data and 'current_price' in tech_data:
+                current_price = tech_data['current_price']
+                print(f"[PRICE-CACHE] 使用缓存价格: {ticker} = ¥{current_price:.2f}")
+        
+        # 如果缓存没有价格，尝试获取实时价格
+        if current_price is None:
+            current_price = self.get_stock_price(ticker)
         if current_price is None:
             # 根据股票代码特征设置基础价格
             if ticker.startswith('688'):  # 科创板
@@ -4912,6 +4977,7 @@ class AShareAnalyzerGUI:
     def _generate_smart_mock_fundamental_data(self, ticker):
         """生成智能模拟基本面数据"""
         import hashlib
+        import random
         
         # 使用股票代码作为种子，确保一致性但股票间有差异
         seed_value = int(hashlib.md5(ticker.encode()).hexdigest()[:8], 16)
@@ -5251,9 +5317,52 @@ class AShareAnalyzerGUI:
 
     def generate_investment_advice(self, ticker):
         """生成短期、中期、长期投资预测，支持大模型AI生成"""
+        import random  # 确保random模块可用
         stock_info = self.get_stock_info_generic(ticker)
-        technical_data = self._generate_smart_mock_technical_data(ticker)
-        financial_data = self._generate_smart_mock_fundamental_data(ticker)
+        
+        # 优先使用缓存中的技术和基本面数据，避免重复网络请求
+        technical_data = None
+        financial_data = None
+        if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
+            cached = self.comprehensive_stock_data.get(ticker, {})
+            if 'tech_data' in cached and cached['tech_data']:
+                technical_data = cached['tech_data']
+                print(f"[DATA-CACHE] 使用缓存技术数据: {ticker}")
+            if 'fund_data' in cached and cached['fund_data']:
+                financial_data = cached['fund_data']
+                print(f"[DATA-CACHE] 使用缓存基本面数据: {ticker}")
+        
+        # 如果缓存没有数据，才生成模拟数据
+        if technical_data is None:
+            technical_data = self._generate_smart_mock_technical_data(ticker)
+        if financial_data is None:
+            financial_data = self._generate_smart_mock_fundamental_data(ticker)
+        
+        # 确保数据不为None，提供默认值
+        if technical_data is None:
+            print(f"[WARN] 无法获取技术数据: {ticker}，使用默认值")
+            current_price = stock_info.get('price', 10.0)
+            technical_data = {
+                'current_price': current_price,
+                'ma5': current_price * 0.98,
+                'ma10': current_price * 0.97,
+                'ma20': current_price * 0.96,
+                'ma60': current_price * 0.95,
+                'ma120': current_price * 0.94,
+                'rsi': 50,
+                'macd': 0,
+                'signal': 0,
+                'volume_ratio': 1.0
+            }
+        
+        if financial_data is None:
+            print(f"[WARN] 无法获取基本面数据: {ticker}，使用默认值")
+            financial_data = {
+                'pe_ratio': 20,
+                'pb_ratio': 2.0,
+                'roe': 10
+            }
+        
         current_price = technical_data.get('current_price', stock_info.get('price', 10.0))
         ma5 = technical_data.get('ma5', current_price * 0.98)
         ma10 = technical_data.get('ma10', current_price * 0.97)
