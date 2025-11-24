@@ -1,0 +1,1810 @@
+{
+  "date": "2025-11-24",
+  "timestamp": "2025-11-24 13:34:34",
+  "version": "2.0",
+  "data": {
+    "603344": {
+      "fund_data": {
+        "pe_ratio": 24.78,
+        "pb_ratio": 2.2942321,
+        "roe": 0.09544,
+        "market_cap": 4820477952.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603345": {
+      "fund_data": {
+        "pe_ratio": 16.802149,
+        "pb_ratio": 1.7156721,
+        "roe": 0.09802,
+        "market_cap": 26039863296.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603348": {
+      "fund_data": {
+        "pe_ratio": 290.7143,
+        "pb_ratio": 1.4818321,
+        "roe": 0.00477,
+        "market_cap": 6399610880.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603350": {
+      "fund_data": {
+        "pe_ratio": 35.588234,
+        "pb_ratio": 3.2121053,
+        "roe": 0.09137,
+        "market_cap": 4225864448.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603351": {
+      "fund_data": {
+        "pe_ratio": 24.98165,
+        "pb_ratio": 2.0965507,
+        "roe": 0.08478,
+        "market_cap": 3688007680.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603353": {
+      "fund_data": {
+        "pe_ratio": 577.8,
+        "pb_ratio": 2.6624274,
+        "roe": 0.00472,
+        "market_cap": 4966364160.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603355": {
+      "fund_data": {
+        "pe_ratio": 16.775148,
+        "pb_ratio": 2.9202719,
+        "roe": 0.17679001,
+        "market_cap": 16255761408.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603356": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 4.4569535,
+        "roe": -0.34666002,
+        "market_cap": 1794756352.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603357": {
+      "fund_data": {
+        "pe_ratio": 10.185185,
+        "pb_ratio": 1.2029747,
+        "roe": 0.11848,
+        "market_cap": 4624768000.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603358": {
+      "fund_data": {
+        "pe_ratio": 50.483513,
+        "pb_ratio": 5.6305914,
+        "roe": 0.11378,
+        "market_cap": 21579995136.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603359": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 1.2883643,
+        "roe": -0.22328,
+        "market_cap": 3408173312.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603360": {
+      "fund_data": {
+        "pe_ratio": 105.63333,
+        "pb_ratio": 14.746394,
+        "roe": 0.12741,
+        "market_cap": 22380228608.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603363": {
+      "fund_data": {
+        "pe_ratio": 2.740113,
+        "pb_ratio": 3.7772584,
+        "roe": 0.012464299000000002,
+        "market_cap": 12624365568.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603365": {
+      "fund_data": {
+        "pe_ratio": 14.148649,
+        "pb_ratio": 1.8678083,
+        "roe": 0.13261,
+        "market_cap": 5499545600.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603366": {
+      "fund_data": {
+        "pe_ratio": 43.18182,
+        "pb_ratio": 1.8590997,
+        "roe": 0.04104,
+        "market_cap": 7723957248.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603367": {
+      "fund_data": {
+        "pe_ratio": 16.870369,
+        "pb_ratio": 1.3406916,
+        "roe": 0.08236,
+        "market_cap": 8249180160.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603368": {
+      "fund_data": {
+        "pe_ratio": 9.106599,
+        "pb_ratio": 0.89200485,
+        "roe": 0.094610006,
+        "market_cap": 7125210112.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603369": {
+      "fund_data": {
+        "pe_ratio": 16.36087,
+        "pb_ratio": 2.8421452,
+        "roe": 0.18175,
+        "market_cap": 46917087232.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603370": {
+      "fund_data": {
+        "pe_ratio": 33.401512,
+        "pb_ratio": 4.048297,
+        "roe": 0.08,
+        "market_cap": 7713545728.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603373": {
+      "fund_data": {
+        "pe_ratio": 34.85124,
+        "pb_ratio": 2.508775,
+        "roe": 0.09925,
+        "market_cap": 4534408192.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603375": {
+      "fund_data": {
+        "pe_ratio": 165.86957,
+        "pb_ratio": 2.4294722,
+        "roe": 0.0117999995,
+        "market_cap": 3840433664.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603376": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 1.8,
+        "roe": 0.08,
+        "market_cap": 1000000000.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603377": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.619792,
+        "roe": -0.65085,
+        "market_cap": 2981159424.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603378": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.864979,
+        "roe": -0.46716,
+        "market_cap": 2910171136.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603379": {
+      "fund_data": {
+        "pe_ratio": 17.908474,
+        "pb_ratio": 4.269781,
+        "roe": 0.25518999,
+        "market_cap": 32251609088.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603380": {
+      "fund_data": {
+        "pe_ratio": 24.935251,
+        "pb_ratio": 3.582429,
+        "roe": 0.14858,
+        "market_cap": 5560891904.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603381": {
+      "fund_data": {
+        "pe_ratio": 51.149998,
+        "pb_ratio": 1.3572139,
+        "roe": 0.025390001,
+        "market_cap": 4854264320.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603382": {
+      "fund_data": {
+        "pe_ratio": 31.34737,
+        "pb_ratio": 3.1134346,
+        "roe": 0.08,
+        "market_cap": 5397666304.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603383": {
+      "fund_data": {
+        "pe_ratio": 38.8125,
+        "pb_ratio": 5.240506,
+        "roe": 0.13573,
+        "market_cap": 7652718592.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603385": {
+      "fund_data": {
+        "pe_ratio": 43.25,
+        "pb_ratio": 0.7017544,
+        "roe": 0.013250001,
+        "market_cap": 2634201600.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603386": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.5780573,
+        "roe": -0.08253,
+        "market_cap": 3879975424.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603387": {
+      "fund_data": {
+        "pe_ratio": 19.92683,
+        "pb_ratio": 1.5397662,
+        "roe": 0.07119,
+        "market_cap": 4143444224.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603388": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 0.26839426,
+        "roe": -0.41037998,
+        "market_cap": 188925472.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603389": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 51.357735,
+        "roe": -0.32801,
+        "market_cap": 11429711872.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603390": {
+      "fund_data": {
+        "pe_ratio": 67.388885,
+        "pb_ratio": 2.431349,
+        "roe": 0.03941,
+        "market_cap": 4265538304.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603391": {
+      "fund_data": {
+        "pe_ratio": 23.958847,
+        "pb_ratio": 2.531965,
+        "roe": 0.10069,
+        "market_cap": 5298020352.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603392": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 5.3537045,
+        "roe": -0.02695,
+        "market_cap": 64723681280.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603393": {
+      "fund_data": {
+        "pe_ratio": 10.242424,
+        "pb_ratio": 1.2754116,
+        "roe": 0.106529996,
+        "market_cap": 11462833152.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603395": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 6.1022305,
+        "roe": 0.01764,
+        "market_cap": 8535800320.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603396": {
+      "fund_data": {
+        "pe_ratio": 95.72727,
+        "pb_ratio": 1.6901182,
+        "roe": 0.02488,
+        "market_cap": 4376082944.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603398": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 6.7071524,
+        "roe": -1.0096,
+        "market_cap": 4310396928.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603399": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.1892877,
+        "roe": -0.1145,
+        "market_cap": 5368805888.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603400": {
+      "fund_data": {
+        "pe_ratio": 26.252476,
+        "pb_ratio": 4.2117386,
+        "roe": 0.08,
+        "market_cap": 5303000064.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603406": {
+      "fund_data": {
+        "pe_ratio": 32.384,
+        "pb_ratio": 3.4749763,
+        "roe": 0.08,
+        "market_cap": 16192404480.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603408": {
+      "fund_data": {
+        "pe_ratio": 12.469388,
+        "pb_ratio": 1.5704923,
+        "roe": 0.12878999,
+        "market_cap": 5469342208.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603409": {
+      "fund_data": {
+        "pe_ratio": 23.398602,
+        "pb_ratio": 2.8269684,
+        "roe": 0.14561,
+        "market_cap": 4216963584.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603416": {
+      "fund_data": {
+        "pe_ratio": 32.742138,
+        "pb_ratio": 3.0993629,
+        "roe": 0.09608,
+        "market_cap": 8180637696.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603418": {
+      "fund_data": {
+        "pe_ratio": 15.701149,
+        "pb_ratio": 3.6080296,
+        "roe": 0.24615999,
+        "market_cap": 10549260288.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603421": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 1.6301816,
+        "roe": -0.17888,
+        "market_cap": 4565333504.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603429": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 4.496805,
+        "roe": -0.02039,
+        "market_cap": 5905706496.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603439": {
+      "fund_data": {
+        "pe_ratio": 29.675,
+        "pb_ratio": 3.2520547,
+        "roe": 0.09673,
+        "market_cap": 4854001664.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603444": {
+      "fund_data": {
+        "pe_ratio": 20.474138,
+        "pb_ratio": 5.728413,
+        "roe": 0.31667998,
+        "market_cap": 30797572096.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603456": {
+      "fund_data": {
+        "pe_ratio": 22.987806,
+        "pb_ratio": 1.9111832,
+        "roe": 0.08287,
+        "market_cap": 16766057472.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603458": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 0.84825736,
+        "roe": -0.11354999,
+        "market_cap": 2421444864.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603466": {
+      "fund_data": {
+        "pe_ratio": 170.0,
+        "pb_ratio": 2.8254848,
+        "roe": 0.01572,
+        "market_cap": 6066815488.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603477": {
+      "fund_data": {
+        "pe_ratio": 24.833332,
+        "pb_ratio": 2.8489482,
+        "roe": 0.113129996,
+        "market_cap": 9120057344.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603486": {
+      "fund_data": {
+        "pe_ratio": 27.768682,
+        "pb_ratio": 5.036793,
+        "roe": 0.2051,
+        "market_cap": 45188833280.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603488": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.6213593,
+        "roe": -0.0248,
+        "market_cap": 2365122560.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603489": {
+      "fund_data": {
+        "pe_ratio": 91.242424,
+        "pb_ratio": 2.6228225,
+        "roe": 0.029830001,
+        "market_cap": 7064347648.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603496": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 6.266942,
+        "roe": -0.00992,
+        "market_cap": 8735308800.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603499": {
+      "fund_data": {
+        "pe_ratio": 47.380955,
+        "pb_ratio": 6.8858128,
+        "roe": 0.14278,
+        "market_cap": 6021628416.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603500": {
+      "fund_data": {
+        "pe_ratio": 25.857143,
+        "pb_ratio": 3.4237075,
+        "roe": 0.1443,
+        "market_cap": 3614102016.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603501": {
+      "fund_data": {
+        "pe_ratio": 33.68116,
+        "pb_ratio": 5.0622983,
+        "roe": 0.16341999,
+        "market_cap": 140532760576.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603505": {
+      "fund_data": {
+        "pe_ratio": 60.62069,
+        "pb_ratio": 8.214952,
+        "roe": 0.12462,
+        "market_cap": 14796537856.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603506": {
+      "fund_data": {
+        "pe_ratio": 18.952381,
+        "pb_ratio": 1.7847533,
+        "roe": 0.10395,
+        "market_cap": 2242066688.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603507": {
+      "fund_data": {
+        "pe_ratio": 72.258064,
+        "pb_ratio": 1.8063059,
+        "roe": 0.021960001,
+        "market_cap": 4128349440.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603508": {
+      "fund_data": {
+        "pe_ratio": 16.524693,
+        "pb_ratio": 2.654174,
+        "roe": 0.14739999,
+        "market_cap": 10206714880.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603511": {
+      "fund_data": {
+        "pe_ratio": 49.612904,
+        "pb_ratio": 1.4273783,
+        "roe": 0.02913,
+        "market_cap": 6214298624.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603515": {
+      "fund_data": {
+        "pe_ratio": 15.01695,
+        "pb_ratio": 1.8945793,
+        "roe": 0.13078,
+        "market_cap": 13180448768.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603516": {
+      "fund_data": {
+        "pe_ratio": 4185.0,
+        "pb_ratio": 24.441523,
+        "roe": 0.0029499999,
+        "market_cap": 34027108352.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603517": {
+      "fund_data": {
+        "pe_ratio": 103.00001,
+        "pb_ratio": 1.2712427,
+        "roe": 0.00738,
+        "market_cap": 8114365952.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603518": {
+      "fund_data": {
+        "pe_ratio": 13.704226,
+        "pb_ratio": 0.9318138,
+        "roe": 0.07284,
+        "market_cap": 3368527616.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603519": {
+      "fund_data": {
+        "pe_ratio": 19.349205,
+        "pb_ratio": 2.703482,
+        "roe": 0.13484,
+        "market_cap": 3246536192.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603520": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 1.6520566,
+        "roe": -0.0110599995,
+        "market_cap": 4296416768.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603527": {
+      "fund_data": {
+        "pe_ratio": 23.069767,
+        "pb_ratio": 1.5238094,
+        "roe": 0.06295,
+        "market_cap": 3144354304.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603528": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.4070797,
+        "roe": -0.03312,
+        "market_cap": 6522793984.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603529": {
+      "fund_data": {
+        "pe_ratio": 11.48106,
+        "pb_ratio": 2.5826516,
+        "roe": 0.25215,
+        "market_cap": 26343266304.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603530": {
+      "fund_data": {
+        "pe_ratio": 44.896553,
+        "pb_ratio": 9.943993,
+        "roe": 0.22482,
+        "market_cap": 16861599744.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603533": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 4.27378,
+        "roe": -0.048,
+        "market_cap": 9879567360.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603535": {
+      "fund_data": {
+        "pe_ratio": 28.135134,
+        "pb_ratio": 1.9378257,
+        "roe": 0.07052,
+        "market_cap": 5318658560.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603536": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 7.2468915,
+        "roe": -0.045890003,
+        "market_cap": 2966740736.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603538": {
+      "fund_data": {
+        "pe_ratio": 43.704544,
+        "pb_ratio": 1.8328251,
+        "roe": 0.04675,
+        "market_cap": 4242490112.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603551": {
+      "fund_data": {
+        "pe_ratio": 16.171053,
+        "pb_ratio": 3.516452,
+        "roe": 0.20677,
+        "market_cap": 4795049984.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603556": {
+      "fund_data": {
+        "pe_ratio": 17.139175,
+        "pb_ratio": 2.170649,
+        "roe": 0.13181,
+        "market_cap": 16168283136.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603557": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 19.36508,
+        "roe": -3.73608,
+        "market_cap": 1521185920.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603558": {
+      "fund_data": {
+        "pe_ratio": 10.752381,
+        "pb_ratio": 1.61401,
+        "roe": 0.15275,
+        "market_cap": 3868383488.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603559": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.6593595,
+        "roe": -0.58174,
+        "market_cap": 3483084288.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603565": {
+      "fund_data": {
+        "pe_ratio": 10.0990095,
+        "pb_ratio": 2.1683674,
+        "roe": 0.21141,
+        "market_cap": 21420642304.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603566": {
+      "fund_data": {
+        "pe_ratio": 31.785717,
+        "pb_ratio": 1.770557,
+        "roe": 0.055069998,
+        "market_cap": 4619931648.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603567": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 1.3109677,
+        "roe": -0.04321,
+        "market_cap": 9560524800.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603568": {
+      "fund_data": {
+        "pe_ratio": 14.422359,
+        "pb_ratio": 2.6834624,
+        "roe": 0.18458,
+        "market_cap": 39579836416.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603569": {
+      "fund_data": {
+        "pe_ratio": 77.9,
+        "pb_ratio": 1.5670891,
+        "roe": 0.029289998,
+        "market_cap": 4701321728.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603577": {
+      "fund_data": {
+        "pe_ratio": 23.666666,
+        "pb_ratio": 1.6130723,
+        "roe": 0.07,
+        "market_cap": 3130253824.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603578": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.3156154,
+        "roe": -0.18757,
+        "market_cap": 2270695168.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603579": {
+      "fund_data": {
+        "pe_ratio": 27.431818,
+        "pb_ratio": 1.7661691,
+        "roe": 0.06808,
+        "market_cap": 4909003264.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603580": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 4.8882685,
+        "roe": -0.0055299997,
+        "market_cap": 2058102912.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603583": {
+      "fund_data": {
+        "pe_ratio": 35.83505,
+        "pb_ratio": 2.876531,
+        "roe": 0.08224,
+        "market_cap": 13409397760.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603585": {
+      "fund_data": {
+        "pe_ratio": 30.186441,
+        "pb_ratio": 1.253519,
+        "roe": 0.03502,
+        "market_cap": 3328456704.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603586": {
+      "fund_data": {
+        "pe_ratio": 22.15,
+        "pb_ratio": 1.4975069,
+        "roe": 0.06892,
+        "market_cap": 3474055168.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603587": {
+      "fund_data": {
+        "pe_ratio": 22.421053,
+        "pb_ratio": 1.6460587,
+        "roe": 0.07194,
+        "market_cap": 6058906112.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603588": {
+      "fund_data": {
+        "pe_ratio": 18.236841,
+        "pb_ratio": 1.1020992,
+        "roe": 0.06434,
+        "market_cap": 10556014592.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603589": {
+      "fund_data": {
+        "pe_ratio": 17.182322,
+        "pb_ratio": 1.7918874,
+        "roe": 0.10533,
+        "market_cap": 18601517056.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603590": {
+      "fund_data": {
+        "pe_ratio": 118.83333,
+        "pb_ratio": 2.1367564,
+        "roe": 0.00923,
+        "market_cap": 6817270272.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603595": {
+      "fund_data": {
+        "pe_ratio": 97.176476,
+        "pb_ratio": 2.4842105,
+        "roe": 0.00719,
+        "market_cap": 3839947264.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603596": {
+      "fund_data": {
+        "pe_ratio": 20.115208,
+        "pb_ratio": 3.4987178,
+        "roe": 0.18359,
+        "market_cap": 26474199040.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603598": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 23.067009,
+        "roe": -0.08096,
+        "market_cap": 4820309504.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603599": {
+      "fund_data": {
+        "pe_ratio": 14.137501,
+        "pb_ratio": 1.0326881,
+        "roe": 0.07454,
+        "market_cap": 10295147520.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603600": {
+      "fund_data": {
+        "pe_ratio": 14.582278,
+        "pb_ratio": 1.6625776,
+        "roe": 0.11659,
+        "market_cap": 3806590464.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603601": {
+      "fund_data": {
+        "pe_ratio": 55.375,
+        "pb_ratio": 2.0018075,
+        "roe": 0.03778,
+        "market_cap": 4563533312.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603602": {
+      "fund_data": {
+        "pe_ratio": 132.81818,
+        "pb_ratio": 3.055846,
+        "roe": 0.029860001,
+        "market_cap": 3350632192.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603605": {
+      "fund_data": {
+        "pe_ratio": 17.774435,
+        "pb_ratio": 4.9267106,
+        "roe": 0.30252,
+        "market_cap": 28082616320.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603606": {
+      "fund_data": {
+        "pe_ratio": 40.437496,
+        "pb_ratio": 5.2060795,
+        "roe": 0.13583,
+        "market_cap": 40045666304.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603607": {
+      "fund_data": {
+        "pe_ratio": 38.5,
+        "pb_ratio": 4.080551,
+        "roe": 0.104329996,
+        "market_cap": 4123738112.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603608": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.5190284,
+        "roe": -0.058029998,
+        "market_cap": 2917026048.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603609": {
+      "fund_data": {
+        "pe_ratio": 37.5,
+        "pb_ratio": 0.9672427,
+        "roe": 0.018099999,
+        "market_cap": 6843683328.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603610": {
+      "fund_data": {
+        "pe_ratio": 43.860466,
+        "pb_ratio": 2.110092,
+        "roe": 0.04834,
+        "market_cap": 6657422336.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603611": {
+      "fund_data": {
+        "pe_ratio": 11.666667,
+        "pb_ratio": 1.8374211,
+        "roe": 0.16519,
+        "market_cap": 5770257408.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603612": {
+      "fund_data": {
+        "pe_ratio": 15.839161,
+        "pb_ratio": 1.9998233,
+        "roe": 0.13746999,
+        "market_cap": 11282065408.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603613": {
+      "fund_data": {
+        "pe_ratio": 13.435,
+        "pb_ratio": 2.1758847,
+        "roe": 0.18375999,
+        "market_cap": 19360851968.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603615": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 4.966188,
+        "roe": -0.01461,
+        "market_cap": 5682769920.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603616": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 8.75195,
+        "roe": -0.56036,
+        "market_cap": 2195294208.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603617": {
+      "fund_data": {
+        "pe_ratio": 55.692307,
+        "pb_ratio": 1.8223004,
+        "roe": 0.03175,
+        "market_cap": 2827012352.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603618": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 1.9806271,
+        "roe": -0.067329995,
+        "market_cap": 5371988480.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603619": {
+      "fund_data": {
+        "pe_ratio": 21.075474,
+        "pb_ratio": 3.0712125,
+        "roe": 0.11986,
+        "market_cap": 10328641536.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603626": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.910313,
+        "roe": -0.15439999,
+        "market_cap": 6247945216.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603628": {
+      "fund_data": {
+        "pe_ratio": 40.606056,
+        "pb_ratio": 2.691844,
+        "roe": 0.06849,
+        "market_cap": 3659554560.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603629": {
+      "fund_data": {
+        "pe_ratio": 33.931507,
+        "pb_ratio": 3.429323,
+        "roe": 0.10645001,
+        "market_cap": 6491721728.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603630": {
+      "fund_data": {
+        "pe_ratio": 2041.0,
+        "pb_ratio": 2.3804524,
+        "roe": -0.00035,
+        "market_cap": 4596425216.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603633": {
+      "fund_data": {
+        "pe_ratio": 245.00002,
+        "pb_ratio": 2.1378708,
+        "roe": 0.00826,
+        "market_cap": 4182746112.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603636": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.4744449,
+        "roe": -0.100880004,
+        "market_cap": 7811652608.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603637": {
+      "fund_data": {
+        "pe_ratio": 25.846155,
+        "pb_ratio": 2.3327932,
+        "roe": 0.09193,
+        "market_cap": 2405953536.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603638": {
+      "fund_data": {
+        "pe_ratio": 42.86667,
+        "pb_ratio": 4.3455734,
+        "roe": 0.10597,
+        "market_cap": 16031698944.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603639": {
+      "fund_data": {
+        "pe_ratio": 22.410715,
+        "pb_ratio": 1.2324463,
+        "roe": 0.05604,
+        "market_cap": 4265473280.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603648": {
+      "fund_data": {
+        "pe_ratio": 33.999996,
+        "pb_ratio": 2.0198019,
+        "roe": 0.0629,
+        "market_cap": 3696610560.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603650": {
+      "fund_data": {
+        "pe_ratio": 44.84375,
+        "pb_ratio": 7.355202,
+        "roe": 0.16527,
+        "market_cap": 26524882944.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603655": {
+      "fund_data": {
+        "pe_ratio": 94.615395,
+        "pb_ratio": 6.9859905,
+        "roe": 0.05195,
+        "market_cap": 3911400192.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603656": {
+      "fund_data": {
+        "pe_ratio": 130.58824,
+        "pb_ratio": 3.1467047,
+        "roe": 0.02268,
+        "market_cap": 4070933248.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603657": {
+      "fund_data": {
+        "pe_ratio": 274.54547,
+        "pb_ratio": 4.2649345,
+        "roe": 0.00829,
+        "market_cap": 4082739456.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603658": {
+      "fund_data": {
+        "pe_ratio": 19.203125,
+        "pb_ratio": 2.4088593,
+        "roe": 0.12722999,
+        "market_cap": 21068431360.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603659": {
+      "fund_data": {
+        "pe_ratio": 33.44156,
+        "pb_ratio": 2.6954882,
+        "roe": 0.08912,
+        "market_cap": 55012278272.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603660": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 6.320571,
+        "roe": -0.26432,
+        "market_cap": 5639749120.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603661": {
+      "fund_data": {
+        "pe_ratio": 16.189054,
+        "pb_ratio": 1.16003,
+        "roe": 0.07867,
+        "market_cap": 4525241856.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603662": {
+      "fund_data": {
+        "pe_ratio": 52.473686,
+        "pb_ratio": 6.100347,
+        "roe": 0.12404,
+        "market_cap": 16799242240.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603663": {
+      "fund_data": {
+        "pe_ratio": 172.33333,
+        "pb_ratio": 9.929578,
+        "roe": 0.04658,
+        "market_cap": 13130758144.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603665": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 7.3135343,
+        "roe": -0.32394,
+        "market_cap": 5197442560.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603666": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.97546,
+        "roe": -0.08208,
+        "market_cap": 6379664384.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603667": {
+      "fund_data": {
+        "pe_ratio": 172.96,
+        "pb_ratio": 5.3087783,
+        "roe": 0.03266,
+        "market_cap": 15834608640.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603668": {
+      "fund_data": {
+        "pe_ratio": 307.19998,
+        "pb_ratio": 3.3311646,
+        "roe": 0.0094800005,
+        "market_cap": 7735627776.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603669": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 4.92823,
+        "roe": -0.14881,
+        "market_cap": 3714416640.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603676": {
+      "fund_data": {
+        "pe_ratio": 21.307693,
+        "pb_ratio": 3.1379213,
+        "roe": 0.14762,
+        "market_cap": 4821589504.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603677": {
+      "fund_data": {
+        "pe_ratio": 53.45714,
+        "pb_ratio": 3.0966566,
+        "roe": 0.058140002,
+        "market_cap": 3603561984.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603678": {
+      "fund_data": {
+        "pe_ratio": 49.741936,
+        "pb_ratio": 2.3792624,
+        "roe": 0.047069997,
+        "market_cap": 14666474496.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603679": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.1963372,
+        "roe": -0.12209,
+        "market_cap": 2473531136.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603680": {
+      "fund_data": {
+        "pe_ratio": 15.984616,
+        "pb_ratio": 1.4543673,
+        "roe": 0.117939994,
+        "market_cap": 8142838272.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603681": {
+      "fund_data": {
+        "pe_ratio": 23.38356,
+        "pb_ratio": 1.1922889,
+        "roe": 0.05718,
+        "market_cap": 3262607616.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603682": {
+      "fund_data": {
+        "pe_ratio": 45.538464,
+        "pb_ratio": 2.9452736,
+        "roe": 0.04657,
+        "market_cap": 2797200128.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603683": {
+      "fund_data": {
+        "pe_ratio": 109.95652,
+        "pb_ratio": 4.5152655,
+        "roe": 0.04478,
+        "market_cap": 7324051456.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603685": {
+      "fund_data": {
+        "pe_ratio": 142.92308,
+        "pb_ratio": 2.5924375,
+        "roe": 0.00935,
+        "market_cap": 3483920640.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603686": {
+      "fund_data": {
+        "pe_ratio": 74.73529,
+        "pb_ratio": 3.1116824,
+        "roe": 0.05007,
+        "market_cap": 10556086272.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603687": {
+      "fund_data": {
+        "pe_ratio": 40.52381,
+        "pb_ratio": 1.423553,
+        "roe": 0.04816,
+        "market_cap": 4680771584.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603688": {
+      "fund_data": {
+        "pe_ratio": 121.89655,
+        "pb_ratio": 3.2856212,
+        "roe": 0.025910001,
+        "market_cap": 19148326912.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603689": {
+      "fund_data": {
+        "pe_ratio": 15.45283,
+        "pb_ratio": 1.184553,
+        "roe": 0.08126,
+        "market_cap": 4308171264.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603690": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.0960567,
+        "roe": -0.03528,
+        "market_cap": 10665320448.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603693": {
+      "fund_data": {
+        "pe_ratio": 27.55814,
+        "pb_ratio": 1.5176742,
+        "roe": 0.053179998,
+        "market_cap": 10563989504.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603696": {
+      "fund_data": {
+        "pe_ratio": 66.64706,
+        "pb_ratio": 4.5926228,
+        "roe": 0.070539996,
+        "market_cap": 2664815872.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603697": {
+      "fund_data": {
+        "pe_ratio": 23.8,
+        "pb_ratio": 2.891859,
+        "roe": 0.118540004,
+        "market_cap": 5089536000.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603698": {
+      "fund_data": {
+        "pe_ratio": 50.72222,
+        "pb_ratio": 2.8354037,
+        "roe": 0.058379997,
+        "market_cap": 9787177984.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603699": {
+      "fund_data": {
+        "pe_ratio": 25.754011,
+        "pb_ratio": 8.94336,
+        "roe": 0.35074002,
+        "market_cap": 37349339136.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603700": {
+      "fund_data": {
+        "pe_ratio": 27.152172,
+        "pb_ratio": 1.5323273,
+        "roe": 0.057490002,
+        "market_cap": 2519222784.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603701": {
+      "fund_data": {
+        "pe_ratio": 103.6875,
+        "pb_ratio": 5.402149,
+        "roe": 0.0701,
+        "market_cap": 4335993856.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603703": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 5.682159,
+        "roe": -0.03952,
+        "market_cap": 4718346752.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603706": {
+      "fund_data": {
+        "pe_ratio": 17.610619,
+        "pb_ratio": 2.270912,
+        "roe": 0.12872,
+        "market_cap": 3768716032.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603707": {
+      "fund_data": {
+        "pe_ratio": 24.725,
+        "pb_ratio": 2.3298,
+        "roe": 0.09983,
+        "market_cap": 15978630144.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603708": {
+      "fund_data": {
+        "pe_ratio": 47.833332,
+        "pb_ratio": 2.990362,
+        "roe": 0.05377,
+        "market_cap": 7328128000.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603709": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.607595,
+        "roe": -0.113129996,
+        "market_cap": 1868464128.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603711": {
+      "fund_data": {
+        "pe_ratio": 37.555553,
+        "pb_ratio": 1.6902113,
+        "roe": 0.04437,
+        "market_cap": 5582057984.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603712": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.687812,
+        "roe": -0.08856,
+        "market_cap": 15393680384.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603713": {
+      "fund_data": {
+        "pe_ratio": 15.480337,
+        "pb_ratio": 1.8607557,
+        "roe": 0.1449,
+        "market_cap": 8714388480.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603716": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.9380198,
+        "roe": -0.21747999,
+        "market_cap": 4379940352.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603717": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 4.6636767,
+        "roe": -0.13051,
+        "market_cap": 2414016512.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603718": {
+      "fund_data": {
+        "pe_ratio": 25.73077,
+        "pb_ratio": 2.8601966,
+        "roe": 0.13948,
+        "market_cap": 4386380288.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603719": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 2.363135,
+        "roe": -0.08336,
+        "market_cap": 4812000256.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603721": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 5.361786,
+        "roe": -0.0392,
+        "market_cap": 2466099968.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603722": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 3.9819927,
+        "roe": -0.03501,
+        "market_cap": 3803266816.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603725": {
+      "fund_data": {
+        "pe_ratio": 23.128206,
+        "pb_ratio": 3.2657495,
+        "roe": 0.14996,
+        "market_cap": 2749816320.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603726": {
+      "fund_data": {
+        "pe_ratio": 18.827587,
+        "pb_ratio": 2.878229,
+        "roe": 0.16089001,
+        "market_cap": 4054622208.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603727": {
+      "fund_data": {
+        "pe_ratio": 145.8,
+        "pb_ratio": 1.2729177,
+        "roe": 0.0092,
+        "market_cap": 4107466752.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603728": {
+      "fund_data": {
+        "pe_ratio": 343.31583,
+        "pb_ratio": 9.217183,
+        "roe": 0.02794,
+        "market_cap": 27323707392.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603729": {
+      "fund_data": {
+        "pe_ratio": 15.0,
+        "pb_ratio": 5.2368026,
+        "roe": -0.18043,
+        "market_cap": 1620347776.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603730": {
+      "fund_data": {
+        "pe_ratio": 27.24138,
+        "pb_ratio": 3.6795528,
+        "roe": 0.1355,
+        "market_cap": 16973815808.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603733": {
+      "fund_data": {
+        "pe_ratio": 20.231482,
+        "pb_ratio": 1.8164436,
+        "roe": 0.11788999,
+        "market_cap": 15463770112.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603737": {
+      "fund_data": {
+        "pe_ratio": 48.86667,
+        "pb_ratio": 9.990913,
+        "roe": 0.19614,
+        "market_cap": 32449212416.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603738": {
+      "fund_data": {
+        "pe_ratio": 159.5,
+        "pb_ratio": 3.916994,
+        "roe": 0.02103,
+        "market_cap": 6154905600.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603739": {
+      "fund_data": {
+        "pe_ratio": 45.0,
+        "pb_ratio": 2.1181002,
+        "roe": 0.06068,
+        "market_cap": 3757478656.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603755": {
+      "fund_data": {
+        "pe_ratio": 47.907894,
+        "pb_ratio": 4.723664,
+        "roe": 0.10049,
+        "market_cap": 3590524160.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603757": {
+      "fund_data": {
+        "pe_ratio": 29.363634,
+        "pb_ratio": 3.1473114,
+        "roe": 0.10651,
+        "market_cap": 6628023808.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603758": {
+      "fund_data": {
+        "pe_ratio": 37.780487,
+        "pb_ratio": 2.6134636,
+        "roe": 0.0706,
+        "market_cap": 6796966400.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603759": {
+      "fund_data": {
+        "pe_ratio": 17.775864,
+        "pb_ratio": 1.6718017,
+        "roe": 0.09832,
+        "market_cap": 4760745984.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603766": {
+      "fund_data": {
+        "pe_ratio": 15.159091,
+        "pb_ratio": 2.7573378,
+        "roe": 0.18205,
+        "market_cap": 27394248704.0,
+        "revenue_growth": 0.05
+      }
+    },
+    "603767": {
+      "fund_data": {
+        "pe_ratio": 746.3333,
+        "pb_ratio": 4.970033,
+        "roe": 0.00593,
+        "market_cap": 6910258688.0,
+        "revenue_growth": 0.05
+      }
+    }
+  },
+  "count": 200,
+  "part": 22,
+  "total_parts": 24
+}

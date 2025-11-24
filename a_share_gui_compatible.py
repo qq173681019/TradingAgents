@@ -5,10 +5,23 @@ ENABLE_ETF_BUTTONS = False  # 默认关闭ETF功能
 DEEPSEEK_API_KEY = "sk-bdd85ba18ab54a699617d8b25fbecfea"  # 在此填写你的Deepseek API Key
 MINIMAX_API_KEY = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiLmiYvlt6XliLbmnZbmnLrlmajkuroiLCJVc2VyTmFtZSI6IkplcmljbyIsIkFjY291bnQiOiIiLCJTdWJqZWN0SUQiOiIxOTkwMjM2MDQ1NDQyMDI4MjE2IiwiUGhvbmUiOiIiLCJHcm91cElEIjoiMTk5MDIzNjA0NTQzNzgzODAwOCIsIlBhZ2VOYW1lIjoiIiwiTWFpbCI6InVuZGVydGlnZXJAMTI2LmNvbSIsIkNyZWF0ZVRpbWUiOiIyMDI1LTExLTE3IDE1OjQ1OjUzIiwiVG9rZW5UeXBlIjoxLCJpc3MiOiJtaW5pbWF4In0.c73EzaLhzTl-IimMDpeOrm-qDdhQ_ptzQO64y8IW4hkbLTpu1L-SL4uB_ydO0yIC5EUyG3C__D6ha4DZgWpRCLTsXUcAHme7PUlGY_wm4aP7eKMRSTPmEmmWDGMTkyN8xSznGE6TNXm1fcDKDeK_NmA9xg9stMqqaVX3vOJ0yj3a0TTpYe8vcmqAwabF9_YaAZ_bEh6IBshBalbYDnjRn0L4Vn0e8cmdcgadRbkmyz2F7y9dYw_HDWP9ufhCLkoGBDXA0duqXwleDRYehU_Et11xZUgL8CJ9EuKSNuiuSqi4udxUW0szmagAGNXhDVymUKo0HNkuXzfkkphlyMv3bw"    # 在此填写你的Minimax API Key
 
+import os
+import json
+import random
+from datetime import datetime, timedelta
 import requests
+
+def call_llm(prompt, model="deepseek"):
+    """
+    调用LLM的占位函数，防止NameError。
+    实际实现应根据项目需求添加。
+    """
+    print(f"[LLM] Mock Call: {prompt[:20]}...")
+    return "LLM Analysis Result (Placeholder)"
+
 def test_llm_api_keys():
         """批量评分功能已被移除（按用户请求）。此函数为占位，避免外部调用时报错。"""
-        self.show_progress("NOTICE: 批量评分功能已被移除。")
+        print("NOTICE: 批量评分功能已被移除。")
         return
 try:
     import yfinance as yf
@@ -43,6 +56,13 @@ try:
 except Exception:
     ak = None
     AKSHARE_AVAILABLE = False
+
+try:
+    import baostock as bs
+    BAOSTOCK_AVAILABLE = True
+except ImportError:
+    bs = None
+    BAOSTOCK_AVAILABLE = False
 
 # 导入urllib用于网络请求
 try:
@@ -556,6 +576,34 @@ class AShareAnalyzerGUI:
         if hasattr(self, 'show_progress'):
             self.show_progress(f"INFO: {miss_count} 只股票未在缓存中，已实时获取数据")
 
+        # 保存到文件以便查看
+        try:
+            import os
+            from datetime import datetime
+            os.makedirs('data', exist_ok=True)
+            file_path = os.path.join('data', 'cache_miss_stocks.txt')
+            
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(f"缓存未命中统计报告\n")
+                f.write(f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"类型: {stock_type}\n")
+                f.write(f"总计: {miss_count} 只\n")
+                f.write(f"{'='*50}\n")
+                f.write(f"{'序号':<6} {'股票代码':<10} {'股票名称':<30}\n")
+                f.write(f"{'-'*50}\n")
+                
+                for i, stock in enumerate(cache_miss_list, 1):
+                    code = stock['code']
+                    name = stock['name']
+                    f.write(f"{i:<6} {code:<10} {name:<30}\n")
+            
+            print(f"✅ 未命中名单已保存至: {file_path}")
+            if hasattr(self, 'show_progress'):
+                self.show_progress(f"INFO: 未命中名单已保存至 data/cache_miss_stocks.txt")
+                
+        except Exception as e:
+            print(f"保存未命中名单失败: {e}")
+
     def save_comprehensive_data(self):
         """保存完整的三时间段推荐数据 - 支持分卷存储"""
         import json
@@ -785,6 +833,7 @@ class AShareAnalyzerGUI:
 
         # 2. 如果没有分卷数据，尝试加载单文件 (兼容旧模式)
         candidates = []
+        candidates.append(os.path.join('data', 'comprehensive_stock_data.json')) # 优先尝试标准路径
         candidates.append(os.path.join('data', self.comprehensive_data_file))
         candidates.append(self.comprehensive_data_file)
 
@@ -1698,14 +1747,19 @@ class AShareAnalyzerGUI:
         import threading
         import gc
         
+        print(f"[DEBUG] 点击了批量评分按钮: {stock_type}")
+        
         # 检查是否已经在运行
         if hasattr(self, '_batch_running') and self._batch_running:
+            print("[DEBUG] 批量评分已在运行中")
             self.show_progress("WARNING: 批量评分已在运行中，请等待完成")
             return
         
+        # 标记为正在运行 (在主线程设置，防止重复点击)
+        self._batch_running = True
+        
         # 在后台线程中运行，避免界面卡死
         def batch_scoring_thread():
-            self._batch_running = True
             try:
                 # 转换股票类型
                 if stock_type == "60/00/68":
@@ -1715,9 +1769,15 @@ class AShareAnalyzerGUI:
                 else:
                     filter_type = stock_type
                 
+                print(f"[DEBUG] 开始后台线程，类型: {filter_type}")
                 self.show_progress(f"START: 开始获取{stock_type}股票评分...")
                 
-                # 检查缓存状态
+                # 检查缓存状态，如果未加载则尝试加载
+                if not getattr(self, 'comprehensive_data_loaded', False):
+                    print(f"[DEBUG] 内存缓存未加载，尝试从磁盘加载...")
+                    self.load_comprehensive_stock_data()
+                
+                # 再次检查缓存状态
                 if getattr(self, 'comprehensive_data_loaded', False):
                     cache_count = len(self.comprehensive_stock_data)
                     print(f"\033[1;34m[INFO] 批量评分开始，当前内存缓存中有 {cache_count} 条数据\033[0m")
@@ -1730,7 +1790,9 @@ class AShareAnalyzerGUI:
                 try:
                     all_codes = self.get_all_stock_codes(filter_type)
                     total_stocks = len(all_codes)
+                    print(f"[DEBUG] 获取到 {total_stocks} 只股票")
                 except Exception as e:
+                    print(f"[ERROR] 获取股票列表失败: {e}")
                     self.show_progress(f"ERROR: 获取股票列表失败: {e}")
                     return
                 
@@ -1763,7 +1825,7 @@ class AShareAnalyzerGUI:
                 start_time = time.time()  # 记录开始时间用于计算 ETA
                 
                 # 记录未命中缓存的股票
-                cache_miss_stocks = []
+                self._current_batch_cache_miss = []
                 
                 for i, code in enumerate(all_codes):
                     try:
@@ -1905,6 +1967,7 @@ class AShareAnalyzerGUI:
             thread = threading.Thread(target=batch_scoring_thread)
             thread.daemon = True
             thread.start()
+            print("[DEBUG] 批量评分线程已启动")
         except Exception as e:
             self.show_progress(f"ERROR: 启动{stock_type}评分失败: {e}")
             self._batch_running = False
@@ -1923,8 +1986,13 @@ class AShareAnalyzerGUI:
             
             # 使用与"开始分析"相同的加权平均算法
             short_score = short_prediction.get('technical_score', 0)
+            if short_score is None: short_score = 0
+            
             medium_score = medium_prediction.get('total_score', 0)
+            if medium_score is None: medium_score = 0
+            
             long_score = long_prediction.get('fundamental_score', 0)
+            if long_score is None: long_score = 0
             
             # 加权平均：短期30%，中期40%，长期30%
             raw_score = (short_score * 0.3 + medium_score * 0.4 + long_score * 0.3)
@@ -1942,65 +2010,191 @@ class AShareAnalyzerGUI:
             print(f"获取 {stock_code} 评分失败: {e}")
             return None
 
+    def _calculate_tech_data_from_kline(self, daily_data):
+        """从K线数据计算技术指标"""
+        try:
+            import pandas as pd
+            if not daily_data:
+                return None
+                
+            df = pd.DataFrame(daily_data)
+            # 确保数值类型
+            for col in ['close', 'volume']:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
+            
+            # 按日期升序排序 (旧->新)
+            if 'date' in df.columns:
+                df = df.sort_values('date')
+            
+            if df.empty:
+                return None
+                
+            current_price = float(df['close'].iloc[-1])
+            
+            # 计算均线
+            ma5 = float(df['close'].rolling(window=5).mean().iloc[-1]) if len(df) >= 5 else current_price
+            ma10 = float(df['close'].rolling(window=10).mean().iloc[-1]) if len(df) >= 10 else current_price
+            ma20 = float(df['close'].rolling(window=20).mean().iloc[-1]) if len(df) >= 20 else current_price
+            ma60 = float(df['close'].rolling(window=60).mean().iloc[-1]) if len(df) >= 60 else current_price
+            
+            # 计算RSI
+            if len(df) >= 14:
+                delta = df['close'].diff()
+                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+                rs = gain / loss
+                rsi = 100 - (100 / (1 + rs.iloc[-1]))
+            else:
+                rsi = 50
+            
+            # 计算MACD
+            if len(df) >= 26:
+                ema12 = df['close'].ewm(span=12, adjust=False).mean()
+                ema26 = df['close'].ewm(span=26, adjust=False).mean()
+                macd_line = ema12 - ema26
+                signal_line = macd_line.ewm(span=9, adjust=False).mean()
+                macd = float(macd_line.iloc[-1])
+                signal = float(signal_line.iloc[-1])
+            else:
+                macd = 0
+                signal = 0
+            
+            # 计算量比
+            if len(df) >= 5:
+                vol_ma5 = df['volume'].rolling(window=5).mean().iloc[-1]
+                vol_ratio = float(df['volume'].iloc[-1] / vol_ma5) if vol_ma5 > 0 else 1.0
+            else:
+                vol_ratio = 1.0
+            
+            return {
+                'current_price': current_price,
+                'ma5': ma5,
+                'ma10': ma10,
+                'ma20': ma20,
+                'ma60': ma60,
+                'rsi': float(rsi) if not pd.isna(rsi) else 50,
+                'macd': macd,
+                'signal': signal,
+                'volume_ratio': vol_ratio,
+                'data_source': 'cache_calculated'
+            }
+        except Exception as e:
+            print(f"计算技术指标失败: {e}")
+            return None
+
     def get_comprehensive_stock_data_for_batch(self, stock_code):
         """为批量评分获取单只股票的完整数据 - 只使用真实数据"""
         try:
-            # 优先使用内存缓存中的收集数据，避免重复网络请求
+            # 初始化缓存容器
+            cached = {}
+            has_cache = False
+            is_cache_miss = False
+            
+            # 1. 尝试获取现有缓存
             if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
-                try:
-                    cached = self.comprehensive_stock_data.get(stock_code)
-                    # 如果缓存中包含 overall_score，则也填充评分缓存
-                    if isinstance(cached, dict) and 'overall_score' in cached:
-                        try:
-                            self.scores_cache[stock_code] = float(cached['overall_score'])
-                        except Exception:
-                            pass
-                    print(f"\033[1;32m[CACHE] 命中缓存数据: {stock_code}\033[0m")
-                    return cached
-                except Exception as e:
-                    print(f"\033[1;31m[ERROR] 从内存缓存读取 {stock_code} 失败: {e}\033[0m")
-                    # 回退到实时抓取
-            else:
-                if not getattr(self, 'comprehensive_data_loaded', False):
-                    print(f"\033[1;33m[MISS] 缓存未加载，将实时获取: {stock_code}\033[0m")
-                else:
-                    print(f"\033[1;33m[MISS] 缓存中未找到: {stock_code}\033[0m")
+                cached = self.comprehensive_stock_data.get(stock_code, {})
+                has_cache = True
                 
-                # 记录缓存未命中的股票
-                if hasattr(self, '_current_batch_cache_miss'):
-                    stock_name = self.stock_info.get(stock_code, {}).get('name', '未知')
-                    self._current_batch_cache_miss.append({
-                        'code': stock_code,
-                        'name': stock_name
-                    })
+                # [兼容性修复] 检查并转换字段名 (financial_data -> fund_data, technical_indicators -> tech_data)
+                if 'financial_data' in cached and ('fund_data' not in cached or not cached['fund_data']):
+                    print(f"\033[1;34m[CACHE] {stock_code} 发现旧格式基本面数据，正在转换...\033[0m")
+                    fin_data = cached['financial_data']
+                    cached['fund_data'] = {
+                        'pe_ratio': fin_data.get('pe_ratio'),
+                        'pb_ratio': fin_data.get('pb_ratio'),
+                        'roe': fin_data.get('roe'),
+                        'revenue_growth': fin_data.get('revenue_growth', fin_data.get('revenue')), # 尝试映射
+                        'debt_ratio': fin_data.get('debt_ratio'),
+                        'net_profit': fin_data.get('net_profit'),
+                        'market_cap': fin_data.get('market_cap')
+                    }
+                    # 如果转换后仍缺关键数据，标记为None以便后续补全
+                    if not cached['fund_data'].get('pe_ratio') and not cached['fund_data'].get('roe'):
+                         # 保留已有的，但可能需要补全
+                         pass
 
-            from datetime import datetime
+                if 'technical_indicators' in cached and ('tech_data' not in cached or not cached['tech_data']):
+                    print(f"\033[1;34m[CACHE] {stock_code} 发现旧格式技术数据，正在转换...\033[0m")
+                    ti_data = cached['technical_indicators']
+                    cached['tech_data'] = ti_data # 字段基本一致
             
-            # 获取真实技术指标数据
-            tech_data = self.get_real_technical_indicators(stock_code)
-            if tech_data is None:
-                print(f"{stock_code} 无法获取真实技术数据，跳过分析")
-                return None
-            
-            # 获取真实基础数据
-            fund_data = self.get_real_fundamental_indicators(stock_code)
-            if fund_data is None:
-                # 对于ETF，如果无法获取基础数据，使用ETF专用的默认值
-                if self.is_etf_code(stock_code):
-                    print(f"{stock_code} 是ETF，使用ETF专用评估方式")
-                    fund_data = {
-                        'pe_ratio': 12.0,  # ETF通常PE较低
-                        'pb_ratio': 1.5,   # ETF的PB相对稳定
-                        'roe': 0.1,        # ETF的ROE用分红率代替
-                        'market_cap': 1000000000,  # ETF规模
-                        'revenue_growth': 0.03,    # ETF跟踪指数增长
+            # 2. 检查技术数据 (如果缺失则只获取技术数据)
+            if 'tech_data' not in cached or not cached['tech_data']:
+                # 尝试从缓存的K线数据计算
+                if 'kline_data' in cached and cached['kline_data'] and 'daily' in cached['kline_data']:
+                    print(f"\033[1;32m[CACHE] {stock_code} 发现K线数据，正在计算技术指标...\033[0m")
+                    tech_data = self._calculate_tech_data_from_kline(cached['kline_data']['daily'])
+                    if tech_data:
+                        cached['tech_data'] = tech_data
+                        # 更新回全局缓存
+                        if getattr(self, 'comprehensive_data_loaded', False):
+                            if stock_code not in self.comprehensive_stock_data:
+                                self.comprehensive_stock_data[stock_code] = {}
+                            self.comprehensive_stock_data[stock_code]['tech_data'] = tech_data
+
+                # 如果仍然没有技术数据，则尝试网络获取
+                if 'tech_data' not in cached or not cached['tech_data']:
+                    is_cache_miss = True
+                    if has_cache:
+                        print(f"\033[1;33m[CACHE] {stock_code} 缓存缺技术数据，尝试获取真实数据...\033[0m")
+                    else:
+                        print(f"\033[1;33m[MISS] {stock_code} 无缓存，尝试获取真实技术数据...\033[0m")
+                    
+                    tech_data = self.get_real_technical_indicators(stock_code)
+                    if tech_data:
+                        cached['tech_data'] = tech_data
+                        # 更新回全局缓存
+                        if getattr(self, 'comprehensive_data_loaded', False):
+                            if stock_code not in self.comprehensive_stock_data:
+                                self.comprehensive_stock_data[stock_code] = {}
+                            self.comprehensive_stock_data[stock_code]['tech_data'] = tech_data
+            else:
+                print(f"\033[1;32m[CACHE] {stock_code} 命中技术数据缓存\033[0m")
+
+            # 3. 检查基本面数据 (如果缺失则只获取基本面数据)
+            if 'fund_data' not in cached or not cached['fund_data']:
+                is_cache_miss = True
+                if has_cache:
+                    print(f"\033[1;33m[CACHE] {stock_code} 缓存缺基本面数据，尝试获取真实数据...\033[0m")
+                
+                fund_data = self.get_real_fundamental_indicators(stock_code)
+                
+                # ETF特殊处理 (如果获取失败)
+                if fund_data is None and self.is_etf_code(stock_code):
+                     print(f"{stock_code} 是ETF，使用ETF专用评估方式")
+                     fund_data = {
+                        'pe_ratio': 12.0,
+                        'pb_ratio': 1.5,
+                        'roe': 0.1,
+                        'market_cap': 1000000000,
+                        'revenue_growth': 0.03,
                         'is_etf': True
                     }
-                else:
-                    print(f"{stock_code} 无法获取真实基础数据，跳过分析")
-                    return None
+
+                if fund_data:
+                    cached['fund_data'] = fund_data
+                    # 更新回全局缓存
+                    if getattr(self, 'comprehensive_data_loaded', False):
+                        if stock_code not in self.comprehensive_stock_data:
+                            self.comprehensive_stock_data[stock_code] = {}
+                        self.comprehensive_stock_data[stock_code]['fund_data'] = fund_data
             else:
-                fund_data['is_etf'] = self.is_etf_code(stock_code)
+                print(f"\033[1;32m[CACHE] {stock_code} 命中基本面数据缓存\033[0m")
+
+            # 4. 准备数据用于后续计算
+            tech_data = cached.get('tech_data')
+            fund_data = cached.get('fund_data')
+
+            if not tech_data:
+                 print(f"{stock_code} 无法获取技术数据，跳过分析")
+                 return None
+            
+            if not fund_data:
+                 print(f"{stock_code} 无法获取基本面数据，跳过分析")
+                 return None
+            
+            fund_data['is_etf'] = self.is_etf_code(stock_code)
                 
             stock_info = self.stock_info.get(stock_code, {})
             
@@ -2063,6 +2257,14 @@ class AShareAnalyzerGUI:
                 'data_source': 'comprehensive_batch'
             }
             
+            # 记录缓存未命中
+            if is_cache_miss and hasattr(self, '_current_batch_cache_miss'):
+                 # 检查是否已存在 (避免重复)
+                 existing_codes = [item['code'] for item in self._current_batch_cache_miss]
+                 if stock_code not in existing_codes:
+                      stock_name = self.stock_info.get(stock_code, {}).get('name', '未知')
+                      self._current_batch_cache_miss.append({'code': stock_code, 'name': stock_name})
+            
             return comprehensive_data
             
         except Exception as e:
@@ -2090,11 +2292,15 @@ class AShareAnalyzerGUI:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     csv_reader = csv.reader(f)
-                    headers = next(csv_reader, None)  # 跳过标题行
+                    # headers = next(csv_reader, None)  # 不再强制跳过第一行，而是通过内容判断
                     
                     for row in csv_reader:
                         if row and len(row) > 0:
                             code = str(row[0]).strip()
+                            # 移除可能的BOM头
+                            if code.startswith('\ufeff'):
+                                code = code[1:]
+                                
                             if code and code.isdigit():
                                 # 补全股票代码到6位
                                 code = code.zfill(6)
@@ -2165,12 +2371,35 @@ class AShareAnalyzerGUI:
                             cached_item = self.comprehensive_stock_data.get(code, {})
                             tech_data = cached_item.get('tech_data')
                             fund_data = cached_item.get('fund_data')
+                            
+                            # [修复] 尝试从K线计算技术指标 (如果缺失)
+                            if not tech_data and 'kline_data' in cached_item and cached_item['kline_data'] and 'daily' in cached_item['kline_data']:
+                                # print(f"[CSV-CACHE] {code} 从缓存K线计算技术指标...")
+                                tech_data = self._calculate_tech_data_from_kline(cached_item['kline_data']['daily'])
+                            
+                            # [修复] 兼容旧版基本面数据 (如果缺失)
+                            if not fund_data and 'financial_data' in cached_item:
+                                # print(f"[CSV-CACHE] {code} 转换旧版基本面数据...")
+                                fin_data = cached_item['financial_data']
+                                fund_data = {
+                                    'pe_ratio': fin_data.get('pe_ratio'),
+                                    'pb_ratio': fin_data.get('pb_ratio'),
+                                    'roe': fin_data.get('roe'),
+                                    'revenue_growth': fin_data.get('revenue_growth', fin_data.get('revenue')),
+                                    'debt_ratio': fin_data.get('debt_ratio'),
+                                    'net_profit': fin_data.get('net_profit'),
+                                    'market_cap': fin_data.get('market_cap')
+                                }
+
                             # 如果batch_scores没有评分，从缓存数据计算
                             if score is None and cached_item.get('overall_score'):
                                 score = cached_item.get('overall_score')
                                 print(f"[CSV-CACHE] 使用缓存数据和评分: {code}")
                             else:
-                                print(f"[CSV-CACHE] 使用缓存数据: {code}")
+                                if tech_data and fund_data:
+                                    print(f"[CSV-CACHE] 使用完整缓存数据: {code}")
+                                else:
+                                    print(f"[CSV-CACHE] 缓存数据不完整 (Tech:{bool(tech_data)}, Fund:{bool(fund_data)}): {code}")
                         
                         # 【优先级3】实时获取数据（最后选择）
                         if tech_data is None or fund_data is None:
@@ -2188,7 +2417,18 @@ class AShareAnalyzerGUI:
                         if score is not None:
                             
                             if tech_data is None:
-                                print(f"{code} 无法获取真实技术数据，跳过")
+                                print(f"{code} 无法获取真实技术数据，标记为失败")
+                                results.append({
+                                    '股票代码': code,
+                                    '股票名称': stock_name,
+                                    '综合评分': 0.0,
+                                    '技术面评分': 0.0,
+                                    '基本面评分': 0.0,
+                                    'RSI状态': "数据获取失败",
+                                    '趋势': "无法分析",
+                                    '所属行业': "未知",
+                                    '分析时间': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                })
                                 continue
                                 
                             # 如果没有基础数据，根据是否为ETF使用不同默认值
@@ -2355,34 +2595,50 @@ class AShareAnalyzerGUI:
             
             report += "\n" + "-" * 88 + "\n\n"
             
-            # 统计分析
-            scores = [float(r['综合评分']) for r in results]
-            avg_score = sum(scores) / len(scores)
-            max_score = max(scores)
-            min_score = min(scores)
-            
-            high_quality = len([s for s in scores if s >= 8.0])
-            medium_quality = len([s for s in scores if 6.0 <= s < 8.0])
-            low_quality = len([s for s in scores if s < 6.0])
+            # 统计分析 (排除获取失败的股票)
+            valid_results = [r for r in results if r['综合评分'] > 0]
+            if valid_results:
+                scores = [float(r['综合评分']) for r in valid_results]
+                avg_score = sum(scores) / len(scores)
+                max_score = max(scores)
+                min_score = min(scores)
+                
+                high_quality = len([s for s in scores if s >= 8.0])
+                medium_quality = len([s for s in scores if 6.0 <= s < 8.0])
+                low_quality = len([s for s in scores if s < 6.0])
+            else:
+                avg_score = 0
+                max_score = 0
+                min_score = 0
+                high_quality = 0
+                medium_quality = 0
+                low_quality = 0
             
             # RSI状态统计
             oversold = len([r for r in results if r['RSI状态'] == '超卖'])
             normal = len([r for r in results if r['RSI状态'] == '正常'])
             overbought = len([r for r in results if r['RSI状态'] == '超买'])
+            failed_count = len([r for r in results if r['RSI状态'] == '数据获取失败'])
             
             # 趋势统计
             trend_counts = {}
             for stock in results:
                 trend = stock['趋势']
-                trend_counts[trend] = trend_counts.get(trend, 0) + 1
+                if trend != "无法分析":
+                    trend_counts[trend] = trend_counts.get(trend, 0) + 1
             
             report += "TREND: 统计分析:\n"
-            report += f"平均评分: {avg_score:.1f}  |  最高评分: {max_score:.1f}  |  最低评分: {min_score:.1f}\n\n"
+            report += f"平均评分: {avg_score:.1f}  |  最高评分: {max_score:.1f}  |  最低评分: {min_score:.1f}\n"
+            if failed_count > 0:
+                report += f"有效分析: {len(valid_results)} 只  |  获取失败: {failed_count} 只\n\n"
+            else:
+                report += "\n"
             
-            report += "DATA: 评分分布:\n"
-            report += f"高质量股票 (8.0分以上): {high_quality} 只 ({high_quality/len(results)*100:.1f}%)\n"
-            report += f"中等质量股票 (6.0-8.0分): {medium_quality} 只 ({medium_quality/len(results)*100:.1f}%)\n"
-            report += f"低质量股票 (6.0分以下): {low_quality} 只 ({low_quality/len(results)*100:.1f}%)\n\n"
+            report += "DATA: 评分分布 (仅统计有效数据):\n"
+            total_valid = len(valid_results) if len(valid_results) > 0 else 1
+            report += f"高质量股票 (8.0分以上): {high_quality} 只 ({high_quality/total_valid*100:.1f}%)\n"
+            report += f"中等质量股票 (6.0-8.0分): {medium_quality} 只 ({medium_quality/total_valid*100:.1f}%)\n"
+            report += f"低质量股票 (6.0分以下): {low_quality} 只 ({low_quality/total_valid*100:.1f}%)\n\n"
             
             report += "TREND: RSI状态分布:\n"
             report += f"超卖状态: {oversold} 只 ({oversold/len(results)*100:.1f}%) - 潜在买入机会\n"
@@ -2407,7 +2663,9 @@ class AShareAnalyzerGUI:
                 line = f"{stock['股票代码']:<8} {stock['股票名称']:<12} {stock['综合评分']:<6} {stock['技术面评分']:<6} {stock['基本面评分']:<6} {stock['RSI状态']:<6} {trend:<10} {stock['所属行业']:<12}\n"
                 # 判断趋势关键词
                 tag = None
-                if any(key in trend for key in ["偏空", "下跌", "消极", "弱势", "空头"]):
+                if stock['RSI状态'] == "数据获取失败":
+                    tag = "failed_data"
+                elif any(key in trend for key in ["偏空", "下跌", "消极", "弱势", "空头"]):
                     tag = "neg_trend"
                 elif any(key in trend for key in ["偏多", "上涨", "积极", "强势", "多头"]):
                     tag = "pos_trend"
@@ -2418,6 +2676,7 @@ class AShareAnalyzerGUI:
             # 配置tag颜色（始终生效）
             self.overview_text.tag_configure("neg_trend", foreground="#d32f2f")  # 红色
             self.overview_text.tag_configure("pos_trend", foreground="#388e3c")  # 绿色
+            self.overview_text.tag_configure("failed_data", foreground="#d32f2f")  # 红色 (失败)
             
             report += "\n" + "=" * 100 + "\n"
             report += "IDEA: 投资建议:\n"
@@ -2720,7 +2979,7 @@ class AShareAnalyzerGUI:
         csv_analysis_btn.pack(side="left", padx=5)
 
         # 新增：批量分析结果排序勾选框
-        self.sort_csv_var = tk.BooleanVar(value=True)
+        self.sort_csv_var = tk.BooleanVar(value=False)
         self.sort_csv_checkbox = tk.Checkbutton(recommend_button_frame,
                             text="按评分排序",
                             variable=self.sort_csv_var,
@@ -3823,6 +4082,87 @@ class AShareAnalyzerGUI:
                 return real_price
             else:
                 failed_sources.append("akshare")
+
+        # 方案5: yfinance (实时/延迟)
+        if YFINANCE_AVAILABLE:
+            try:
+                import yfinance as yf
+                if ticker.startswith('6'):
+                    yf_ticker = f"{ticker}.SS"
+                else:
+                    yf_ticker = f"{ticker}.SZ"
+                
+                stock = yf.Ticker(yf_ticker)
+                # 获取今日数据
+                hist = stock.history(period="1d")
+                if not hist.empty:
+                    real_price = float(hist['Close'].iloc[-1])
+                    self.log_price_with_score(ticker, real_price)
+                    return real_price
+                else:
+                    failed_sources.append("yfinance")
+            except Exception:
+                failed_sources.append("yfinance")
+
+        # 方案6: Tushare (日线收盘价作为兜底)
+        try:
+            import tushare as ts
+            if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
+                ts.set_token(TUSHARE_TOKEN)
+                pro = ts.pro_api()
+                if ticker.startswith('6'):
+                    ts_code = f"{ticker}.SH"
+                else:
+                    ts_code = f"{ticker}.SZ"
+                
+                # 获取最近交易日数据
+                import datetime
+                end_date = datetime.datetime.now().strftime('%Y%m%d')
+                start_date = (datetime.datetime.now() - datetime.timedelta(days=10)).strftime('%Y%m%d')
+                
+                df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+                if not df.empty:
+                    real_price = float(df.iloc[0]['close'])
+                    self.log_price_with_score(ticker, real_price)
+                    return real_price
+                else:
+                    failed_sources.append("Tushare")
+        except Exception:
+            failed_sources.append("Tushare")
+
+        # 方案7: Baostock (日线收盘价作为兜底)
+        if BAOSTOCK_AVAILABLE:
+            try:
+                lg = bs.login()
+                if lg.error_code == '0':
+                    if ticker.startswith('6'):
+                        bs_code = f"sh.{ticker}"
+                    else:
+                        bs_code = f"sz.{ticker}"
+                    
+                    import datetime
+                    today = datetime.datetime.now().strftime('%Y-%m-%d')
+                    start_date = (datetime.datetime.now() - datetime.timedelta(days=10)).strftime('%Y-%m-%d')
+                    
+                    rs = bs.query_history_k_data_plus(bs_code,
+                        "close",
+                        start_date=start_date, end_date=today, 
+                        frequency="d", adjustflag="3")
+                    
+                    if rs.error_code == '0':
+                        data_list = []
+                        while rs.next():
+                            data_list.append(rs.get_row_data())
+                        
+                        if data_list:
+                            real_price = float(data_list[-1][0])
+                            bs.logout()
+                            self.log_price_with_score(ticker, real_price)
+                            return real_price
+                    bs.logout()
+                    failed_sources.append("Baostock")
+            except Exception:
+                failed_sources.append("Baostock")
         
         # 所有数据源都失败时报告网络问题
         print(f"所有数据源均无法获取 {ticker} 的价格")
@@ -4161,12 +4501,6 @@ class AShareAnalyzerGUI:
     def get_real_technical_indicators(self, ticker):
         """获取真实的技术指标数据，永远尝试获取真实数据，失败时如实告知"""
         
-        # 检查数据源是否可用
-        if not AKSHARE_AVAILABLE and not YFINANCE_AVAILABLE:
-            error_msg = f"ERROR: {ticker} 没有可用的数据源（akshare和yfinance都不可用）"
-            print(error_msg)
-            return None
-        
         # 尝试获取真实数据，增强成功率
         for attempt in range(self.max_network_retries):
             try:
@@ -4186,14 +4520,8 @@ class AShareAnalyzerGUI:
                     import time
                     time.sleep(2)  # 重试间隔2秒
         
-        # 跳过失败的股票，但提供智能模拟数据作为备用方案
-        print(f"⚠️ {ticker} 网络获取失败，尝试生成智能模拟数据")
-        
-        # 生成智能模拟数据作为最终备用方案
-        fallback_data = self._generate_smart_fallback_technical_data(ticker)
-        if fallback_data:
-            print(f"✓ {ticker} 使用智能模拟数据")
-            return fallback_data
+        # 跳过失败的股票，不再生成模拟数据
+        print(f"❌ {ticker} 网络获取失败，且已禁用模拟数据")
         
         # 记录无法获取真实数据的股票
         if ticker not in [item['code'] for item in self.failed_real_data_stocks]:
@@ -4208,12 +4536,6 @@ class AShareAnalyzerGUI:
 
     def get_real_fundamental_indicators(self, ticker):
         """获取真实的基础指标数据，永远尝试获取真实数据，失败时如实告知"""
-        
-        # 检查数据源是否可用
-        if not AKSHARE_AVAILABLE and not YFINANCE_AVAILABLE:
-            error_msg = f"ERROR: {ticker} 没有可用的数据源（akshare和yfinance都不可用）"
-            print(error_msg)
-            return None
         
         # 尝试获取真实基础数据，增强成功率
         for attempt in range(self.max_network_retries):
@@ -4260,20 +4582,101 @@ class AShareAnalyzerGUI:
             original_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(10)  # 10秒超时
             try:
-                # 多种方法获取基础数据
-                stock_individual_info = None
-                # 优先使用yfinance
-                stock_individual_info = None
+                # 1. 尝试Tushare基础数据
+                try:
+                    print(f"{ticker} 尝试Tushare基础数据...")
+                    import tushare as ts
+                    if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
+                        ts.set_token(TUSHARE_TOKEN)
+                        pro = ts.pro_api()
+                        if ticker.startswith('6'):
+                            ts_code = f"{ticker}.SH"
+                        else:
+                            ts_code = f"{ticker}.SZ"
+                        
+                        df = pro.daily_basic(ts_code=ts_code, fields='pe_ttm,pb,total_mv')
+                        if not df.empty:
+                            # 获取财务指标
+                            fina = pro.fina_indicator(ts_code=ts_code, period='20231231', fields='roe,debt_to_assets')
+                            roe = 0.1
+                            if not fina.empty:
+                                roe = float(fina.iloc[0]['roe']) / 100 if fina.iloc[0]['roe'] else 0.1
+                                
+                            print(f"\033[92m✓ {ticker} Tushare基础数据获取成功\033[0m")
+                            return {
+                                'pe_ratio': float(df.iloc[0]['pe_ttm']) if df.iloc[0]['pe_ttm'] else 15.0,
+                                'pb_ratio': float(df.iloc[0]['pb']) if df.iloc[0]['pb'] else 2.0,
+                                'roe': roe,
+                                'market_cap': float(df.iloc[0]['total_mv']) * 10000, # Tushare单位是万
+                                'revenue_growth': 0.05
+                            }
+                        else:
+                            print(f"⚠ {ticker} Tushare基础数据为空")
+                    else:
+                        print(f"⚠ {ticker} Tushare Token未配置，跳过")
+                except Exception as e_ts:
+                    error_str = str(e_ts)
+                    if "没有接口访问权限" in error_str:
+                        print(f"ℹ {ticker} Tushare积分不足(需2000分获取基本面)，自动切换备用源")
+                    else:
+                        print(f"{ticker} Tushare基础数据失败: {e_ts}")
+
+                # 2. 尝试Baostock基础数据
+                if BAOSTOCK_AVAILABLE:
+                    try:
+                        print(f"{ticker} 尝试Baostock基础数据...")
+                        lg = bs.login()
+                        if lg.error_code == '0':
+                            if ticker.startswith('6'):
+                                bs_code = f"sh.{ticker}"
+                            else:
+                                bs_code = f"sz.{ticker}"
+                            
+                            import datetime
+                            today = datetime.datetime.now().strftime('%Y-%m-%d')
+                            rs = bs.query_history_k_data_plus(bs_code,
+                                "peTTM,pbMRQ",
+                                start_date=today, end_date=today, 
+                                frequency="d", adjustflag="3")
+                            
+                            if rs.error_code == '0' and rs.next():
+                                row = rs.get_row_data()
+                                print(f"\033[92m✓ {ticker} Baostock基础数据获取成功\033[0m")
+                                bs.logout()
+                                return {
+                                    'pe_ratio': float(row[0]) if row[0] else 15.0,
+                                    'pb_ratio': float(row[1]) if row[1] else 2.0,
+                                    'roe': 0.1, # Baostock日线不含ROE，使用默认
+                                    'market_cap': 10000000000, # 估算
+                                    'revenue_growth': 0.05
+                                }
+                            else:
+                                print(f"⚠ {ticker} Baostock基础数据为空")
+                            bs.logout()
+                        else:
+                            print(f"⚠ {ticker} Baostock登录失败: {lg.error_msg}")
+                    except Exception as e_bs:
+                        print(f"{ticker} Baostock基础数据失败: {e_bs}")
+                else:
+                    print(f"⚠ {ticker} Baostock库未安装，跳过")
+
+                # 3. 尝试yfinance基础数据
                 if YFINANCE_AVAILABLE:
                     try:
                         print(f"{ticker} 尝试yfinance基础数据...")
                         yf_data = self._try_get_yfinance_fundamental_data(ticker)
                         if yf_data:
-                            print(f"✓ {ticker} yfinance基础数据获取成功")
+                            print(f"\033[92m✓ {ticker} yfinance基础数据获取成功\033[0m")
                             return yf_data
+                        else:
+                            print(f"⚠ {ticker} yfinance基础数据为空")
                     except Exception as e_yf:
                         print(f"{ticker} yfinance基础数据失败: {e_yf}")
-                # yfinance失败再尝试akshare（5秒超时）
+                else:
+                    print(f"⚠ {ticker} yfinance库未安装，跳过")
+
+                # 4. 尝试akshare基础数据
+                stock_individual_info = None
                 if AKSHARE_AVAILABLE:
                     import akshare as ak
                     import threading
@@ -4293,8 +4696,12 @@ class AShareAnalyzerGUI:
                         print(f"{ticker} akshare基础数据接口超时，直接兜底")
                         akshare_result['data'] = None
                     stock_individual_info = akshare_result.get('data')
+                    if stock_individual_info is None or stock_individual_info.empty:
+                        print(f"⚠ {ticker} akshare基础数据为空")
+                else:
+                    print(f"⚠ {ticker} akshare库未安装，跳过")
                 
-                # 兜底方案：使用价格数据估算
+                # 5. 兜底方案：使用价格数据估算
                 if stock_individual_info is None or stock_individual_info.empty:
                     try:
                         print(f"{ticker} 尝试价格估算基础数据...")
@@ -4408,48 +4815,100 @@ class AShareAnalyzerGUI:
             print(f"📡 尝试获取 {ticker} 实时数据...")
             
             # 使用更稳定的日期范围和参数
-            import datetime
-            end_date = datetime.datetime.now().strftime('%Y%m%d')
-            start_date = (datetime.datetime.now() - datetime.timedelta(days=90)).strftime('%Y%m%d')
+            from datetime import datetime, timedelta
+            end_date = datetime.now().strftime('%Y%m%d')
+            start_date = (datetime.now() - timedelta(days=90)).strftime('%Y%m%d')
             
             # 尝试多种数据源
             stock_hist = None
-            # tushare优先
+            
+            # 1. Tushare优先 (最稳定)
             try:
                 print(f"{ticker} 尝试Tushare数据源...")
                 import tushare as ts
                 if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
                     ts.set_token(TUSHARE_TOKEN)
+                    pro = ts.pro_api()
+                    if ticker.startswith('6'):
+                        ts_code = f"{ticker}.SH"
+                    else:
+                        ts_code = f"{ticker}.SZ"
+                    import pandas as pd
+                    df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+                    if not df.empty:
+                        df = df.sort_values('trade_date')
+                        stock_hist = pd.DataFrame({
+                            '收盘': df['close'].values,
+                            '成交量': df['vol'].values
+                        })
+                        print(f"\033[92m✓ {ticker} tushare数据获取成功\033[0m")
+                    else:
+                        print(f"⚠ {ticker} Tushare返回数据为空")
                 else:
-                    raise Exception("TUSHARE_TOKEN未配置")
-                pro = ts.pro_api()
-                if ticker.startswith('6'):
-                    ts_code = f"{ticker}.SH"
-                else:
-                    ts_code = f"{ticker}.SZ"
-                import pandas as pd
-                df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
-                if not df.empty:
-                    df = df.sort_values('trade_date')
-                    stock_hist = pd.DataFrame({
-                        '收盘': df['close'].values,
-                        '成交量': df['vol'].values
-                    })
-                    print(f"✓ {ticker} tushare数据获取成功")
+                    print(f"⚠ {ticker} Tushare Token未配置，跳过")
             except Exception as e4:
                 print(f"{ticker} tushare数据源失败: {e4}")
                 stock_hist = None
-            # yfinance次之
-            if (stock_hist is None or stock_hist.empty) and YFINANCE_AVAILABLE:
-                try:
-                    print(f"{ticker} 尝试yfinance接口...")
-                    stock_hist = self._try_get_yfinance_data(ticker)
-                    if stock_hist is not None and not stock_hist.empty:
-                        print(f"✓ {ticker} yfinance数据获取成功")
-                except Exception as e_yf:
-                    print(f"{ticker} yfinance接口失败: {e_yf}")
-                    stock_hist = None
-            # 腾讯再次兜底
+
+            # 2. Baostock次之 (免费且稳定)
+            if (stock_hist is None or stock_hist.empty):
+                if BAOSTOCK_AVAILABLE:
+                    try:
+                        print(f"{ticker} 尝试Baostock数据源...")
+                        lg = bs.login()
+                        if lg.error_code == '0':
+                            if ticker.startswith('6'):
+                                bs_code = f"sh.{ticker}"
+                            else:
+                                bs_code = f"sz.{ticker}"
+                            
+                            # 尝试获取更长的时间范围，防止因停牌或假期导致数据为空
+                            rs = bs.query_history_k_data_plus(bs_code,
+                                "close,volume",
+                                start_date=start_date[:4]+"-"+start_date[4:6]+"-"+start_date[6:], 
+                                end_date=end_date[:4]+"-"+end_date[4:6]+"-"+end_date[6:],
+                                frequency="d", adjustflag="3")
+                            
+                            data_list = []
+                            while (rs.error_code == '0') & rs.next():
+                                data_list.append(rs.get_row_data())
+                            
+                            if data_list:
+                                import pandas as pd
+                                df = pd.DataFrame(data_list, columns=rs.fields)
+                                stock_hist = pd.DataFrame({
+                                    '收盘': df['close'].astype(float).values,
+                                    '成交量': df['volume'].astype(float).values
+                                })
+                                print(f"\033[92m✓ {ticker} Baostock数据获取成功\033[0m")
+                            else:
+                                print(f"⚠ {ticker} Baostock返回数据为空 (日期范围: {start_date} - {end_date})")
+                            bs.logout()
+                        else:
+                            print(f"⚠ {ticker} Baostock登录失败: {lg.error_msg}")
+                    except Exception as e_bs:
+                        print(f"{ticker} Baostock数据源失败: {e_bs}")
+                        stock_hist = None
+                else:
+                    print(f"⚠ {ticker} Baostock库未安装，跳过")
+
+            # 3. yfinance (国际接口)
+            if (stock_hist is None or stock_hist.empty):
+                if YFINANCE_AVAILABLE:
+                    try:
+                        print(f"{ticker} 尝试yfinance接口...")
+                        stock_hist = self._try_get_yfinance_data(ticker)
+                        if stock_hist is not None and not stock_hist.empty:
+                            print(f"\033[92m✓ {ticker} yfinance数据获取成功\033[0m")
+                        else:
+                            print(f"⚠ {ticker} yfinance返回数据为空")
+                    except Exception as e_yf:
+                        print(f"{ticker} yfinance接口失败: {e_yf}")
+                        stock_hist = None
+                else:
+                    print(f"⚠ {ticker} yfinance库未安装，跳过")
+
+            # 4. 腾讯数据源 (实时性好)
             if (stock_hist is None or stock_hist.empty):
                 try:
                     print(f"{ticker} 尝试腾讯数据源...")
@@ -4460,71 +4919,82 @@ class AShareAnalyzerGUI:
                             '收盘': [current_price] * 30,
                             '成交量': [1000000] * 30
                         })
-                        print(f"✓ {ticker} 使用腾讯数据源成功")
+                        print(f"\033[92m✓ {ticker} 使用腾讯数据源成功\033[0m")
+                    else:
+                        print(f"⚠ {ticker} 腾讯数据源返回为空")
                 except Exception as e3:
                     print(f"{ticker} 腾讯数据源失败: {e3}")
                     stock_hist = None
-            # 网易财经数据源
+
+            # 5. 网易财经数据源
             if (stock_hist is None or stock_hist.empty):
                 try:
                     print(f"{ticker} 尝试网易财经数据源...")
                     stock_hist = self._try_get_netease_data(ticker)
                     if stock_hist is not None and not stock_hist.empty:
-                        print(f"✓ {ticker} 网易财经数据获取成功")
+                        print(f"\033[92m✓ {ticker} 网易财经数据获取成功\033[0m")
+                    else:
+                        print(f"⚠ {ticker} 网易财经返回数据为空")
                 except Exception as e_netease:
                     print(f"{ticker} 网易财经数据源失败: {e_netease}")
                     stock_hist = None
 
-            # 新浪财经数据源
+            # 6. 新浪财经数据源
             if (stock_hist is None or stock_hist.empty):
                 try:
                     print(f"{ticker} 尝试新浪财经数据源...")
                     stock_hist = self._try_get_sina_data(ticker)
                     if stock_hist is not None and not stock_hist.empty:
-                        print(f"✓ {ticker} 新浪财经数据获取成功")
+                        print(f"\033[92m✓ {ticker} 新浪财经数据获取成功\033[0m")
+                    else:
+                        print(f"⚠ {ticker} 新浪财经返回数据为空")
                 except Exception as e_sina:
                     print(f"{ticker} 新浪财经数据源失败: {e_sina}")
                     stock_hist = None
 
-            # QQ/腾讯财经数据源
+            # 7. QQ/腾讯财经数据源 (备用)
             if (stock_hist is None or stock_hist.empty):
                 try:
                     print(f"{ticker} 尝试QQ/腾讯数据源...")
                     stock_hist = self._try_get_qq_finance_data(ticker)
                     if stock_hist is not None and not stock_hist.empty:
-                        print(f"✓ {ticker} QQ/腾讯数据获取成功")
+                        print(f"\033[92m✓ {ticker} QQ/腾讯数据获取成功\033[0m")
+                    else:
+                        print(f"⚠ {ticker} QQ/腾讯数据返回为空")
                 except Exception as e_qq:
                     print(f"{ticker} QQ/腾讯数据源失败: {e_qq}")
                     stock_hist = None
 
-            # akshare最后兜底
-            if (stock_hist is None or stock_hist.empty) and AKSHARE_AVAILABLE:
-                try:
-                    print(f"{ticker} 尝试akshare标准接口...")
-                    stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
-                                                   start_date=start_date, end_date=end_date,
-                                                   adjust="qfq", timeout=8)
-                except Exception as e1:
-                    print(f"{ticker} akshare标准接口失败: {e1}")
+            # 8. akshare最后兜底 (容易超时)
+            if (stock_hist is None or stock_hist.empty):
+                if AKSHARE_AVAILABLE:
                     try:
-                        print(f"{ticker} 尝试akshare简化接口...")
+                        print(f"{ticker} 尝试akshare标准接口...")
                         stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
-                                                       start_date="20241001", end_date="20241107")
-                    except Exception as e2:
-                        print(f"{ticker} akshare简化接口失败: {e2}")
-                        stock_hist = None
-            # 全部数据源失败，使用智能模拟数据
-            if stock_hist is None or stock_hist.empty:
-                print(f"⚠️ {ticker} 未获取到任何有效历史数据，使用智能模拟数据")
-                stock_hist = self._generate_smart_mock_kline_data(ticker)
-                if stock_hist is not None:
-                    print(f"✓ {ticker} 使用智能模拟 K 线数据")
+                                                    start_date=start_date, end_date=end_date,
+                                                    adjust="qfq", timeout=8)
+                        if stock_hist is None or stock_hist.empty:
+                             print(f"⚠ {ticker} akshare标准接口返回为空")
+                    except Exception as e1:
+                        print(f"{ticker} akshare标准接口失败: {e1}")
+                        try:
+                            print(f"{ticker} 尝试akshare简化接口...")
+                            stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
+                                                        start_date="20241001", end_date="20241107")
+                            if stock_hist is None or stock_hist.empty:
+                                print(f"⚠ {ticker} akshare简化接口返回为空")
+                        except Exception as e2:
+                            print(f"{ticker} akshare简化接口失败: {e2}")
+                            stock_hist = None
                 else:
-                    print(f"❌ {ticker} 无法生成任何数据，跳过该股票")
-                    return None
+                    print(f"⚠ {ticker} akshare库未安装，跳过")
+            # 全部数据源失败
+            if stock_hist is None or stock_hist.empty:
+                print(f"❌ {ticker} 未获取到任何有效历史数据，且已禁用模拟数据")
+                return None
             
             if stock_hist is not None and not stock_hist.empty:
-                print(f"✓ {ticker} 实时数据获取成功")
+                print(f"\033[92m✓ {ticker} 实时数据获取成功\033[0m")
                 # 获取最新价格
                 current_price = float(stock_hist['收盘'].iloc[-1])
                 
@@ -4642,7 +5112,7 @@ class AShareAnalyzerGUI:
                     '成交量': hist['Volume']
                 })
                 
-                print(f"✓ yfinance获取 {ticker} 数据成功，共{len(hist_cn)}条记录")
+                print(f"\033[92m✓ yfinance获取 {ticker} 数据成功，共{len(hist_cn)}条记录\033[0m")
                 return hist_cn
             else:
                 print(f"yfinance获取 {ticker} 数据为空")
@@ -4755,6 +5225,7 @@ class AShareAnalyzerGUI:
         ma10 = current_price * trend_factor * random.uniform(0.96, 1.04)
         ma20 = current_price * trend_factor * random.uniform(0.94, 1.06)
         ma60 = current_price * trend_factor * random.uniform(0.90, 1.10)
+        ma120 = current_price * trend_factor * random.uniform(0.85, 1.15)
         
         # RSI (相对强弱指标) - 基于股票特征分布
         if stock_hash < 15:  # 15%超卖
@@ -4786,6 +5257,22 @@ class AShareAnalyzerGUI:
         elif momentum == "下降":
             macd = random.uniform(-0.5, -0.1)
             signal = random.uniform(-0.3, 0)
+        else:
+            macd = random.uniform(-0.1, 0.1)
+            signal = random.uniform(-0.1, 0.1)
+            
+        return {
+            'current_price': current_price,
+            'ma5': ma5,
+            'ma10': ma10,
+            'ma20': ma20,
+            'ma60': ma60,
+            'ma120': ma120,
+            'rsi': rsi,
+            'macd': macd,
+            'signal': signal,
+            'volume_ratio': volume_ratio
+        }
     def _try_get_netease_data(self, ticker):
         """NetEase data fallback: prefer yfinance if available, else None"""
         try:
@@ -5077,72 +5564,23 @@ class AShareAnalyzerGUI:
         }
     
     def get_real_financial_data(self, ticker):
-        """获取真实的财务数据"""
-        try:
-            if AKSHARE_AVAILABLE:
-                import akshare as ak
-                
-                try:
-                    # 获取股票基本信息
-                    stock_info = ak.stock_individual_info_em(symbol=ticker)
-                    
-                    if stock_info is not None and not stock_info.empty:
-                        # 解析财务指标
-                        pe_ratio = None
-                        pb_ratio = None
-                        roe = None
-                        
-                        for _, row in stock_info.iterrows():
-                            item = row['item']
-                            value = str(row['value']).replace(',', '').replace('%', '')
-                            
-                            try:
-                                if 'PE' in item or '市盈率' in item:
-                                    pe_ratio = float(value) if value != '-' and value != '--' else None
-                                elif 'PB' in item or '市净率' in item:
-                                    pb_ratio = float(value) if value != '-' and value != '--' else None
-                                elif 'ROE' in item or '净资产收益率' in item:
-                                    roe = float(value) if value != '-' and value != '--' else None
-                            except (ValueError, TypeError):
-                                continue
-                        
-                        # 设置合理的默认值和范围限制
-                        pe_ratio = pe_ratio if pe_ratio and 0 < pe_ratio < 200 else 20
-                        pb_ratio = pb_ratio if pb_ratio and 0 < pb_ratio < 50 else 2.0
-                        roe = roe if roe and -50 < roe < 100 else 10
-                        
-                        return {
-                            'pe_ratio': pe_ratio,
-                            'pb_ratio': pb_ratio,
-                            'roe': roe
-                        }
-                        
-                except Exception as e:
-                    error_msg = str(e)
-                    if "ProxyError" in error_msg or "proxy" in error_msg.lower():
-                        print(f"🔌 {ticker} 财务数据获取-代理问题，使用默认值")
-                    elif "Max retries exceeded" in error_msg or "timeout" in error_msg.lower():
-                        print(f"🌐 {ticker} 财务数据获取-网络超时，使用默认值")
-                    elif "HTTPSConnectionPool" in error_msg:
-                        print(f"🌐 {ticker} 财务数据获取-连接问题，使用默认值")
-                    else:
-                        print(f"{ticker} 财务数据获取失败，使用默认值")
-                    
-        except Exception as e:
-            error_msg = str(e)
-            if "ProxyError" in error_msg or "proxy" in error_msg.lower():
-                print(f"🔌 akshare财务数据获取-代理问题，使用离线模式")
-            elif "Max retries exceeded" in error_msg or "timeout" in error_msg.lower():
-                print(f"🌐 akshare财务数据获取-网络问题，使用离线模式")
-            else:
-                print("akshare财务数据获取失败，使用离线模式")
+        """获取真实的财务数据 - 统一调用增强版基础数据接口"""
+        # 直接复用增强版的基础数据获取逻辑，确保多源轮询
+        data = self._try_get_real_fundamental_data(ticker)
         
-        # 如果获取失败，返回合理的默认值
-        return {
-            'pe_ratio': 20,  # 合理的默认PE
-            'pb_ratio': 2.0,  # 合理的默认PB
-            'roe': 10  # 合理的默认ROE
-        }
+        if data:
+            return {
+                'pe_ratio': data.get('pe_ratio', 20),
+                'pb_ratio': data.get('pb_ratio', 2.0),
+                'roe': data.get('roe', 10)
+            }
+        else:
+            # 如果获取失败，返回合理的默认值
+            return {
+                'pe_ratio': 20,  # 合理的默认PE
+                'pb_ratio': 2.0,  # 合理的默认PB
+                'roe': 10  # 合理的默认ROE
+            }
     
     # ==================== 高级技术分析算法 ====================
     
@@ -5323,6 +5761,8 @@ class AShareAnalyzerGUI:
         # 优先使用缓存中的技术和基本面数据，避免重复网络请求
         technical_data = None
         financial_data = None
+        
+        # 1. 尝试从原始缓存获取
         if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
             cached = self.comprehensive_stock_data.get(ticker, {})
             if 'tech_data' in cached and cached['tech_data']:
@@ -5332,28 +5772,53 @@ class AShareAnalyzerGUI:
                 financial_data = cached['fund_data']
                 print(f"[DATA-CACHE] 使用缓存基本面数据: {ticker}")
         
-        # 如果缓存没有数据，才生成模拟数据
+        # 2. 尝试从最新分析结果获取 (修复评分时找不到刚获取数据的问题)
+        if technical_data is None and hasattr(self, 'comprehensive_data') and ticker in self.comprehensive_data:
+            cached = self.comprehensive_data.get(ticker, {})
+            if 'tech_data' in cached and cached['tech_data']:
+                technical_data = cached['tech_data']
+                # print(f"[DATA-NEW] 使用最新分析数据(Tech): {ticker}")
+            if 'fund_data' in cached and cached['fund_data']:
+                financial_data = cached['fund_data']
+                # print(f"[DATA-NEW] 使用最新分析数据(Fund): {ticker}")
+        
+        # 3. 尝试实时获取缺失数据 (补全逻辑)
         if technical_data is None:
-            technical_data = self._generate_smart_mock_technical_data(ticker)
+            print(f"[ADVICE] {ticker} 缺少技术数据，尝试实时获取...")
+            technical_data = self.get_real_technical_indicators(ticker)
+            # 更新缓存
+            if technical_data and getattr(self, 'comprehensive_data_loaded', False):
+                if ticker not in self.comprehensive_stock_data:
+                    self.comprehensive_stock_data[ticker] = {}
+                self.comprehensive_stock_data[ticker]['tech_data'] = technical_data
+
         if financial_data is None:
-            financial_data = self._generate_smart_mock_fundamental_data(ticker)
+            print(f"[ADVICE] {ticker} 缺少基本面数据，尝试实时获取...")
+            financial_data = self.get_real_fundamental_indicators(ticker)
+            # 更新缓存
+            if financial_data and getattr(self, 'comprehensive_data_loaded', False):
+                if ticker not in self.comprehensive_stock_data:
+                    self.comprehensive_stock_data[ticker] = {}
+                self.comprehensive_stock_data[ticker]['fund_data'] = financial_data
+
+        # 如果缓存没有数据，且无法获取真实数据，则返回空结果
+        if technical_data is None:
+            print(f"❌ {ticker} 无法获取技术数据，无法生成投资建议")
+            return ({'technical_score': 0}, {'total_score': 0}, {'fundamental_score': 0})
+            
+        if financial_data is None:
+            # 如果只有技术数据没有基本面数据，尝试使用默认基本面数据（影响较小）
+            print(f"[WARN] 无法获取基本面数据: {ticker}，使用默认值")
+            financial_data = {
+                'pe_ratio': 20,
+                'pb_ratio': 2.0,
+                'roe': 10
+            }
         
         # 确保数据不为None，提供默认值
         if technical_data is None:
-            print(f"[WARN] 无法获取技术数据: {ticker}，使用默认值")
-            current_price = stock_info.get('price', 10.0)
-            technical_data = {
-                'current_price': current_price,
-                'ma5': current_price * 0.98,
-                'ma10': current_price * 0.97,
-                'ma20': current_price * 0.96,
-                'ma60': current_price * 0.95,
-                'ma120': current_price * 0.94,
-                'rsi': 50,
-                'macd': 0,
-                'signal': 0,
-                'volume_ratio': 1.0
-            }
+             # This block is now unreachable but kept for structure if logic changes
+             pass
         
         if financial_data is None:
             print(f"[WARN] 无法获取基本面数据: {ticker}，使用默认值")
@@ -5631,6 +6096,11 @@ class AShareAnalyzerGUI:
             fundamental_signals = []
             
             # 估值水平分析
+            # 确保pe_ratio和pb_ratio是数值类型
+            if pe_ratio is None: pe_ratio = 20
+            if pb_ratio is None: pb_ratio = 2.0
+            if roe is None: roe = 10
+            
             if pe_ratio and pe_ratio > 0:
                 if pe_ratio < 15:
                     fundamental_score += 2
@@ -5728,6 +6198,11 @@ class AShareAnalyzerGUI:
             fundamental_signals = []
             
             # 估值安全边际分析 (权重35%)
+            # 确保pe_ratio和pb_ratio是数值类型
+            if pe_ratio is None: pe_ratio = 20
+            if pb_ratio is None: pb_ratio = 2.0
+            if roe is None: roe = 10
+            
             if pe_ratio < 10:
                 fundamental_score += 4
                 fundamental_signals.append("PE严重低估，投资价值突出")
@@ -6048,9 +6523,14 @@ class AShareAnalyzerGUI:
             signal = technical_data.get('signal', 0)
             volume_ratio = technical_data.get('volume_ratio', 1.0)
             
-            pe_ratio = financial_data.get('pe_ratio', 20)
-            pb_ratio = financial_data.get('pb_ratio', 2.0)
-            roe = financial_data.get('roe', 10)
+            pe_ratio = financial_data.get('pe_ratio')
+            if pe_ratio is None: pe_ratio = 20
+            
+            pb_ratio = financial_data.get('pb_ratio')
+            if pb_ratio is None: pb_ratio = 2.0
+            
+            roe = financial_data.get('roe')
+            if roe is None: roe = 10
             
             # 使用中期预测算法
             prediction = self.get_medium_term_prediction(
@@ -6096,9 +6576,14 @@ class AShareAnalyzerGUI:
             ma60 = technical_data.get('ma60', current_price)
             ma120 = technical_data.get('ma120', current_price)
             
-            pe_ratio = financial_data.get('pe_ratio', 20)
-            pb_ratio = financial_data.get('pb_ratio', 2.0)
-            roe = financial_data.get('roe', 10)
+            pe_ratio = financial_data.get('pe_ratio')
+            if pe_ratio is None: pe_ratio = 20
+            
+            pb_ratio = financial_data.get('pb_ratio')
+            if pb_ratio is None: pb_ratio = 2.0
+            
+            roe = financial_data.get('roe')
+            if roe is None: roe = 10
             
             # 使用长期预测算法
             prediction = self.get_long_term_prediction(
@@ -6545,6 +7030,17 @@ WARNING:  风险提示:
     
     def get_medium_term_advice(self, pe_ratio, pb_ratio, roe, rsi, macd, signal, volume_ratio, ma20, current_price):
         """生成中期投资建议 (7-30天)"""
+        
+        # 确保输入参数不为None
+        if pe_ratio is None: pe_ratio = 20
+        if pb_ratio is None: pb_ratio = 2.0
+        if roe is None: roe = 10
+        if rsi is None: rsi = 50
+        if macd is None: macd = 0
+        if signal is None: signal = 0
+        if volume_ratio is None: volume_ratio = 1.0
+        if ma20 is None: ma20 = current_price
+        if current_price is None: current_price = 0
         
         # 技术面评分 (60%)
         tech_score = 0

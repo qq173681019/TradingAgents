@@ -79,6 +79,7 @@ except ImportError:
 try:
     from alpha_vantage_api import AlphaVantageAPI
     ALPHA_VANTAGE_AVAILABLE = True
+    ALPHA_VANTAGE_API_KEY = "52N6YLT15MUAA46B"
     print("[INFO] Alpha Vantage API 已加载")
 except ImportError:
     ALPHA_VANTAGE_AVAILABLE = False
@@ -194,6 +195,10 @@ class ComprehensiveDataCollector:
         self.last_yfinance_call = 0  # 上次yfinance调用时间
         self.yfinance_wait_seconds = 120  # yfinance等待时间(2分钟)
         
+        # API轮换相关初始化
+        self.last_api_switch_time = 0
+        self.api_rotation_index = 0
+        
         # 初始化 tushare
         if TUSHARE_AVAILABLE and self.tushare_token:
             try:
@@ -247,7 +252,7 @@ class ComprehensiveDataCollector:
         self.alpha_vantage = None
         if ALPHA_VANTAGE_AVAILABLE:
             try:
-                self.alpha_vantage = AlphaVantageAPI()
+                self.alpha_vantage = AlphaVantageAPI(ALPHA_VANTAGE_API_KEY)
                 print("[INFO] Alpha Vantage API 初始化成功")
             except Exception as e:
                 print(f"[WARN] Alpha Vantage API 初始化失败: {e}")

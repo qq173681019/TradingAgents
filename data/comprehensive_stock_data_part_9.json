@@ -2,195 +2,453 @@
   "stocks": {
     "601600": {
       "code": "601600",
-      "timestamp": "2025-11-22T21:39:43.232829",
-      "collection_time": "2025-11-22 21:39:43",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601600",
-        "name": "中国铝业",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2007-04-30",
-        "source": "baostock"
-      },
-      "kline_data": null,
-      "financial_data": {
-        "code": "601600",
-        "source": "baostock",
-        "revenue": 0.08647,
-        "net_profit": 0.152303,
-        "eps": 15026506000.0,
-        "roe": 0.605027,
-        "total_profit": null,
-        "roa": 3.329337,
-        "gross_profit_rate": 0.815847,
-        "net_profit_rate": 0.60006,
-        "debt_ratio": 0.08647
-      },
-      "technical_indicators": {
-        "status": "no_kline_data"
-      },
-      "industry_concept": {
-        "code": "601600",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601600",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "none"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:39:43.234170",
-        "success_rate": 0.8
-      }
-    },
-    "601601": {
-      "code": "601601",
-      "timestamp": "2025-11-22T21:39:43.535001",
-      "collection_time": "2025-11-22 21:39:43",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601601",
-        "name": "中国太保",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2007-12-25",
-        "source": "baostock"
-      },
+      "name": "股票601600",
       "kline_data": {
         "daily": [
           {
-            "date": "2025-10-09T00:00:00",
-            "open": 34.93,
-            "high": 35.14,
-            "low": 34.26,
-            "close": 34.88,
-            "volume": 545148.0
+            "date": "20251121",
+            "open": 10.72,
+            "high": 10.91,
+            "low": 10.5,
+            "close": 10.52,
+            "volume": 3707277.47
           },
           {
-            "date": "2025-10-10T00:00:00",
-            "open": 34.7,
-            "high": 35.7,
-            "low": 34.65,
-            "close": 35.06,
-            "volume": 497304.0
+            "date": "20251120",
+            "open": 11.1,
+            "high": 11.3,
+            "low": 10.99,
+            "close": 11.04,
+            "volume": 2930026.83
           },
           {
-            "date": "2025-10-13T00:00:00",
-            "open": 34.5,
-            "high": 35.0,
-            "low": 34.25,
-            "close": 34.92,
-            "volume": 438221.0
+            "date": "20251119",
+            "open": 10.78,
+            "high": 11.11,
+            "low": 10.78,
+            "close": 10.98,
+            "volume": 3528756.53
           },
           {
-            "date": "2025-10-14T00:00:00",
-            "open": 35.41,
-            "high": 36.34,
-            "low": 35.41,
-            "close": 36.0,
-            "volume": 788298.0
+            "date": "20251118",
+            "open": 10.91,
+            "high": 11.05,
+            "low": 10.62,
+            "close": 10.75,
+            "volume": 4593972.17
           },
           {
-            "date": "2025-10-15T00:00:00",
-            "open": 35.99,
-            "high": 36.99,
-            "low": 35.85,
-            "close": 36.9,
-            "volume": 620093.0
+            "date": "20251117",
+            "open": 11.41,
+            "high": 11.49,
+            "low": 11.03,
+            "close": 11.16,
+            "volume": 5117842.58
           },
           {
-            "date": "2025-10-16T00:00:00",
-            "open": 36.78,
-            "high": 37.96,
-            "low": 36.7,
-            "close": 37.7,
-            "volume": 631375.0
+            "date": "20251114",
+            "open": 11.85,
+            "high": 12.06,
+            "low": 11.65,
+            "close": 11.66,
+            "volume": 4500462.56
           },
           {
-            "date": "2025-10-17T00:00:00",
-            "open": 37.61,
-            "high": 38.0,
-            "low": 36.65,
-            "close": 36.75,
-            "volume": 408852.0
+            "date": "20251113",
+            "open": 11.7,
+            "high": 12.3,
+            "low": 11.55,
+            "close": 12.17,
+            "volume": 6166006.54
           },
           {
-            "date": "2025-10-20T00:00:00",
-            "open": 37.57,
-            "high": 37.75,
-            "low": 36.81,
-            "close": 37.07,
-            "volume": 308800.0
+            "date": "20251112",
+            "open": 10.98,
+            "high": 11.74,
+            "low": 10.93,
+            "close": 11.71,
+            "volume": 5846178.73
           },
           {
-            "date": "2025-10-21T00:00:00",
-            "open": 36.91,
-            "high": 38.14,
-            "low": 36.91,
-            "close": 37.33,
-            "volume": 520669.0
+            "date": "20251111",
+            "open": 11.1,
+            "high": 11.22,
+            "low": 10.9,
+            "close": 10.98,
+            "volume": 3381386.28
           },
           {
-            "date": "2025-10-22T00:00:00",
-            "open": 37.24,
-            "high": 37.62,
-            "low": 36.9,
-            "close": 37.2,
-            "volume": 250528.0
+            "date": "20251110",
+            "open": 10.82,
+            "high": 11.26,
+            "low": 10.68,
+            "close": 11.1,
+            "volume": 5536305.53
           },
           {
-            "date": "2025-10-23T00:00:00",
+            "date": "20251107",
+            "open": 10.7,
+            "high": 10.99,
+            "low": 10.65,
+            "close": 10.75,
+            "volume": 4995443.39
+          },
+          {
+            "date": "20251106",
+            "open": 9.87,
+            "high": 10.86,
+            "low": 9.83,
+            "close": 10.86,
+            "volume": 6968233.04
+          },
+          {
+            "date": "20251105",
+            "open": 9.51,
+            "high": 9.9,
+            "low": 9.46,
+            "close": 9.87,
+            "volume": 2865612.84
+          },
+          {
+            "date": "20251104",
+            "open": 10.16,
+            "high": 10.39,
+            "low": 9.76,
+            "close": 9.85,
+            "volume": 3773356.07
+          },
+          {
+            "date": "20251103",
+            "open": 10.14,
+            "high": 10.22,
+            "low": 9.75,
+            "close": 10.17,
+            "volume": 4029313.15
+          },
+          {
+            "date": "20251031",
+            "open": 10.25,
+            "high": 10.3,
+            "low": 9.95,
+            "close": 9.99,
+            "volume": 4248321.8
+          },
+          {
+            "date": "20251030",
+            "open": 9.81,
+            "high": 10.5,
+            "low": 9.78,
+            "close": 10.31,
+            "volume": 5507061.79
+          },
+          {
+            "date": "20251029",
+            "open": 9.38,
+            "high": 10.05,
+            "low": 9.34,
+            "close": 9.91,
+            "volume": 4940314.42
+          },
+          {
+            "date": "20251028",
+            "open": 9.35,
+            "high": 9.72,
+            "low": 9.24,
+            "close": 9.26,
+            "volume": 4612886.35
+          },
+          {
+            "date": "20251027",
+            "open": 9.27,
+            "high": 9.41,
+            "low": 9.11,
+            "close": 9.4,
+            "volume": 4037755.37
+          },
+          {
+            "date": "20251024",
+            "open": 9.2,
+            "high": 9.48,
+            "low": 9.02,
+            "close": 9.23,
+            "volume": 4153406.18
+          },
+          {
+            "date": "20251023",
+            "open": 8.78,
+            "high": 9.14,
+            "low": 8.7,
+            "close": 9.04,
+            "volume": 4704580.98
+          },
+          {
+            "date": "20251022",
+            "open": 8.42,
+            "high": 8.8,
+            "low": 8.39,
+            "close": 8.75,
+            "volume": 2820271.31
+          },
+          {
+            "date": "20251021",
+            "open": 8.45,
+            "high": 8.77,
+            "low": 8.43,
+            "close": 8.62,
+            "volume": 2970203.57
+          },
+          {
+            "date": "20251020",
+            "open": 8.51,
+            "high": 8.57,
+            "low": 8.32,
+            "close": 8.37,
+            "volume": 2334928.75
+          },
+          {
+            "date": "20251017",
+            "open": 8.72,
+            "high": 8.86,
+            "low": 8.45,
+            "close": 8.47,
+            "volume": 2798475.93
+          },
+          {
+            "date": "20251016",
+            "open": 8.8,
+            "high": 8.98,
+            "low": 8.62,
+            "close": 8.72,
+            "volume": 3094213.79
+          },
+          {
+            "date": "20251015",
+            "open": 8.74,
+            "high": 8.98,
+            "low": 8.62,
+            "close": 8.87,
+            "volume": 3880023.18
+          },
+          {
+            "date": "20251014",
+            "open": 8.82,
+            "high": 9.27,
+            "low": 8.58,
+            "close": 8.64,
+            "volume": 6241729.65
+          },
+          {
+            "date": "20251013",
+            "open": 8.28,
+            "high": 8.62,
+            "low": 8.28,
+            "close": 8.57,
+            "volume": 3752911.93
+          },
+          {
+            "date": "20251010",
+            "open": 8.58,
+            "high": 8.82,
+            "low": 8.48,
+            "close": 8.62,
+            "volume": 3697052.41
+          },
+          {
+            "date": "20251009",
+            "open": 8.49,
+            "high": 8.69,
+            "low": 8.32,
+            "close": 8.68,
+            "volume": 5370604.71
+          }
+        ],
+        "latest_price": 8.68,
+        "data_points": 32,
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.527117"
+      },
+      "technical_indicators": {
+        "current_price": 10.52,
+        "ma5": 10.889999999999999,
+        "ma10": 11.206999999999999,
+        "ma20": 10.622000000000002,
+        "ma60": 10.52,
+        "rsi": 53.28330206378987,
+        "macd": 0.49266144584987615,
+        "signal": 0.5709531489433536,
+        "volume_ratio": 0.896731311756147,
+        "status": "calculated"
+      },
+      "last_kline_update": "2025-11-24T14:39:35.527117",
+      "timestamp": "2025-11-24T14:39:35.527117"
+    },
+    "601601": {
+      "code": "601601",
+      "name": "股票601601",
+      "kline_data": {
+        "daily": [
+          {
+            "date": "20251121",
+            "open": 35.39,
+            "high": 35.57,
+            "low": 34.6,
+            "close": 34.63,
+            "volume": 294254.0
+          },
+          {
+            "date": "20251120",
+            "open": 36.0,
+            "high": 36.16,
+            "low": 35.42,
+            "close": 35.54,
+            "volume": 256291.32
+          },
+          {
+            "date": "20251119",
+            "open": 34.88,
+            "high": 36.08,
+            "low": 34.88,
+            "close": 35.83,
+            "volume": 509604.61
+          },
+          {
+            "date": "20251118",
+            "open": 35.42,
+            "high": 35.57,
+            "low": 34.63,
+            "close": 34.86,
+            "volume": 422185.69
+          },
+          {
+            "date": "20251117",
+            "open": 36.2,
+            "high": 36.26,
+            "low": 35.3,
+            "close": 35.47,
+            "volume": 332597.92
+          },
+          {
+            "date": "20251114",
+            "open": 36.8,
+            "high": 37.19,
+            "low": 36.27,
+            "close": 36.29,
+            "volume": 339889.38
+          },
+          {
+            "date": "20251113",
+            "open": 36.41,
+            "high": 37.17,
+            "low": 36.36,
+            "close": 37.05,
+            "volume": 395218.55
+          },
+          {
+            "date": "20251112",
+            "open": 35.69,
+            "high": 36.79,
+            "low": 35.59,
+            "close": 36.5,
+            "volume": 485419.72
+          },
+          {
+            "date": "20251111",
+            "open": 36.05,
+            "high": 36.15,
+            "low": 35.46,
+            "close": 35.59,
+            "volume": 267369.87
+          },
+          {
+            "date": "20251110",
+            "open": 35.6,
+            "high": 36.27,
+            "low": 35.39,
+            "close": 36.05,
+            "volume": 352360.01
+          },
+          {
+            "date": "20251107",
+            "open": 35.33,
+            "high": 36.17,
+            "low": 35.31,
+            "close": 35.61,
+            "volume": 359741.55
+          },
+          {
+            "date": "20251106",
+            "open": 35.08,
+            "high": 35.67,
+            "low": 34.89,
+            "close": 35.49,
+            "volume": 476295.74
+          },
+          {
+            "date": "20251105",
+            "open": 35.2,
+            "high": 35.3,
+            "low": 34.96,
+            "close": 35.02,
+            "volume": 269689.63
+          },
+          {
+            "date": "20251104",
+            "open": 35.03,
+            "high": 35.54,
+            "low": 35.03,
+            "close": 35.43,
+            "volume": 317981.76
+          },
+          {
+            "date": "20251103",
+            "open": 35.5,
+            "high": 35.75,
+            "low": 35.05,
+            "close": 35.13,
+            "volume": 390216.55
+          },
+          {
+            "date": "20251031",
+            "open": 36.9,
+            "high": 36.9,
+            "low": 35.43,
+            "close": 35.5,
+            "volume": 861556.22
+          },
+          {
+            "date": "20251030",
+            "open": 37.54,
+            "high": 38.3,
+            "low": 37.5,
+            "close": 37.75,
+            "volume": 529572.92
+          },
+          {
+            "date": "20251029",
+            "open": 37.46,
+            "high": 37.83,
+            "low": 37.27,
+            "close": 37.6,
+            "volume": 590656.84
+          },
+          {
+            "date": "20251028",
             "open": 37.2,
-            "high": 37.54,
-            "low": 36.74,
-            "close": 37.34,
-            "volume": 218464.0
+            "high": 37.51,
+            "low": 37.03,
+            "close": 37.3,
+            "volume": 389585.49
           },
           {
-            "date": "2025-10-24T00:00:00",
+            "date": "20251027",
+            "open": 37.3,
+            "high": 37.71,
+            "low": 36.92,
+            "close": 37.13,
+            "volume": 433875.26
+          },
+          {
+            "date": "20251024",
             "open": 37.4,
             "high": 37.45,
             "low": 37.02,
@@ -198,182 +456,98 @@
             "volume": 199165.0
           },
           {
-            "date": "2025-10-27T00:00:00",
-            "open": 37.3,
-            "high": 37.71,
-            "low": 36.92,
-            "close": 37.13,
-            "volume": 433875.0
-          },
-          {
-            "date": "2025-10-28T00:00:00",
+            "date": "20251023",
             "open": 37.2,
-            "high": 37.51,
-            "low": 37.03,
-            "close": 37.3,
-            "volume": 389585.0
+            "high": 37.54,
+            "low": 36.74,
+            "close": 37.34,
+            "volume": 218464.0
           },
           {
-            "date": "2025-10-29T00:00:00",
-            "open": 37.46,
-            "high": 37.83,
-            "low": 37.27,
-            "close": 37.6,
-            "volume": 590657.0
+            "date": "20251022",
+            "open": 37.24,
+            "high": 37.62,
+            "low": 36.9,
+            "close": 37.2,
+            "volume": 250527.62
           },
           {
-            "date": "2025-10-30T00:00:00",
-            "open": 37.54,
-            "high": 38.3,
-            "low": 37.5,
-            "close": 37.75,
-            "volume": 529573.0
+            "date": "20251021",
+            "open": 36.91,
+            "high": 38.14,
+            "low": 36.91,
+            "close": 37.33,
+            "volume": 520668.89
           },
           {
-            "date": "2025-10-31T00:00:00",
-            "open": 36.9,
-            "high": 36.9,
-            "low": 35.43,
-            "close": 35.5,
-            "volume": 861556.0
+            "date": "20251020",
+            "open": 37.57,
+            "high": 37.75,
+            "low": 36.81,
+            "close": 37.07,
+            "volume": 308800.25
           },
           {
-            "date": "2025-11-03T00:00:00",
-            "open": 35.5,
-            "high": 35.75,
-            "low": 35.05,
-            "close": 35.13,
-            "volume": 390217.0
+            "date": "20251017",
+            "open": 37.61,
+            "high": 38.0,
+            "low": 36.65,
+            "close": 36.75,
+            "volume": 408852.41
           },
           {
-            "date": "2025-11-04T00:00:00",
-            "open": 35.03,
-            "high": 35.54,
-            "low": 35.03,
-            "close": 35.43,
-            "volume": 317982.0
+            "date": "20251016",
+            "open": 36.78,
+            "high": 37.96,
+            "low": 36.7,
+            "close": 37.7,
+            "volume": 631375.09
           },
           {
-            "date": "2025-11-05T00:00:00",
-            "open": 35.2,
-            "high": 35.3,
-            "low": 34.96,
-            "close": 35.02,
-            "volume": 269690.0
+            "date": "20251015",
+            "open": 35.99,
+            "high": 36.99,
+            "low": 35.85,
+            "close": 36.9,
+            "volume": 620092.99
           },
           {
-            "date": "2025-11-06T00:00:00",
-            "open": 35.08,
-            "high": 35.67,
-            "low": 34.89,
-            "close": 35.49,
-            "volume": 476296.0
+            "date": "20251014",
+            "open": 35.41,
+            "high": 36.34,
+            "low": 35.41,
+            "close": 36.0,
+            "volume": 788298.25
           },
           {
-            "date": "2025-11-07T00:00:00",
-            "open": 35.33,
-            "high": 36.17,
-            "low": 35.31,
-            "close": 35.61,
-            "volume": 359742.0
+            "date": "20251013",
+            "open": 34.5,
+            "high": 35.0,
+            "low": 34.25,
+            "close": 34.92,
+            "volume": 438221.48
           },
           {
-            "date": "2025-11-10T00:00:00",
-            "open": 35.6,
-            "high": 36.27,
-            "low": 35.39,
-            "close": 36.05,
-            "volume": 352360.0
+            "date": "20251010",
+            "open": 34.7,
+            "high": 35.7,
+            "low": 34.65,
+            "close": 35.06,
+            "volume": 497303.98
           },
           {
-            "date": "2025-11-11T00:00:00",
-            "open": 36.05,
-            "high": 36.15,
-            "low": 35.46,
-            "close": 35.59,
-            "volume": 267370.0
-          },
-          {
-            "date": "2025-11-12T00:00:00",
-            "open": 35.69,
-            "high": 36.79,
-            "low": 35.59,
-            "close": 36.5,
-            "volume": 485420.0
-          },
-          {
-            "date": "2025-11-13T00:00:00",
-            "open": 36.41,
-            "high": 37.17,
-            "low": 36.36,
-            "close": 37.05,
-            "volume": 395219.0
-          },
-          {
-            "date": "2025-11-14T00:00:00",
-            "open": 36.8,
-            "high": 37.19,
-            "low": 36.27,
-            "close": 36.29,
-            "volume": 339889.0
-          },
-          {
-            "date": "2025-11-17T00:00:00",
-            "open": 36.2,
-            "high": 36.26,
-            "low": 35.3,
-            "close": 35.47,
-            "volume": 332598.0
-          },
-          {
-            "date": "2025-11-18T00:00:00",
-            "open": 35.42,
-            "high": 35.57,
-            "low": 34.63,
-            "close": 34.86,
-            "volume": 422186.0
-          },
-          {
-            "date": "2025-11-19T00:00:00",
-            "open": 34.88,
-            "high": 36.08,
-            "low": 34.88,
-            "close": 35.83,
-            "volume": 509605.0
-          },
-          {
-            "date": "2025-11-20T00:00:00",
-            "open": 36.0,
-            "high": 36.16,
-            "low": 35.42,
-            "close": 35.54,
-            "volume": 256291.0
-          },
-          {
-            "date": "2025-11-21T00:00:00",
-            "open": 35.39,
-            "high": 35.57,
-            "low": 34.6,
-            "close": 34.63,
-            "volume": 294254.0
+            "date": "20251009",
+            "open": 34.93,
+            "high": 35.14,
+            "low": 34.26,
+            "close": 34.88,
+            "volume": 545147.77
           }
         ],
-        "latest_price": 34.63,
+        "latest_price": 34.88,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601601",
-        "source": "baostock",
-        "revenue": 0.127056,
-        "net_profit": null,
-        "eps": 39459000000.0,
-        "roe": 4.409199,
-        "total_profit": null,
-        "roa": 9.616046,
-        "gross_profit_rate": 0.123523,
-        "net_profit_rate": 0.970881,
-        "debt_ratio": 0.127056
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.536118"
       },
       "technical_indicators": {
         "current_price": 34.63,
@@ -384,46 +558,11 @@
         "rsi": 46.88279301745635,
         "macd": -0.18635153676498106,
         "signal": -0.03238728383181755,
-        "volume_ratio": 0.7907634707447023,
+        "volume_ratio": 0.7907635047456344,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601601",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601601",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:39:43.544779",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.536118",
+      "timestamp": "2025-11-24T14:39:35.536118"
     },
     "601602": {
       "code": "601602",
@@ -683,26 +822,7 @@
     },
     "601606": {
       "code": "601606",
-      "timestamp": "2025-11-22T21:40:21.339740",
-      "collection_time": "2025-11-22 21:40:21",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601606",
-        "name": "长城军工",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2018-08-06",
-        "source": "baostock"
-      },
+      "name": "股票601606",
       "kline_data": {
         "daily": [
           {
@@ -964,20 +1084,8 @@
         ],
         "latest_price": 42.91,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601606",
-        "source": "baostock",
-        "revenue": -0.080737,
-        "net_profit": 0.143258,
-        "eps": -78450318.38,
-        "roe": -0.081077,
-        "total_profit": null,
-        "roa": 1.752742,
-        "gross_profit_rate": 0.215975,
-        "net_profit_rate": 0.970154,
-        "debt_ratio": -0.080737
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.543118"
       },
       "technical_indicators": {
         "current_price": 52.21,
@@ -991,66 +1099,12 @@
         "volume_ratio": 1.0896030815882984,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601606",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601606",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:21.345576",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.543118",
+      "timestamp": "2025-11-24T14:39:35.543118"
     },
     "601607": {
       "code": "601607",
-      "timestamp": "2025-11-22T21:40:21.646045",
-      "collection_time": "2025-11-22 21:40:21",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601607",
-        "name": "上海医药",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "1994-03-24",
-        "source": "baostock"
-      },
+      "name": "股票601607",
       "kline_data": {
         "daily": [
           {
@@ -1312,20 +1366,8 @@
         ],
         "latest_price": 18.29,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601607",
-        "source": "baostock",
-        "revenue": 0.023963,
-        "net_profit": 0.110563,
-        "eps": 5023298063.88,
-        "roe": 1.086594,
-        "total_profit": null,
-        "roa": 3.125864,
-        "gross_profit_rate": 0.962231,
-        "net_profit_rate": 0.807075,
-        "debt_ratio": 0.023963
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.549118"
       },
       "technical_indicators": {
         "current_price": 17.72,
@@ -1339,66 +1381,12 @@
         "volume_ratio": 1.2651074207038042,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601607",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601607",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:21.649159",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.549118",
+      "timestamp": "2025-11-24T14:39:35.549118"
     },
     "601608": {
       "code": "601608",
-      "timestamp": "2025-11-22T21:40:21.949598",
-      "collection_time": "2025-11-22 21:40:21",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601608",
-        "name": "中信重工",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2012-07-06",
-        "source": "baostock"
-      },
+      "name": "股票601608",
       "kline_data": {
         "daily": [
           {
@@ -1660,20 +1648,8 @@
         ],
         "latest_price": 5.69,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601608",
-        "source": "baostock",
-        "revenue": 0.047761,
-        "net_profit": 0.212586,
-        "eps": 280685080.1,
-        "roe": 0.087672,
-        "total_profit": null,
-        "roa": 2.194758,
-        "gross_profit_rate": 0.314968,
-        "net_profit_rate": 1.012496,
-        "debt_ratio": 0.047761
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.565117"
       },
       "technical_indicators": {
         "current_price": 6.65,
@@ -1687,66 +1663,12 @@
         "volume_ratio": 1.2726114983454202,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601608",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601608",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:21.957759",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.565117",
+      "timestamp": "2025-11-24T14:39:35.565117"
     },
     "601609": {
       "code": "601609",
-      "timestamp": "2025-11-22T21:40:22.258397",
-      "collection_time": "2025-11-22 21:40:22",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601609",
-        "name": "金田股份",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2020-04-22",
-        "source": "baostock"
-      },
+      "name": "股票601609",
       "kline_data": {
         "daily": [
           {
@@ -2008,20 +1930,8 @@
         ],
         "latest_price": 13.48,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601609",
-        "source": "baostock",
-        "revenue": 0.00314,
-        "net_profit": 0.022451,
-        "eps": 288346668.93,
-        "roe": 0.291474,
-        "total_profit": null,
-        "roa": 2.943035,
-        "gross_profit_rate": 3.776388,
-        "net_profit_rate": 0.99861,
-        "debt_ratio": 0.00314
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.573119"
       },
       "technical_indicators": {
         "current_price": 9.82,
@@ -2035,43 +1945,8 @@
         "volume_ratio": 1.374942371070389,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601609",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601609",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:22.266840",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.573119",
+      "timestamp": "2025-11-24T14:39:35.573119"
     },
     "601610": {
       "code": "601610",
@@ -2139,26 +2014,7 @@
     },
     "601611": {
       "code": "601611",
-      "timestamp": "2025-11-22T21:40:22.870184",
-      "collection_time": "2025-11-22 21:40:22",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601611",
-        "name": "中国核建",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2016-06-06",
-        "source": "baostock"
-      },
+      "name": "股票601611",
       "kline_data": {
         "daily": [
           {
@@ -2420,20 +2276,8 @@
         ],
         "latest_price": 9.74,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601611",
-        "source": "baostock",
-        "revenue": 0.024834,
-        "net_profit": 0.102026,
-        "eps": 1960091810.76,
-        "roe": 0.699432,
-        "total_profit": null,
-        "roa": 7.2708,
-        "gross_profit_rate": 0.361136,
-        "net_profit_rate": 0.742339,
-        "debt_ratio": 0.024834
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.580209"
       },
       "technical_indicators": {
         "current_price": 11.2,
@@ -2447,43 +2291,8 @@
         "volume_ratio": 0.8562535014667033,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601611",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601611",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:22.876456",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.580209",
+      "timestamp": "2025-11-24T14:39:35.580209"
     },
     "601612": {
       "code": "601612",
@@ -2679,26 +2488,7 @@
     },
     "601615": {
       "code": "601615",
-      "timestamp": "2025-11-22T21:40:24.083706",
-      "collection_time": "2025-11-22 21:40:24",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601615",
-        "name": "明阳智能",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2019-01-23",
-        "source": "baostock"
-      },
+      "name": "股票601615",
       "kline_data": {
         "daily": [
           {
@@ -2960,20 +2750,8 @@
         ],
         "latest_price": 17.28,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601615",
-        "source": "baostock",
-        "revenue": 0.042713,
-        "net_profit": 0.152035,
-        "eps": 864364063.2,
-        "roe": -0.024214,
-        "total_profit": null,
-        "roa": 3.062703,
-        "gross_profit_rate": 0.242673,
-        "net_profit_rate": 0.935382,
-        "debt_ratio": 0.042713
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.587117"
       },
       "technical_indicators": {
         "current_price": 13.06,
@@ -2987,66 +2765,12 @@
         "volume_ratio": 1.0196696936778566,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601615",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601615",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:24.091700",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.587117",
+      "timestamp": "2025-11-24T14:39:35.587117"
     },
     "601616": {
       "code": "601616",
-      "timestamp": "2025-11-22T21:40:24.392094",
-      "collection_time": "2025-11-22 21:40:24",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601616",
-        "name": "广电电气",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2011-02-01",
-        "source": "baostock"
-      },
+      "name": "股票601616",
       "kline_data": {
         "daily": [
           {
@@ -3308,20 +3032,8 @@
         ],
         "latest_price": 4.09,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601616",
-        "source": "baostock",
-        "revenue": 0.085582,
-        "net_profit": 0.282422,
-        "eps": 63004499.68,
-        "roe": 0.054418,
-        "total_profit": null,
-        "roa": 1.244714,
-        "gross_profit_rate": 0.240434,
-        "net_profit_rate": 0.761103,
-        "debt_ratio": 0.085582
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.594120"
       },
       "technical_indicators": {
         "current_price": 3.82,
@@ -3335,43 +3047,8 @@
         "volume_ratio": 1.3616921156802273,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601616",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601616",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:24.398261",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.594120",
+      "timestamp": "2025-11-24T14:39:35.594120"
     },
     "601617": {
       "code": "601617",
@@ -3439,26 +3116,7 @@
     },
     "601618": {
       "code": "601618",
-      "timestamp": "2025-11-22T21:40:25.000908",
-      "collection_time": "2025-11-22 21:40:25",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601618",
-        "name": "中国中冶",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2009-09-21",
-        "source": "baostock"
-      },
+      "name": "股票601618",
       "kline_data": {
         "daily": [
           {
@@ -3720,20 +3378,8 @@
         ],
         "latest_price": 4.14,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601618",
-        "source": "baostock",
-        "revenue": 0.01866,
-        "net_profit": 0.090436,
-        "eps": 7699234000.0,
-        "roe": 0.353091,
-        "total_profit": null,
-        "roa": 4.632045,
-        "gross_profit_rate": 0.595146,
-        "net_profit_rate": 0.887199,
-        "debt_ratio": 0.01866
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.602116"
       },
       "technical_indicators": {
         "current_price": 3.19,
@@ -3747,66 +3393,12 @@
         "volume_ratio": 1.0543458885658248,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601618",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601618",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:25.008558",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.602116",
+      "timestamp": "2025-11-24T14:39:35.602116"
     },
     "601619": {
       "code": "601619",
-      "timestamp": "2025-11-22T21:40:25.309522",
-      "collection_time": "2025-11-22 21:40:25",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601619",
-        "name": "嘉泽新能",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2017-07-20",
-        "source": "baostock"
-      },
+      "name": "股票601619",
       "kline_data": {
         "daily": [
           {
@@ -4068,20 +3660,8 @@
         ],
         "latest_price": 5.67,
         "data_points": 32,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601619",
-        "source": "baostock",
-        "revenue": 0.305737,
-        "net_profit": 0.618944,
-        "eps": 555197255.47,
-        "roe": 0.289449,
-        "total_profit": null,
-        "roa": 3.12402,
-        "gross_profit_rate": 0.087085,
-        "net_profit_rate": 0.992006,
-        "debt_ratio": 0.305737
+        "source": "new",
+        "update_time": "2025-11-24T14:39:35.610119"
       },
       "technical_indicators": {
         "current_price": 4.22,
@@ -4095,43 +3675,8 @@
         "volume_ratio": 0.9690492738587515,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601619",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601619",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-22T21:40:25.321276",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-24T14:39:35.610119",
+      "timestamp": "2025-11-24T14:39:35.610119"
     },
     "601620": {
       "code": "601620",
@@ -23348,6 +22893,6 @@
       }
     }
   },
-  "last_updated": "2025-11-22T21:55:03.622273",
+  "last_updated": "2025-11-24T14:39:44.250633",
   "total_stocks": 200
 }
