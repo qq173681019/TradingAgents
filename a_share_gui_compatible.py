@@ -77,9 +77,9 @@ def call_llm(prompt, model="deepseek"):
             # MiniMax API调用 - 使用正确的API格式
             url = f"{MINIMAX_API_URL}?GroupId={MINIMAX_GROUP_ID}"
             
-            # MiniMax认证方式：直接使用JWT token作为Authorization（不带Bearer前缀）
+            # MiniMax认证方式：使用Bearer前缀
             headers = {
-                "Authorization": MINIMAX_API_KEY,
+                "Authorization": f"Bearer {MINIMAX_API_KEY}",
                 "Content-Type": "application/json"
             }
             
@@ -104,7 +104,7 @@ def call_llm(prompt, model="deepseek"):
             }
             
             print(f"[MiniMax调试] URL: {url}")
-            print(f"[MiniMax调试] Authorization (前30字符): {MINIMAX_API_KEY[:30]}...")
+            print(f"[MiniMax调试] API Key (前20字符): {MINIMAX_API_KEY[:20]}...")
             
             response = requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT)
             
@@ -117,9 +117,23 @@ def call_llm(prompt, model="deepseek"):
             if "base_resp" in result:
                 base_resp = result["base_resp"]
                 if base_resp.get("status_code") != 0:
-                    error_msg = f"status_code={base_resp.get('status_code')}, msg={base_resp.get('status_msg', '未知错误')}"
+                    status_code = base_resp.get('status_code')
+                    status_msg = base_resp.get('status_msg', '未知错误')
+                    error_msg = f"status_code={status_code}, msg={status_msg}"
                     print(f"[MiniMax错误] {error_msg}")
-                    print(f"[MiniMax提示] 请检查：1. API Key是否有效 2. GroupId是否正确 3. 账户余额是否充足")
+                    
+                    # 针对常见错误码给出具体提示
+                    if status_code == 1004 or status_code == 2049:
+                        print(f"[MiniMax提示] 认证失败！")
+                        print(f"[重要] 请检查 config.py 中的 MINIMAX_API_KEY:")
+                        print(f"  1. 必须使用 'API Secret Key'（类似 sk-xxx 格式），而不是JWT Token")
+                        print(f"  2. 获取方式：登录 https://platform.minimaxi.com/ -> API管理 -> 创建API Key")
+                        print(f"  3. 当前配置的Key前缀: {MINIMAX_API_KEY[:10]}...")
+                    elif status_code == 1002:
+                        print(f"[MiniMax提示] 账户余额不足，请充值后再试")
+                    else:
+                        print(f"[MiniMax提示] 请检查：1. API Secret Key是否正确 2. GroupId是否匹配 3. 账户状态是否正常")
+                    
                     return f"AI分析失败：{error_msg}"
             
             # MiniMax 返回格式：{"reply": "回复内容", "choices": [...]}
