@@ -1,9 +1,38 @@
-# ==================== 全局配置 ====================
-# ETF功能开关：设置为True显示ETF按钮，False则隐藏
-ENABLE_ETF_BUTTONS = False  # 默认关闭ETF功能
-
-DEEPSEEK_API_KEY = "sk-bdd85ba18ab54a699617d8b25fbecfea"  # 在此填写你的Deepseek API Key
-MINIMAX_API_KEY = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiLmiYvlt6XliLbmnZbmnLrlmajkuroiLCJVc2VyTmFtZSI6IkplcmljbyIsIkFjY291bnQiOiIiLCJTdWJqZWN0SUQiOiIxOTkwMjM2MDQ1NDQyMDI4MjE2IiwiUGhvbmUiOiIiLCJHcm91cElEIjoiMTk5MDIzNjA0NTQzNzgzODAwOCIsIlBhZ2VOYW1lIjoiIiwiTWFpbCI6InVuZGVydGlnZXJAMTI2LmNvbSIsIkNyZWF0ZVRpbWUiOiIyMDI1LTExLTE3IDE1OjQ1OjUzIiwiVG9rZW5UeXBlIjoxLCJpc3MiOiJtaW5pbWF4In0.c73EzaLhzTl-IimMDpeOrm-qDdhQ_ptzQO64y8IW4hkbLTpu1L-SL4uB_ydO0yIC5EUyG3C__D6ha4DZgWpRCLTsXUcAHme7PUlGY_wm4aP7eKMRSTPmEmmWDGMTkyN8xSznGE6TNXm1fcDKDeK_NmA9xg9stMqqaVX3vOJ0yj3a0TTpYe8vcmqAwabF9_YaAZ_bEh6IBshBalbYDnjRn0L4Vn0e8cmdcgadRbkmyz2F7y9dYw_HDWP9ufhCLkoGBDXA0duqXwleDRYehU_Et11xZUgL8CJ9EuKSNuiuSqi4udxUW0szmagAGNXhDVymUKo0HNkuXzfkkphlyMv3bw"    # 在此填写你的Minimax API Key
+# ==================== 导入配置文件 ====================
+try:
+    from config import (
+        DEEPSEEK_API_KEY, 
+        MINIMAX_API_KEY, 
+        MINIMAX_GROUP_ID,
+        ENABLE_ETF_BUTTONS,
+        LLM_MODEL_OPTIONS,
+        DEFAULT_LLM_MODEL,
+        DEEPSEEK_API_URL,
+        DEEPSEEK_MODEL_NAME,
+        MINIMAX_API_URL,
+        MINIMAX_MODEL_NAME,
+        API_TIMEOUT,
+        AI_TEMPERATURE,
+        AI_MAX_TOKENS,
+        AI_TOP_P
+    )
+    print("✅ 已从 config.py 加载配置")
+except ImportError:
+    print("⚠️ 未找到 config.py，使用默认配置")
+    DEEPSEEK_API_KEY = ""
+    MINIMAX_API_KEY = ""
+    MINIMAX_GROUP_ID = ""
+    ENABLE_ETF_BUTTONS = False
+    LLM_MODEL_OPTIONS = ["none", "deepseek", "minimax"]
+    DEFAULT_LLM_MODEL = "none"
+    DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+    DEEPSEEK_MODEL_NAME = "deepseek-chat"
+    MINIMAX_API_URL = "https://api.minimax.chat/v1/text/chatcompletion_v2"
+    MINIMAX_MODEL_NAME = "abab6.5s-chat"
+    API_TIMEOUT = 30
+    AI_TEMPERATURE = 0.7
+    AI_MAX_TOKENS = 1000
+    AI_TOP_P = 0.95
 
 import os
 import json
@@ -13,11 +42,116 @@ import requests
 
 def call_llm(prompt, model="deepseek"):
     """
-    调用LLM的占位函数，防止NameError。
-    实际实现应根据项目需求添加。
+    调用大语言模型API进行智能分析
+    支持 deepseek 和 minimax 两种模型
     """
-    print(f"[LLM] Mock Call: {prompt[:20]}...")
-    return "LLM Analysis Result (Placeholder)"
+    try:
+        if model == "deepseek":
+            # DeepSeek API调用
+            url = DEEPSEEK_API_URL
+            headers = {
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": DEEPSEEK_MODEL_NAME,
+                "messages": [
+                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。"},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": AI_TEMPERATURE,
+                "max_tokens": AI_MAX_TOKENS
+            }
+            
+            response = requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT)
+            response.raise_for_status()
+            result = response.json()
+            
+            if "choices" in result and len(result["choices"]) > 0:
+                return result["choices"][0]["message"]["content"]
+            else:
+                print(f"[DeepSeek] 返回格式异常: {result}")
+                return "AI分析失败：返回格式异常"
+                
+        elif model == "minimax":
+            # MiniMax API调用 - 使用正确的API格式
+            url = f"{MINIMAX_API_URL}?GroupId={MINIMAX_GROUP_ID}"
+            
+            # MiniMax认证方式：直接使用JWT token作为Authorization（不带Bearer前缀）
+            headers = {
+                "Authorization": MINIMAX_API_KEY,
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "model": MINIMAX_MODEL_NAME,
+                "tokens_to_generate": AI_MAX_TOKENS,
+                "messages": [
+                    {"sender_type": "USER", "sender_name": "用户", "text": prompt}
+                ],
+                "reply_constraints": {
+                    "sender_type": "BOT",
+                    "sender_name": "投资分析师"
+                },
+                "bot_setting": [
+                    {
+                        "bot_name": "投资分析师",
+                        "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。"
+                    }
+                ],
+                "temperature": AI_TEMPERATURE,
+                "top_p": AI_TOP_P
+            }
+            
+            print(f"[MiniMax调试] URL: {url}")
+            print(f"[MiniMax调试] Authorization (前30字符): {MINIMAX_API_KEY[:30]}...")
+            
+            response = requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT)
+            
+            print(f"[MiniMax调试] HTTP状态码: {response.status_code}")
+            print(f"[MiniMax调试] 响应内容: {response.text[:300]}")
+            
+            result = response.json()
+            
+            # 检查是否有错误
+            if "base_resp" in result:
+                base_resp = result["base_resp"]
+                if base_resp.get("status_code") != 0:
+                    error_msg = f"status_code={base_resp.get('status_code')}, msg={base_resp.get('status_msg', '未知错误')}"
+                    print(f"[MiniMax错误] {error_msg}")
+                    print(f"[MiniMax提示] 请检查：1. API Key是否有效 2. GroupId是否正确 3. 账户余额是否充足")
+                    return f"AI分析失败：{error_msg}"
+            
+            # MiniMax 返回格式：{"reply": "回复内容", "choices": [...]}
+            if "reply" in result:
+                return result["reply"]
+            elif "choices" in result and len(result["choices"]) > 0:
+                choice = result["choices"][0]
+                # 尝试多种可能的返回格式
+                if "messages" in choice and len(choice["messages"]) > 0:
+                    return choice["messages"][0].get("text", "")
+                elif "text" in choice:
+                    return choice["text"]
+                elif "message" in choice:
+                    return choice["message"].get("content", "")
+            
+            print(f"[MiniMax] 返回格式异常: {result}")
+            return "AI分析失败：返回格式异常"
+        else:
+            print(f"[LLM] 不支持的模型: {model}")
+            return f"不支持的模型: {model}"
+            
+    except requests.exceptions.Timeout:
+        print(f"[{model.upper()}] API调用超时")
+        return "AI分析失败：请求超时"
+    except requests.exceptions.RequestException as e:
+        print(f"[{model.upper()}] API调用失败: {e}")
+        return f"AI分析失败：{str(e)}"
+    except Exception as e:
+        print(f"[{model.upper()}] 调用异常: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"AI分析异常：{str(e)}"
 
 def test_llm_api_keys():
         """批量评分功能已被移除（按用户请求）。此函数为占位，避免外部调用时报错。"""
@@ -98,9 +232,6 @@ except Exception:
     scrolledtext = None
     SCROLLED_AVAILABLE = False
 
-# LLM 模型选项默认值（若之前被误删，补回一个安全的默认列表）
-LLM_MODEL_OPTIONS = ["none", "deepseek", "minimax"]
-
 # 尝试导入 messagebox（用于弹窗信息），不可用则回退为 None
 try:
     import tkinter.messagebox as messagebox
@@ -156,6 +287,8 @@ class AShareAnalyzerGUI:
 
         # 新增：批量评分数据存储
         self.batch_score_file = "batch_stock_scores.json"
+        self.batch_score_file_deepseek = "batch_stock_scores_deepseek.json"
+        self.batch_score_file_minimax = "batch_stock_scores_minimax.json"
         self.batch_scores = {}           # 批量评分数据
 
         # 新增：完整推荐数据存储
@@ -182,118 +315,105 @@ class AShareAnalyzerGUI:
         except Exception:
             pass
 
-        self.stock_info = {
-            # 科创板
-            "688981": {"name": "中芯国际", "industry": "半导体制造", "concept": "芯片概念,科创板", "price": 128.55},
-            "688036": {"name": "传音控股", "industry": "消费电子", "concept": "科创板,智能手机", "price": 89.66},
-            "688111": {"name": "金山办公", "industry": "软件服务", "concept": "科创板,办公软件", "price": 385.00},
-            "688599": {"name": "天合光能", "industry": "光伏设备", "concept": "科创板,新能源", "price": 45.80},
-            "688169": {"name": "石头科技", "industry": "智能硬件", "concept": "科创板,扫地机器人", "price": 380.50},
-            "688180": {"name": "君实生物", "industry": "生物制药", "concept": "科创板,创新药", "price": 55.90},
-            # ...existing code...
-            "600276": {"name": "恒瑞医药", "industry": "医药制造", "concept": "医药股,创新药", "price": 55.80},
-            "600887": {"name": "伊利股份", "industry": "乳制品", "concept": "消费股,食品饮料", "price": 29.88},
-            "600585": {"name": "海螺水泥", "industry": "建材", "concept": "基建股,水泥", "price": 28.90},
-            "600703": {"name": "三安光电", "industry": "半导体", "concept": "LED,化合物半导体", "price": 18.50},
-            "600009": {"name": "上海机场", "industry": "机场服务", "concept": "基础设施,机场", "price": 45.60},
-            "600019": {"name": "宝钢股份", "industry": "钢铁", "concept": "钢铁股,蓝筹", "price": 5.88},
-            "600309": {"name": "万华化学", "industry": "化工", "concept": "化工股,MDI", "price": 85.90},
-            "600028": {"name": "中国石化", "industry": "石油化工", "concept": "石化股,央企", "price": 5.12},
-            "600048": {"name": "保利发展", "industry": "房地产", "concept": "央企地产,蓝筹", "price": 12.88},
-            "600196": {"name": "复星医药", "industry": "医药制造", "concept": "医药股,综合医药", "price": 28.50},
-            "600688": {"name": "上海石化", "industry": "石油化工", "concept": "石化股,炼化", "price": 3.88},
-            "600745": {"name": "闻泰科技", "industry": "电子制造", "concept": "5G概念,电子", "price": 45.20},
-            "600547": {"name": "山东黄金", "industry": "有色金属", "concept": "黄金股,贵金属", "price": 15.60},
-            "600900": {"name": "长江电力", "industry": "电力", "concept": "水电股,公用事业", "price": 22.88},
-            "600031": {"name": "三一重工", "industry": "工程机械", "concept": "机械股,基建", "price": 16.85},
-            "600660": {"name": "福耀玻璃", "industry": "汽车零部件", "concept": "汽车玻璃,制造业", "price": 38.90},
-            "600025": {"name": "华能国际", "industry": "电力", "concept": "火电股,央企", "price": 8.95},
-            "600588": {"name": "用友网络", "industry": "软件服务", "concept": "企业软件,云计算", "price": 16.50},
-            "600809": {"name": "山西汾酒", "industry": "白酒", "concept": "白酒股,消费", "price": 185.00},
-            "600690": {"name": "海尔智家", "industry": "家用电器", "concept": "白电龙头,智能家居", "price": 25.88},
-            "600837": {"name": "海通证券", "industry": "证券", "concept": "券商股,金融", "price": 9.65},
-            "601318": {"name": "中国平安", "industry": "保险", "concept": "保险股,金融", "price": 42.50},
-            "601166": {"name": "兴业银行", "industry": "银行", "concept": "股份制银行", "price": 18.88},
-            "601328": {"name": "交通银行", "industry": "银行", "concept": "国有银行", "price": 5.95},
-            "601398": {"name": "工商银行", "industry": "银行", "concept": "大型银行,国有", "price": 5.12},
-            "601288": {"name": "农业银行", "industry": "银行", "concept": "国有银行", "price": 3.88},
-            "601939": {"name": "建设银行", "industry": "银行", "concept": "国有银行", "price": 6.85},
-            "601988": {"name": "中国银行", "industry": "银行", "concept": "国有银行", "price": 3.95},
-            "601012": {"name": "隆基绿能", "industry": "光伏设备", "concept": "光伏股,新能源", "price": 22.90},
-            "601888": {"name": "中国中免", "industry": "商业贸易", "concept": "免税概念,消费", "price": 88.50},
-            "601225": {"name": "陕西煤业", "industry": "煤炭开采", "concept": "煤炭股,能源", "price": 12.88},
-            "600089": {"name": "特变电工", "industry": "电力设备", "concept": "特高压,新能源设备", "price": 15.20},
-            
-            # 深市主板 (26只)
-            "000001": {"name": "平安银行", "industry": "银行", "concept": "银行股,零售银行", "price": 10.55},
-            "000002": {"name": "万科A", "industry": "房地产", "concept": "地产股,白马股", "price": 8.95},
-            "000063": {"name": "中兴通讯", "industry": "通信设备", "concept": "5G概念,通信", "price": 28.50},
-            "000069": {"name": "华侨城A", "industry": "旅游服务", "concept": "文旅股,地产", "price": 6.85},
-            "000100": {"name": "TCL科技", "industry": "消费电子", "concept": "面板股,电子", "price": 4.15},
-            "000157": {"name": "中联重科", "industry": "工程机械", "concept": "机械股,基建", "price": 6.20},
-            "000166": {"name": "申万宏源", "industry": "证券", "concept": "券商股,金融", "price": 4.85},
-            "000568": {"name": "泸州老窖", "industry": "白酒", "concept": "白酒股,消费", "price": 155.00},
-            "000596": {"name": "古井贡酒", "industry": "白酒", "concept": "白酒股,地方酒", "price": 188.00},
-            "000625": {"name": "长安汽车", "industry": "汽车制造", "concept": "自主品牌,汽车", "price": 12.88},
-            "000651": {"name": "格力电器", "industry": "家用电器", "concept": "空调龙头,白电", "price": 32.90},
-            "000725": {"name": "京东方A", "industry": "显示面板", "concept": "面板股,OLED", "price": 3.68},
-            "000858": {"name": "五粮液", "industry": "白酒", "concept": "消费股,白酒", "price": 138.88},
-            "000876": {"name": "新希望", "industry": "农林牧渔", "concept": "农业股,生猪", "price": 15.88},
-            "000895": {"name": "双汇发展", "industry": "食品加工", "concept": "肉制品,食品", "price": 25.90},
-            "000938": {"name": "紫光股份", "industry": "计算机设备", "concept": "IT设备,云计算", "price": 18.50},
-            "000977": {"name": "浪潮信息", "industry": "计算机设备", "concept": "服务器,AI算力", "price": 28.88},
-            "002001": {"name": "新和成", "industry": "化工", "concept": "维生素,精细化工", "price": 18.90},
-            "002027": {"name": "分众传媒", "industry": "广告营销", "concept": "广告股,传媒", "price": 6.85},
-            "002050": {"name": "三花智控", "industry": "汽车零部件", "concept": "汽车零部件,制冷", "price": 22.50},
-            "002120": {"name": "韵达股份", "industry": "物流", "concept": "快递股,物流", "price": 12.88},
-            "002129": {"name": "中环股份", "industry": "半导体", "concept": "硅片,光伏", "price": 25.60},
-            "002142": {"name": "宁波银行", "industry": "银行", "concept": "城商行,银行", "price": 28.88},
-            "002304": {"name": "洋河股份", "industry": "白酒", "concept": "白酒股,苏酒", "price": 98.50},
-            "002352": {"name": "顺丰控股", "industry": "物流", "concept": "快递龙头,物流", "price": 38.90},
-            "002714": {"name": "牧原股份", "industry": "农林牧渔", "concept": "生猪养殖,农业", "price": 42.80},
-            "002415": {"name": "海康威视", "industry": "安防设备", "concept": "科技股,监控", "price": 30.45},
-            "002594": {"name": "比亚迪", "industry": "新能源汽车", "concept": "新能源,汽车", "price": 280.00},
-            "002174": {"name": "游族网络", "industry": "游戏软件", "concept": "游戏概念,文化传媒", "price": 18.50},
-            "002475": {"name": "立讯精密", "industry": "电子制造", "concept": "苹果概念,消费电子", "price": 35.60},
-            
-            # 创业板
-            "300750": {"name": "宁德时代", "industry": "新能源电池", "concept": "新能源,锂电池", "price": 195.50},
-            "300059": {"name": "东方财富", "industry": "金融服务", "concept": "互联网金融", "price": 12.88},
-            "300015": {"name": "爱尔眼科", "industry": "医疗服务", "concept": "医疗股,眼科", "price": 38.90},
-            "300142": {"name": "沃森生物", "industry": "生物制药", "concept": "疫苗概念,生物医药", "price": 25.80},
-            "300760": {"name": "迈瑞医疗", "industry": "医疗器械", "concept": "创业板,医疗设备", "price": 285.60},
-            "300896": {"name": "爱美客", "industry": "医美产品", "concept": "创业板,医美概念", "price": 380.88},
-            "300122": {"name": "智飞生物", "industry": "生物制药", "concept": "创业板,疫苗", "price": 45.20},
-            "300274": {"name": "阳光电源", "industry": "电力设备", "concept": "创业板,光伏逆变器", "price": 85.50},
-            "300347": {"name": "泰格医药", "industry": "医药外包", "concept": "创业板,CRO", "price": 78.90},
-            "300433": {"name": "蓝思科技", "industry": "消费电子", "concept": "创业板,苹果概念", "price": 18.85},
-            
-            # ETF基金 - 主要宽基ETF
-            "510050": {"name": "50ETF", "industry": "ETF基金", "concept": "上证50,蓝筹股ETF", "price": 3.190},
-            "510300": {"name": "300ETF", "industry": "ETF基金", "concept": "沪深300,宽基ETF", "price": 4.123},
-            "510500": {"name": "500ETF", "industry": "ETF基金", "concept": "中证500,中盘ETF", "price": 6.788},
-            "159919": {"name": "300ETF", "industry": "ETF基金", "concept": "沪深300,深交所ETF", "price": 4.125},
-            "159915": {"name": "创业板ETF", "industry": "ETF基金", "concept": "创业板,成长股ETF", "price": 2.156},
-            "159949": {"name": "创业板50", "industry": "ETF基金", "concept": "创业板50,成长ETF", "price": 2.688},
-            "510900": {"name": "H股ETF", "industry": "ETF基金", "concept": "香港股票,跨境ETF", "price": 2.456},
-            
-            # 行业主题ETF
-            "512880": {"name": "证券ETF", "industry": "ETF基金", "concept": "证券行业,行业ETF", "price": 0.956},
-            "159928": {"name": "消费ETF", "industry": "ETF基金", "concept": "消费行业,行业ETF", "price": 2.888},
-            "512690": {"name": "酒ETF", "industry": "ETF基金", "concept": "白酒行业,主题ETF", "price": 1.156},
-            "515050": {"name": "5G ETF", "industry": "ETF基金", "concept": "5G通信,科技ETF", "price": 0.956},
-            "512170": {"name": "医疗ETF", "industry": "ETF基金", "concept": "医疗健康,行业ETF", "price": 1.825},
-            "512000": {"name": "券商ETF", "industry": "ETF基金", "concept": "券商行业,行业ETF", "price": 1.045},
-            "512010": {"name": "医药ETF", "industry": "ETF基金", "concept": "医药生物,行业ETF", "price": 1.562},
-            "515030": {"name": "新能源车ETF", "industry": "ETF基金", "concept": "新能源汽车,主题ETF", "price": 0.876},
-            "516160": {"name": "新能源ETF", "industry": "ETF基金", "concept": "新能源,主题ETF", "price": 0.756},
-            "159995": {"name": "芯片ETF", "industry": "ETF基金", "concept": "芯片半导体,科技ETF", "price": 1.234},
-            "515000": {"name": "科技ETF", "industry": "ETF基金", "concept": "科技创新,科技ETF", "price": 1.456},
-            "159825": {"name": "农业ETF", "industry": "ETF基金", "concept": "农业农村,行业ETF", "price": 0.856},
-        }
+        # 从JSON文件加载后备股票信息
+        self.stock_info = self._load_stock_info_fallback()
         
         # 添加通用股票验证函数，支持所有A股代码格式
         self.valid_a_share_codes = self.generate_valid_codes()
+    
+    def _load_stock_info_fallback(self):
+        """从JSON文件加载后备股票信息数据"""
+        import json
+        import os
+        
+        fallback_file = 'stock_info_fallback.json'
+        
+        try:
+            if os.path.exists(fallback_file):
+                with open(fallback_file, 'r', encoding='utf-8') as f:
+                    stock_info = json.load(f)
+                print(f"✅ 已加载后备股票信息：{len(stock_info)} 只股票")
+                return stock_info
+            else:
+                print(f"⚠️ 后备数据文件不存在: {fallback_file}，使用空字典")
+                return {}
+        except Exception as e:
+            print(f"❌ 加载后备股票信息失败: {e}")
+            return {}
+    
+    def _update_stock_info_fallback(self):
+        """从comprehensive_stock_data更新后备股票信息到JSON文件"""
+        import json
+        
+        fallback_file = 'stock_info_fallback.json'
+        
+        try:
+            if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
+                print("⚠️ 没有可用的股票数据用于更新后备文件")
+                return False
+            
+            updated_stock_info = {}
+            update_count = 0
+            
+            for code, stock_data in self.comprehensive_stock_data.items():
+                # 提取关键信息
+                name = stock_data.get('name', stock_data.get('basic_info', {}).get('name', '未知'))
+                
+                # 获取行业信息
+                industry = '未知'
+                if 'fund_data' in stock_data and stock_data['fund_data']:
+                    industry = stock_data['fund_data'].get('industry', '未知')
+                elif 'financial_data' in stock_data and stock_data['financial_data']:
+                    industry = stock_data['financial_data'].get('industry', '未知')
+                elif 'basic_info' in stock_data and stock_data['basic_info']:
+                    industry = stock_data['basic_info'].get('industry', '未知')
+                
+                # 获取概念信息
+                concept = '未知'
+                if 'industry_concept' in stock_data and stock_data['industry_concept']:
+                    concepts_list = stock_data['industry_concept'].get('concepts', [])
+                    if isinstance(concepts_list, list) and concepts_list:
+                        concept = ','.join(concepts_list[:5])  # 最多取前5个概念
+                    elif isinstance(concepts_list, str):
+                        concept = concepts_list
+                
+                # 获取最新价格
+                price = 0.0
+                if 'kline_data' in stock_data and stock_data['kline_data']:
+                    price = stock_data['kline_data'].get('latest_price', 0.0)
+                elif 'tech_data' in stock_data and stock_data['tech_data']:
+                    price = stock_data['tech_data'].get('current_price', 0.0)
+                
+                # 只有当名称不是"未知"时才添加
+                if name != '未知':
+                    updated_stock_info[code] = {
+                        'name': name,
+                        'industry': industry,
+                        'concept': concept,
+                        'price': float(price) if price else 0.0
+                    }
+                    update_count += 1
+            
+            if update_count > 0:
+                # 保存到文件
+                with open(fallback_file, 'w', encoding='utf-8') as f:
+                    json.dump(updated_stock_info, f, ensure_ascii=False, indent=2)
+                
+                print(f"✅ 已更新后备股票信息：{update_count} 只股票 → {fallback_file}")
+                
+                # 同步更新内存中的stock_info
+                self.stock_info = updated_stock_info
+                
+                return True
+            else:
+                print("⚠️ 没有有效的股票信息可更新")
+                return False
+                
+        except Exception as e:
+            print(f"❌ 更新后备股票信息失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
     
     def load_daily_cache(self):
         """加载当日股票分析缓存"""
@@ -355,39 +475,50 @@ class AShareAnalyzerGUI:
         self.save_daily_cache()
     
     def load_batch_scores(self):
-        """加载批量评分数据 - 增强版本"""
+        """加载批量评分数据 - 根据AI模型加载对应文件"""
         import json
         from datetime import datetime
         import os
         
         try:
-            if not os.path.exists(self.batch_score_file):
-                print("未找到历史评分数据")
+            # 确定加载文件路径（根据当前使用的AI模型）
+            if hasattr(self, 'llm_model') and self.llm_model == "deepseek":
+                load_file = self.batch_score_file_deepseek
+                model_name = "DeepSeek"
+            elif hasattr(self, 'llm_model') and self.llm_model == "minimax":
+                load_file = self.batch_score_file_minimax
+                model_name = "MiniMax"
+            else:
+                load_file = self.batch_score_file
+                model_name = "本地规则"
+            
+            if not os.path.exists(load_file):
+                print(f"未找到{model_name}历史评分数据: {load_file}")
                 self.batch_scores = {}
                 return False
             
             # 检查文件大小
-            file_size = os.path.getsize(self.batch_score_file)
+            file_size = os.path.getsize(load_file)
             if file_size == 0:
-                print("评分文件为空")
+                print(f"{model_name}评分文件为空")
                 self.batch_scores = {}
                 return False
             
             # 检查文件大小是否合理（超过100MB可能有问题）
             if file_size > 100 * 1024 * 1024:
-                print(f"评分文件过大: {file_size / (1024*1024):.1f}MB")
+                print(f"{model_name}评分文件过大: {file_size / (1024*1024):.1f}MB")
                 # 尝试备份大文件
                 try:
-                    backup_file = f"{self.batch_score_file}.large_backup"
+                    backup_file = f"{load_file}.large_backup"
                     import shutil
-                    shutil.move(self.batch_score_file, backup_file)
+                    shutil.move(load_file, backup_file)
                     print(f"📦 大文件已备份为: {backup_file}")
                     self.batch_scores = {}
                     return False
                 except:
                     pass
             
-            with open(self.batch_score_file, 'r', encoding='utf-8') as f:
+            with open(load_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
             # 检查数据是否在48小时内
@@ -417,20 +548,21 @@ class AShareAnalyzerGUI:
                     print(f"清理了 {invalid_count} 条无效评分数据")
                 
                 score_time = data.get('timestamp', data.get('date', '未知'))
-                print(f"加载批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time})")
+                score_model = data.get('model', model_name)
+                print(f"✅ 加载{model_name}批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time}, 模型: {score_model})")
             else:
-                print("批量评分数据已超过48小时，将重新获取")
+                print(f"{model_name}批量评分数据已超过48小时，将重新获取")
                 self.batch_scores = {}
                 
         except json.JSONDecodeError as e:
-            print(f"评分文件JSON格式错误: {e}")
+            print(f"{model_name}评分文件JSON格式错误: {e}")
             # 尝试恢复备份
-            backup_file = f"{self.batch_score_file}.backup"
+            backup_file = f"{load_file}.backup"
             if os.path.exists(backup_file):
                 try:
                     import shutil
-                    shutil.copy2(backup_file, self.batch_score_file)
-                    print("� 已尝试从备份恢复")
+                    shutil.copy2(backup_file, load_file)
+                    print(f"� 已尝试从备份恢复{model_name}评分")
                     return self.load_batch_scores()  # 递归调用一次
                 except:
                     pass
@@ -507,31 +639,43 @@ class AShareAnalyzerGUI:
                 print("没有有效的评分数据")
                 return False
             
+            # 确定保存文件路径（根据当前使用的AI模型）
+            if hasattr(self, 'llm_model') and self.llm_model == "deepseek":
+                save_file = self.batch_score_file_deepseek
+                model_name = "DeepSeek"
+            elif hasattr(self, 'llm_model') and self.llm_model == "minimax":
+                save_file = self.batch_score_file_minimax
+                model_name = "MiniMax"
+            else:
+                save_file = self.batch_score_file
+                model_name = "本地规则"
+            
             data = {
                 'date': datetime.now().strftime('%Y-%m-%d'),
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'model': getattr(self, 'llm_model', 'none'),
                 'scores': valid_scores,
                 'count': len(valid_scores)
             }
             
             # 创建备份
-            backup_file = f"{self.batch_score_file}.backup"
-            if os.path.exists(self.batch_score_file):
+            backup_file = f"{save_file}.backup"
+            if os.path.exists(save_file):
                 try:
                     import shutil
-                    shutil.copy2(self.batch_score_file, backup_file)
+                    shutil.copy2(save_file, backup_file)
                 except Exception as backup_error:
                     print(f"创建备份失败: {backup_error}")
             
-            # 保存主文件
-            with open(self.batch_score_file, 'w', encoding='utf-8') as f:
+            # 保存主文件（不分卷）
+            with open(save_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             
-            print(f"💾 批量评分已保存：{len(valid_scores)}只股票 (时间: {data['timestamp']})")
+            print(f"💾 {model_name}批量评分已保存：{len(valid_scores)}只股票 → {save_file} (时间: {data['timestamp']})")
             
             # 清理旧备份（只保留最新的）
             try:
-                if os.path.exists(backup_file) and os.path.getsize(self.batch_score_file) > 0:
+                if os.path.exists(backup_file) and os.path.getsize(save_file) > 0:
                     pass  # 保留备份
             except:
                 pass
@@ -1809,6 +1953,15 @@ class AShareAnalyzerGUI:
                 
                 self.show_progress(f"DATA: 准备分析 {total_stocks} 只{stock_type}股票...")
                 
+                # 检测评分模式
+                use_llm_mode = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax"]
+                if use_llm_mode:
+                    print(f"\033[1;35m[评分模式] 🤖 AI模式 - 使用{self.llm_model}大模型进行智能评分\033[0m")
+                    self.show_progress(f"MODE: 🤖 AI模式 - 使用{self.llm_model}进行评分（较慢但更准确）")
+                else:
+                    print(f"\033[1;36m[评分模式] ⚡ 快速模式 - 使用本地规则引擎评分\033[0m")
+                    self.show_progress(f"MODE: ⚡ 快速模式 - 使用本地规则引擎强制重新计算")
+                
                 # 初始化批量评分进度条
                 def init_batch_progress():
                     if hasattr(self, 'batch_scoring_status_label'):
@@ -1821,6 +1974,8 @@ class AShareAnalyzerGUI:
                 
                 success_count = 0
                 failed_count = 0
+                cache_hit_count = 0  # 缓存命中计数
+                recalculated_count = 0  # 重新计算计数
                 batch_save_interval = 20
                 start_time = time.time()  # 记录开始时间用于计算 ETA
                 
@@ -1867,18 +2022,27 @@ class AShareAnalyzerGUI:
                             if comprehensive_data:
                                 self.comprehensive_data[code] = comprehensive_data
                                 
-                                # 获取评分：优先从缓存数据中取，如果没有则重新计算
-                                score = comprehensive_data.get('overall_score')
-                                if score is None:
-                                    # 缓存数据中没有评分，尝试重新计算
-                                    print(f"[WARN] 缓存数据无评分，重新计算: {code}")
-                                    score = self.get_stock_score_for_batch(code)
-                                    if score is not None:
-                                        comprehensive_data['overall_score'] = score
-                                    else:
-                                        print(f"[ERROR] 无法计算评分: {code}")
-                                        failed_count += 1
-                                        continue
+                                # 【关键逻辑】批量评分强制重新计算，不使用缓存评分
+                                # 1. 如果选择了LLM模型（deepseek/minimax），使用AI评分
+                                # 2. 否则使用本地规则引擎评分
+                                use_llm = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax"]
+                                
+                                if use_llm:
+                                    # AI模式：使用LLM进行智能评分
+                                    print(f"[AI-MODE] 使用{self.llm_model}评分: {code}")
+                                else:
+                                    # 快速模式：使用本地规则引擎评分
+                                    print(f"[LOCAL-MODE] 本地规则引擎评分: {code}")
+                                
+                                # 强制重新计算评分（不使用缓存）
+                                score = self.get_stock_score_for_batch(code)
+                                if score is not None:
+                                    comprehensive_data['overall_score'] = score
+                                    recalculated_count += 1
+                                else:
+                                    print(f"[ERROR] 评分失败: {code}")
+                                    failed_count += 1
+                                    continue
                                 
                                 stock_name = comprehensive_data.get('name', self.stock_info.get(code, {}).get('name', '未知'))
                                 industry = comprehensive_data.get('fund_data', {}).get('industry', '未知')
@@ -1933,8 +2097,20 @@ class AShareAnalyzerGUI:
                         self.batch_scoring_progress['value'] = 100
                 self.root.after(0, finish_batch_progress)
                 
-                # 显示完成信息
-                self.show_progress(f"SUCCESS: {stock_type}评分完成！成功: {success_count}, 失败: {failed_count}")
+                # 显示完成信息和统计
+                print(f"\n{'='*80}")
+                print(f"📊 {stock_type}评分统计")
+                print(f"{'='*80}")
+                print(f"✅ 成功: {success_count} 只")
+                print(f"❌ 失败: {failed_count} 只")
+                print(f"🔄 全部重新计算: {recalculated_count} 只")
+                if use_llm_mode:
+                    print(f"🤖 AI模式: 使用{self.llm_model}大模型评分")
+                else:
+                    print(f"⚡ 快速模式: 使用本地规则引擎评分")
+                print(f"{'='*80}\n")
+                
+                self.show_progress(f"SUCCESS: {stock_type}评分完成！成功:{success_count} 失败:{failed_count} 缓存:{cache_hit_count} 计算:{recalculated_count}")
                 
                 # 显示缓存未命中统计
                 if hasattr(self, '_current_batch_cache_miss') and self._current_batch_cache_miss:
@@ -2844,7 +3020,7 @@ class AShareAnalyzerGUI:
                       bg="#2c3e50")
         title_label.pack(expand=True)
         
-        # 输入和快速操作区域（股票代码输入、开始分析、批量评分、期限选择）
+        # 输入和快速操作区域（股票代码输入、开始分析、AI模型选择）
         input_frame = tk.Frame(self.root, bg="#f0f0f0")
         input_frame.pack(fill="x", padx=20, pady=5)
 
@@ -2856,19 +3032,22 @@ class AShareAnalyzerGUI:
         # 开始分析按钮
         self.analyze_btn = tk.Button(input_frame, text="开始分析", font=("微软雅黑", 11), bg="#27ae60", fg="white", command=self.start_analysis, cursor="hand2", width=12)
         self.analyze_btn.pack(side="left", padx=5)
-
-        # 批量评分快捷按钮 已移除
-
-        # 投资期限选择（短期/中期/长期）
-        tk.Label(input_frame, text="期限:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(10, 0))
-        self.period_var = tk.StringVar(value="中期")
+        
+        # AI模型选择
+        tk.Label(input_frame, text="AI模型:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(20, 0))
+        self.llm_var = tk.StringVar(value="none")
         try:
-            period_menu = ttk.Combobox(input_frame, textvariable=self.period_var, values=["短期", "中期", "长期"], width=6, state='readonly', font=("微软雅黑", 11))
-            period_menu.pack(side="left", padx=5)
+            llm_menu = ttk.Combobox(input_frame, textvariable=self.llm_var, values=LLM_MODEL_OPTIONS, width=10, state='readonly', font=("微软雅黑", 11))
+            llm_menu.pack(side="left", padx=5)
+            llm_menu.bind("<<ComboboxSelected>>", lambda e: self.set_llm_model(self.llm_var.get()))
         except Exception:
             # 如果 ttk 不可用，回退为普通 OptionMenu
-            tk.OptionMenu(input_frame, self.period_var, "短期", "中期", "长期").pack(side="left", padx=5)
-        # 推荐配置框架
+            llm_option = tk.OptionMenu(input_frame, self.llm_var, *LLM_MODEL_OPTIONS, command=self.set_llm_model)
+            llm_option.pack(side="left", padx=5)
+        
+        # 版本号显示
+        tk.Label(input_frame, text="v1.0.0", font=("微软雅黑", 10), bg="#f0f0f0", fg="#7f8c8d").pack(side="right", padx=10)
+        # 推荐配置框架（推荐评分、期限、推荐按钮在同一排）
         recommend_frame = tk.Frame(self.root, bg="#f0f0f0")
         recommend_frame.pack(fill="x", padx=20, pady=5)
         
@@ -2885,64 +3064,33 @@ class AShareAnalyzerGUI:
                               variable=self.score_var,
                               font=("微软雅黑", 10),
                               bg="#f0f0f0",
-                              length=150)
-        score_scale.pack(side="left", padx=(10, 20))
+                              length=120)
+        score_scale.pack(side="left", padx=(5, 10))
         
         # 评分显示标签
         self.score_label = tk.Label(recommend_frame, 
                                    text="≥8.0分", 
-                                   font=("微软雅黑", 12, "bold"),
+                                   font=("微软雅黑", 11, "bold"),
                                    fg="#e74c3c",
                                    bg="#f0f0f0")
-        self.score_label.pack(side="left", padx=(0, 20))
+        self.score_label.pack(side="left", padx=(0, 15))
         
         # 绑定评分条变化事件
         score_scale.bind("<Motion>", self.update_score_label)
         score_scale.bind("<ButtonRelease-1>", self.update_score_label)
         
-        # 获取评分按钮组
-        score_button_frame = tk.Frame(self.root, bg="#f0f0f0")
-        score_button_frame.pack(fill="x", padx=20, pady=5)
-        
-        tk.Label(score_button_frame, text="获取评分:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=8, anchor="w").pack(side="left", padx=(0, 10))
-        
-        # 获取全部评分按钮 已移除
-        
-        # 获取主板评分按钮
-        get_main_score_btn = tk.Button(score_button_frame, 
-                                     text="获取主板评分", 
-                                     font=("微软雅黑", 11),
-                                     bg="#3498db", 
-                                     fg="white",
-                                     activebackground="#2980b9",
-                                     command=lambda: self.start_batch_scoring_by_type("主板"),
-                                     cursor="hand2",
-                                     width=12)
-        get_main_score_btn.pack(side="left", padx=5)
-        
-        # 获取ETF评分按钮 - 根据全局开关决定是否显示
-        if ENABLE_ETF_BUTTONS:
-            get_etf_score_btn = tk.Button(score_button_frame, 
-                                        text="获取ETF评分", 
-                                        font=("微软雅黑", 11),
-                                        bg="#3498db", 
-                                        fg="white",
-                                        activebackground="#2980b9",
-                                        command=lambda: self.start_batch_scoring_by_type("ETF"),
-                                        cursor="hand2",
-                                        width=12)
-            get_etf_score_btn.pack(side="left", padx=5)
-        
-        # 推荐按钮组
-        recommend_button_frame = tk.Frame(self.root, bg="#f0f0f0")
-        recommend_button_frame.pack(fill="x", padx=20, pady=5)
-        
-        tk.Label(recommend_button_frame, text="股票推荐:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=8, anchor="w").pack(side="left", padx=(0, 10))
-        
-        # 综合推荐按钮 已移除
+        # 投资期限选择
+        tk.Label(recommend_frame, text="期限:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(0, 5))
+        self.period_var = tk.StringVar(value="中期")
+        try:
+            period_menu = ttk.Combobox(recommend_frame, textvariable=self.period_var, values=["短期", "中期", "长期"], width=6, state='readonly', font=("微软雅黑", 11))
+            period_menu.pack(side="left", padx=(0, 15))
+        except Exception:
+            # 如果 ttk 不可用，回退为普通 OptionMenu
+            tk.OptionMenu(recommend_frame, self.period_var, "短期", "中期", "长期").pack(side="left", padx=(0, 15))
         
         # 推荐主板股票按钮
-        main_recommend_btn = tk.Button(recommend_button_frame, 
+        main_recommend_btn = tk.Button(recommend_frame, 
                                      text="推荐主板股票", 
                                      font=("微软雅黑", 11),
                                      bg="#e74c3c", 
@@ -2955,7 +3103,7 @@ class AShareAnalyzerGUI:
         
         # 推荐ETF按钮 - 根据全局开关决定是否显示
         if ENABLE_ETF_BUTTONS:
-            etf_recommend_btn = tk.Button(recommend_button_frame, 
+            etf_recommend_btn = tk.Button(recommend_frame, 
                                         text="推荐ETF", 
                                         font=("微软雅黑", 11),
                                         bg="#e74c3c", 
@@ -2966,8 +3114,69 @@ class AShareAnalyzerGUI:
                                         width=12)
             etf_recommend_btn.pack(side="left", padx=5)
         
+        # 数据收集与评分按钮组（获取全部数据、更新K线、获取主板评分在同一排）
+        data_score_frame = tk.Frame(self.root, bg="#f0f0f0")
+        data_score_frame.pack(fill="x", padx=20, pady=5)
+        
+        tk.Label(data_score_frame, text="数据与评分:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=10, anchor="w").pack(side="left", padx=(0, 10))
+        
+        # 获取全部数据按钮
+        collect_all_data_btn = tk.Button(data_score_frame, 
+                                        text="获取全部数据", 
+                                        font=("微软雅黑", 11),
+                                        bg="#27ae60", 
+                                        fg="white",
+                                        activebackground="#229954",
+                                        command=self.start_comprehensive_data_collection,
+                                        cursor="hand2",
+                                        width=12)
+        collect_all_data_btn.pack(side="left", padx=5)
+        
+        # 更新K线数据按钮
+        update_kline_btn = tk.Button(data_score_frame,
+                                    text="更新K线数据",
+                                    font=("微软雅黑", 11),
+                                    bg="#3498db",
+                                    fg="white",
+                                    activebackground="#2980b9",
+                                    command=self.start_kline_update,
+                                    cursor="hand2",
+                                    width=12)
+        update_kline_btn.pack(side="left", padx=5)
+        
+        # 获取主板评分按钮
+        get_main_score_btn = tk.Button(data_score_frame, 
+                                     text="获取主板评分", 
+                                     font=("微软雅黑", 11),
+                                     bg="#3498db", 
+                                     fg="white",
+                                     activebackground="#2980b9",
+                                     command=lambda: self.start_batch_scoring_by_type("主板"),
+                                     cursor="hand2",
+                                     width=12)
+        get_main_score_btn.pack(side="left", padx=5)
+        
+        # 获取ETF评分按钮 - 根据全局开关决定是否显示
+        if ENABLE_ETF_BUTTONS:
+            get_etf_score_btn = tk.Button(data_score_frame, 
+                                        text="获取ETF评分", 
+                                        font=("微软雅黑", 11),
+                                        bg="#3498db", 
+                                        fg="white",
+                                        activebackground="#2980b9",
+                                        command=lambda: self.start_batch_scoring_by_type("ETF"),
+                                        cursor="hand2",
+                                        width=12)
+            get_etf_score_btn.pack(side="left", padx=5)
+        
+        # CSV批量分析与热门板块按钮组
+        analysis_button_frame = tk.Frame(self.root, bg="#f0f0f0")
+        analysis_button_frame.pack(fill="x", padx=20, pady=5)
+        
+        tk.Label(analysis_button_frame, text="批量分析:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=10, anchor="w").pack(side="left", padx=(0, 10))
+        
         # CSV批量分析按钮及排序勾选框
-        csv_analysis_btn = tk.Button(recommend_button_frame, 
+        csv_analysis_btn = tk.Button(analysis_button_frame, 
                        text="CSV批量分析", 
                        font=("微软雅黑", 11),
                        bg="#f39c12", 
@@ -2980,7 +3189,7 @@ class AShareAnalyzerGUI:
 
         # 新增：批量分析结果排序勾选框
         self.sort_csv_var = tk.BooleanVar(value=False)
-        self.sort_csv_checkbox = tk.Checkbutton(recommend_button_frame,
+        self.sort_csv_checkbox = tk.Checkbutton(analysis_button_frame,
                             text="按评分排序",
                             variable=self.sort_csv_var,
                             font=("微软雅黑", 10),
@@ -2988,7 +3197,7 @@ class AShareAnalyzerGUI:
         self.sort_csv_checkbox.pack(side="left", padx=5)
         
         # 热门板块分析按钮
-        hot_sectors_btn = tk.Button(recommend_button_frame, 
+        hot_sectors_btn = tk.Button(analysis_button_frame, 
                                    text="热门板块分析", 
                                    font=("微软雅黑", 11),
                                    bg="#9b59b6", 
@@ -2998,36 +3207,6 @@ class AShareAnalyzerGUI:
                                    cursor="hand2",
                                    width=12)
         hot_sectors_btn.pack(side="left", padx=5)
-        
-        # 数据收集按钮组
-        data_collection_frame = tk.Frame(self.root, bg="#f0f0f0")
-        data_collection_frame.pack(fill="x", padx=20, pady=5)
-        
-        tk.Label(data_collection_frame, text="数据收集:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", width=8, anchor="w").pack(side="left", padx=(0, 10))
-        
-        # 获取全部数据按钮
-        collect_all_data_btn = tk.Button(data_collection_frame, 
-                                        text="获取全部数据", 
-                                        font=("微软雅黑", 11),
-                                        bg="#27ae60", 
-                                        fg="white",
-                                        activebackground="#229954",
-                                        command=self.start_comprehensive_data_collection,
-                                        cursor="hand2",
-                                        width=12)
-        collect_all_data_btn.pack(side="left", padx=5)
-        
-        # 更新K线数据按钮
-        update_kline_btn = tk.Button(data_collection_frame,
-                                    text="更新K线数据",
-                                    font=("微软雅黑", 11),
-                                    bg="#3498db",
-                                    fg="white",
-                                    activebackground="#2980b9",
-                                    command=self.start_kline_update,
-                                    cursor="hand2",
-                                    width=12)
-        update_kline_btn.pack(side="left", padx=5)
         
         # --- 通用进度显示区域（所有操作共用） ---
         universal_progress_frame = tk.Frame(self.root, bg="#ecf0f1", relief="sunken", bd=1)
@@ -5829,29 +6008,40 @@ class AShareAnalyzerGUI:
             }
         
         current_price = technical_data.get('current_price', stock_info.get('price', 10.0))
-        ma5 = technical_data.get('ma5', current_price * 0.98)
-        ma10 = technical_data.get('ma10', current_price * 0.97)
-        ma20 = technical_data.get('ma20', current_price * 0.96)
-        ma60 = technical_data.get('ma60', current_price * 0.95)
-        ma120 = technical_data.get('ma120', current_price * 0.94)
-        rsi = technical_data.get('rsi', 50)
-        macd = technical_data.get('macd', 0)
-        signal = technical_data.get('signal', 0)
-        volume_ratio = technical_data.get('volume_ratio', 1.0)
-        pe_ratio = financial_data.get('pe_ratio', 20)
-        pb_ratio = financial_data.get('pb_ratio', 2.0)
-        roe = financial_data.get('roe', 10)
+        if current_price is None:
+            current_price = 10.0
+        
+        ma5 = technical_data.get('ma5', current_price * 0.98) or current_price * 0.98
+        ma10 = technical_data.get('ma10', current_price * 0.97) or current_price * 0.97
+        ma20 = technical_data.get('ma20', current_price * 0.96) or current_price * 0.96
+        ma60 = technical_data.get('ma60', current_price * 0.95) or current_price * 0.95
+        ma120 = technical_data.get('ma120', current_price * 0.94) or current_price * 0.94
+        rsi = technical_data.get('rsi', 50) or 50
+        macd = technical_data.get('macd', 0) or 0
+        signal = technical_data.get('signal', 0) or 0
+        volume_ratio = technical_data.get('volume_ratio', 1.0) or 1.0
+        pe_ratio = financial_data.get('pe_ratio', 20) or 20
+        pb_ratio = financial_data.get('pb_ratio', 2.0) or 2.0
+        roe = financial_data.get('roe', 10) or 10
+        
         print(f"📊 {ticker} 模拟数据: 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
 
         # 如果选择了大模型，优先用大模型生成投资建议
         print(f"[调试] generate_investment_advice: llm_model={getattr(self, 'llm_model', None)}")
         if hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax"]:
             print(f"[调试] 命中大模型分支: {self.llm_model}")
+            
+            # 安全获取股票信息，确保不为None
+            stock_name = stock_info.get('name') or '未知'
+            stock_industry = stock_info.get('industry') or '未知'
+            stock_concept = stock_info.get('concept') or '未知'
+            
             prompt = f"请根据以下A股股票的技术面和基本面数据，分别给出短期（1-7天）、中期（7-30天）、长期（30-90天）的投资建议，内容简明扼要，分条列出：\n" \
-                     f"股票名称: {stock_info.get('name','')}\n行业: {stock_info.get('industry','')}\n概念: {stock_info.get('concept','')}\n当前价格: {current_price}\n" \
-                     f"技术面: RSI={rsi}, MACD={macd}, MA5={ma5}, MA10={ma10}, MA20={ma20}, MA60={ma60}, MA120={ma120}, VOL_RATIO={volume_ratio}\n" \
-                     f"基本面: PE={pe_ratio}, PB={pb_ratio}, ROE={roe}\n" \
+                     f"股票名称: {stock_name}\n行业: {stock_industry}\n概念: {stock_concept}\n当前价格: {current_price:.2f}\n" \
+                     f"技术面: RSI={rsi:.1f}, MACD={macd:.3f}, MA5={ma5:.2f}, MA10={ma10:.2f}, MA20={ma20:.2f}, MA60={ma60:.2f}, MA120={ma120:.2f}, VOL_RATIO={volume_ratio:.2f}\n" \
+                     f"基本面: PE={pe_ratio:.1f}, PB={pb_ratio:.2f}, ROE={roe:.1f}\n" \
                      f"请用简洁中文输出，分短期/中期/长期三段，每段3条建议。"
+            
             ai_reply = call_llm(prompt, model=self.llm_model)
             print(f"[调试] call_llm已调用, 返回内容前100字: {str(ai_reply)[:100]}")
             # 简单分段解析AI回复
@@ -6833,10 +7023,19 @@ WARNING:  风险提示:
         if not recommendations:
             return f"暂无{stock_type}推荐股票"
         
+        # 确定当前使用的AI模型
+        current_model = getattr(self, 'llm_model', 'none')
+        if current_model == "deepseek":
+            model_name = "DeepSeek AI"
+        elif current_model == "minimax":
+            model_name = "MiniMax AI"
+        else:
+            model_name = "本地规则引擎"
+        
         report = f"""
 =========================================================
             {stock_type}股票推荐报告 (Top 10)
-            基于本地评分数据
+            评分模型: {model_name}
 =========================================================
 
 """
@@ -11172,22 +11371,30 @@ WARNING: 重要声明:
             messagebox.showerror("推荐失败", f"股票推荐生成失败：{str(e)}")
     
     def _perform_stock_recommendations_by_type(self, stock_type):
-        """执行股票推荐（后台线程）- 基于本地评分数据"""
+        """执行股票推荐（后台线程）- 基于当前AI模型的评分数据"""
         try:
-            print(f"开始生成{stock_type}股票推荐（基于本地评分数据）...")
+            # 确定当前使用的AI模型
+            current_model = getattr(self, 'llm_model', 'none')
+            if current_model == "deepseek":
+                model_name = "DeepSeek"
+            elif current_model == "minimax":
+                model_name = "MiniMax"
+            else:
+                model_name = "本地规则"
             
-            # 检查是否有评分数据
-            if not hasattr(self, 'batch_scores') or not self.batch_scores:
-                print("未找到评分数据，尝试加载...")
-                self.load_batch_scores()
+            print(f"开始生成{stock_type}股票推荐（使用{model_name}评分数据）...")
+            
+            # 重新加载当前AI模型对应的评分数据
+            print(f"正在加载{model_name}评分数据...")
+            self.load_batch_scores()
                 
             if not self.batch_scores:
-                error_msg = "未找到评分数据，请先点击'获取主板评分'或'获取ETF评分'按钮进行评分"
+                error_msg = f"未找到{model_name}评分数据，请先使用'{model_name}'模型进行批量评分"
                 print(error_msg)
                 self.root.after(0, self.show_error, error_msg)
                 return
             
-            print(f"📂 找到batch_scores，共{len(self.batch_scores)}只股票")
+            print(f"📂 已加载{model_name}评分数据，共{len(self.batch_scores)}只股票")
             
             # 转换股票类型过滤
             if stock_type == "60/00/68":
@@ -11431,10 +11638,44 @@ WARNING: 重要声明:
             try:
                 loaded = self.load_comprehensive_stock_data()
                 if loaded:
+                    # 清除缓存中的旧评分数据（overall_score等），因为这是数据收集而非评分
+                    cleaned_count = 0
+                    for code in self.comprehensive_stock_data:
+                        stock_data = self.comprehensive_stock_data[code]
+                        # 移除评分相关字段
+                        if 'overall_score' in stock_data:
+                            del stock_data['overall_score']
+                            cleaned_count += 1
+                        if 'short_term_score' in stock_data:
+                            del stock_data['short_term_score']
+                        if 'medium_term_score' in stock_data:
+                            del stock_data['medium_term_score']
+                        if 'long_term_score' in stock_data:
+                            del stock_data['long_term_score']
+                        if 'investment_advice' in stock_data:
+                            del stock_data['investment_advice']
+                    
+                    # 自动更新后备股票信息文件
+                    update_status("收集完成", 100, "正在更新后备股票信息...")
+                    fallback_updated = self._update_stock_info_fallback()
+                    
                     # 在主线程更新状态与显示完成消息
                     count = len(self.comprehensive_stock_data)
-                    update_status("收集完成", 100, f"已成功加载 {count} 条数据到内存缓存")
-                    self.root.after(0, lambda: messagebox.showinfo("完成", f"全部数据收集完成！\n已加载 {count} 条数据到内存缓存。"))
+                    detail_msg = f"已加载 {count} 条数据到内存缓存"
+                    if cleaned_count > 0:
+                        detail_msg += f"，已清除 {cleaned_count} 条旧评分数据"
+                    if fallback_updated:
+                        detail_msg += f"，已更新后备数据库"
+                    update_status("收集完成", 100, detail_msg)
+                    
+                    success_msg = f"全部数据收集完成！\n已加载 {count} 条数据到内存缓存。\n"
+                    if cleaned_count > 0:
+                        success_msg += "已清除旧评分数据，"
+                    if fallback_updated:
+                        success_msg += f"已自动更新后备数据库({count}只股票)，"
+                    success_msg += "请点击「批量评分」进行评分。"
+                    
+                    self.root.after(0, lambda: messagebox.showinfo("完成", success_msg))
                 else:
                     update_status("收集完成", 100, "数据已保存，但未能自动加载到内存")
                     self.root.after(0, lambda: messagebox.showinfo("完成", "全部数据收集完成！\n数据已保存到 data/comprehensive_stock_data.json (未能自动加载)"))
