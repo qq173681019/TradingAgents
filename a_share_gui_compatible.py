@@ -4,6 +4,8 @@ try:
         DEEPSEEK_API_KEY, 
         MINIMAX_API_KEY, 
         MINIMAX_GROUP_ID,
+        OPENAI_API_KEY,
+        OPENROUTER_API_KEY,
         ENABLE_ETF_BUTTONS,
         LLM_MODEL_OPTIONS,
         DEFAULT_LLM_MODEL,
@@ -11,6 +13,10 @@ try:
         DEEPSEEK_MODEL_NAME,
         MINIMAX_API_URL,
         MINIMAX_MODEL_NAME,
+        OPENAI_API_URL,
+        OPENAI_MODEL_NAME,
+        OPENROUTER_API_URL,
+        OPENROUTER_MODEL_NAME,
         API_TIMEOUT,
         AI_TEMPERATURE,
         AI_MAX_TOKENS,
@@ -22,13 +28,19 @@ except ImportError:
     DEEPSEEK_API_KEY = ""
     MINIMAX_API_KEY = ""
     MINIMAX_GROUP_ID = ""
+    OPENAI_API_KEY = ""
+    OPENROUTER_API_KEY = ""
     ENABLE_ETF_BUTTONS = False
-    LLM_MODEL_OPTIONS = ["none", "deepseek", "minimax"]
+    LLM_MODEL_OPTIONS = ["none", "deepseek", "minimax", "openai", "openrouter"]
     DEFAULT_LLM_MODEL = "none"
     DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
     DEEPSEEK_MODEL_NAME = "deepseek-chat"
     MINIMAX_API_URL = "https://api.minimax.chat/v1/text/chatcompletion_v2"
     MINIMAX_MODEL_NAME = "abab6.5s-chat"
+    OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
+    OPENAI_MODEL_NAME = "gpt-3.5-turbo"
+    OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+    OPENROUTER_MODEL_NAME = "openai/gpt-3.5-turbo"
     API_TIMEOUT = 30
     AI_TEMPERATURE = 0.7
     AI_MAX_TOKENS = 1000
@@ -43,7 +55,7 @@ import requests
 def call_llm(prompt, model="deepseek"):
     """
     调用大语言模型API进行智能分析
-    支持 deepseek 和 minimax 两种模型
+    支持 deepseek、minimax、openai 和 openrouter 四种模型
     """
     try:
         if model == "deepseek":
@@ -73,8 +85,111 @@ def call_llm(prompt, model="deepseek"):
                 print(f"[DeepSeek] 返回格式异常: {result}")
                 return "AI分析失败：返回格式异常"
                 
+        elif model == "openai":
+            # OpenAI API调用
+            url = OPENAI_API_URL
+            headers = {
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": OPENAI_MODEL_NAME,
+                "messages": [
+                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文回复。"},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": AI_TEMPERATURE,
+                "max_tokens": AI_MAX_TOKENS
+            }
+            
+            print(f"[OpenAI调试] URL: {url}")
+            print(f"[OpenAI调试] API Key (前20字符): {OPENAI_API_KEY[:20]}...")
+            
+            response = requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT)
+            
+            print(f"[OpenAI调试] HTTP状态码: {response.status_code}")
+            print(f"[OpenAI调试] 响应内容: {response.text[:200]}...")
+            
+            if response.status_code == 200:
+                result = response.json()
+                if "choices" in result and len(result["choices"]) > 0:
+                    return result["choices"][0]["message"]["content"]
+                else:
+                    print(f"[OpenAI] 返回格式异常: {result}")
+                    return "AI分析失败：返回格式异常"
+            elif response.status_code == 403:
+                error_detail = response.json() if response.headers.get('content-type', '').startswith('application/json') else {"error": {"message": response.text}}
+                if "unsupported_country_region_territory" in str(error_detail):
+                    print("[OpenAI] 地区限制：当前地区不支持OpenAI API访问")
+                    return "AI分析失败：OpenAI API地区限制，建议使用DeepSeek或其他模型"
+                else:
+                    print(f"[OpenAI] 访问被拒绝: {error_detail}")
+                    return "AI分析失败：OpenAI API访问被拒绝"
+            elif response.status_code == 401:
+                print("[OpenAI] 认证失败：API Key无效或过期")
+                return "AI分析失败：OpenAI API Key无效"
+            elif response.status_code == 429:
+                print("[OpenAI] 请求限制：频率超限或余额不足")
+                return "AI分析失败：OpenAI API请求限制"
+            else:
+                response.raise_for_status()
+                
+        elif model == "openrouter":
+            # OpenRouter API调用
+            url = OPENROUTER_API_URL
+            headers = {
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://github.com/your-username/TradingAgents",  # 可选，用于统计
+                "X-Title": "A股分析助手"  # 可选，用于统计
+            }
+            data = {
+                "model": OPENROUTER_MODEL_NAME,
+                "messages": [
+                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文回复。"},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": AI_TEMPERATURE,
+                "max_tokens": AI_MAX_TOKENS,
+                "stream": False
+            }
+            
+            print(f"[OpenRouter调试] URL: {url}")
+            print(f"[OpenRouter调试] API Key (前20字符): {OPENROUTER_API_KEY[:20]}...")
+            print(f"[OpenRouter调试] 模型: {OPENROUTER_MODEL_NAME}")
+            
+            response = requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT)
+            
+            print(f"[OpenRouter调试] HTTP状态码: {response.status_code}")
+            print(f"[OpenRouter调试] 响应内容: {response.text[:200]}...")
+            
+            if response.status_code == 200:
+                result = response.json()
+                if "choices" in result and len(result["choices"]) > 0:
+                    return result["choices"][0]["message"]["content"]
+                else:
+                    print(f"[OpenRouter] 返回格式异常: {result}")
+                    return "AI分析失败：返回格式异常"
+            elif response.status_code == 401:
+                print("[OpenRouter] 认证失败：API Key无效或过期")
+                return "AI分析失败：OpenRouter API Key无效"
+            elif response.status_code == 402:
+                print("[OpenRouter] 余额不足：请检查账户余额")
+                return "AI分析失败：OpenRouter账户余额不足"
+            elif response.status_code == 429:
+                print("[OpenRouter] 请求限制：频率超限")
+                return "AI分析失败：OpenRouter API请求限制"
+            else:
+                try:
+                    error_detail = response.json()
+                    print(f"[OpenRouter] API错误: {error_detail}")
+                    return f"AI分析失败：OpenRouter API错误 - {error_detail.get('error', {}).get('message', 'Unknown error')}"
+                except:
+                    print(f"[OpenRouter] HTTP错误: {response.status_code} - {response.text}")
+                    return f"AI分析失败：OpenRouter HTTP错误 {response.status_code}"
+                
         elif model == "minimax":
-            # MiniMax API调用 - 使用正确的API格式
+            # MiniMax API调用 - 使用最新的OpenAI兼容格式
             url = f"{MINIMAX_API_URL}?GroupId={MINIMAX_GROUP_ID}"
             
             # MiniMax认证方式：使用Bearer前缀
@@ -87,17 +202,8 @@ def call_llm(prompt, model="deepseek"):
                 "model": MINIMAX_MODEL_NAME,
                 "tokens_to_generate": AI_MAX_TOKENS,
                 "messages": [
-                    {"sender_type": "USER", "sender_name": "用户", "text": prompt}
-                ],
-                "reply_constraints": {
-                    "sender_type": "BOT",
-                    "sender_name": "投资分析师"
-                },
-                "bot_setting": [
-                    {
-                        "bot_name": "投资分析师",
-                        "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。"
-                    }
+                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文回复。"},
+                    {"role": "user", "content": prompt}
                 ],
                 "temperature": AI_TEMPERATURE,
                 "top_p": AI_TOP_P
@@ -129,25 +235,31 @@ def call_llm(prompt, model="deepseek"):
                         print(f"  1. 必须使用 'API Secret Key'（类似 sk-xxx 格式），而不是JWT Token")
                         print(f"  2. 获取方式：登录 https://platform.minimaxi.com/ -> API管理 -> 创建API Key")
                         print(f"  3. 当前配置的Key前缀: {MINIMAX_API_KEY[:10]}...")
-                    elif status_code == 1002:
+                    elif status_code == 1002 or status_code == 1008:
                         print(f"[MiniMax提示] 账户余额不足，请充值后再试")
+                        print(f"[重要] 请登录 https://platform.minimaxi.com/ 查看账户余额并充值")
+                    elif status_code == 2013:
+                        print(f"[MiniMax提示] API格式错误 - 已修复为最新兼容格式")
+                        print(f"[重要] MiniMax已更新为OpenAI兼容格式，请重试")
                     else:
                         print(f"[MiniMax提示] 请检查：1. API Secret Key是否正确 2. GroupId是否匹配 3. 账户状态是否正常")
                     
                     return f"AI分析失败：{error_msg}"
             
-            # MiniMax 返回格式：{"reply": "回复内容", "choices": [...]}
-            if "reply" in result:
-                return result["reply"]
-            elif "choices" in result and len(result["choices"]) > 0:
+            # MiniMax 新格式返回：使用OpenAI兼容格式
+            if "choices" in result and len(result["choices"]) > 0:
                 choice = result["choices"][0]
-                # 尝试多种可能的返回格式
-                if "messages" in choice and len(choice["messages"]) > 0:
-                    return choice["messages"][0].get("text", "")
+                # OpenAI兼容格式：choices[0].message.content
+                if "message" in choice and "content" in choice["message"]:
+                    return choice["message"]["content"]
+                # 向后兼容：旧格式
                 elif "text" in choice:
                     return choice["text"]
-                elif "message" in choice:
-                    return choice["message"].get("content", "")
+                elif "messages" in choice and len(choice["messages"]) > 0:
+                    return choice["messages"][0].get("text", "")
+            # 备用：直接返回reply字段（旧格式）  
+            elif "reply" in result:
+                return result["reply"]
             
             print(f"[MiniMax] 返回格式异常: {result}")
             return "AI分析失败：返回格式异常"
@@ -303,6 +415,8 @@ class AShareAnalyzerGUI:
         self.batch_score_file = "batch_stock_scores.json"
         self.batch_score_file_deepseek = "batch_stock_scores_deepseek.json"
         self.batch_score_file_minimax = "batch_stock_scores_minimax.json"
+        self.batch_score_file_openai = "batch_stock_scores_openai.json"
+        self.batch_score_file_openrouter = "batch_stock_scores_openrouter.json"
         self.batch_scores = {}           # 批量评分数据
 
         # 新增：完整推荐数据存储
@@ -502,6 +616,12 @@ class AShareAnalyzerGUI:
             elif hasattr(self, 'llm_model') and self.llm_model == "minimax":
                 load_file = self.batch_score_file_minimax
                 model_name = "MiniMax"
+            elif hasattr(self, 'llm_model') and self.llm_model == "openai":
+                load_file = self.batch_score_file_openai
+                model_name = "OpenAI"
+            elif hasattr(self, 'llm_model') and self.llm_model == "openrouter":
+                load_file = self.batch_score_file_openrouter
+                model_name = "OpenRouter"
             else:
                 load_file = self.batch_score_file
                 model_name = "本地规则"
@@ -660,6 +780,12 @@ class AShareAnalyzerGUI:
             elif hasattr(self, 'llm_model') and self.llm_model == "minimax":
                 save_file = self.batch_score_file_minimax
                 model_name = "MiniMax"
+            elif hasattr(self, 'llm_model') and self.llm_model == "openai":
+                save_file = self.batch_score_file_openai
+                model_name = "OpenAI"
+            elif hasattr(self, 'llm_model') and self.llm_model == "openrouter":
+                save_file = self.batch_score_file_openrouter
+                model_name = "OpenRouter"
             else:
                 save_file = self.batch_score_file
                 model_name = "本地规则"
@@ -2380,9 +2506,43 @@ class AShareAnalyzerGUI:
                  print(f"{stock_code} 无法获取技术数据，跳过分析")
                  return None
             
+            # 验证技术数据完整性，补全缺失字段
+            required_tech_fields = ['current_price', 'ma5', 'ma10', 'ma20', 'ma60', 'rsi', 'macd', 'signal', 'volume_ratio']
+            missing_fields = [field for field in required_tech_fields if field not in tech_data or tech_data[field] is None]
+            
+            if missing_fields:
+                print(f"\033[1;33m[CACHE] {stock_code} 技术数据缺失字段: {missing_fields}，正在补全...\033[0m")
+                # 使用智能模拟数据补全缺失字段
+                simulated_data = self._generate_smart_mock_technical_data(stock_code)
+                for field in missing_fields:
+                    if field in simulated_data:
+                        tech_data[field] = simulated_data[field]
+                        print(f"  ✓ 已补全字段: {field}")
+                
+                # 更新缓存
+                if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
+                    self.comprehensive_stock_data[stock_code]['tech_data'] = tech_data
+            
             if not fund_data:
                  print(f"{stock_code} 无法获取基本面数据，跳过分析")
                  return None
+            
+            # 验证基本面数据完整性，补全缺失字段
+            required_fund_fields = ['pe_ratio', 'pb_ratio', 'roe']
+            missing_fund_fields = [field for field in required_fund_fields if field not in fund_data or fund_data[field] is None]
+            
+            if missing_fund_fields:
+                print(f"\033[1;33m[CACHE] {stock_code} 基本面数据缺失字段: {missing_fund_fields}，正在补全...\033[0m")
+                # 使用智能模拟数据补全缺失字段
+                simulated_data = self._generate_smart_mock_fundamental_data(stock_code)
+                for field in missing_fund_fields:
+                    if field in simulated_data:
+                        fund_data[field] = simulated_data[field]
+                        print(f"  ✓ 已补全字段: {field}")
+                
+                # 更新缓存
+                if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
+                    self.comprehensive_stock_data[stock_code]['fund_data'] = fund_data
             
             fund_data['is_etf'] = self.is_etf_code(stock_code)
                 
@@ -2457,6 +2617,39 @@ class AShareAnalyzerGUI:
             
             return comprehensive_data
             
+        except KeyError as e:
+            print(f"获取 {stock_code} 完整数据失败: 缺少关键字段 {e}")
+            print(f"[DEBUG] 技术数据字段: {list(cached.get('tech_data', {}).keys()) if cached.get('tech_data') else '无'}")
+            print(f"[DEBUG] 基本面数据字段: {list(cached.get('fund_data', {}).keys()) if cached.get('fund_data') else '无'}")
+            # 尝试使用模拟数据作为兜底
+            try:
+                print(f"[FALLBACK] {stock_code} 使用模拟数据作为兜底...")
+                tech_data = self._generate_smart_mock_technical_data(stock_code)
+                fund_data = self._generate_smart_mock_fundamental_data(stock_code)
+                
+                if tech_data and fund_data:
+                    # 重新构建数据
+                    stock_info = self.stock_info.get(stock_code, {})
+                    short_score_data = self._calculate_short_term_score(stock_code, tech_data, fund_data, stock_info)
+                    medium_score_data = self._calculate_medium_term_score(stock_code, tech_data, fund_data, stock_info)
+                    long_score_data = self._calculate_long_term_score(stock_code, tech_data, fund_data, stock_info)
+                    
+                    return {
+                        'code': stock_code,
+                        'name': stock_info.get('name', f'股票{stock_code}'),
+                        'current_price': tech_data['current_price'],
+                        'tech_data': tech_data,
+                        'fund_data': fund_data,
+                        'short_term': {'score': short_score_data['score']},
+                        'medium_term': {'score': medium_score_data['score']},
+                        'long_term': {'score': long_score_data['score']},
+                        'overall_score': (short_score_data['score'] + medium_score_data['score'] + long_score_data['score']) / 3,
+                        'timestamp': datetime.now().isoformat(),
+                        'data_source': 'fallback_simulation'
+                    }
+            except Exception as fallback_error:
+                print(f"[FALLBACK] {stock_code} 模拟数据兜底也失败: {fallback_error}")
+            return None
         except Exception as e:
             print(f"获取 {stock_code} 完整数据失败: {e}")
             return None
@@ -5462,9 +5655,11 @@ class AShareAnalyzerGUI:
             'ma60': ma60,
             'ma120': ma120,
             'rsi': rsi,
+            'rsi_status': rsi_status,
             'macd': macd,
             'signal': signal,
-            'volume_ratio': volume_ratio
+            'volume_ratio': volume_ratio,
+            'momentum': momentum
         }
     def _try_get_netease_data(self, ticker):
         """NetEase data fallback: prefer yfinance if available, else None"""
@@ -6038,11 +6233,25 @@ class AShareAnalyzerGUI:
         pb_ratio = financial_data.get('pb_ratio', 2.0) or 2.0
         roe = financial_data.get('roe', 10) or 10
         
-        print(f"📊 {ticker} 模拟数据: 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
+        # 确定数据来源标识
+        data_source = "未知"
+        if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
+            cached_data = self.comprehensive_stock_data.get(ticker, {})
+            if cached_data.get('tech_data') and cached_data.get('fund_data'):
+                data_source = "缓存数据"
+        elif technical_data and financial_data:
+            if technical_data.get('data_source') == 'mock' or financial_data.get('data_source') == 'mock':
+                data_source = "智能模拟"
+            else:
+                data_source = "实时获取"
+        else:
+            data_source = "智能模拟"
+        
+        print(f"📊 {ticker} 数据来源({data_source}): 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
 
         # 如果选择了大模型，优先用大模型生成投资建议
         print(f"[调试] generate_investment_advice: llm_model={getattr(self, 'llm_model', None)}")
-        if hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax"]:
+        if hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openai"]:
             print(f"[调试] 命中大模型分支: {self.llm_model}")
             
             # 安全获取股票信息，确保不为None
@@ -6058,18 +6267,34 @@ class AShareAnalyzerGUI:
             
             ai_reply = call_llm(prompt, model=self.llm_model)
             print(f"[调试] call_llm已调用, 返回内容前100字: {str(ai_reply)[:100]}")
+            
+            # 基于技术指标计算数值评分（用于推荐指数计算）
+            short_score = self._calculate_technical_score(rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price)
+            medium_score = self._calculate_combined_score(rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price, pe_ratio, pb_ratio, roe)
+            long_score = self._calculate_fundamental_score(pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price)
+            
+            print(f"[AI评分] {ticker} {self.llm_model.upper()}评分: 短期={short_score:.1f}, 中期={medium_score:.1f}, 长期={long_score:.1f}")
             # 简单分段解析AI回复
-            def parse_ai_advice(ai_text, period):
+            def parse_ai_advice(ai_text, period, score):
                 import re
                 # 尝试按“短期/中期/长期”分段
                 match = re.search(f"{period}.*?([\u4e00-\u9fa5].*)", ai_text, re.DOTALL)
                 if match:
-                    return {'period': period, 'advice': match.group(1).strip()}
-                return {'period': period, 'advice': ai_text.strip()}
+                    advice_text = match.group(1).strip()
+                else:
+                    advice_text = ai_text.strip()
+                
+                # 为每个时间段返回对应的评分结构
+                if period == '短期':
+                    return {'period': period, 'advice': advice_text, 'technical_score': score, 'trend': self._score_to_trend(score)}
+                elif period == '中期':
+                    return {'period': period, 'advice': advice_text, 'total_score': score, 'trend': self._score_to_trend(score)}
+                else:  # 长期
+                    return {'period': period, 'advice': advice_text, 'fundamental_score': score, 'trend': self._score_to_trend(score)}
             return (
-                parse_ai_advice(ai_reply, '短期'),
-                parse_ai_advice(ai_reply, '中期'),
-                parse_ai_advice(ai_reply, '长期')
+                parse_ai_advice(ai_reply, '短期', short_score),
+                parse_ai_advice(ai_reply, '中期', medium_score),
+                parse_ai_advice(ai_reply, '长期', long_score)
             )
 
         # 否则用本地规则
@@ -6083,7 +6308,100 @@ class AShareAnalyzerGUI:
         long_term_prediction = self.get_long_term_prediction(
             pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price, stock_info
         )
+        
+        # 输出本地规则评分
+        short_score = short_term_prediction.get('technical_score', 0)
+        medium_score = medium_term_prediction.get('total_score', 0)
+        long_score = long_term_prediction.get('fundamental_score', 0)
+        print(f"[本地评分] {ticker} 规则评分: 短期={short_score:.1f}, 中期={medium_score:.1f}, 长期={long_score:.1f}")
+        
         return short_term_prediction, medium_term_prediction, long_term_prediction
+    
+    def _calculate_technical_score(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price):
+        """计算技术面评分（简化版，用于AI模式）"""
+        score = 0
+        
+        # RSI评分
+        if rsi < 20:
+            score += 4
+        elif rsi < 30:
+            score += 3
+        elif 45 <= rsi <= 55:
+            score += 1
+        elif rsi > 80:
+            score -= 4
+        elif rsi > 70:
+            score -= 3
+            
+        # MACD评分
+        macd_diff = macd - signal
+        if macd > 0 and macd_diff > 0.05:
+            score += 3
+        elif macd > 0 and macd_diff > 0:
+            score += 2
+        elif macd < 0 and macd_diff < -0.05:
+            score -= 3
+        elif macd < 0 and macd_diff < 0:
+            score -= 2
+            
+        # 均线评分
+        if current_price > ma5 > ma10 > ma20:
+            score += 3
+        elif current_price > ma5 > ma10:
+            score += 2
+        elif current_price < ma5 < ma10 < ma20:
+            score -= 3
+        elif current_price < ma5 < ma10:
+            score -= 2
+            
+        return score
+    
+    def _calculate_combined_score(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price, pe_ratio, pb_ratio, roe):
+        """计算综合评分（技术+基本面）"""
+        tech_score = self._calculate_technical_score(rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price)
+        fund_score = self._calculate_fundamental_score(pe_ratio, pb_ratio, roe, ma20, ma60, ma20, current_price)
+        return (tech_score * 0.6 + fund_score * 0.4)  # 技术面权重60%，基本面40%
+    
+    def _calculate_fundamental_score(self, pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price):
+        """计算基本面评分（简化版）"""
+        score = 0
+        
+        # PE评分
+        if 5 <= pe_ratio <= 15:
+            score += 3
+        elif 15 < pe_ratio <= 25:
+            score += 1
+        elif pe_ratio > 50:
+            score -= 2
+            
+        # PB评分
+        if 0.5 <= pb_ratio <= 2:
+            score += 2
+        elif pb_ratio > 5:
+            score -= 2
+            
+        # ROE评分
+        if roe >= 15:
+            score += 3
+        elif roe >= 10:
+            score += 1
+        elif roe <= 0:
+            score -= 2
+            
+        return score
+    
+    def _score_to_trend(self, score):
+        """将数值评分转换为趋势描述"""
+        if score >= 5:
+            return "看涨"
+        elif score >= 2:
+            return "偏多"
+        elif score >= -2:
+            return "震荡"
+        elif score >= -5:
+            return "偏空"
+        else:
+            return "看跌"
     
     def get_short_term_prediction(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price, kline_data=None):
         """短期预测 (1-7天) - 基于技术指标和量价分析（简化版）"""
