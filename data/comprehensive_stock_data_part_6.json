@@ -5177,7 +5177,7 @@
         "latest_price": 31.08,
         "data_points": 34,
         "source": "new",
-        "update_time": "2025-11-26T16:26:23.965624"
+        "update_time": "2025-11-26T18:19:21.131309"
       },
       "technical_indicators": {
         "current_price": 31.08,
@@ -5191,8 +5191,8 @@
         "volume_ratio": 1.1356691917306891,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:23.965624",
-      "timestamp": "2025-11-26T16:26:23.965624"
+      "last_kline_update": "2025-11-26T18:19:21.131309",
+      "timestamp": "2025-11-26T18:19:21.131309"
     },
     "601021": {
       "code": "601021",
@@ -5470,27 +5470,35 @@
             "low": 54.15,
             "close": 54.3,
             "volume": 6719568
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 54.59,
+            "high": 55.07,
+            "low": 53.99,
+            "close": 54.89,
+            "volume": 4715357
           }
         ],
-        "latest_price": 54.3,
-        "data_points": 34,
+        "latest_price": 54.89,
+        "data_points": 35,
         "source": "new",
-        "update_time": "2025-11-26T16:26:23.974624"
+        "update_time": "2025-11-26T18:19:21.142307"
       },
       "technical_indicators": {
-        "current_price": 54.3,
-        "ma5": 55.331999999999994,
-        "ma10": 56.575,
-        "ma20": 55.859,
-        "ma60": 54.3,
-        "rsi": 45.22653721682848,
-        "macd": 0.3502866104317164,
-        "signal": 0.733146241237897,
-        "volume_ratio": 0.9719332190351242,
+        "current_price": 54.89,
+        "ma5": 55.1,
+        "ma10": 56.173,
+        "ma20": 55.95899999999999,
+        "ma60": 54.89,
+        "rsi": 46.65090622537431,
+        "macd": 0.25140112663758885,
+        "signal": 0.6367972183178353,
+        "volume_ratio": 0.7781367809075302,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:23.974624",
-      "timestamp": "2025-11-26T16:26:23.974624"
+      "last_kline_update": "2025-11-26T18:19:21.142307",
+      "timestamp": "2025-11-26T18:19:21.142307"
     },
     "601022": {
       "code": "601022",
@@ -5773,7 +5781,7 @@
         "latest_price": 9.23,
         "data_points": 34,
         "source": "new",
-        "update_time": "2025-11-26T16:26:23.982625"
+        "update_time": "2025-11-26T18:19:21.157308"
       },
       "technical_indicators": {
         "current_price": 9.23,
@@ -5787,8 +5795,8 @@
         "volume_ratio": 0.6758067500448114,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:23.982625",
-      "timestamp": "2025-11-26T16:26:23.982625"
+      "last_kline_update": "2025-11-26T18:19:21.157308",
+      "timestamp": "2025-11-26T18:19:21.157308"
     },
     "601026": {
       "code": "601026",
@@ -6031,7 +6039,7 @@
         "latest_price": 20.49,
         "data_points": 29,
         "source": "new",
-        "update_time": "2025-11-26T16:26:23.990624"
+        "update_time": "2025-11-26T18:19:21.168307"
       },
       "technical_indicators": {
         "current_price": 20.49,
@@ -6045,8 +6053,8 @@
         "volume_ratio": 1.0676449416716578,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:23.990624",
-      "timestamp": "2025-11-26T16:26:23.990624"
+      "last_kline_update": "2025-11-26T18:19:21.168307",
+      "timestamp": "2025-11-26T18:19:21.168307"
     },
     "601033": {
       "code": "601033",
@@ -6329,7 +6337,7 @@
         "latest_price": 15.42,
         "data_points": 34,
         "source": "new",
-        "update_time": "2025-11-26T16:26:23.998628"
+        "update_time": "2025-11-26T18:19:21.178309"
       },
       "technical_indicators": {
         "current_price": 15.42,
@@ -6343,8 +6351,8 @@
         "volume_ratio": 0.8222411003622376,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:23.998628",
-      "timestamp": "2025-11-26T16:26:23.998628"
+      "last_kline_update": "2025-11-26T18:19:21.178309",
+      "timestamp": "2025-11-26T18:19:21.178309"
     },
     "601038": {
       "code": "601038",
@@ -6627,7 +6635,7 @@
         "latest_price": 12.69,
         "data_points": 34,
         "source": "new",
-        "update_time": "2025-11-26T16:26:24.007475"
+        "update_time": "2025-11-26T18:19:21.190307"
       },
       "technical_indicators": {
         "current_price": 12.69,
@@ -6641,8 +6649,8 @@
         "volume_ratio": 0.9676602633821751,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:24.007475",
-      "timestamp": "2025-11-26T16:26:24.007475"
+      "last_kline_update": "2025-11-26T18:19:21.190307",
+      "timestamp": "2025-11-26T18:19:21.190307"
     },
     "601058": {
       "code": "601058",
@@ -6933,7 +6941,7 @@
         "latest_price": 14.62,
         "data_points": 35,
         "source": "new",
-        "update_time": "2025-11-26T16:26:58.299612"
+        "update_time": "2025-11-26T18:19:57.651811"
       },
       "technical_indicators": {
         "current_price": 15.85,
@@ -6947,8 +6955,8 @@
         "volume_ratio": 0.6148568756641088,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:58.299612",
-      "timestamp": "2025-11-26T16:26:58.299612"
+      "last_kline_update": "2025-11-26T18:19:57.651811",
+      "timestamp": "2025-11-26T18:19:57.651811"
     },
     "601059": {
       "code": "601059",
@@ -7199,7 +7207,7 @@
         "latest_price": 19.36,
         "data_points": 30,
         "source": "new",
-        "update_time": "2025-11-26T16:26:58.307610"
+        "update_time": "2025-11-26T18:19:57.669879"
       },
       "technical_indicators": {
         "current_price": 17.79,
@@ -7213,8 +7221,8 @@
         "volume_ratio": 1.0832582268307671,
         "status": "calculated"
       },
-      "last_kline_update": "2025-11-26T16:26:58.307610",
-      "timestamp": "2025-11-26T16:26:58.307610"
+      "last_kline_update": "2025-11-26T18:19:57.669879",
+      "timestamp": "2025-11-26T18:19:57.669879"
     },
     "601061": {
       "code": "601061",
@@ -23475,6 +23483,6 @@
       }
     }
   },
-  "last_updated": "2025-11-26T18:13:26.591359",
+  "last_updated": "2025-11-26T18:20:05.004884",
   "total_stocks": 71
 }

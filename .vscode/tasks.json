@@ -1,0 +1,51 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "启动 MiniMax CodingPlan 开发环境",
+            "type": "shell",
+            "command": "${workspaceFolder}/open-minimax-agent.bat",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "启动VSCode + MiniMax Agent分屏开发环境"
+        },
+        {
+            "label": "测试 MiniMax API 连接",
+            "type": "shell",
+            "command": "node",
+            "args": [
+                "test-codingplan.js"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "启动主应用程序",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "a_share_gui_compatible.py"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
