@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "测试 MiniMax CodingPlan",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/minimax_integration.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "运行主程序",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/a_share_gui_compatible.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "数据收集器",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/comprehensive_data_collector.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ]
+}

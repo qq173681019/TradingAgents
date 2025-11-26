@@ -1,56 +1,79 @@
-# ==================== 导入配置文件 ====================
-try:
-    from config import (
-        DEEPSEEK_API_KEY, 
-        MINIMAX_API_KEY, 
-        MINIMAX_GROUP_ID,
-        OPENAI_API_KEY,
-        OPENROUTER_API_KEY,
-        ENABLE_ETF_BUTTONS,
-        LLM_MODEL_OPTIONS,
-        DEFAULT_LLM_MODEL,
-        DEEPSEEK_API_URL,
-        DEEPSEEK_MODEL_NAME,
-        MINIMAX_API_URL,
-        MINIMAX_MODEL_NAME,
-        OPENAI_API_URL,
-        OPENAI_MODEL_NAME,
-        OPENROUTER_API_URL,
-        OPENROUTER_MODEL_NAME,
-        API_TIMEOUT,
-        AI_TEMPERATURE,
-        AI_MAX_TOKENS,
-        AI_TOP_P
-    )
-    print("✅ 已从 config.py 加载配置")
-except ImportError:
-    print("⚠️ 未找到 config.py，使用默认配置")
-    DEEPSEEK_API_KEY = ""
-    MINIMAX_API_KEY = ""
-    MINIMAX_GROUP_ID = ""
-    OPENAI_API_KEY = ""
-    OPENROUTER_API_KEY = ""
-    ENABLE_ETF_BUTTONS = False
-    LLM_MODEL_OPTIONS = ["none", "deepseek", "minimax", "openai", "openrouter"]
-    DEFAULT_LLM_MODEL = "none"
-    DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-    DEEPSEEK_MODEL_NAME = "deepseek-chat"
-    MINIMAX_API_URL = "https://api.minimax.chat/v1/text/chatcompletion_v2"
-    MINIMAX_MODEL_NAME = "abab6.5s-chat"
-    OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
-    OPENAI_MODEL_NAME = "gpt-3.5-turbo"
-    OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-    OPENROUTER_MODEL_NAME = "openai/gpt-3.5-turbo"
-    API_TIMEOUT = 30
-    AI_TEMPERATURE = 0.7
-    AI_MAX_TOKENS = 1000
-    AI_TOP_P = 0.95
-
+# ==================== 环境变量配置加载 ====================
 import os
+
+
+def load_env_config():
+    """从环境变量和 .env.local 文件加载配置"""
+    # 尝试从 .env.local 文件读取配置
+    env_file_path = '.env.local'
+    if os.path.exists(env_file_path):
+        try:
+            with open(env_file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and '=' in line and not line.startswith('#'):
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip().strip('\'"')
+                        os.environ[key] = value
+            print("✅ 已从 .env.local 加载环境配置")
+        except Exception as e:
+            print(f"⚠️ 读取 .env.local 文件失败: {e}")
+    
+    return {
+        'DEEPSEEK_API_KEY': os.environ.get('DEEPSEEK_API_KEY', ''),
+        'MINIMAX_API_KEY': os.environ.get('MINIMAX_API_KEY', ''),
+        'MINIMAX_GROUP_ID': os.environ.get('MINIMAX_GROUP_ID', ''),
+        'OPENAI_API_KEY': os.environ.get('OPENAI_API_KEY', ''),
+        'OPENROUTER_API_KEY': os.environ.get('OPENROUTER_API_KEY', ''),
+        'ALPHA_VANTAGE_API_KEY': os.environ.get('ALPHA_VANTAGE_API_KEY', ''),
+        'ENABLE_ETF_BUTTONS': os.environ.get('ENABLE_ETF_BUTTONS', 'False').lower() == 'true',
+        'LLM_MODEL_OPTIONS': ["none", "deepseek", "minimax", "openai", "openrouter"],
+        'DEFAULT_LLM_MODEL': os.environ.get('DEFAULT_LLM_MODEL', 'none'),
+        'DEEPSEEK_API_URL': os.environ.get('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1/chat/completions'),
+        'DEEPSEEK_MODEL_NAME': os.environ.get('DEEPSEEK_MODEL_NAME', 'deepseek-chat'),
+        'MINIMAX_API_URL': os.environ.get('MINIMAX_API_URL', 'https://api.minimax.chat/v1/text/chatcompletion_v2'),
+        'MINIMAX_MODEL_NAME': os.environ.get('MINIMAX_MODEL_NAME', 'abab6.5s-chat'),
+        'OPENAI_API_URL': os.environ.get('OPENAI_API_URL', 'https://api.openai.com/v1/chat/completions'),
+        'OPENAI_MODEL_NAME': os.environ.get('OPENAI_MODEL_NAME', 'gpt-3.5-turbo'),
+        'OPENROUTER_API_URL': os.environ.get('OPENROUTER_API_URL', 'https://openrouter.ai/api/v1/chat/completions'),
+        'OPENROUTER_MODEL_NAME': os.environ.get('OPENROUTER_MODEL_NAME', 'openai/gpt-3.5-turbo'),
+        'API_TIMEOUT': int(os.environ.get('API_TIMEOUT', '30')),
+        'AI_TEMPERATURE': float(os.environ.get('AI_TEMPERATURE', '0.7')),
+        'AI_MAX_TOKENS': int(os.environ.get('AI_MAX_TOKENS', '1000')),
+        'AI_TOP_P': float(os.environ.get('AI_TOP_P', '0.95'))
+    }
+
+# 加载配置
+config = load_env_config()
+DEEPSEEK_API_KEY = config['DEEPSEEK_API_KEY']
+MINIMAX_API_KEY = config['MINIMAX_API_KEY'] 
+MINIMAX_GROUP_ID = config['MINIMAX_GROUP_ID']
+OPENAI_API_KEY = config['OPENAI_API_KEY']
+OPENROUTER_API_KEY = config['OPENROUTER_API_KEY']
+ENABLE_ETF_BUTTONS = config['ENABLE_ETF_BUTTONS']
+LLM_MODEL_OPTIONS = config['LLM_MODEL_OPTIONS']
+DEFAULT_LLM_MODEL = config['DEFAULT_LLM_MODEL']
+DEEPSEEK_API_URL = config['DEEPSEEK_API_URL']
+DEEPSEEK_MODEL_NAME = config['DEEPSEEK_MODEL_NAME']
+MINIMAX_API_URL = config['MINIMAX_API_URL']
+MINIMAX_MODEL_NAME = config['MINIMAX_MODEL_NAME']
+OPENAI_API_URL = config['OPENAI_API_URL']
+OPENAI_MODEL_NAME = config['OPENAI_MODEL_NAME']
+OPENROUTER_API_URL = config['OPENROUTER_API_URL']
+OPENROUTER_MODEL_NAME = config['OPENROUTER_MODEL_NAME']
+API_TIMEOUT = config['API_TIMEOUT']
+AI_TEMPERATURE = config['AI_TEMPERATURE']
+AI_MAX_TOKENS = config['AI_MAX_TOKENS']
+AI_TOP_P = config['AI_TOP_P']
+
 import json
+import os
 import random
 from datetime import datetime, timedelta
+
 import requests
+
 
 def call_llm(prompt, model="deepseek"):
     """
@@ -326,9 +349,9 @@ except ImportError:
 
 # 导入urllib用于网络请求
 try:
-    import urllib.request
-    import urllib.parse
     import urllib.error
+    import urllib.parse
+    import urllib.request
     URLLIB_AVAILABLE = True
 except Exception:
     urllib = None
@@ -605,8 +628,8 @@ class AShareAnalyzerGUI:
     def load_batch_scores(self):
         """加载批量评分数据 - 根据AI模型加载对应文件"""
         import json
-        from datetime import datetime
         import os
+        from datetime import datetime
         
         try:
             # 确定加载文件路径（根据当前使用的AI模型）
@@ -746,8 +769,8 @@ class AShareAnalyzerGUI:
     def save_batch_scores(self):
         """保存批量评分数据 - 增强版本"""
         import json
-        from datetime import datetime
         import os
+        from datetime import datetime
         
         try:
             # 数据验证
@@ -890,11 +913,11 @@ class AShareAnalyzerGUI:
 
     def save_comprehensive_data(self):
         """保存完整的三时间段推荐数据 - 支持分卷存储"""
-        import json
-        from datetime import datetime
-        import os
         import glob
-        
+        import json
+        import os
+        from datetime import datetime
+
         # 修改保存路径，避免覆盖原始采集数据
         base_filename = 'stock_analysis_results.json'
         save_file = os.path.join('data', base_filename)
@@ -984,11 +1007,11 @@ class AShareAnalyzerGUI:
 
     def load_comprehensive_data(self):
         """加载完整的三时间段推荐数据 - 支持分卷加载"""
-        import json
-        from datetime import datetime
-        import os
         import glob
-        
+        import json
+        import os
+        from datetime import datetime
+
         # 1. 尝试加载分卷数据
         base_filename = 'stock_analysis_results.json'
         base_name = base_filename.replace('.json', '')
@@ -1054,9 +1077,9 @@ class AShareAnalyzerGUI:
 
     def load_comprehensive_stock_data(self):
         """尝试将数据收集器生成的完整数据加载到内存缓存中，支持分卷文件和单文件"""
+        import glob
         import json
         import os
-        import glob
  
         print("\033[1;34m[INFO] 正在尝试加载完整数据缓存...\033[0m")
         
@@ -1203,7 +1226,7 @@ class AShareAnalyzerGUI:
         akshare_success = False
         try:
             import akshare as ak
-            
+
             # 获取A股股票列表
             stock_list = ak.stock_info_a_code_name()
             if stock_list is not None and not stock_list.empty:
@@ -1317,6 +1340,56 @@ class AShareAnalyzerGUI:
         
         return sorted(list(set(all_stocks)))
     
+    def get_cached_stock_codes(self, stock_type="全部"):
+        """从缓存数据中获取股票代码，避免重新获取股票列表"""
+        cached_codes = []
+        
+        # 检查是否有缓存数据
+        if not getattr(self, 'comprehensive_data_loaded', False) or not hasattr(self, 'comprehensive_stock_data'):
+            print(f"[INFO] 缓存数据未加载，无法从缓存获取{stock_type}股票")
+            return []
+        
+        # 从缓存中获取所有股票代码
+        all_cache_codes = list(self.comprehensive_stock_data.keys())
+        
+        # 根据股票类型过滤
+        for code in all_cache_codes:
+            if self.is_stock_type_match(code, stock_type):
+                cached_codes.append(code)
+        
+        print(f"[INFO] 从缓存数据中找到 {len(cached_codes)} 只{stock_type}股票")
+        return sorted(cached_codes)
+    
+    def get_stock_codes_from_index(self, stock_type="全部"):
+        """从股票文件索引中获取股票代码"""
+        import json
+        import os
+        
+        index_file = os.path.join('data', 'stock_file_index.json')
+        if not os.path.exists(index_file):
+            print(f"[WARN] 索引文件不存在: {index_file}")
+            return []
+        
+        try:
+            with open(index_file, 'r', encoding='utf-8') as f:
+                index_data = json.load(f)
+            
+            # 从索引文件中获取所有股票代码
+            all_indexed_codes = list(index_data.keys())
+            
+            # 根据股票类型过滤
+            filtered_codes = []
+            for code in all_indexed_codes:
+                if self.is_stock_type_match(code, stock_type):
+                    filtered_codes.append(code)
+            
+            print(f"[INFO] 从索引文件中找到 {len(filtered_codes)} 只{stock_type}股票")
+            return sorted(filtered_codes)
+            
+        except Exception as e:
+            print(f"[ERROR] 读取索引文件失败: {e}")
+            return []
+    
     def get_hot_sectors(self):
         """获取当前市场热门板块 - 支持多数据源"""
         # 尝试多个数据源
@@ -1395,8 +1468,9 @@ class AShareAnalyzerGUI:
         if not REQUESTS_AVAILABLE:
             raise Exception("requests库不可用")
             
-        import requests
         import json
+
+        import requests
         
         hot_sectors = {
             'concepts': [],
@@ -1457,8 +1531,9 @@ class AShareAnalyzerGUI:
         if not REQUESTS_AVAILABLE:
             raise Exception("requests库不可用")
             
-        import requests
         import random
+
+        import requests
         
         hot_sectors = {
             'concepts': [],
@@ -1525,7 +1600,7 @@ class AShareAnalyzerGUI:
         """备用数据源 - 基于当前市场热点的智能推断"""
         import random
         from datetime import datetime
-        
+
         # 根据当前时间和市场情况智能生成热门板块
         current_month = datetime.now().month
         
@@ -1859,8 +1934,9 @@ class AShareAnalyzerGUI:
     
     def start_batch_scoring(self):
         """开始批量获取评分 - 增强稳定性版本"""
-        import threading
         import gc
+        import threading
+
         # 如果批量评分功能被禁用（如用户已请求移除相关按钮），则直接返回
         if not getattr(self, 'batch_scoring_enabled', True):
             try:
@@ -2028,8 +2104,8 @@ class AShareAnalyzerGUI:
     
     def start_batch_scoring_by_type(self, stock_type):
         """按股票类型获取评分"""
-        import threading
         import gc
+        import threading
         
         print(f"[DEBUG] 点击了批量评分按钮: {stock_type}")
         
@@ -2070,10 +2146,32 @@ class AShareAnalyzerGUI:
                     print(f"\033[1;33m[WARNING] 批量评分开始，内存缓存未加载，将使用实时数据\033[0m")
                     self.show_progress(f"WARNING: 未检测到本地数据，将使用实时网络获取")
 
-                # 获取符合类型要求的股票代码
+                # 获取符合类型要求的股票代码 - 优先从缓存数据中获取
                 try:
-                    all_codes = self.get_all_stock_codes(filter_type)
+                    all_codes = []
+                    source_info = ""
+                    
+                    # 优先级1：从内存缓存中获取
+                    if getattr(self, 'comprehensive_data_loaded', False) and hasattr(self, 'comprehensive_stock_data'):
+                        all_codes = self.get_cached_stock_codes(filter_type)
+                        if all_codes:
+                            source_info = "从内存缓存"
+                    
+                    # 优先级2：从索引文件中获取
+                    if not all_codes:
+                        all_codes = self.get_stock_codes_from_index(filter_type)
+                        if all_codes:
+                            source_info = "从索引文件"
+                    
+                    # 优先级3：使用原有的完整股票池获取方法
+                    if not all_codes:
+                        print(f"[INFO] 缓存和索引文件中均未找到股票，使用完整股票池获取{stock_type}股票")
+                        all_codes = self.get_all_stock_codes(filter_type)
+                        source_info = "从完整股票池"
+                    
                     total_stocks = len(all_codes)
+                    print(f"[INFO] {source_info}中获取到 {total_stocks} 只{stock_type}股票")
+                    self.show_progress(f"INFO: {source_info}中获取到 {total_stocks} 只{stock_type}股票")
                     print(f"[DEBUG] 获取到 {total_stocks} 只股票")
                 except Exception as e:
                     print(f"[ERROR] 获取股票列表失败: {e}")
@@ -2083,6 +2181,24 @@ class AShareAnalyzerGUI:
                 if total_stocks == 0:
                     self.show_progress(f"ERROR: 未找到{stock_type}类型的股票代码")
                     return
+                
+                # 性能优化：提前过滤退市股票，避免后续无效计算
+                print(f"[OPTIMIZE] 开始预过滤退市股票，提升计算效率...")
+                active_codes, filtered_count = self._prefilter_delisted_stocks(all_codes)
+                
+                if filtered_count > 0:
+                    print(f"[OPTIMIZE] 已跳过 {filtered_count} 只退市股票，节省计算时间")
+                    self.show_progress(f"OPTIMIZE: 已跳过 {filtered_count} 只退市股票，优化计算效率")
+                
+                # 更新处理的股票列表
+                all_codes = active_codes
+                total_stocks = len(all_codes)
+                
+                if total_stocks == 0:
+                    self.show_progress(f"NOTICE: 过滤退市股票后，没有有效的{stock_type}股票需要评分")
+                    return
+                    
+                print(f"[OPTIMIZE] 过滤后剩余 {total_stocks} 只有效股票，开始评分...")
                 
                 # 限制最大处理数量，防止内存溢出
                 max_process = min(total_stocks, 5000)
@@ -2187,6 +2303,7 @@ class AShareAnalyzerGUI:
                                 stock_name = comprehensive_data.get('name', self.stock_info.get(code, {}).get('name', '未知'))
                                 industry = comprehensive_data.get('fund_data', {}).get('industry', '未知')
                                 
+                                # 简化批量评分结果存储
                                 self.batch_scores[code] = {
                                     'name': stock_name,
                                     'score': float(score),
@@ -2289,14 +2406,25 @@ class AShareAnalyzerGUI:
             self._batch_running = False
     
     def get_stock_score_for_batch(self, stock_code):
-        """为批量评分获取单只股票的评分 - 与单独分析使用相同算法"""
+        """为批量评分获取单只股票的评分 - 优化计算效率"""
         try:
-            # 优先使用评分缓存
+            # 优先检查评分缓存（包括退市股票的-10分缓存）
             if stock_code in getattr(self, 'scores_cache', {}):
                 try:
-                    return float(self.scores_cache[stock_code])
+                    cached_score = float(self.scores_cache[stock_code])
+                    if cached_score == -10.0:
+                        print(f"[SKIP-CACHED] {stock_code} 缓存显示已退市，跳过计算")
+                    return cached_score
                 except Exception:
                     pass
+
+            # 快速退市检测（仅在没有缓存时进行）
+            delisting_status = self._check_stock_delisting_status(stock_code)
+            if delisting_status['is_delisted']:
+                print(f"[SKIP-DELISTED] {stock_code} 已退市，跳过复杂计算，直接评分: -10")
+                # 缓存结果避免重复检测
+                self.scores_cache[stock_code] = -10.0
+                return -10.0
             # 使用与单独分析相同的三时间段预测算法
             short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(stock_code)
             
@@ -2323,8 +2451,117 @@ class AShareAnalyzerGUI:
             return round(final_score, 1)
             
         except Exception as e:
-            print(f"获取 {stock_code} 评分失败: {e}")
+            # 如果正常评分失败，最后检查一次是否为退市股票
+            try:
+                delisting_status = self._check_stock_delisting_status(stock_code)
+                if delisting_status['is_delisted']:
+                    print(f"[SKIP-EXCEPTION] {stock_code} 异常中检测到退市，跳过计算")
+                    self.scores_cache[stock_code] = -10.0
+                    return -10.0
+            except:
+                pass
+            
+            print(f"[ERROR] {stock_code} 评分计算失败: {e}")
             return None
+
+    def _check_stock_delisting_status(self, stock_code):
+        """检查股票是否已退市"""
+        try:
+            # 使用现有的退市检测系统
+            if hasattr(self, 'delisting_protection_enabled') and self.delisting_protection_enabled:
+                from stock_status_checker import StockStatusChecker
+                checker = StockStatusChecker()
+                status = checker.check_single_stock(stock_code)
+                
+                if status['status'] in ['delisted', 'invalid']:
+                    reason = f"{status['status']}"
+                    if status.get('delisting_date'):
+                        reason += f" (退市日期: {status['delisting_date']})"
+                    return {
+                        'is_delisted': True,
+                        'status': status['status'], 
+                        'reason': reason,
+                        'delisting_date': status.get('delisting_date')
+                    }
+            
+            # 如果退市保护未启用，进行简单检查
+            # 检查是否为明显的无效代码
+            if stock_code.startswith(('999', '888', '777')):
+                return {
+                    'is_delisted': True,
+                    'status': 'invalid',
+                    'reason': '无效股票代码'
+                }
+                
+            return {
+                'is_delisted': False,
+                'status': 'unknown',
+                'reason': None
+            }
+            
+        except Exception as e:
+            print(f"[WARN] 检查 {stock_code} 退市状态失败: {e}")
+            return {
+                'is_delisted': False,
+                'status': 'error', 
+                'reason': f'检查失败: {e}'
+            }
+
+    def _prefilter_delisted_stocks(self, stock_codes):
+        """预过滤退市股票，优化计算性能"""
+        active_codes = []
+        filtered_count = 0
+        
+        try:
+            # 如果启用了退市保护，使用批量检测
+            if hasattr(self, 'delisting_protection_enabled') and self.delisting_protection_enabled:
+                try:
+                    from stock_status_checker import StockStatusChecker
+                    checker = StockStatusChecker()
+                    
+                    # 批量检测股票状态（更高效）
+                    print(f"[OPTIMIZE] 批量检测 {len(stock_codes)} 只股票的退市状态...")
+                    batch_results = checker.batch_check_stocks(stock_codes)
+                    
+                    for code in stock_codes:
+                        if code in batch_results:
+                            status = batch_results[code]['status']
+                            if status in ['delisted', 'invalid']:
+                                filtered_count += 1
+                                print(f"[SKIP] {code} 已退市，跳过计算")
+                                continue
+                        active_codes.append(code)
+                    
+                    return active_codes, filtered_count
+                    
+                except Exception as e:
+                    print(f"[WARN] 批量退市检测失败，使用简单过滤: {e}")
+            
+            # 简单过滤：跳过明显无效的代码
+            for code in stock_codes:
+                if code.startswith(('999', '888', '777')):
+                    filtered_count += 1
+                    continue
+                active_codes.append(code)
+            
+            return active_codes, filtered_count
+            
+        except Exception as e:
+            print(f"[ERROR] 预过滤失败，使用原始列表: {e}")
+            return stock_codes, 0
+
+    def _get_delisted_stock_advice(self, ticker, reason):
+        """为退市股票生成简化的投资建议，避免复杂计算"""
+        delisted_advice = {
+            'technical_score': -10,
+            'fundamental_score': -10,
+            'total_score': -10,
+            'recommendation': 'AVOID',
+            'reason': f'股票已退市 - {reason}',
+            'risk_level': 'DELISTED',
+            'period': 'ALL'
+        }
+        return delisted_advice, delisted_advice, delisted_advice
 
     def _calculate_tech_data_from_kline(self, daily_data):
         """从K线数据计算技术指标"""
@@ -2657,10 +2894,10 @@ class AShareAnalyzerGUI:
     def import_csv_analysis(self):
         """CSV批量分析功能"""
         try:
-            from tkinter import filedialog, messagebox
             import csv
             from datetime import datetime
-            
+            from tkinter import filedialog, messagebox
+
             # 选择CSV文件
             file_path = filedialog.askopenfilename(
                 title="选择包含股票代码的CSV文件",
@@ -2931,7 +3168,7 @@ class AShareAnalyzerGUI:
             import csv
             from datetime import datetime
             from tkinter import messagebox
-            
+
             # 生成文件名
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"CSV分析结果_{timestamp}.csv"
@@ -4124,7 +4361,7 @@ class AShareAnalyzerGUI:
             
             if AKSHARE_AVAILABLE:
                 import akshare as ak
-                
+
                 # 尝试从akshare获取股票基本信息
                 try:
                     # 获取股票基本信息
@@ -4561,7 +4798,7 @@ class AShareAnalyzerGUI:
         """尝试通过腾讯财经获取实时价格 - 支持ETF"""
         try:
             import time
-            
+
             # 控制请求频率
             current_time = time.time()
             if current_time - self.last_request_time < 0.3:
@@ -4615,7 +4852,7 @@ class AShareAnalyzerGUI:
         """通过新浪财经获取ETF价格"""
         try:
             import time
-            
+
             # ETF在新浪财经的代码格式
             if ticker.startswith('51'):
                 code = f"sh{ticker}"
@@ -4650,7 +4887,7 @@ class AShareAnalyzerGUI:
         """尝试通过网易财经获取实时价格"""
         try:
             import time
-            
+
             # 控制请求频率
             current_time = time.time()
             if current_time - self.last_request_time < 0.3:
@@ -4674,6 +4911,7 @@ class AShareAnalyzerGUI:
             
             # 解析JSON数据
             import json
+
             # 移除JSONP回调函数包装
             if data.startswith('_ntes_quote_callback(') and data.endswith(');'):
                 json_str = data[21:-2]
@@ -4693,10 +4931,10 @@ class AShareAnalyzerGUI:
         """尝试通过akshare获取实时价格（快速失败）"""
         try:
             # 由于akshare经常失败，设置较短超时
-            import akshare as ak
-            
             # 快速超时设置
             import socket
+
+            import akshare as ak
             socket.setdefaulttimeout(3)
             
             # 获取单只股票的实时数据
@@ -4720,7 +4958,7 @@ class AShareAnalyzerGUI:
         """尝试通过新浪财经获取实时价格（优化版）"""
         try:
             import time
-            
+
             # 控制请求频率，避免被限制
             current_time = time.time()
             if current_time - self.last_request_time < 0.5:  # 最少间隔0.5秒
@@ -5064,8 +5302,9 @@ class AShareAnalyzerGUI:
                 # 4. 尝试akshare基础数据
                 stock_individual_info = None
                 if AKSHARE_AVAILABLE:
-                    import akshare as ak
                     import threading
+
+                    import akshare as ak
                     akshare_result = {}
                     def akshare_fetch():
                         try:
@@ -5142,11 +5381,12 @@ class AShareAnalyzerGUI:
     
     def _try_get_real_technical_data(self, ticker):
         """尝试获取真实技术数据 - 增强网络诊断和连接稳定性"""
+        import os
+        import socket
+        import urllib.request
+
         import akshare as ak
         import pandas as pd
-        import os
-        import urllib.request
-        import socket
         import requests
         from requests.adapters import HTTPAdapter
         from urllib3.util.retry import Retry
@@ -5467,9 +5707,9 @@ class AShareAnalyzerGUI:
     def _try_get_yfinance_data(self, ticker):
         """使用yfinance获取股票数据"""
         try:
-            import yfinance as yf
             import pandas as pd
-            
+            import yfinance as yf
+
             # 转换股票代码为yfinance格式
             if ticker.startswith(('60', '68')):  # 沪市
                 symbol = f"{ticker}.SS"
@@ -5512,7 +5752,7 @@ class AShareAnalyzerGUI:
         """使用yfinance获取基础财务数据"""
         try:
             import yfinance as yf
-            
+
             # 转换股票代码为yfinance格式
             if ticker.startswith(('60', '68')):  # 沪市
                 symbol = f"{ticker}.SS"
@@ -5560,9 +5800,9 @@ class AShareAnalyzerGUI:
 
     def _generate_smart_mock_technical_data(self, ticker):
         """生成智能模拟技术数据（基于实时价格和股票特征）"""
-        import random
         import hashlib
-        
+        import random
+
         # 使用股票代码作为随机种子，确保每个股票的数据是稳定但不同的
         seed = int(hashlib.md5(ticker.encode()).hexdigest()[:8], 16)
         random.seed(seed)
@@ -5702,9 +5942,10 @@ class AShareAnalyzerGUI:
     def _generate_smart_mock_kline_data(self, ticker, days=60):
         """生成用于计算技术指标的模拟K线数据（收盘和成交量）"""
         try:
-            import pandas as pd
-            import random
             import datetime
+            import random
+
+            import pandas as pd
 
             base_price = self.get_stock_price(ticker) or random.uniform(5, 50)
             prices = []
@@ -5853,7 +6094,7 @@ class AShareAnalyzerGUI:
         """生成智能模拟基本面数据"""
         import hashlib
         import random
-        
+
         # 使用股票代码作为种子，确保一致性但股票间有差异
         seed_value = int(hashlib.md5(ticker.encode()).hexdigest()[:8], 16)
         random.seed(seed_value)
@@ -6143,6 +6384,20 @@ class AShareAnalyzerGUI:
 
     def generate_investment_advice(self, ticker):
         """生成短期、中期、长期投资预测，支持大模型AI生成"""
+        # 快速退市检查，优化计算性能
+        try:
+            # 先检查缓存，如果已知是退市股票则快速跳过
+            if ticker in getattr(self, 'scores_cache', {}) and self.scores_cache[ticker] == -10.0:
+                print(f"[SKIP-ADVICE] {ticker} 已知退市股票，跳过投资建议生成")
+                return self._get_delisted_stock_advice(ticker, "已知退市股票")
+            
+            delisting_status = self._check_stock_delisting_status(ticker)
+            if delisting_status['is_delisted']:
+                print(f"[SKIP-ADVICE] {ticker} 检测到退市，跳过复杂分析")
+                return self._get_delisted_stock_advice(ticker, delisting_status['reason'])
+        except Exception as e:
+            print(f"[WARN] 快速退市检查失败，继续正常分析: {e}")
+        
         import random  # 确保random模块可用
         stock_info = self.get_stock_info_generic(ticker)
         
@@ -6277,6 +6532,7 @@ class AShareAnalyzerGUI:
             # 简单分段解析AI回复
             def parse_ai_advice(ai_text, period, score):
                 import re
+
                 # 尝试按“短期/中期/长期”分段
                 match = re.search(f"{period}.*?([\u4e00-\u9fa5].*)", ai_text, re.DOTALL)
                 if match:
@@ -8533,8 +8789,8 @@ CSV批量分析使用方法:
     def perform_analysis(self, ticker):
         """执行分析（在后台线程中）- 使用智能模拟数据"""
         try:
-            import time
             import threading
+            import time
             print(f"开始分析股票: {ticker}")
             
             # 设置总体超时时间（15秒）
@@ -9641,7 +9897,7 @@ IDEA: 优势:
         """基于批量评分数据执行快速推荐"""
         try:
             from datetime import datetime
-            
+
             # 过滤符合类型要求的股票
             filtered_stocks = []
             
@@ -9705,7 +9961,7 @@ IDEA: 优势:
     def _display_fast_recommendation_report(self, recommended_stocks, total_stocks, qualified_count, min_score, pool_type, stock_type, period):
         """显示快速推荐报告"""
         from datetime import datetime
-        
+
         # 清空并切换到推荐页面
         self.recommendation_text.delete('1.0', tk.END)
         self.notebook.select(3)
@@ -9870,7 +10126,7 @@ DATA: 推荐统计:
         """智能推荐工作线程 - 优先使用批量评分数据"""
         try:
             import time
-            
+
             # 检查是否有批量评分数据
             if self.batch_scores:
                 self.update_progress("TARGET: 使用批量评分数据进行推荐...")
@@ -9998,7 +10254,7 @@ DATA: 推荐统计:
     def _display_batch_recommendation_report(self, recommended_stocks, total_stocks, qualified_count, min_score, pool_type):
         """显示批量推荐报告"""
         from datetime import datetime
-        
+
         # 清空并切换到推荐页面
         self.recommendation_text.delete('1.0', tk.END)
         self.notebook.select(3)
@@ -10164,7 +10420,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
         """执行推荐分析（在后台线程中）- 带缓存机制"""
         try:
             import time
-            
+
             # 获取用户设置
             stock_type = self.stock_type_var.get()
             score_threshold = self.score_var.get()
@@ -10329,7 +10585,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
         """执行详细分析（后台线程）"""
         try:
             import time
-            
+
             # 优先使用缓存的comprehensive_data，确保数据一致性
             if hasattr(self, 'comprehensive_data') and ticker in self.comprehensive_data:
                 print(f"使用缓存数据进行详细分析: {ticker}")
@@ -10457,6 +10713,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             
             # 使用正则表达式查找股票代码
             import re
+
             # 支持多种格式的股票代码匹配
             stock_patterns = [
                 r'【\d+】\s*(\d{6})\s*-',           # 【01】600519 - 贵州茅台
@@ -10505,6 +10762,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             
             # 使用正则表达式查找股票代码 (支持多种格式)
             import re
+
             # 支持多种格式的股票代码匹配
             stock_patterns = [
                 r'【\d+】\s*(\d{6})\s*-',           # 【01】600519 - 贵州茅台
@@ -10584,13 +10842,15 @@ WARNING:  暂无批量评分数据
                 if not self.is_stock_type_match(code, stock_type):
                     continue
                 
-                filtered_stocks.append({
+                stock_data = {
                     'code': code,
                     'name': data.get('name', f'股票{code}'),
                     'score': data.get('score', 0),
                     'industry': data.get('industry', '未知'),
                     'timestamp': data.get('timestamp', '未知')
-                })
+                }
+                
+                filtered_stocks.append(stock_data)
             
             # 按评分排序
             filtered_stocks.sort(key=lambda x: x['score'], reverse=True)
@@ -10629,26 +10889,36 @@ ERROR: 暂无符合条件的{stock_type}股票数据
 """
             else:
                 for i, stock in enumerate(top_stocks, 1):
-                    score_color = "🟢" if stock['score'] >= 8 else "🟡" if stock['score'] >= 7 else "🔴"
-                    report += f"【{i:02d}】{stock['code']} - {stock['name']:<12} {score_color} {stock['score']:.1f}分 | {stock['industry']}\n"
+                    if stock['score'] == -10.0:
+                        # 退市股票简单标记
+                        report += f"【{i:02d}】{stock['code']} - {stock['name']:<12} ⚠️ {stock['score']:.1f}分 | 已退市\n"
+                    else:
+                        # 正常股票显示
+                        score_color = "🟢" if stock['score'] >= 8 else "🟡" if stock['score'] >= 7 else "🔴"
+                        report += f"【{i:02d}】{stock['code']} - {stock['name']:<12} {score_color} {stock['score']:.1f}分 | {stock['industry']}\n"
                 
                 # 添加统计信息
-                avg_score = sum(s['score'] for s in top_stocks) / len(top_stocks)
-                high_score_count = len([s for s in top_stocks if s['score'] >= 8])
+                normal_stocks = [s for s in top_stocks if s['score'] != -10.0]
+                delisted_count = len([s for s in top_stocks if s['score'] == -10.0])
+                
+                avg_score = sum(s['score'] for s in normal_stocks) / len(normal_stocks) if normal_stocks else 0
+                high_score_count = len([s for s in normal_stocks if s['score'] >= 8])
                 
                 report += f"""
 {'='*60}
 DATA: 统计信息
 {'='*60}
 
-TARGET: 平均评分: {avg_score:.2f}分
+TARGET: 平均评分: {avg_score:.2f}分 (正常股票)
 STAR: 高分股票: {high_score_count}只 (≥8分)
-TREND: 最高评分: {top_stocks[0]['score']:.1f}分 ({top_stocks[0]['name']})
-📉 最低评分: {top_stocks[-1]['score']:.1f}分 ({top_stocks[-1]['name']})
+⚠️  退市股票: {delisted_count}只 (-10分)
+TREND: 最高评分: {normal_stocks[0]['score']:.1f}分 ({normal_stocks[0]['name']}) 
+📉 最低评分: {normal_stocks[-1]['score']:.1f}分 ({normal_stocks[-1]['name']})
 
 IDEA: 使用提示:
    • 双击任意股票代码行可快速进行详细分析
-   • 高分股票(≥8分)值得重点关注
+   • 高分股票(≥8分)值得重点关注  
+   • ⚠️ 退市股票(-10分)已被系统自动识别
    • 建议结合技术面和基本面综合判断
 
 WARNING:  风险提示: 评分仅供参考，投资需谨慎
@@ -10769,7 +11039,7 @@ WARNING: 免责声明: 本分析仅供参考，不构成投资建议，投资需
         """格式化包含缓存信息的推荐报告"""
         import time
         from datetime import datetime
-        
+
         # 获取用户设置
         stock_type = self.stock_type_var.get()
         score_threshold = self.score_var.get()
@@ -10851,7 +11121,7 @@ WARNING:  免责声明: 本推荐仅供参考，不构成投资建议
     def format_simple_recommendation_report(self, stocks, period):
         """格式化简化的推荐报告"""
         import time
-        
+
         # 获取用户设置
         stock_type = self.stock_type_var.get()
         score_threshold = self.score_var.get()
@@ -11114,7 +11384,7 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
         """批量分析工作线程"""
         try:
             import time
-            
+
             # 清空之前的失败记录
             self.failed_real_data_stocks = []
             
@@ -11843,16 +12113,20 @@ WARNING: 重要声明:
         try:
             import os
             import sys
-            
+
             # 添加当前目录到Python路径
             current_dir = os.path.dirname(os.path.abspath(__file__))
             sys.path.insert(0, current_dir)
             
             # 导入数据收集器
             from comprehensive_data_collector import ComprehensiveDataCollector
-            
+            from delisting_protection import enable_delisting_protection
+
             # 创建收集器实例
             collector = ComprehensiveDataCollector()
+            
+            # 启用退市股票保护功能
+            enable_delisting_protection(collector)
             
             def update_status(message, progress=None, detail=""):
                 """更新状态显示"""
@@ -11932,16 +12206,20 @@ WARNING: 重要声明:
             # 导入并使用comprehensive_data_collector
             import os
             import sys
-            
+
             # 添加当前目录到Python路径
             current_dir = os.path.dirname(os.path.abspath(__file__))
             sys.path.insert(0, current_dir)
             
             # 导入数据收集器
             from comprehensive_data_collector import ComprehensiveDataCollector
-            
+            from delisting_protection import enable_delisting_protection
+
             # 创建收集器实例
             collector = ComprehensiveDataCollector()
+            
+            # 启用退市股票保护功能
+            enable_delisting_protection(collector)
             
             def update_status(message, progress=None, detail=""):
                 """更新状态显示"""

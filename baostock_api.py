@@ -119,7 +119,7 @@ class BaoStockAPI:
                 data_list.append(rs.get_row_data())
             
             if not data_list:
-                print(f"[WARN] BaoStock {code} 无数据")
+                print(f"[WARN] BaoStock {code} 无数据：可能原因 - 1)股票已退市 2)停牌期间 3)新股未开始交易 4)代码错误")
                 return None
             
             # 创建DataFrame

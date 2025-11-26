@@ -112,6 +112,15 @@ except ImportError:
     BAOSTOCK_AVAILABLE = False
     print("[WARN] BaoStock API 未找到，请安装: pip install baostock")
 
+# 股票状态检测器
+try:
+    from stock_status_checker import StockStatusChecker
+    STOCK_STATUS_CHECKER_AVAILABLE = True
+    print("[INFO] 股票状态检测器已加载")
+except ImportError:
+    STOCK_STATUS_CHECKER_AVAILABLE = False
+    print("[WARN] 股票状态检测器未找到")
+
 print(f"[INFO] BaoStock分析: 免费稳定的A股K线数据源，作为最终兜底方案：")
 print(f"       - K线数据: 免费稳定（日K线）")
 print(f"       - 历史数据: 覆盖全面（A股全市场）")
@@ -265,6 +274,10 @@ class ComprehensiveDataCollector:
                 print("[INFO] Polygon API 初始化成功")
             except Exception as e:
                 print(f"[WARN] Polygon API 初始化失败: {e}")
+        
+        # 初始化股票状态检测器
+        self.status_checker = StockStatusChecker()
+        print("[INFO] 股票状态检测器已初始化")
 
         # 确保输出目录存在
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
@@ -603,7 +616,20 @@ class ComprehensiveDataCollector:
                         print(" ❌ 超时")
                         continue
                     elif exception[0]:
-                        print(f" ❌ 异常: {type(exception[0]).__name__}")
+                        error_msg = str(exception[0])
+                        error_type = type(exception[0]).__name__
+                        print(f" ❌ 异常: {error_type}")
+                        # 详细诊断AKShare常见错误
+                        if 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
+                            print(f"    [诊断] 网络超时 - 可能网络连接不稳定或AKShare服务器响应慢")
+                        elif 'connection' in error_msg.lower() or 'network' in error_msg.lower():
+                            print(f"    [诊断] 网络连接问题 - 请检查网络连接")
+                        elif '502' in error_msg or '503' in error_msg or '504' in error_msg:
+                            print(f"    [诊断] 服务器错误 - AKShare后端服务可能暂时不可用")
+                        elif 'ssl' in error_msg.lower() or 'certificate' in error_msg.lower():
+                            print(f"    [诊断] SSL证书问题 - 可能需要更新证书或关闭SSL验证")
+                        elif 'forbidden' in error_msg.lower() or '403' in error_msg:
+                            print(f"    [诊断] 访问被拒绝 - 可能IP被限制或需要更新AKShare版本")
                         continue
                     elif result[0] is not None and not result[0].empty:
                         print(" ✅ 成功")
@@ -653,9 +679,8 @@ class ComprehensiveDataCollector:
             return False
     
     def get_stock_list_excluding_cyb(self, limit: int = 50) -> List[str]:
-        """获取股票列表，只保留主板股票（排除创业板300和科创板688）"""
+        """获取全部主板股票列表（排除创业板300、科创板688和ETF）"""
         stock_codes = []
-        
         # 优先从 akshare 获取完整列表
         if AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
             try:
@@ -664,73 +689,57 @@ class ComprehensiveDataCollector:
                 all_codes = df['code'].astype(str).tolist()
                 # 只保留主板股票：沪市主板(60开头) + 深市主板(000开头) + 深市中小板(002开头)
                 main_board_codes = [code for code in all_codes 
-                                  if code.startswith('60') or code.startswith('000') or code.startswith('002')]
-                stock_codes = main_board_codes[:limit]
-                print(f"[SUCCESS] 从 akshare 获取 {len(stock_codes)} 只主板股票（已排除创业板300和科创板688）")
+                                  if (code.startswith('60') or code.startswith('000') or code.startswith('002'))
+                                  and not code.startswith('688') and not code.startswith('300') and not code.startswith('ETF')]
+                stock_codes = main_board_codes
+                print(f"[SUCCESS] 从 akshare 获取 {len(stock_codes)} 只主板股票（已排除创业板300、科创板688和ETF）")
                 return stock_codes
             except Exception as e:
                 print(f"[ERROR] akshare 获取股票列表失败: {type(e).__name__}: {e}")
-        
         # 尝试从 Baostock 获取
         if BAOSTOCK_AVAILABLE:
             try:
                 print(f"[INFO] 尝试从 Baostock 获取股票列表...")
                 import baostock as bs
-                # 确保已登录
                 lg = bs.login()
-                
-                # 获取所有A股
                 rs = bs.query_all_stock(day=datetime.now().strftime('%Y-%m-%d'))
                 if rs.error_code == '0':
                     all_codes = []
                     while rs.next():
                         row = rs.get_row_data()
-                        # row: code, tradeStatus, code_name
-                        # code format: sh.600000
                         if len(row) > 0:
                             full_code = row[0]
                             if '.' in full_code:
                                 code = full_code.split('.')[1]
                                 all_codes.append(code)
-                    
                     main_board_codes = [code for code in all_codes 
-                                      if code.startswith('60') or code.startswith('000') or code.startswith('002')]
-                    stock_codes = main_board_codes[:limit]
+                                      if (code.startswith('60') or code.startswith('000') or code.startswith('002'))
+                                      and not code.startswith('688') and not code.startswith('300') and not code.startswith('ETF')]
+                    stock_codes = main_board_codes
                     if stock_codes:
                         print(f"[SUCCESS] 从 Baostock 获取 {len(stock_codes)} 只主板股票")
                         return stock_codes
             except Exception as e:
                 print(f"[ERROR] Baostock 获取股票列表失败: {e}")
-        
         print(f"[INFO] 切换到备用主板股票池...")
         print(f"[WARN] akshare 和 Baostock 均获取失败，使用扩展备用股票池（1000+只主板股票）")
-        
-        # 备选：扩展的内置主板股票池 - 提供更多可靠股票（1000+只）
         fallback_codes = []
-        
-        # 沪市主板 - 600开头（生成600000-600999）
         for i in range(1000):
             code = f"60{i:04d}"
             fallback_codes.append(code)
-        
-        # 沪市主板 - 601开头（生成601000-601999）
         for i in range(1000, 2000):
             code = f"60{i:04d}"
             fallback_codes.append(code)
-        
-        # 深市主板 - 000开头（生成000001-000999，排除30开头）
         for i in range(1, 1000):
             code = f"000{i:03d}"
             fallback_codes.append(code)
-        
-        # 深市中小板 - 002开头（生成002001-002999）
         for i in range(1, 1000):
             code = f"002{i:03d}"
             fallback_codes.append(code)
-        
+        # 过滤创业板、科创板、ETF
+        fallback_codes = [code for code in fallback_codes if not code.startswith('688') and not code.startswith('300') and not code.startswith('ETF')]
         print(f"[INFO] 备用股票池共生成 {len(fallback_codes)} 只主板股票代码")
-        
-        return fallback_codes[:limit]
+        return fallback_codes
     
     def get_stock_list_by_type(self, stock_type: str = "主板", limit: int = 50) -> List[str]:
         """根据股票类型获取股票列表"""
@@ -932,7 +941,27 @@ class ComprehensiveDataCollector:
                             primary_success.append(code)
                         time.sleep(0.1)  # TUSHARE请求间隔
                     except Exception as e:
-                        print(f"[WARN] TUSHARE获取{code}失败: {e}")
+                        error_msg = str(e)
+                        error_type = type(e).__name__
+                        
+                        # 详细诊断Tushare常见错误
+                        if 'no data' in error_msg.lower() or 'empty' in error_msg.lower():
+                            print(f"[WARN] TUSHARE获取{code}失败: 无数据 - 可能该股票在指定时间范围内无交易数据")
+                        elif 'permission' in error_msg.lower() or 'not authorized' in error_msg.lower():
+                            print(f"[WARN] TUSHARE获取{code}失败: 权限不足 - 可能需要更高权限的Token或该数据需要付费")
+                        elif 'frequency' in error_msg.lower() or 'limit' in error_msg.lower() or 'too many' in error_msg.lower():
+                            print(f"[WARN] TUSHARE获取{code}失败: 频率限制 - API调用过于频繁，已触发限流")
+                        elif 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
+                            print(f"[WARN] TUSHARE获取{code}失败: 网络超时 - 可能网络连接不稳定")
+                        elif 'invalid' in error_msg.lower() and 'symbol' in error_msg.lower():
+                            print(f"[WARN] TUSHARE获取{code}失败: 股票代码无效 - {ts_code}可能不存在或已退市")
+                        elif '40001' in error_msg or '40002' in error_msg or '40003' in error_msg:
+                            print(f"[WARN] TUSHARE获取{code}失败: API错误({error_msg}) - Tushare服务端问题")
+                        elif 'token' in error_msg.lower() or 'invalid token' in error_msg.lower():
+                            print(f"[WARN] TUSHARE获取{code}失败: Token无效 - 请检查Tushare Token是否正确")
+                        else:
+                            print(f"[WARN] TUSHARE获取{code}失败: {error_type}: {error_msg}")
+                        
                         fallback_codes.append(code)
                         continue
                 
@@ -1158,7 +1187,59 @@ class ComprehensiveDataCollector:
         if not 'yfinance_success' in locals():
             yfinance_success = []
         
-        # 3. BaoStock最终兜底处理（免费稳定的K线数据）
+        # 3. AKShare兜底处理（优先于Alpha Vantage）
+        akshare_fallback_success = []
+        if final_failed_codes and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
+            print(f"[INFO] AKShare 兜底处理 {len(final_failed_codes)} 只失败股票...")
+            try:
+                temp_remaining = []
+                for code in final_failed_codes:
+                    try:
+                        df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_iso, end_date=end_iso)
+                        if df is not None and not df.empty:
+                            df = self.standardize_kline_columns(df, 'akshare')
+                            if not df.empty:
+                                result[code] = df
+                                akshare_fallback_success.append(code)
+                        else:
+                            temp_remaining.append(code)
+                    except Exception as e:
+                        print(f"[WARN] AKShare兜底 {code} 失败: {type(e).__name__}: {e}")
+                        temp_remaining.append(code)
+                    time.sleep(0.2)
+                final_failed_codes = temp_remaining
+                print(f"[SUCCESS] AKShare 兜底成功: {len(akshare_fallback_success)}/{len(final_failed_codes) + len(akshare_fallback_success)} 只")
+            except Exception as e:
+                print(f"[ERROR] AKShare 兜底处理异常: {type(e).__name__}: {e}")
+        elif final_failed_codes and not (AKSHARE_AVAILABLE and AKSHARE_CONNECTED):
+            print(f"[WARN] AKShare 不可用，无法兜底处理 {len(final_failed_codes)} 只股票")
+            
+        # 4. 腾讯K线兜底处理
+        tencent_fallback_success = []
+        if final_failed_codes and self.tencent_kline:
+            print(f"[INFO] 腾讯K线 兜底处理 {len(final_failed_codes)} 只失败股票...")
+            try:
+                temp_remaining = []
+                for code in final_failed_codes:
+                    try:
+                        df = self.tencent_kline.get_stock_kline(code, start_iso, end_iso)
+                        if df is not None and not df.empty:
+                            df = self.standardize_kline_columns(df, 'tencent')
+                            if not df.empty:
+                                result[code] = df
+                                tencent_fallback_success.append(code)
+                        else:
+                            temp_remaining.append(code)
+                    except Exception as e:
+                        print(f"[WARN] 腾讯K线兜底 {code} 失败: {e}")
+                        temp_remaining.append(code)
+                    time.sleep(0.1)
+                final_failed_codes = temp_remaining
+                print(f"[SUCCESS] 腾讯K线 兜底成功: {len(tencent_fallback_success)}/{len(final_failed_codes) + len(tencent_fallback_success)} 只")
+            except Exception as e:
+                print(f"[ERROR] 腾讯K线 兜底处理异常: {e}")
+        
+        # 5. BaoStock兜底处理（稳定性好）
         baostock_success = []
         if final_failed_codes and self.baostock and self.baostock.is_connected:
             print(f"[INFO] BaoStock 兜底处理 {len(final_failed_codes)} 只最终失败股票...")
@@ -1169,26 +1250,37 @@ class ComprehensiveDataCollector:
                 # 使用BaoStock批量获取
                 bs_results = self.baostock.batch_get_klines(final_failed_codes, days)
                 
-                for code, df in bs_results.items():
-                    if df is not None and not df.empty:
-                        df = self.standardize_kline_columns(df, 'baostock')
+                temp_remaining = []
+                for code in final_failed_codes:
+                    if code in bs_results and bs_results[code] is not None and not bs_results[code].empty:
+                        df = self.standardize_kline_columns(bs_results[code], 'baostock')
                         if not df.empty:
                             result[code] = df
                             baostock_success.append(code)
+                    else:
+                        temp_remaining.append(code)
+                final_failed_codes = temp_remaining
                 
-                print(f"[SUCCESS] BaoStock 兜底成功: {len(baostock_success)}/{len(final_failed_codes)} 只")
+                print(f"[SUCCESS] BaoStock 兜底成功: {len(baostock_success)}/{len(final_failed_codes) + len(baostock_success)} 只")
             except Exception as e:
                 print(f"[ERROR] BaoStock 兜底处理异常: {e}")
         elif final_failed_codes and not (self.baostock and getattr(self.baostock, 'is_connected', False)):
             print(f"[WARN] BaoStock API未连接，无法兜底处理 {len(final_failed_codes)} 只股票")
         
-        # 4. Alpha Vantage最终兜底处理
+        # 6. Alpha Vantage最后兜底处理（仅限美股/ADR）
         still_failed = [code for code in codes if code not in result]
+        # 过滤A股代码，Alpha Vantage主要支持美股/ADR
+        alpha_candidate_codes = [code for code in still_failed 
+                               if not (code.startswith(('00', '30', '60', '68')) and code.isdigit())]
+        a_stock_codes = [code for code in still_failed if code not in alpha_candidate_codes]
+        
         alpha_success = []
-        if still_failed and self.alpha_vantage:
-            print(f"[INFO] Alpha Vantage 最终兜底处理 {len(still_failed)} 只股票...")
+        if alpha_candidate_codes and self.alpha_vantage:
+            print(f"[INFO] Alpha Vantage 最终兜底处理 {len(alpha_candidate_codes)} 只可能的美股/ADR代码...")
+            if a_stock_codes:
+                print(f"[SKIP] 跳过 {len(a_stock_codes)} 只A股代码（Alpha Vantage不支持）")
             try:
-                for code in still_failed:
+                for code in alpha_candidate_codes:
                     try:
                         df = self.alpha_vantage.get_daily_kline(code, outputsize='compact')
                         if df is not None and not df.empty:
@@ -1905,6 +1997,21 @@ class ComprehensiveDataCollector:
     
     def collect_batch_basic_info(self, codes: List[str], source: str = 'auto') -> Dict[str, Dict[str, Any]]:
         """批量采集基础信息 - 新策略：Baostock为主 → JoinQuant为辅 → 腾讯补充 → AKShare兜底"""
+        # 预检股票状态，过滤退市股票
+        if STOCK_STATUS_CHECKER_AVAILABLE and self.status_checker:
+            print(f"[INFO] 基础信息采集前检查股票状态...")
+            try:
+                validity_check = self.pre_check_stock_validity(codes)
+                original_count = len(codes)
+                codes = validity_check['valid_codes']
+                
+                filtered_count = original_count - len(codes)
+                if filtered_count > 0:
+                    print(f"[INFO] 基础信息采集已过滤 {filtered_count} 只退市/无效股票")
+                    
+            except Exception as e:
+                print(f"[WARN] 基础信息采集前状态检查异常: {e}，继续处理")
+        
         result = {}
         total_codes = len(codes)
         
@@ -1930,6 +2037,7 @@ class ComprehensiveDataCollector:
                         
                         rs = bs.query_stock_basic(code=bs_code)
                         if rs.error_code == '0':
+                            data_found = False
                             while rs.next():
                                 row = rs.get_row_data()
                                 # Baostock query_stock_basic 返回: code, code_name, ipoDate, outDate, type, status
@@ -1944,7 +2052,14 @@ class ComprehensiveDataCollector:
                                         'source': 'baostock'
                                     }
                                     baostock_success.append(code)
+                                    data_found = True
                                     break
+                            
+                            if not data_found:
+                                print(f"[WARN] BaoStock {code} 无数据：可能已退市或代码无效")
+                        else:
+                            print(f"[WARN] BaoStock {code} 查询失败: {rs.error_msg}")
+                        
                         time.sleep(0.05)
                     except Exception as e:
                         print(f"[DEBUG] Baostock {code}: {e}")
@@ -3148,6 +3263,16 @@ class ComprehensiveDataCollector:
 
     def collect_kline_data(self, code: str, source: str = 'auto', days: int = None) -> Optional[pd.DataFrame]:
         """收集单个股票的K线数据"""
+        # 检查股票状态，如果已退市则跳过
+        if STOCK_STATUS_CHECKER_AVAILABLE and self.status_checker:
+            try:
+                status_info = self.status_checker.check_single_stock(code)
+                if status_info['status'] in ['delisted', 'invalid']:
+                    print(f"[SKIP] {code} 已{status_info['status']}，跳过K线数据收集")
+                    return None
+            except Exception as e:
+                print(f"[DEBUG] {code} 状态检查异常: {e}，继续收集")
+        
         if days is None:
             days = self.kline_days
             
@@ -3180,6 +3305,144 @@ class ComprehensiveDataCollector:
             return self.tencent_kline.get_stock_kline(code, start_iso, end_iso)
             
         return None
+
+    def pre_check_stock_validity(self, codes: List[str], filter_invalid: bool = True) -> Dict[str, List[str]]:
+        """
+        预检股票有效性，过滤退市和无效股票
+        
+        Args:
+            codes: 股票代码列表
+            filter_invalid: 是否过滤无效股票
+            
+        Returns:
+            {
+                'valid_codes': 有效且活跃的股票代码,
+                'delisted': 已退市的股票,
+                'invalid': 无效的股票代码,
+                'suspended': 停牌的股票
+            }
+        """
+        print(f"[INFO] 开始股票有效性预检: {len(codes)} 只股票...")
+        
+        try:
+            # 批量检测股票状态
+            status_results = self.status_checker.batch_check_stocks(codes)
+            
+            # 分类结果
+            categorized = {
+                'valid_codes': [],
+                'delisted': [],
+                'invalid': [],
+                'suspended': []
+            }
+            
+            for code, info in status_results.items():
+                if info['status'] == 'active':
+                    categorized['valid_codes'].append(code)
+                elif info['status'] == 'delisted':
+                    categorized['delisted'].append(code)
+                elif info['status'] == 'invalid':
+                    categorized['invalid'].append(code)
+                elif info['status'] == 'suspended':
+                    categorized['suspended'].append(code)
+            
+            # 报告结果
+            print(f"[SUCCESS] 股票预检完成:")
+            print(f"  OK 有效活跃: {len(categorized['valid_codes'])} 只")
+            print(f"  DELISTED 已退市: {len(categorized['delisted'])} 只 {categorized['delisted'][:5]}{'...' if len(categorized['delisted']) > 5 else ''}")
+            print(f"  INVALID 无效代码: {len(categorized['invalid'])} 只 {categorized['invalid'][:5]}{'...' if len(categorized['invalid']) > 5 else ''}")
+            print(f"  SUSPENDED 停牌特处: {len(categorized['suspended'])} 只 {categorized['suspended'][:5]}{'...' if len(categorized['suspended']) > 5 else ''}")
+            
+            return categorized
+            
+        except Exception as e:
+            print(f"[ERROR] 股票预检异常: {e}")
+            # 如果预检失败，返回原始代码列表
+            return {
+                'valid_codes': codes,
+                'delisted': [],
+                'invalid': [],
+                'suspended': []
+            }
+    
+    def clean_delisted_stocks_from_data(self, data_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        清理数据中的退市股票
+        
+        Args:
+            data_dict: 包含股票数据的字典
+            
+        Returns:
+            清理后的数据字典
+        """
+        if not STOCK_STATUS_CHECKER_AVAILABLE or not self.status_checker:
+            return data_dict
+        
+        print(f"[INFO] 开始清理数据中的退市股票...")
+        
+        try:
+            # 获取所有股票代码
+            all_codes = list(data_dict.keys())
+            if not all_codes:
+                return data_dict
+            
+            # 检查股票状态
+            validity_check = self.pre_check_stock_validity(all_codes)
+            
+            # 需要移除的股票（退市和无效）
+            codes_to_remove = validity_check['delisted'] + validity_check['invalid']
+            
+            if codes_to_remove:
+                print(f"[INFO] 发现 {len(codes_to_remove)} 只退市/无效股票，正在清理...")
+                
+                cleaned_data = {}
+                removed_count = 0
+                
+                for code, data in data_dict.items():
+                    if code not in codes_to_remove:
+                        cleaned_data[code] = data
+                    else:
+                        removed_count += 1
+                        print(f"[CLEAN] 移除退市股票数据: {code}")
+                
+                print(f"[SUCCESS] 数据清理完成，移除 {removed_count} 只退市股票")
+                print(f"[INFO] 清理后数据: {len(cleaned_data)}/{len(data_dict)} 只股票")
+                
+                return cleaned_data
+            else:
+                print(f"[INFO] 数据中无退市股票，无需清理")
+                return data_dict
+                
+        except Exception as e:
+            print(f"[ERROR] 清理退市股票数据时异常: {e}")
+            return data_dict
+    
+    def auto_clean_all_data(self):
+        """
+        自动清理所有已收集数据中的退市股票
+        """
+        print(f"[INFO] 开始自动清理所有数据中的退市股票...")
+        
+        # 清理主要数据
+        if hasattr(self, 'collected_data') and self.collected_data:
+            print(f"[INFO] 清理主要收集数据...")
+            self.collected_data = self.clean_delisted_stocks_from_data(self.collected_data)
+        
+        # 清理等待期数据
+        if hasattr(self, 'wait_period_data') and self.wait_period_data:
+            print(f"[INFO] 清理等待期数据...")
+            self.wait_period_data = self.clean_delisted_stocks_from_data(self.wait_period_data)
+        
+        # 清理其他可能的数据字典
+        for attr_name in ['kline_data_cache', 'financial_data_cache', 'basic_info_cache']:
+            if hasattr(self, attr_name):
+                attr_data = getattr(self, attr_name)
+                if isinstance(attr_data, dict) and attr_data:
+                    print(f"[INFO] 清理{attr_name}...")
+                    cleaned = self.clean_delisted_stocks_from_data(attr_data)
+                    setattr(self, attr_name, cleaned)
+        
+        print(f"[SUCCESS] 自动清理完成")
 
     def _safe_float(self, value) -> Optional[float]:
         """安全转换为浮点数"""
@@ -3268,6 +3531,32 @@ class ComprehensiveDataCollector:
         results = {}
         
         print(f"[INFO] 开始采集 {len(codes)} 只股票的综合数据 (专门化API分配策略)")
+        
+        # 预检股票有效性（过滤退市和无效股票）
+        if STOCK_STATUS_CHECKER_AVAILABLE and self.status_checker:
+            print(f"[INFO] 步骤0: 股票有效性预检...")
+            try:
+                validity_check = self.pre_check_stock_validity(codes)
+                original_count = len(codes)
+                codes = validity_check['valid_codes']  # 只使用有效的股票
+                
+                # 记录被过滤的股票
+                filtered_count = original_count - len(codes)
+                if filtered_count > 0:
+                    print(f"[INFO] 已过滤 {filtered_count} 只问题股票:")
+                    if validity_check['delisted']:
+                        print(f"  - 退市股票: {len(validity_check['delisted'])} 只")
+                    if validity_check['invalid']:
+                        print(f"  - 无效代码: {len(validity_check['invalid'])} 只")
+                    if validity_check['suspended']:
+                        print(f"  - 停牌股票: {len(validity_check['suspended'])} 只")
+                        
+                print(f"[INFO] 预检后有效股票: {len(codes)} 只")
+            except Exception as e:
+                print(f"[WARN] 股票预检异常: {e}，将继续使用原始列表")
+        else:
+            print(f"[INFO] 股票状态检测器不可用，跳过预检")
+        
         print(f"[INFO] 数据源策略: Baostock基本面 | Tencent实时资金 | YFinance估值 | AKShare兜底")
         
         # 1. 批量采集K线数据 (保持原有轮换策略: tushare ↔ akshare → JoinQuant → Alpha Vantage)
