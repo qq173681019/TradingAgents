@@ -1,11 +1,11 @@
 {
-  "date": "2025-11-26",
-  "timestamp": "2025-11-26 14:33:31",
+  "date": "2025-11-27",
+  "timestamp": "2025-11-27 11:53:11",
   "version": "2.0",
   "data": {
     "002286": {
       "code": "002286",
-      "name": "保龄宝",
+      "name": "股票002286",
       "current_price": 8.94,
       "tech_data": {
         "current_price": 8.94,
@@ -57,12 +57,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:43:06.178195",
+      "timestamp": "2025-11-27T11:19:20.162048",
       "data_source": "comprehensive_batch"
     },
     "002287": {
       "code": "002287",
-      "name": "奇正藏药",
+      "name": "股票002287",
       "current_price": 24.76,
       "tech_data": {
         "current_price": 24.76,
@@ -114,12 +114,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:43:06.396062",
+      "timestamp": "2025-11-27T11:19:20.381054",
       "data_source": "comprehensive_batch"
     },
     "002289": {
       "code": "002289",
-      "name": "*ST宇顺",
+      "name": "股票002289",
       "current_price": 36.76,
       "tech_data": {
         "current_price": 36.76,
@@ -171,12 +171,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.4,
-      "timestamp": "2025-11-26T13:43:06.613750",
+      "timestamp": "2025-11-27T11:19:20.597469",
       "data_source": "comprehensive_batch"
     },
     "002290": {
       "code": "002290",
-      "name": "禾盛新材",
+      "name": "股票002290",
       "current_price": 38.86,
       "tech_data": {
         "current_price": 38.86,
@@ -228,12 +228,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.8,
-      "timestamp": "2025-11-26T13:43:06.832383",
+      "timestamp": "2025-11-27T11:19:20.813144",
       "data_source": "comprehensive_batch"
     },
     "002291": {
       "code": "002291",
-      "name": "遥望科技",
+      "name": "股票002291",
       "current_price": 7.67,
       "tech_data": {
         "current_price": 7.67,
@@ -283,12 +283,12 @@
         "risk_level": "中高"
       },
       "overall_score": 6.5,
-      "timestamp": "2025-11-26T13:43:07.050446",
+      "timestamp": "2025-11-27T11:19:21.034381",
       "data_source": "comprehensive_batch"
     },
     "002292": {
       "code": "002292",
-      "name": "奥飞娱乐",
+      "name": "股票002292",
       "current_price": 9.34,
       "tech_data": {
         "current_price": 9.34,
@@ -339,12 +339,12 @@
         "risk_level": "中高"
       },
       "overall_score": 6.1,
-      "timestamp": "2025-11-26T13:43:07.269400",
+      "timestamp": "2025-11-27T11:19:21.254976",
       "data_source": "comprehensive_batch"
     },
     "002293": {
       "code": "002293",
-      "name": "罗莱生活",
+      "name": "股票002293",
       "current_price": 9.5,
       "tech_data": {
         "current_price": 9.5,
@@ -396,12 +396,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.3,
-      "timestamp": "2025-11-26T13:43:07.485414",
+      "timestamp": "2025-11-27T11:19:21.472980",
       "data_source": "comprehensive_batch"
     },
     "002294": {
       "code": "002294",
-      "name": "信立泰",
+      "name": "股票002294",
       "current_price": 59.1,
       "tech_data": {
         "current_price": 59.1,
@@ -452,12 +452,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:43:07.702282",
+      "timestamp": "2025-11-27T11:19:21.690571",
       "data_source": "comprehensive_batch"
     },
     "002295": {
       "code": "002295",
-      "name": "精艺股份",
+      "name": "股票002295",
       "current_price": 11.37,
       "tech_data": {
         "current_price": 11.37,
@@ -509,12 +509,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.4,
-      "timestamp": "2025-11-26T13:43:07.919129",
+      "timestamp": "2025-11-27T11:19:21.910571",
       "data_source": "comprehensive_batch"
     },
     "002296": {
       "code": "002296",
-      "name": "辉煌科技",
+      "name": "股票002296",
       "current_price": 10.61,
       "tech_data": {
         "current_price": 10.61,
@@ -566,12 +566,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:43:08.139275",
+      "timestamp": "2025-11-27T11:19:22.127572",
       "data_source": "comprehensive_batch"
     },
     "002297": {
       "code": "002297",
-      "name": "博云新材",
+      "name": "股票002297",
       "current_price": 9.16,
       "tech_data": {
         "current_price": 9.16,
@@ -623,12 +623,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.7,
-      "timestamp": "2025-11-26T13:43:08.357089",
+      "timestamp": "2025-11-27T11:19:22.347864",
       "data_source": "comprehensive_batch"
     },
     "002298": {
       "code": "002298",
-      "name": "中电鑫龙",
+      "name": "股票002298",
       "current_price": 11.06,
       "tech_data": {
         "current_price": 11.06,
@@ -680,12 +680,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.7,
-      "timestamp": "2025-11-26T13:43:08.574920",
+      "timestamp": "2025-11-27T11:19:22.565448",
       "data_source": "comprehensive_batch"
     },
     "002299": {
       "code": "002299",
-      "name": "圣农发展",
+      "name": "股票002299",
       "current_price": 16.16,
       "tech_data": {
         "current_price": 16.16,
@@ -737,12 +737,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.6,
-      "timestamp": "2025-11-26T13:43:08.794081",
+      "timestamp": "2025-11-27T11:19:22.784428",
       "data_source": "comprehensive_batch"
     },
     "002300": {
       "code": "002300",
-      "name": "太阳电缆",
+      "name": "股票002300",
       "current_price": 7.0,
       "tech_data": {
         "current_price": 7.0,
@@ -794,12 +794,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:43:09.012403",
+      "timestamp": "2025-11-27T11:19:23.000423",
       "data_source": "comprehensive_batch"
     },
     "002301": {
       "code": "002301",
-      "name": "齐心集团",
+      "name": "股票002301",
       "current_price": 7.73,
       "tech_data": {
         "current_price": 7.73,
@@ -850,12 +850,12 @@
         "risk_level": "高"
       },
       "overall_score": 5.8,
-      "timestamp": "2025-11-26T13:43:09.229709",
+      "timestamp": "2025-11-27T11:19:23.221433",
       "data_source": "comprehensive_batch"
     },
     "002302": {
       "code": "002302",
-      "name": "西部建设",
+      "name": "股票002302",
       "current_price": 6.47,
       "tech_data": {
         "current_price": 6.47,
@@ -907,12 +907,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:43:09.448281",
+      "timestamp": "2025-11-27T11:19:23.438436",
       "data_source": "comprehensive_batch"
     },
     "002303": {
       "code": "002303",
-      "name": "美盈森",
+      "name": "股票002303",
       "current_price": 4.16,
       "tech_data": {
         "current_price": 4.16,
@@ -964,12 +964,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.6,
-      "timestamp": "2025-11-26T13:43:31.304178",
+      "timestamp": "2025-11-27T11:19:23.657427",
       "data_source": "comprehensive_batch"
     },
     "002304": {
       "code": "002304",
-      "name": "洋河股份",
+      "name": "股票002304",
       "current_price": 65.71,
       "tech_data": {
         "current_price": 65.71,
@@ -984,8 +984,8 @@
         "status": "calculated"
       },
       "fund_data": {
-        "pe_ratio": 20.93,
-        "pb_ratio": 6.15,
+        "pe_ratio": 33.3,
+        "pb_ratio": 9.86,
         "roe": 5.570181,
         "revenue_growth": 0.311651,
         "debt_ratio": 0.311651,
@@ -1001,7 +1001,7 @@
         "risk_level": "低"
       },
       "medium_term": {
-        "score": 4.9,
+        "score": 4.6,
         "recommendation": "回避",
         "confidence": 76.0,
         "factors": [
@@ -1013,19 +1013,19 @@
         "risk_level": "高"
       },
       "long_term": {
-        "score": 6.1,
+        "score": 5.95,
         "recommendation": "",
-        "confidence": 60,
+        "confidence": 70,
         "factors": [],
-        "risk_level": "中等"
+        "risk_level": "中高"
       },
-      "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:43:31.520956",
+      "overall_score": 2.5,
+      "timestamp": "2025-11-27T11:19:23.875427",
       "data_source": "comprehensive_batch"
     },
     "002305": {
       "code": "002305",
-      "name": "*ST南置",
+      "name": "股票002305",
       "current_price": 2.37,
       "tech_data": {
         "current_price": 2.37,
@@ -1077,12 +1077,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.0,
-      "timestamp": "2025-11-26T13:43:31.739373",
+      "timestamp": "2025-11-27T11:19:24.094579",
       "data_source": "comprehensive_batch"
     },
     "002306": {
       "code": "002306",
-      "name": "*ST云网",
+      "name": "股票002306",
       "current_price": 2.01,
       "tech_data": {
         "current_price": 2.01,
@@ -1134,12 +1134,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.1,
-      "timestamp": "2025-11-26T13:43:31.954991",
+      "timestamp": "2025-11-27T11:19:24.312568",
       "data_source": "comprehensive_batch"
     },
     "002307": {
       "code": "002307",
-      "name": "北新路桥",
+      "name": "股票002307",
       "current_price": 5.5,
       "tech_data": {
         "current_price": 5.5,
@@ -1190,12 +1190,12 @@
         "risk_level": "高"
       },
       "overall_score": 6.3,
-      "timestamp": "2025-11-26T13:43:32.175923",
+      "timestamp": "2025-11-27T11:19:40.957600",
       "data_source": "comprehensive_batch"
     },
     "002309": {
       "code": "002309",
-      "name": "中利集团",
+      "name": "股票002309",
       "current_price": 3.25,
       "tech_data": {
         "current_price": 3.25,
@@ -1246,12 +1246,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:43:32.393269",
+      "timestamp": "2025-11-27T11:19:41.177599",
       "data_source": "comprehensive_batch"
     },
     "002310": {
       "code": "002310",
-      "name": "东方园林",
+      "name": "股票002310",
       "current_price": 2.43,
       "tech_data": {
         "current_price": 2.43,
@@ -1303,12 +1303,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.0,
-      "timestamp": "2025-11-26T13:43:32.611557",
+      "timestamp": "2025-11-27T11:19:41.395601",
       "data_source": "comprehensive_batch"
     },
     "002311": {
       "code": "002311",
-      "name": "海大集团",
+      "name": "股票002311",
       "current_price": 55.74,
       "tech_data": {
         "current_price": 55.74,
@@ -1360,12 +1360,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:43:32.828860",
+      "timestamp": "2025-11-27T11:19:41.614607",
       "data_source": "comprehensive_batch"
     },
     "002312": {
       "code": "002312",
-      "name": "川发龙蟒",
+      "name": "股票002312",
       "current_price": 12.03,
       "tech_data": {
         "current_price": 12.03,
@@ -1416,12 +1416,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:43:33.046728",
+      "timestamp": "2025-11-27T11:19:41.833605",
       "data_source": "comprehensive_batch"
     },
     "002313": {
       "code": "002313",
-      "name": "日海智能",
+      "name": "股票002313",
       "current_price": 10.97,
       "tech_data": {
         "current_price": 10.97,
@@ -1473,12 +1473,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.4,
-      "timestamp": "2025-11-26T13:43:33.264986",
+      "timestamp": "2025-11-27T11:19:42.050613",
       "data_source": "comprehensive_batch"
     },
     "002314": {
       "code": "002314",
-      "name": "南山控股",
+      "name": "股票002314",
       "current_price": 3.11,
       "tech_data": {
         "current_price": 3.11,
@@ -1529,12 +1529,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.3,
-      "timestamp": "2025-11-26T13:43:33.483487",
+      "timestamp": "2025-11-27T11:19:42.269016",
       "data_source": "comprehensive_batch"
     },
     "002315": {
       "code": "002315",
-      "name": "焦点科技",
+      "name": "股票002315",
       "current_price": 47.45,
       "tech_data": {
         "current_price": 47.45,
@@ -1585,12 +1585,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.8,
-      "timestamp": "2025-11-26T13:43:33.702454",
+      "timestamp": "2025-11-27T11:19:42.489336",
       "data_source": "comprehensive_batch"
     },
     "002316": {
       "code": "002316",
-      "name": "亚联发展",
+      "name": "股票002316",
       "current_price": 5.34,
       "tech_data": {
         "current_price": 5.34,
@@ -1642,12 +1642,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:43:33.920450",
+      "timestamp": "2025-11-27T11:19:42.706776",
       "data_source": "comprehensive_batch"
     },
     "002317": {
       "code": "002317",
-      "name": "众生药业",
+      "name": "股票002317",
       "current_price": 25.97,
       "tech_data": {
         "current_price": 25.97,
@@ -1699,12 +1699,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.1,
-      "timestamp": "2025-11-26T13:43:34.139158",
+      "timestamp": "2025-11-27T11:19:42.924777",
       "data_source": "comprehensive_batch"
     },
     "002318": {
       "code": "002318",
-      "name": "久立特材",
+      "name": "股票002318",
       "current_price": 24.65,
       "tech_data": {
         "current_price": 24.65,
@@ -1756,12 +1756,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.6,
-      "timestamp": "2025-11-26T13:43:34.357310",
+      "timestamp": "2025-11-27T11:19:43.140780",
       "data_source": "comprehensive_batch"
     },
     "002319": {
       "code": "002319",
-      "name": "乐通股份",
+      "name": "股票002319",
       "current_price": 13.33,
       "tech_data": {
         "current_price": 13.33,
@@ -1812,12 +1812,12 @@
         "risk_level": "高"
       },
       "overall_score": 5.3,
-      "timestamp": "2025-11-26T13:43:34.574488",
+      "timestamp": "2025-11-27T11:19:43.346778",
       "data_source": "comprehensive_batch"
     },
     "002320": {
       "code": "002320",
-      "name": "海峡股份",
+      "name": "股票002320",
       "current_price": 12.54,
       "tech_data": {
         "current_price": 12.54,
@@ -1869,12 +1869,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:43:34.790514",
+      "timestamp": "2025-11-27T11:19:43.563783",
       "data_source": "comprehensive_batch"
     },
     "002321": {
       "code": "002321",
-      "name": "华英农业",
+      "name": "股票002321",
       "current_price": 2.85,
       "tech_data": {
         "current_price": 2.85,
@@ -1926,12 +1926,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.4,
-      "timestamp": "2025-11-26T13:43:35.007939",
+      "timestamp": "2025-11-27T11:19:43.783779",
       "data_source": "comprehensive_batch"
     },
     "002322": {
       "code": "002322",
-      "name": "理工能科",
+      "name": "股票002322",
       "current_price": 12.38,
       "tech_data": {
         "current_price": 12.38,
@@ -1983,12 +1983,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.9,
-      "timestamp": "2025-11-26T13:43:35.227097",
+      "timestamp": "2025-11-27T11:19:44.003782",
       "data_source": "comprehensive_batch"
     },
     "002323": {
       "code": "002323",
-      "name": "雅博股份",
+      "name": "股票002323",
       "current_price": 1.74,
       "tech_data": {
         "current_price": 1.74,
@@ -2040,12 +2040,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:43:35.444901",
+      "timestamp": "2025-11-27T11:19:44.222007",
       "data_source": "comprehensive_batch"
     },
     "002324": {
       "code": "002324",
-      "name": "普利特",
+      "name": "股票002324",
       "current_price": 12.76,
       "tech_data": {
         "current_price": 12.76,
@@ -2097,12 +2097,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:43:58.770368",
+      "timestamp": "2025-11-27T11:19:44.441007",
       "data_source": "comprehensive_batch"
     },
     "002326": {
       "code": "002326",
-      "name": "永太科技",
+      "name": "股票002326",
       "current_price": 24.32,
       "tech_data": {
         "current_price": 24.32,
@@ -2153,12 +2153,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:43:58.989075",
+      "timestamp": "2025-11-27T11:19:44.659306",
       "data_source": "comprehensive_batch"
     },
     "002327": {
       "code": "002327",
-      "name": "富安娜",
+      "name": "股票002327",
       "current_price": 7.22,
       "tech_data": {
         "current_price": 7.22,
@@ -2210,12 +2210,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:43:59.206394",
+      "timestamp": "2025-11-27T11:19:44.881304",
       "data_source": "comprehensive_batch"
     },
     "002328": {
       "code": "002328",
-      "name": "新朋股份",
+      "name": "股票002328",
       "current_price": 6.55,
       "tech_data": {
         "current_price": 6.55,
@@ -2266,12 +2266,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:43:59.426559",
+      "timestamp": "2025-11-27T11:19:45.098067",
       "data_source": "comprehensive_batch"
     },
     "002329": {
       "code": "002329",
-      "name": "皇氏集团",
+      "name": "股票002329",
       "current_price": 3.67,
       "tech_data": {
         "current_price": 3.67,
@@ -2323,12 +2323,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:43:59.644814",
+      "timestamp": "2025-11-27T11:20:02.285977",
       "data_source": "comprehensive_batch"
     },
     "002330": {
       "code": "002330",
-      "name": "得利斯",
+      "name": "股票002330",
       "current_price": 5.18,
       "tech_data": {
         "current_price": 5.18,
@@ -2379,12 +2379,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:43:59.864683",
+      "timestamp": "2025-11-27T11:20:02.505390",
       "data_source": "comprehensive_batch"
     },
     "002331": {
       "code": "002331",
-      "name": "皖通科技",
+      "name": "股票002331",
       "current_price": 9.59,
       "tech_data": {
         "current_price": 9.59,
@@ -2435,12 +2435,12 @@
         "risk_level": "中高"
       },
       "overall_score": 5.2,
-      "timestamp": "2025-11-26T13:44:00.078683",
+      "timestamp": "2025-11-27T11:20:02.723523",
       "data_source": "comprehensive_batch"
     },
     "002332": {
       "code": "002332",
-      "name": "仙琚制药",
+      "name": "股票002332",
       "current_price": 9.49,
       "tech_data": {
         "current_price": 9.49,
@@ -2492,12 +2492,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.8,
-      "timestamp": "2025-11-26T13:44:00.295835",
+      "timestamp": "2025-11-27T11:20:02.944525",
       "data_source": "comprehensive_batch"
     },
     "002333": {
       "code": "002333",
-      "name": "罗普斯金",
+      "name": "股票002333",
       "current_price": 5.93,
       "tech_data": {
         "current_price": 5.93,
@@ -2549,12 +2549,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.5,
-      "timestamp": "2025-11-26T13:44:00.512385",
+      "timestamp": "2025-11-27T11:20:03.161509",
       "data_source": "comprehensive_batch"
     },
     "002334": {
       "code": "002334",
-      "name": "英威腾",
+      "name": "股票002334",
       "current_price": 8.36,
       "tech_data": {
         "current_price": 8.36,
@@ -2606,12 +2606,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:44:00.730600",
+      "timestamp": "2025-11-27T11:20:03.381701",
       "data_source": "comprehensive_batch"
     },
     "002335": {
       "code": "002335",
-      "name": "科华数据",
+      "name": "股票002335",
       "current_price": 51.96,
       "tech_data": {
         "current_price": 51.96,
@@ -2663,12 +2663,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.3,
-      "timestamp": "2025-11-26T13:44:00.952607",
+      "timestamp": "2025-11-27T11:20:03.599701",
       "data_source": "comprehensive_batch"
     },
     "002337": {
       "code": "002337",
-      "name": "赛象科技",
+      "name": "股票002337",
       "current_price": 6.01,
       "tech_data": {
         "current_price": 6.01,
@@ -2720,12 +2720,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:44:01.167112",
+      "timestamp": "2025-11-27T11:20:03.817701",
       "data_source": "comprehensive_batch"
     },
     "002338": {
       "code": "002338",
-      "name": "奥普光电",
+      "name": "股票002338",
       "current_price": 50.86,
       "tech_data": {
         "current_price": 50.86,
@@ -2777,12 +2777,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.9,
-      "timestamp": "2025-11-26T13:44:01.384734",
+      "timestamp": "2025-11-27T11:20:04.034703",
       "data_source": "comprehensive_batch"
     },
     "002339": {
       "code": "002339",
-      "name": "积成电子",
+      "name": "股票002339",
       "current_price": 7.84,
       "tech_data": {
         "current_price": 7.84,
@@ -2834,12 +2834,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.6,
-      "timestamp": "2025-11-26T13:44:01.602790",
+      "timestamp": "2025-11-27T11:20:04.252340",
       "data_source": "comprehensive_batch"
     },
     "002340": {
       "code": "002340",
-      "name": "格林美",
+      "name": "股票002340",
       "current_price": 7.58,
       "tech_data": {
         "current_price": 7.58,
@@ -2891,12 +2891,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.6,
-      "timestamp": "2025-11-26T13:44:01.821697",
+      "timestamp": "2025-11-27T11:20:04.472340",
       "data_source": "comprehensive_batch"
     },
     "002342": {
       "code": "002342",
-      "name": "巨力索具",
+      "name": "股票002342",
       "current_price": 7.33,
       "tech_data": {
         "current_price": 7.33,
@@ -2948,12 +2948,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.0,
-      "timestamp": "2025-11-26T13:44:02.037285",
+      "timestamp": "2025-11-27T11:20:04.689339",
       "data_source": "comprehensive_batch"
     },
     "002343": {
       "code": "002343",
-      "name": "慈文传媒",
+      "name": "股票002343",
       "current_price": 8.31,
       "tech_data": {
         "current_price": 8.31,
@@ -3004,12 +3004,12 @@
         "risk_level": "高"
       },
       "overall_score": 5.8,
-      "timestamp": "2025-11-26T13:44:02.255260",
+      "timestamp": "2025-11-27T11:20:04.908342",
       "data_source": "comprehensive_batch"
     },
     "002344": {
       "code": "002344",
-      "name": "海宁皮城",
+      "name": "股票002344",
       "current_price": 4.53,
       "tech_data": {
         "current_price": 4.53,
@@ -3061,12 +3061,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:44:02.473959",
+      "timestamp": "2025-11-27T11:20:05.126346",
       "data_source": "comprehensive_batch"
     },
     "002345": {
       "code": "002345",
-      "name": "潮宏基",
+      "name": "股票002345",
       "current_price": 12.3,
       "tech_data": {
         "current_price": 12.3,
@@ -3117,12 +3117,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:44:02.691750",
+      "timestamp": "2025-11-27T11:20:05.345346",
       "data_source": "comprehensive_batch"
     },
     "002346": {
       "code": "002346",
-      "name": "柘中股份",
+      "name": "股票002346",
       "current_price": 16.69,
       "tech_data": {
         "current_price": 16.69,
@@ -3174,12 +3174,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.2,
-      "timestamp": "2025-11-26T13:44:02.908080",
+      "timestamp": "2025-11-27T11:20:05.563347",
       "data_source": "comprehensive_batch"
     },
     "002347": {
       "code": "002347",
-      "name": "泰尔股份",
+      "name": "股票002347",
       "current_price": 6.76,
       "tech_data": {
         "current_price": 6.76,
@@ -3231,12 +3231,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:44:25.415872",
+      "timestamp": "2025-11-27T11:20:05.782343",
       "data_source": "comprehensive_batch"
     },
     "002348": {
       "code": "002348",
-      "name": "高乐股份",
+      "name": "股票002348",
       "current_price": 4.81,
       "tech_data": {
         "current_price": 4.81,
@@ -3287,12 +3287,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.1,
-      "timestamp": "2025-11-26T13:44:25.630371",
+      "timestamp": "2025-11-27T11:20:06.000346",
       "data_source": "comprehensive_batch"
     },
     "002349": {
       "code": "002349",
-      "name": "精华制药",
+      "name": "股票002349",
       "current_price": 8.0,
       "tech_data": {
         "current_price": 8.0,
@@ -3343,12 +3343,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.2,
-      "timestamp": "2025-11-26T13:44:25.847074",
+      "timestamp": "2025-11-27T11:20:06.219006",
       "data_source": "comprehensive_batch"
     },
     "002350": {
       "code": "002350",
-      "name": "北京科锐",
+      "name": "股票002350",
       "current_price": 8.23,
       "tech_data": {
         "current_price": 8.23,
@@ -3400,12 +3400,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.8,
-      "timestamp": "2025-11-26T13:44:26.066187",
+      "timestamp": "2025-11-27T11:20:06.436001",
       "data_source": "comprehensive_batch"
     },
     "002351": {
       "code": "002351",
-      "name": "漫步者",
+      "name": "股票002351",
       "current_price": 12.38,
       "tech_data": {
         "current_price": 12.38,
@@ -3457,12 +3457,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:44:26.285513",
+      "timestamp": "2025-11-27T11:20:23.464774",
       "data_source": "comprehensive_batch"
     },
     "002352": {
       "code": "002352",
-      "name": "顺丰控股",
+      "name": "股票002352",
       "current_price": 39.25,
       "tech_data": {
         "current_price": 39.25,
@@ -3514,12 +3514,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:44:26.500682",
+      "timestamp": "2025-11-27T11:20:23.681515",
       "data_source": "comprehensive_batch"
     },
     "002353": {
       "code": "002353",
-      "name": "杰瑞股份",
+      "name": "股票002353",
       "current_price": 52.21,
       "tech_data": {
         "current_price": 52.21,
@@ -3571,12 +3571,12 @@
         "risk_level": "中高"
       },
       "overall_score": 5.2,
-      "timestamp": "2025-11-26T13:44:26.718862",
+      "timestamp": "2025-11-27T11:20:23.901513",
       "data_source": "comprehensive_batch"
     },
     "002354": {
       "code": "002354",
-      "name": "天娱数科",
+      "name": "股票002354",
       "current_price": 7.17,
       "tech_data": {
         "current_price": 7.17,
@@ -3627,12 +3627,12 @@
         "risk_level": "高"
       },
       "overall_score": 5.6,
-      "timestamp": "2025-11-26T13:44:26.935897",
+      "timestamp": "2025-11-27T11:20:24.120130",
       "data_source": "comprehensive_batch"
     },
     "002355": {
       "code": "002355",
-      "name": "兴民智通",
+      "name": "股票002355",
       "current_price": 5.85,
       "tech_data": {
         "current_price": 5.85,
@@ -3684,12 +3684,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.9,
-      "timestamp": "2025-11-26T13:44:27.153438",
+      "timestamp": "2025-11-27T11:20:24.340529",
       "data_source": "comprehensive_batch"
     },
     "002356": {
       "code": "002356",
-      "name": "赫美集团",
+      "name": "股票002356",
       "current_price": 4.1,
       "tech_data": {
         "current_price": 4.1,
@@ -3740,12 +3740,12 @@
         "risk_level": "中高"
       },
       "overall_score": 6.7,
-      "timestamp": "2025-11-26T13:44:27.374904",
+      "timestamp": "2025-11-27T11:20:24.554774",
       "data_source": "comprehensive_batch"
     },
     "002357": {
       "code": "002357",
-      "name": "富临运业",
+      "name": "股票002357",
       "current_price": 9.98,
       "tech_data": {
         "current_price": 9.98,
@@ -3797,12 +3797,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:44:27.593709",
+      "timestamp": "2025-11-27T11:20:24.773766",
       "data_source": "comprehensive_batch"
     },
     "002358": {
       "code": "002358",
-      "name": "森源电气",
+      "name": "股票002358",
       "current_price": 5.33,
       "tech_data": {
         "current_price": 5.33,
@@ -3854,12 +3854,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.7,
-      "timestamp": "2025-11-26T13:44:27.811390",
+      "timestamp": "2025-11-27T11:20:24.994776",
       "data_source": "comprehensive_batch"
     },
     "002360": {
       "code": "002360",
-      "name": "同德化工",
+      "name": "股票002360",
       "current_price": 5.21,
       "tech_data": {
         "current_price": 5.21,
@@ -3911,12 +3911,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:44:28.027425",
+      "timestamp": "2025-11-27T11:20:25.212771",
       "data_source": "comprehensive_batch"
     },
     "002361": {
       "code": "002361",
-      "name": "神剑股份",
+      "name": "股票002361",
       "current_price": 6.44,
       "tech_data": {
         "current_price": 6.44,
@@ -3967,12 +3967,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:44:28.246549",
+      "timestamp": "2025-11-27T11:20:25.430770",
       "data_source": "comprehensive_batch"
     },
     "002362": {
       "code": "002362",
-      "name": "汉王科技",
+      "name": "股票002362",
       "current_price": 24.0,
       "tech_data": {
         "current_price": 24.0,
@@ -4023,12 +4023,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.6,
-      "timestamp": "2025-11-26T13:44:28.463374",
+      "timestamp": "2025-11-27T11:20:25.648770",
       "data_source": "comprehensive_batch"
     },
     "002363": {
       "code": "002363",
-      "name": "隆基机械",
+      "name": "股票002363",
       "current_price": 8.75,
       "tech_data": {
         "current_price": 8.75,
@@ -4079,12 +4079,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:44:28.681963",
+      "timestamp": "2025-11-27T11:20:25.866770",
       "data_source": "comprehensive_batch"
     },
     "002364": {
       "code": "002364",
-      "name": "中恒电气",
+      "name": "股票002364",
       "current_price": 24.16,
       "tech_data": {
         "current_price": 24.16,
@@ -4136,12 +4136,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.0,
-      "timestamp": "2025-11-26T13:44:28.898818",
+      "timestamp": "2025-11-27T11:20:26.086773",
       "data_source": "comprehensive_batch"
     },
     "002365": {
       "code": "002365",
-      "name": "永安药业",
+      "name": "股票002365",
       "current_price": 16.23,
       "tech_data": {
         "current_price": 16.23,
@@ -4193,12 +4193,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.5,
-      "timestamp": "2025-11-26T13:44:29.115724",
+      "timestamp": "2025-11-27T11:20:26.304774",
       "data_source": "comprehensive_batch"
     },
     "002366": {
       "code": "002366",
-      "name": "融发核电",
+      "name": "股票002366",
       "current_price": 7.33,
       "tech_data": {
         "current_price": 7.33,
@@ -4250,12 +4250,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.2,
-      "timestamp": "2025-11-26T13:44:29.334947",
+      "timestamp": "2025-11-27T11:20:26.521774",
       "data_source": "comprehensive_batch"
     },
     "002367": {
       "code": "002367",
-      "name": "康力电梯",
+      "name": "股票002367",
       "current_price": 7.15,
       "tech_data": {
         "current_price": 7.15,
@@ -4307,12 +4307,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.2,
-      "timestamp": "2025-11-26T13:44:29.554396",
+      "timestamp": "2025-11-27T11:20:26.739351",
       "data_source": "comprehensive_batch"
     },
     "002368": {
       "code": "002368",
-      "name": "太极股份",
+      "name": "股票002368",
       "current_price": 24.53,
       "tech_data": {
         "current_price": 24.53,
@@ -4364,12 +4364,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:44:52.219275",
+      "timestamp": "2025-11-27T11:20:26.958350",
       "data_source": "comprehensive_batch"
     },
     "002369": {
       "code": "002369",
-      "name": "卓翼科技",
+      "name": "股票002369",
       "current_price": 10.23,
       "tech_data": {
         "current_price": 10.23,
@@ -4421,12 +4421,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.8,
-      "timestamp": "2025-11-26T13:44:52.434098",
+      "timestamp": "2025-11-27T11:20:27.177355",
       "data_source": "comprehensive_batch"
     },
     "002370": {
       "code": "002370",
-      "name": "亚太药业",
+      "name": "股票002370",
       "current_price": 7.71,
       "tech_data": {
         "current_price": 7.71,
@@ -4478,12 +4478,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.4,
-      "timestamp": "2025-11-26T13:44:52.649921",
+      "timestamp": "2025-11-27T11:20:27.393579",
       "data_source": "comprehensive_batch"
     },
     "002371": {
       "code": "002371",
-      "name": "北方华创",
+      "name": "股票002371",
       "current_price": 418.0,
       "tech_data": {
         "current_price": 418.0,
@@ -4534,12 +4534,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.0,
-      "timestamp": "2025-11-26T13:44:52.867173",
+      "timestamp": "2025-11-27T11:20:27.609579",
       "data_source": "comprehensive_batch"
     },
     "002372": {
       "code": "002372",
-      "name": "伟星新材",
+      "name": "股票002372",
       "current_price": 10.57,
       "tech_data": {
         "current_price": 10.57,
@@ -4590,12 +4590,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.3,
-      "timestamp": "2025-11-26T13:44:53.086745",
+      "timestamp": "2025-11-27T11:20:44.179118",
       "data_source": "comprehensive_batch"
     },
     "002373": {
       "code": "002373",
-      "name": "千方科技",
+      "name": "股票002373",
       "current_price": 11.66,
       "tech_data": {
         "current_price": 11.66,
@@ -4646,12 +4646,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.7,
-      "timestamp": "2025-11-26T13:44:53.304678",
+      "timestamp": "2025-11-27T11:20:44.398123",
       "data_source": "comprehensive_batch"
     },
     "002374": {
       "code": "002374",
-      "name": "中锐股份",
+      "name": "股票002374",
       "current_price": 3.41,
       "tech_data": {
         "current_price": 3.41,
@@ -4702,12 +4702,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:44:53.521599",
+      "timestamp": "2025-11-27T11:20:44.613648",
       "data_source": "comprehensive_batch"
     },
     "002375": {
       "code": "002375",
-      "name": "亚厦股份",
+      "name": "股票002375",
       "current_price": 3.93,
       "tech_data": {
         "current_price": 3.93,
@@ -4759,12 +4759,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:44:53.740390",
+      "timestamp": "2025-11-27T11:20:44.834652",
       "data_source": "comprehensive_batch"
     },
     "002376": {
       "code": "002376",
-      "name": "新北洋",
+      "name": "股票002376",
       "current_price": 7.56,
       "tech_data": {
         "current_price": 7.56,
@@ -4816,12 +4816,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:44:53.960717",
+      "timestamp": "2025-11-27T11:20:45.052650",
       "data_source": "comprehensive_batch"
     },
     "002377": {
       "code": "002377",
-      "name": "国创高新",
+      "name": "股票002377",
       "current_price": 3.15,
       "tech_data": {
         "current_price": 3.15,
@@ -4872,12 +4872,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.9,
-      "timestamp": "2025-11-26T13:44:54.179746",
+      "timestamp": "2025-11-27T11:20:45.270271",
       "data_source": "comprehensive_batch"
     },
     "002378": {
       "code": "002378",
-      "name": "章源钨业",
+      "name": "股票002378",
       "current_price": 12.24,
       "tech_data": {
         "current_price": 12.24,
@@ -4929,12 +4929,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.2,
-      "timestamp": "2025-11-26T13:44:54.394235",
+      "timestamp": "2025-11-27T11:20:45.487589",
       "data_source": "comprehensive_batch"
     },
     "002379": {
       "code": "002379",
-      "name": "宏创控股",
+      "name": "股票002379",
       "current_price": 20.31,
       "tech_data": {
         "current_price": 20.31,
@@ -4985,12 +4985,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.3,
-      "timestamp": "2025-11-26T13:44:54.613132",
+      "timestamp": "2025-11-27T11:20:45.705875",
       "data_source": "comprehensive_batch"
     },
     "002380": {
       "code": "002380",
-      "name": "科远智慧",
+      "name": "股票002380",
       "current_price": 26.62,
       "tech_data": {
         "current_price": 26.62,
@@ -5042,12 +5042,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.2,
-      "timestamp": "2025-11-26T13:44:54.829151",
+      "timestamp": "2025-11-27T11:20:45.912869",
       "data_source": "comprehensive_batch"
     },
     "002381": {
       "code": "002381",
-      "name": "双箭股份",
+      "name": "股票002381",
       "current_price": 6.77,
       "tech_data": {
         "current_price": 6.77,
@@ -5099,12 +5099,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.0,
-      "timestamp": "2025-11-26T13:44:55.048014",
+      "timestamp": "2025-11-27T11:20:46.128871",
       "data_source": "comprehensive_batch"
     },
     "002382": {
       "code": "002382",
-      "name": "蓝帆医疗",
+      "name": "股票002382",
       "current_price": 5.65,
       "tech_data": {
         "current_price": 5.65,
@@ -5155,12 +5155,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:44:55.265259",
+      "timestamp": "2025-11-27T11:20:46.346875",
       "data_source": "comprehensive_batch"
     },
     "002383": {
       "code": "002383",
-      "name": "合众思壮",
+      "name": "股票002383",
       "current_price": 9.53,
       "tech_data": {
         "current_price": 9.53,
@@ -5211,12 +5211,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.9,
-      "timestamp": "2025-11-26T13:44:55.483552",
+      "timestamp": "2025-11-27T11:20:46.562873",
       "data_source": "comprehensive_batch"
     },
     "002384": {
       "code": "002384",
-      "name": "东山精密",
+      "name": "股票002384",
       "current_price": 69.29,
       "tech_data": {
         "current_price": 69.29,
@@ -5267,12 +5267,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:44:55.701737",
+      "timestamp": "2025-11-27T11:20:46.783289",
       "data_source": "comprehensive_batch"
     },
     "002385": {
       "code": "002385",
-      "name": "大北农",
+      "name": "股票002385",
       "current_price": 4.05,
       "tech_data": {
         "current_price": 4.05,
@@ -5324,12 +5324,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:44:55.919093",
+      "timestamp": "2025-11-27T11:20:47.002292",
       "data_source": "comprehensive_batch"
     },
     "002386": {
       "code": "002386",
-      "name": "天原股份",
+      "name": "股票002386",
       "current_price": 5.5,
       "tech_data": {
         "current_price": 5.5,
@@ -5381,12 +5381,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:44:56.136824",
+      "timestamp": "2025-11-27T11:20:47.223293",
       "data_source": "comprehensive_batch"
     },
     "002387": {
       "code": "002387",
-      "name": "维信诺",
+      "name": "股票002387",
       "current_price": 8.93,
       "tech_data": {
         "current_price": 8.93,
@@ -5437,12 +5437,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:44:56.354260",
+      "timestamp": "2025-11-27T11:20:47.443270",
       "data_source": "comprehensive_batch"
     },
     "002388": {
       "code": "002388",
-      "name": "ST新亚",
+      "name": "股票002388",
       "current_price": 6.25,
       "tech_data": {
         "current_price": 6.25,
@@ -5493,12 +5493,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.1,
-      "timestamp": "2025-11-26T13:45:19.031522",
+      "timestamp": "2025-11-27T11:20:47.661269",
       "data_source": "comprehensive_batch"
     },
     "002389": {
       "code": "002389",
-      "name": "航天彩虹",
+      "name": "股票002389",
       "current_price": 22.58,
       "tech_data": {
         "current_price": 22.58,
@@ -5549,12 +5549,12 @@
         "risk_level": "高"
       },
       "overall_score": 5.4,
-      "timestamp": "2025-11-26T13:45:19.247918",
+      "timestamp": "2025-11-27T11:20:47.873264",
       "data_source": "comprehensive_batch"
     },
     "002390": {
       "code": "002390",
-      "name": "信邦制药",
+      "name": "股票002390",
       "current_price": 3.7,
       "tech_data": {
         "current_price": 3.7,
@@ -5606,12 +5606,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:45:19.466140",
+      "timestamp": "2025-11-27T11:20:48.079266",
       "data_source": "comprehensive_batch"
     },
     "002391": {
       "code": "002391",
-      "name": "长青股份",
+      "name": "股票002391",
       "current_price": 6.07,
       "tech_data": {
         "current_price": 6.07,
@@ -5662,12 +5662,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.8,
-      "timestamp": "2025-11-26T13:45:19.682984",
+      "timestamp": "2025-11-27T11:20:48.298690",
       "data_source": "comprehensive_batch"
     },
     "002392": {
       "code": "002392",
-      "name": "北京利尔",
+      "name": "股票002392",
       "current_price": 7.28,
       "tech_data": {
         "current_price": 7.28,
@@ -5719,12 +5719,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.4,
-      "timestamp": "2025-11-26T13:45:19.901013",
+      "timestamp": "2025-11-27T11:21:04.949278",
       "data_source": "comprehensive_batch"
     },
     "002393": {
       "code": "002393",
-      "name": "力生制药",
+      "name": "股票002393",
       "current_price": 20.57,
       "tech_data": {
         "current_price": 20.57,
@@ -5776,12 +5776,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.0,
-      "timestamp": "2025-11-26T13:45:20.120150",
+      "timestamp": "2025-11-27T11:21:05.169931",
       "data_source": "comprehensive_batch"
     },
     "002394": {
       "code": "002394",
-      "name": "联发股份",
+      "name": "股票002394",
       "current_price": 12.78,
       "tech_data": {
         "current_price": 12.78,
@@ -5832,12 +5832,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.0,
-      "timestamp": "2025-11-26T13:45:20.336962",
+      "timestamp": "2025-11-27T11:21:05.392931",
       "data_source": "comprehensive_batch"
     },
     "002395": {
       "code": "002395",
-      "name": "双象股份",
+      "name": "股票002395",
       "current_price": 16.63,
       "tech_data": {
         "current_price": 16.63,
@@ -5889,12 +5889,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.7,
-      "timestamp": "2025-11-26T13:45:20.555938",
+      "timestamp": "2025-11-27T11:21:05.608933",
       "data_source": "comprehensive_batch"
     },
     "002396": {
       "code": "002396",
-      "name": "星网锐捷",
+      "name": "股票002396",
       "current_price": 26.5,
       "tech_data": {
         "current_price": 26.5,
@@ -5945,12 +5945,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.8,
-      "timestamp": "2025-11-26T13:45:20.771826",
+      "timestamp": "2025-11-27T11:21:05.824932",
       "data_source": "comprehensive_batch"
     },
     "002397": {
       "code": "002397",
-      "name": "梦洁股份",
+      "name": "股票002397",
       "current_price": 4.01,
       "tech_data": {
         "current_price": 4.01,
@@ -6002,12 +6002,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:45:20.990519",
+      "timestamp": "2025-11-27T11:21:06.046939",
       "data_source": "comprehensive_batch"
     },
     "002398": {
       "code": "002398",
-      "name": "垒知集团",
+      "name": "股票002398",
       "current_price": 6.23,
       "tech_data": {
         "current_price": 6.23,
@@ -6058,12 +6058,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.9,
-      "timestamp": "2025-11-26T13:45:21.208011",
+      "timestamp": "2025-11-27T11:21:06.261945",
       "data_source": "comprehensive_batch"
     },
     "002399": {
       "code": "002399",
-      "name": "海普瑞",
+      "name": "股票002399",
       "current_price": 11.8,
       "tech_data": {
         "current_price": 11.8,
@@ -6115,12 +6115,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.7,
-      "timestamp": "2025-11-26T13:45:21.424751",
+      "timestamp": "2025-11-27T11:21:06.476050",
       "data_source": "comprehensive_batch"
     },
     "002400": {
       "code": "002400",
-      "name": "省广集团",
+      "name": "股票002400",
       "current_price": 9.72,
       "tech_data": {
         "current_price": 9.72,
@@ -6172,12 +6172,12 @@
         "risk_level": "中高"
       },
       "overall_score": 6.0,
-      "timestamp": "2025-11-26T13:45:21.643936",
+      "timestamp": "2025-11-27T11:21:06.698322",
       "data_source": "comprehensive_batch"
     },
     "002401": {
       "code": "002401",
-      "name": "中远海科",
+      "name": "股票002401",
       "current_price": 16.77,
       "tech_data": {
         "current_price": 16.77,
@@ -6229,12 +6229,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:45:21.860773",
+      "timestamp": "2025-11-27T11:21:06.916325",
       "data_source": "comprehensive_batch"
     },
     "002402": {
       "code": "002402",
-      "name": "和而泰",
+      "name": "股票002402",
       "current_price": 47.5,
       "tech_data": {
         "current_price": 47.5,
@@ -6285,12 +6285,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:45:22.076948",
+      "timestamp": "2025-11-27T11:21:07.133327",
       "data_source": "comprehensive_batch"
     },
     "002403": {
       "code": "002403",
-      "name": "爱仕达",
+      "name": "股票002403",
       "current_price": 12.95,
       "tech_data": {
         "current_price": 12.95,
@@ -6342,12 +6342,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.8,
-      "timestamp": "2025-11-26T13:45:22.292899",
+      "timestamp": "2025-11-27T11:21:07.351930",
       "data_source": "comprehensive_batch"
     },
     "002404": {
       "code": "002404",
-      "name": "嘉欣丝绸",
+      "name": "股票002404",
       "current_price": 6.78,
       "tech_data": {
         "current_price": 6.78,
@@ -6397,12 +6397,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.3,
-      "timestamp": "2025-11-26T13:45:22.510955",
+      "timestamp": "2025-11-27T11:21:07.568932",
       "data_source": "comprehensive_batch"
     },
     "002405": {
       "code": "002405",
-      "name": "四维图新",
+      "name": "股票002405",
       "current_price": 8.46,
       "tech_data": {
         "current_price": 8.46,
@@ -6454,12 +6454,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:45:22.728439",
+      "timestamp": "2025-11-27T11:21:07.787935",
       "data_source": "comprehensive_batch"
     },
     "002406": {
       "code": "002406",
-      "name": "远东传动",
+      "name": "股票002406",
       "current_price": 7.71,
       "tech_data": {
         "current_price": 7.71,
@@ -6511,12 +6511,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:45:22.947201",
+      "timestamp": "2025-11-27T11:21:08.006937",
       "data_source": "comprehensive_batch"
     },
     "002407": {
       "code": "002407",
-      "name": "多氟多",
+      "name": "股票002407",
       "current_price": 33.38,
       "tech_data": {
         "current_price": 33.38,
@@ -6567,12 +6567,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:45:23.164390",
+      "timestamp": "2025-11-27T11:21:08.226612",
       "data_source": "comprehensive_batch"
     },
     "002408": {
       "code": "002408",
-      "name": "齐翔腾达",
+      "name": "股票002408",
       "current_price": 4.76,
       "tech_data": {
         "current_price": 4.76,
@@ -6624,12 +6624,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.9,
-      "timestamp": "2025-11-26T13:45:44.301171",
+      "timestamp": "2025-11-27T11:21:08.443612",
       "data_source": "comprehensive_batch"
     },
     "002409": {
       "code": "002409",
-      "name": "雅克科技",
+      "name": "股票002409",
       "current_price": 68.97,
       "tech_data": {
         "current_price": 68.97,
@@ -6681,12 +6681,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.0,
-      "timestamp": "2025-11-26T13:45:44.518470",
+      "timestamp": "2025-11-27T11:21:08.661118",
       "data_source": "comprehensive_batch"
     },
     "002410": {
       "code": "002410",
-      "name": "广联达",
+      "name": "股票002410",
       "current_price": 12.9,
       "tech_data": {
         "current_price": 12.9,
@@ -6738,12 +6738,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:45:44.733778",
+      "timestamp": "2025-11-27T11:21:08.879113",
       "data_source": "comprehensive_batch"
     },
     "002412": {
       "code": "002412",
-      "name": "汉森制药",
+      "name": "股票002412",
       "current_price": 6.77,
       "tech_data": {
         "current_price": 6.77,
@@ -6794,12 +6794,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:45:44.954615",
+      "timestamp": "2025-11-27T11:21:09.097785",
       "data_source": "comprehensive_batch"
     },
     "002413": {
       "code": "002413",
-      "name": "雷科防务",
+      "name": "股票002413",
       "current_price": 7.01,
       "tech_data": {
         "current_price": 7.01,
@@ -6851,12 +6851,12 @@
         "risk_level": "中高"
       },
       "overall_score": 5.5,
-      "timestamp": "2025-11-26T13:45:45.171615",
+      "timestamp": "2025-11-27T11:21:28.249900",
       "data_source": "comprehensive_batch"
     },
     "002414": {
       "code": "002414",
-      "name": "高德红外",
+      "name": "股票002414",
       "current_price": 12.23,
       "tech_data": {
         "current_price": 12.23,
@@ -6908,12 +6908,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:45:45.390619",
+      "timestamp": "2025-11-27T11:21:28.468899",
       "data_source": "comprehensive_batch"
     },
     "002415": {
       "code": "002415",
-      "name": "海康威视",
+      "name": "股票002415",
       "current_price": 29.99,
       "tech_data": {
         "current_price": 29.99,
@@ -6928,8 +6928,8 @@
         "status": "calculated"
       },
       "fund_data": {
-        "pe_ratio": 15.72,
-        "pb_ratio": 5.11,
+        "pe_ratio": 31.72,
+        "pb_ratio": 9.91,
         "roe": 1.447397,
         "revenue_growth": 0.137061,
         "debt_ratio": 0.137061,
@@ -6945,7 +6945,7 @@
         "risk_level": "中等"
       },
       "medium_term": {
-        "score": 4.9,
+        "score": 4.6,
         "recommendation": "回避",
         "confidence": 69.6,
         "factors": [
@@ -6958,19 +6958,19 @@
         "risk_level": "高"
       },
       "long_term": {
-        "score": 6.15,
+        "score": 5.8,
         "recommendation": "",
-        "confidence": 70,
+        "confidence": 80,
         "factors": [],
-        "risk_level": "中高"
+        "risk_level": "高"
       },
-      "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:45:45.609308",
+      "overall_score": 1.6,
+      "timestamp": "2025-11-27T11:21:28.685927",
       "data_source": "comprehensive_batch"
     },
     "002416": {
       "code": "002416",
-      "name": "爱施德",
+      "name": "股票002416",
       "current_price": 11.86,
       "tech_data": {
         "current_price": 11.86,
@@ -7022,12 +7022,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:45:45.826314",
+      "timestamp": "2025-11-27T11:21:28.901778",
       "data_source": "comprehensive_batch"
     },
     "002418": {
       "code": "002418",
-      "name": "康盛股份",
+      "name": "股票002418",
       "current_price": 4.79,
       "tech_data": {
         "current_price": 4.79,
@@ -7079,12 +7079,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.9,
-      "timestamp": "2025-11-26T13:45:46.047308",
+      "timestamp": "2025-11-27T11:21:29.105411",
       "data_source": "comprehensive_batch"
     },
     "002419": {
       "code": "002419",
-      "name": "天虹股份",
+      "name": "股票002419",
       "current_price": 5.4,
       "tech_data": {
         "current_price": 5.4,
@@ -7136,12 +7136,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:45:46.264326",
+      "timestamp": "2025-11-27T11:21:29.310832",
       "data_source": "comprehensive_batch"
     },
     "002420": {
       "code": "002420",
-      "name": "毅昌科技",
+      "name": "股票002420",
       "current_price": 7.13,
       "tech_data": {
         "current_price": 7.13,
@@ -7193,12 +7193,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.7,
-      "timestamp": "2025-11-26T13:45:46.483493",
+      "timestamp": "2025-11-27T11:21:29.530264",
       "data_source": "comprehensive_batch"
     },
     "002421": {
       "code": "002421",
-      "name": "达实智能",
+      "name": "股票002421",
       "current_price": 2.99,
       "tech_data": {
         "current_price": 2.99,
@@ -7213,8 +7213,8 @@
         "status": "calculated"
       },
       "fund_data": {
-        "pe_ratio": 25.22,
-        "pb_ratio": 8.33,
+        "pe_ratio": 54.52,
+        "pb_ratio": 17.12,
         "roe": 0.026657,
         "revenue_growth": 0.021781,
         "debt_ratio": 0.021781,
@@ -7230,7 +7230,7 @@
         "risk_level": "低"
       },
       "medium_term": {
-        "score": 5.95,
+        "score": 5.45,
         "recommendation": "观望",
         "confidence": 50,
         "factors": [
@@ -7243,19 +7243,19 @@
         "risk_level": "低"
       },
       "long_term": {
-        "score": 5.8,
+        "score": 5.6,
         "recommendation": "",
         "confidence": 80,
         "factors": [],
         "risk_level": "高"
       },
-      "overall_score": 3.9,
-      "timestamp": "2025-11-26T13:45:46.700283",
+      "overall_score": 3.3,
+      "timestamp": "2025-11-27T11:21:29.751756",
       "data_source": "comprehensive_batch"
     },
     "002422": {
       "code": "002422",
-      "name": "科伦药业",
+      "name": "股票002422",
       "current_price": 33.35,
       "tech_data": {
         "current_price": 33.35,
@@ -7270,8 +7270,8 @@
         "status": "calculated"
       },
       "fund_data": {
-        "pe_ratio": 34.04,
-        "pb_ratio": 10.64,
+        "pe_ratio": 63.08,
+        "pb_ratio": 19.35,
         "roe": 1.850479,
         "revenue_growth": 0.173986,
         "debt_ratio": 0.173986,
@@ -7300,19 +7300,19 @@
         "risk_level": "低"
       },
       "long_term": {
-        "score": 5.8,
+        "score": 5.6,
         "recommendation": "",
         "confidence": 80,
         "factors": [],
         "risk_level": "高"
       },
-      "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:45:46.918148",
+      "overall_score": 3.5,
+      "timestamp": "2025-11-27T11:21:29.992213",
       "data_source": "comprehensive_batch"
     },
     "002423": {
       "code": "002423",
-      "name": "中粮资本",
+      "name": "股票002423",
       "current_price": 11.68,
       "tech_data": {
         "current_price": 11.68,
@@ -7364,12 +7364,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.2,
-      "timestamp": "2025-11-26T13:45:47.136538",
+      "timestamp": "2025-11-27T11:21:30.204022",
       "data_source": "comprehensive_batch"
     },
     "002424": {
       "code": "002424",
-      "name": "贵州百灵",
+      "name": "股票002424",
       "current_price": 5.72,
       "tech_data": {
         "current_price": 5.72,
@@ -7421,12 +7421,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.1,
-      "timestamp": "2025-11-26T13:45:47.356239",
+      "timestamp": "2025-11-27T11:21:30.467040",
       "data_source": "comprehensive_batch"
     },
     "002425": {
       "code": "002425",
-      "name": "ST凯文",
+      "name": "股票002425",
       "current_price": 4.05,
       "tech_data": {
         "current_price": 4.05,
@@ -7478,12 +7478,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.7,
-      "timestamp": "2025-11-26T13:45:47.572208",
+      "timestamp": "2025-11-27T11:21:30.699047",
       "data_source": "comprehensive_batch"
     },
     "002426": {
       "code": "002426",
-      "name": "胜利精密",
+      "name": "股票002426",
       "current_price": 3.51,
       "tech_data": {
         "current_price": 3.51,
@@ -7534,12 +7534,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:45:47.791045",
+      "timestamp": "2025-11-27T11:21:30.918047",
       "data_source": "comprehensive_batch"
     },
     "002427": {
       "code": "002427",
-      "name": "尤夫股份",
+      "name": "股票002427",
       "current_price": 6.5,
       "tech_data": {
         "current_price": 6.5,
@@ -7591,12 +7591,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.5,
-      "timestamp": "2025-11-26T13:45:48.005945",
+      "timestamp": "2025-11-27T11:21:31.136049",
       "data_source": "comprehensive_batch"
     },
     "002428": {
       "code": "002428",
-      "name": "云南锗业",
+      "name": "股票002428",
       "current_price": 24.81,
       "tech_data": {
         "current_price": 24.81,
@@ -7648,12 +7648,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.1,
-      "timestamp": "2025-11-26T13:45:48.224885",
+      "timestamp": "2025-11-27T11:21:31.354050",
       "data_source": "comprehensive_batch"
     },
     "002429": {
       "code": "002429",
-      "name": "兆驰股份",
+      "name": "股票002429",
       "current_price": 6.26,
       "tech_data": {
         "current_price": 6.26,
@@ -7704,12 +7704,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.7,
-      "timestamp": "2025-11-26T13:45:48.442939",
+      "timestamp": "2025-11-27T11:21:31.572051",
       "data_source": "comprehensive_batch"
     },
     "002430": {
       "code": "002430",
-      "name": "杭氧股份",
+      "name": "股票002430",
       "current_price": 26.9,
       "tech_data": {
         "current_price": 26.9,
@@ -7761,12 +7761,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.3,
-      "timestamp": "2025-11-26T13:46:11.649237",
+      "timestamp": "2025-11-27T11:21:31.790052",
       "data_source": "comprehensive_batch"
     },
     "002431": {
       "code": "002431",
-      "name": "棕榈股份",
+      "name": "股票002431",
       "current_price": 2.67,
       "tech_data": {
         "current_price": 2.67,
@@ -7818,12 +7818,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.2,
-      "timestamp": "2025-11-26T13:46:11.866894",
+      "timestamp": "2025-11-27T11:21:32.010053",
       "data_source": "comprehensive_batch"
     },
     "002432": {
       "code": "002432",
-      "name": "九安医疗",
+      "name": "股票002432",
       "current_price": 41.81,
       "tech_data": {
         "current_price": 41.81,
@@ -7874,12 +7874,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:46:12.085331",
+      "timestamp": "2025-11-27T11:21:32.227054",
       "data_source": "comprehensive_batch"
     },
     "002434": {
       "code": "002434",
-      "name": "万里扬",
+      "name": "股票002434",
       "current_price": 8.59,
       "tech_data": {
         "current_price": 8.59,
@@ -7931,12 +7931,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.1,
-      "timestamp": "2025-11-26T13:46:12.302600",
+      "timestamp": "2025-11-27T11:21:32.443055",
       "data_source": "comprehensive_batch"
     },
     "002436": {
       "code": "002436",
-      "name": "兴森科技",
+      "name": "股票002436",
       "current_price": 20.1,
       "tech_data": {
         "current_price": 20.1,
@@ -7988,12 +7988,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.9,
-      "timestamp": "2025-11-26T13:46:12.521016",
+      "timestamp": "2025-11-27T11:21:52.944707",
       "data_source": "comprehensive_batch"
     },
     "002437": {
       "code": "002437",
-      "name": "誉衡药业",
+      "name": "股票002437",
       "current_price": 3.22,
       "tech_data": {
         "current_price": 3.22,
@@ -8045,12 +8045,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:46:12.738695",
+      "timestamp": "2025-11-27T11:21:53.165710",
       "data_source": "comprehensive_batch"
     },
     "002438": {
       "code": "002438",
-      "name": "江苏神通",
+      "name": "股票002438",
       "current_price": 13.72,
       "tech_data": {
         "current_price": 13.72,
@@ -8102,12 +8102,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.0,
-      "timestamp": "2025-11-26T13:46:12.956620",
+      "timestamp": "2025-11-27T11:21:53.383710",
       "data_source": "comprehensive_batch"
     },
     "002439": {
       "code": "002439",
-      "name": "启明星辰",
+      "name": "股票002439",
       "current_price": 14.91,
       "tech_data": {
         "current_price": 14.91,
@@ -8159,12 +8159,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.6,
-      "timestamp": "2025-11-26T13:46:13.174607",
+      "timestamp": "2025-11-27T11:21:53.602709",
       "data_source": "comprehensive_batch"
     },
     "002440": {
       "code": "002440",
-      "name": "闰土股份",
+      "name": "股票002440",
       "current_price": 7.08,
       "tech_data": {
         "current_price": 7.08,
@@ -8216,12 +8216,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.6,
-      "timestamp": "2025-11-26T13:46:13.388697",
+      "timestamp": "2025-11-27T11:21:53.820288",
       "data_source": "comprehensive_batch"
     },
     "002441": {
       "code": "002441",
-      "name": "众业达",
+      "name": "股票002441",
       "current_price": 9.15,
       "tech_data": {
         "current_price": 9.15,
@@ -8273,12 +8273,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.2,
-      "timestamp": "2025-11-26T13:46:13.608666",
+      "timestamp": "2025-11-27T11:21:54.039192",
       "data_source": "comprehensive_batch"
     },
     "002442": {
       "code": "002442",
-      "name": "龙星科技",
+      "name": "股票002442",
       "current_price": 6.42,
       "tech_data": {
         "current_price": 6.42,
@@ -8329,12 +8329,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.3,
-      "timestamp": "2025-11-26T13:46:13.827351",
+      "timestamp": "2025-11-27T11:21:54.256969",
       "data_source": "comprehensive_batch"
     },
     "002443": {
       "code": "002443",
-      "name": "金洲管道",
+      "name": "股票002443",
       "current_price": 7.64,
       "tech_data": {
         "current_price": 7.64,
@@ -8386,12 +8386,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:46:14.044164",
+      "timestamp": "2025-11-27T11:21:54.472808",
       "data_source": "comprehensive_batch"
     },
     "002444": {
       "code": "002444",
-      "name": "巨星科技",
+      "name": "股票002444",
       "current_price": 29.91,
       "tech_data": {
         "current_price": 29.91,
@@ -8443,12 +8443,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:46:14.260244",
+      "timestamp": "2025-11-27T11:21:54.691389",
       "data_source": "comprehensive_batch"
     },
     "002445": {
       "code": "002445",
-      "name": "中南文化",
+      "name": "股票002445",
       "current_price": 2.55,
       "tech_data": {
         "current_price": 2.55,
@@ -8500,12 +8500,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:46:14.478182",
+      "timestamp": "2025-11-27T11:21:54.910656",
       "data_source": "comprehensive_batch"
     },
     "002446": {
       "code": "002446",
-      "name": "盛路通信",
+      "name": "股票002446",
       "current_price": 8.39,
       "tech_data": {
         "current_price": 8.39,
@@ -8557,12 +8557,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.7,
-      "timestamp": "2025-11-26T13:46:14.695225",
+      "timestamp": "2025-11-27T11:21:55.129023",
       "data_source": "comprehensive_batch"
     },
     "002448": {
       "code": "002448",
-      "name": "中原内配",
+      "name": "股票002448",
       "current_price": 10.49,
       "tech_data": {
         "current_price": 10.49,
@@ -8614,12 +8614,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:46:14.912467",
+      "timestamp": "2025-11-27T11:21:55.348028",
       "data_source": "comprehensive_batch"
     },
     "002449": {
       "code": "002449",
-      "name": "国星光电",
+      "name": "股票002449",
       "current_price": 8.71,
       "tech_data": {
         "current_price": 8.71,
@@ -8671,12 +8671,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.8,
-      "timestamp": "2025-11-26T13:46:15.129126",
+      "timestamp": "2025-11-27T11:21:55.565025",
       "data_source": "comprehensive_batch"
     },
     "002451": {
       "code": "002451",
-      "name": "摩恩电气",
+      "name": "股票002451",
       "current_price": 10.37,
       "tech_data": {
         "current_price": 10.37,
@@ -8727,12 +8727,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:46:15.349137",
+      "timestamp": "2025-11-27T11:21:55.782029",
       "data_source": "comprehensive_batch"
     },
     "002452": {
       "code": "002452",
-      "name": "长高电新",
+      "name": "股票002452",
       "current_price": 7.85,
       "tech_data": {
         "current_price": 7.85,
@@ -8784,12 +8784,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:46:15.565270",
+      "timestamp": "2025-11-27T11:21:56.002026",
       "data_source": "comprehensive_batch"
     },
     "002453": {
       "code": "002453",
-      "name": "华软科技",
+      "name": "股票002453",
       "current_price": 8.03,
       "tech_data": {
         "current_price": 8.03,
@@ -8841,12 +8841,12 @@
         "risk_level": "中高"
       },
       "overall_score": 5.1,
-      "timestamp": "2025-11-26T13:46:15.782387",
+      "timestamp": "2025-11-27T11:21:56.219028",
       "data_source": "comprehensive_batch"
     },
     "002454": {
       "code": "002454",
-      "name": "松芝股份",
+      "name": "股票002454",
       "current_price": 8.35,
       "tech_data": {
         "current_price": 8.35,
@@ -8898,12 +8898,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.6,
-      "timestamp": "2025-11-26T13:46:37.149311",
+      "timestamp": "2025-11-27T11:21:56.438029",
       "data_source": "comprehensive_batch"
     },
     "002455": {
       "code": "002455",
-      "name": "百川股份",
+      "name": "股票002455",
       "current_price": 8.01,
       "tech_data": {
         "current_price": 8.01,
@@ -8954,12 +8954,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.8,
-      "timestamp": "2025-11-26T13:46:37.368086",
+      "timestamp": "2025-11-27T11:21:56.656670",
       "data_source": "comprehensive_batch"
     },
     "002456": {
       "code": "002456",
-      "name": "欧菲光",
+      "name": "股票002456",
       "current_price": 11.38,
       "tech_data": {
         "current_price": 11.38,
@@ -9011,12 +9011,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:46:37.586954",
+      "timestamp": "2025-11-27T11:21:56.876669",
       "data_source": "comprehensive_batch"
     },
     "002457": {
       "code": "002457",
-      "name": "青龙管业",
+      "name": "股票002457",
       "current_price": 11.22,
       "tech_data": {
         "current_price": 11.22,
@@ -9068,12 +9068,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.3,
-      "timestamp": "2025-11-26T13:46:37.804334",
+      "timestamp": "2025-11-27T11:21:57.093669",
       "data_source": "comprehensive_batch"
     },
     "002458": {
       "code": "002458",
-      "name": "益生股份",
+      "name": "股票002458",
       "current_price": 8.61,
       "tech_data": {
         "current_price": 8.61,
@@ -9125,12 +9125,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.7,
-      "timestamp": "2025-11-26T13:46:38.022436",
+      "timestamp": "2025-11-27T11:22:13.802542",
       "data_source": "comprehensive_batch"
     },
     "002459": {
       "code": "002459",
-      "name": "晶澳科技",
+      "name": "股票002459",
       "current_price": 12.19,
       "tech_data": {
         "current_price": 12.19,
@@ -9182,12 +9182,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:46:38.239892",
+      "timestamp": "2025-11-27T11:22:14.009549",
       "data_source": "comprehensive_batch"
     },
     "002460": {
       "code": "002460",
-      "name": "赣锋锂业",
+      "name": "股票002460",
       "current_price": 60.9,
       "tech_data": {
         "current_price": 60.9,
@@ -9202,8 +9202,8 @@
         "status": "calculated"
       },
       "fund_data": {
-        "pe_ratio": 16.52,
-        "pb_ratio": 5.09,
+        "pe_ratio": 28.04,
+        "pb_ratio": 8.54,
         "roe": -0.844465,
         "revenue_growth": -0.074117,
         "debt_ratio": -0.074117,
@@ -9232,19 +9232,19 @@
         "risk_level": "高"
       },
       "long_term": {
-        "score": 6.15,
+        "score": 5.8,
         "recommendation": "",
-        "confidence": 70,
+        "confidence": 80,
         "factors": [],
-        "risk_level": "中高"
+        "risk_level": "高"
       },
-      "overall_score": 2.7,
-      "timestamp": "2025-11-26T13:46:38.459316",
+      "overall_score": 2.2,
+      "timestamp": "2025-11-27T11:22:14.228136",
       "data_source": "comprehensive_batch"
     },
     "002461": {
       "code": "002461",
-      "name": "珠江啤酒",
+      "name": "股票002461",
       "current_price": 9.3,
       "tech_data": {
         "current_price": 9.3,
@@ -9296,12 +9296,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.2,
-      "timestamp": "2025-11-26T13:46:38.675315",
+      "timestamp": "2025-11-27T11:22:14.447938",
       "data_source": "comprehensive_batch"
     },
     "002462": {
       "code": "002462",
-      "name": "嘉事堂",
+      "name": "股票002462",
       "current_price": 15.33,
       "tech_data": {
         "current_price": 15.33,
@@ -9352,12 +9352,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.7,
-      "timestamp": "2025-11-26T13:46:38.891287",
+      "timestamp": "2025-11-27T11:22:14.663444",
       "data_source": "comprehensive_batch"
     },
     "002463": {
       "code": "002463",
-      "name": "沪电股份",
+      "name": "股票002463",
       "current_price": 66.95,
       "tech_data": {
         "current_price": 66.95,
@@ -9409,12 +9409,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.4,
-      "timestamp": "2025-11-26T13:46:39.111212",
+      "timestamp": "2025-11-27T11:22:14.883443",
       "data_source": "comprehensive_batch"
     },
     "002465": {
       "code": "002465",
-      "name": "海格通信",
+      "name": "股票002465",
       "current_price": 12.1,
       "tech_data": {
         "current_price": 12.1,
@@ -9465,12 +9465,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.2,
-      "timestamp": "2025-11-26T13:46:39.327753",
+      "timestamp": "2025-11-27T11:22:15.099662",
       "data_source": "comprehensive_batch"
     },
     "002466": {
       "code": "002466",
-      "name": "天齐锂业",
+      "name": "股票002466",
       "current_price": 53.7,
       "tech_data": {
         "current_price": 53.7,
@@ -9522,12 +9522,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.1,
-      "timestamp": "2025-11-26T13:46:39.549524",
+      "timestamp": "2025-11-27T11:22:15.319816",
       "data_source": "comprehensive_batch"
     },
     "002467": {
       "code": "002467",
-      "name": "二六三",
+      "name": "股票002467",
       "current_price": 6.63,
       "tech_data": {
         "current_price": 6.63,
@@ -9579,12 +9579,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.6,
-      "timestamp": "2025-11-26T13:46:39.765488",
+      "timestamp": "2025-11-27T11:22:15.537452",
       "data_source": "comprehensive_batch"
     },
     "002468": {
       "code": "002468",
-      "name": "申通快递",
+      "name": "股票002468",
       "current_price": 14.31,
       "tech_data": {
         "current_price": 14.31,
@@ -9636,12 +9636,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.9,
-      "timestamp": "2025-11-26T13:46:39.982338",
+      "timestamp": "2025-11-27T11:22:15.756452",
       "data_source": "comprehensive_batch"
     },
     "002469": {
       "code": "002469",
-      "name": "三维化学",
+      "name": "股票002469",
       "current_price": 8.24,
       "tech_data": {
         "current_price": 8.24,
@@ -9693,12 +9693,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.1,
-      "timestamp": "2025-11-26T13:46:40.199148",
+      "timestamp": "2025-11-27T11:22:15.974189",
       "data_source": "comprehensive_batch"
     },
     "002470": {
       "code": "002470",
-      "name": "金正大",
+      "name": "股票002470",
       "current_price": 1.82,
       "tech_data": {
         "current_price": 1.82,
@@ -9750,12 +9750,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:46:40.415339",
+      "timestamp": "2025-11-27T11:22:16.189184",
       "data_source": "comprehensive_batch"
     },
     "002471": {
       "code": "002471",
-      "name": "中超控股",
+      "name": "股票002471",
       "current_price": 4.16,
       "tech_data": {
         "current_price": 4.16,
@@ -9807,12 +9807,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.0,
-      "timestamp": "2025-11-26T13:46:40.634336",
+      "timestamp": "2025-11-27T11:22:16.398189",
       "data_source": "comprehensive_batch"
     },
     "002472": {
       "code": "002472",
-      "name": "双环传动",
+      "name": "股票002472",
       "current_price": 39.11,
       "tech_data": {
         "current_price": 39.11,
@@ -9864,12 +9864,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.2,
-      "timestamp": "2025-11-26T13:46:40.851757",
+      "timestamp": "2025-11-27T11:22:16.614576",
       "data_source": "comprehensive_batch"
     },
     "002474": {
       "code": "002474",
-      "name": "榕基软件",
+      "name": "股票002474",
       "current_price": 13.71,
       "tech_data": {
         "current_price": 13.71,
@@ -9921,12 +9921,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.6,
-      "timestamp": "2025-11-26T13:46:41.068703",
+      "timestamp": "2025-11-27T11:22:16.833575",
       "data_source": "comprehensive_batch"
     },
     "002475": {
       "code": "002475",
-      "name": "立讯精密",
+      "name": "股票002475",
       "current_price": 55.7,
       "tech_data": {
         "current_price": 55.7,
@@ -9978,12 +9978,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.7,
-      "timestamp": "2025-11-26T13:46:41.286524",
+      "timestamp": "2025-11-27T11:22:17.053589",
       "data_source": "comprehensive_batch"
     },
     "002476": {
       "code": "002476",
-      "name": "宝莫股份",
+      "name": "股票002476",
       "current_price": 6.07,
       "tech_data": {
         "current_price": 6.07,
@@ -10034,12 +10034,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.9,
-      "timestamp": "2025-11-26T13:47:04.535017",
+      "timestamp": "2025-11-27T11:22:17.273580",
       "data_source": "comprehensive_batch"
     },
     "002478": {
       "code": "002478",
-      "name": "常宝股份",
+      "name": "股票002478",
       "current_price": 7.42,
       "tech_data": {
         "current_price": 7.42,
@@ -10091,12 +10091,12 @@
         "risk_level": "中高"
       },
       "overall_score": 4.5,
-      "timestamp": "2025-11-26T13:47:04.751839",
+      "timestamp": "2025-11-27T11:22:17.492423",
       "data_source": "comprehensive_batch"
     },
     "002479": {
       "code": "002479",
-      "name": "富春环保",
+      "name": "股票002479",
       "current_price": 4.94,
       "tech_data": {
         "current_price": 4.94,
@@ -10148,12 +10148,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:47:04.967840",
+      "timestamp": "2025-11-27T11:22:17.707387",
       "data_source": "comprehensive_batch"
     },
     "002480": {
       "code": "002480",
-      "name": "新筑股份",
+      "name": "股票002480",
       "current_price": 6.4,
       "tech_data": {
         "current_price": 6.4,
@@ -10205,12 +10205,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:47:05.187439",
+      "timestamp": "2025-11-27T11:22:17.924570",
       "data_source": "comprehensive_batch"
     },
     "002481": {
       "code": "002481",
-      "name": "双塔食品",
+      "name": "股票002481",
       "current_price": 5.55,
       "tech_data": {
         "current_price": 5.55,
@@ -10262,12 +10262,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:47:05.405181",
+      "timestamp": "2025-11-27T11:22:37.040724",
       "data_source": "comprehensive_batch"
     },
     "002482": {
       "code": "002482",
-      "name": "广田集团",
+      "name": "股票002482",
       "current_price": 1.83,
       "tech_data": {
         "current_price": 1.83,
@@ -10319,12 +10319,12 @@
         "risk_level": "中高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:47:05.620710",
+      "timestamp": "2025-11-27T11:22:37.261724",
       "data_source": "comprehensive_batch"
     },
     "002483": {
       "code": "002483",
-      "name": "润邦股份",
+      "name": "股票002483",
       "current_price": 6.54,
       "tech_data": {
         "current_price": 6.54,
@@ -10376,12 +10376,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:47:05.838409",
+      "timestamp": "2025-11-27T11:22:37.479725",
       "data_source": "comprehensive_batch"
     },
     "002484": {
       "code": "002484",
-      "name": "江海股份",
+      "name": "股票002484",
       "current_price": 26.84,
       "tech_data": {
         "current_price": 26.84,
@@ -10433,12 +10433,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.0,
-      "timestamp": "2025-11-26T13:47:06.053691",
+      "timestamp": "2025-11-27T11:22:37.698416",
       "data_source": "comprehensive_batch"
     },
     "002485": {
       "code": "002485",
-      "name": "ST雪发",
+      "name": "股票002485",
       "current_price": 4.64,
       "tech_data": {
         "current_price": 4.64,
@@ -10490,12 +10490,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.9,
-      "timestamp": "2025-11-26T13:47:06.271100",
+      "timestamp": "2025-11-27T11:22:37.915418",
       "data_source": "comprehensive_batch"
     },
     "002486": {
       "code": "002486",
-      "name": "嘉麟杰",
+      "name": "股票002486",
       "current_price": 3.01,
       "tech_data": {
         "current_price": 3.01,
@@ -10547,12 +10547,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.8,
-      "timestamp": "2025-11-26T13:47:06.489652",
+      "timestamp": "2025-11-27T11:22:38.135420",
       "data_source": "comprehensive_batch"
     },
     "002487": {
       "code": "002487",
-      "name": "大金重工",
+      "name": "股票002487",
       "current_price": 49.2,
       "tech_data": {
         "current_price": 49.2,
@@ -10603,12 +10603,12 @@
         "risk_level": "中高"
       },
       "overall_score": 5.2,
-      "timestamp": "2025-11-26T13:47:06.708174",
+      "timestamp": "2025-11-27T11:22:38.352420",
       "data_source": "comprehensive_batch"
     },
     "002488": {
       "code": "002488",
-      "name": "金固股份",
+      "name": "股票002488",
       "current_price": 8.79,
       "tech_data": {
         "current_price": 8.79,
@@ -10660,12 +10660,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.3,
-      "timestamp": "2025-11-26T13:47:06.924981",
+      "timestamp": "2025-11-27T11:22:38.570007",
       "data_source": "comprehensive_batch"
     },
     "002489": {
       "code": "002489",
-      "name": "浙江永强",
+      "name": "股票002489",
       "current_price": 3.81,
       "tech_data": {
         "current_price": 3.81,
@@ -10717,12 +10717,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.2,
-      "timestamp": "2025-11-26T13:47:07.141787",
+      "timestamp": "2025-11-27T11:22:38.789933",
       "data_source": "comprehensive_batch"
     },
     "002490": {
       "code": "002490",
-      "name": "山东墨龙",
+      "name": "股票002490",
       "current_price": 7.14,
       "tech_data": {
         "current_price": 7.14,
@@ -10774,12 +10774,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.0,
-      "timestamp": "2025-11-26T13:47:07.358470",
+      "timestamp": "2025-11-27T11:22:39.005935",
       "data_source": "comprehensive_batch"
     },
     "002491": {
       "code": "002491",
-      "name": "通鼎互联",
+      "name": "股票002491",
       "current_price": 5.59,
       "tech_data": {
         "current_price": 5.59,
@@ -10830,12 +10830,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.4,
-      "timestamp": "2025-11-26T13:47:07.576342",
+      "timestamp": "2025-11-27T11:22:39.224139",
       "data_source": "comprehensive_batch"
     },
     "002492": {
       "code": "002492",
-      "name": "恒基达鑫",
+      "name": "股票002492",
       "current_price": 7.76,
       "tech_data": {
         "current_price": 7.76,
@@ -10887,12 +10887,12 @@
         "risk_level": "中高"
       },
       "overall_score": 2.5,
-      "timestamp": "2025-11-26T13:47:07.791625",
+      "timestamp": "2025-11-27T11:22:39.442806",
       "data_source": "comprehensive_batch"
     },
     "002493": {
       "code": "002493",
-      "name": "荣盛石化",
+      "name": "股票002493",
       "current_price": 9.46,
       "tech_data": {
         "current_price": 9.46,
@@ -10944,12 +10944,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.9,
-      "timestamp": "2025-11-26T13:47:08.009634",
+      "timestamp": "2025-11-27T11:22:39.660808",
       "data_source": "comprehensive_batch"
     },
     "002494": {
       "code": "002494",
-      "name": "华斯股份",
+      "name": "股票002494",
       "current_price": 5.53,
       "tech_data": {
         "current_price": 5.53,
@@ -11001,12 +11001,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:47:08.228577",
+      "timestamp": "2025-11-27T11:22:39.881351",
       "data_source": "comprehensive_batch"
     },
     "002495": {
       "code": "002495",
-      "name": "佳隆股份",
+      "name": "股票002495",
       "current_price": 2.76,
       "tech_data": {
         "current_price": 2.76,
@@ -11058,12 +11058,12 @@
         "risk_level": "高"
       },
       "overall_score": 3.5,
-      "timestamp": "2025-11-26T13:47:08.444446",
+      "timestamp": "2025-11-27T11:22:40.098397",
       "data_source": "comprehensive_batch"
     },
     "002496": {
       "code": "002496",
-      "name": "*ST辉丰",
+      "name": "股票002496",
       "current_price": 1.77,
       "tech_data": {
         "current_price": 1.77,
@@ -11114,12 +11114,12 @@
         "risk_level": "高"
       },
       "overall_score": 2.6,
-      "timestamp": "2025-11-26T13:47:08.662171",
+      "timestamp": "2025-11-27T11:22:40.314173",
       "data_source": "comprehensive_batch"
     },
     "002497": {
       "code": "002497",
-      "name": "雅化集团",
+      "name": "股票002497",
       "current_price": 21.84,
       "tech_data": {
         "current_price": 21.84,
@@ -11170,12 +11170,12 @@
         "risk_level": "高"
       },
       "overall_score": 4.1,
-      "timestamp": "2025-11-26T13:47:30.078957",
+      "timestamp": "2025-11-27T11:22:40.521185",
       "data_source": "comprehensive_batch"
     },
     "002498": {
       "code": "002498",
-      "name": "汉缆股份",
+      "name": "股票002498",
       "current_price": 3.55,
       "tech_data": {
         "current_price": 3.55,
@@ -11227,12 +11227,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.7,
-      "timestamp": "2025-11-26T13:47:30.295180",
+      "timestamp": "2025-11-27T11:22:40.738971",
       "data_source": "comprehensive_batch"
     },
     "002500": {
       "code": "002500",
-      "name": "山西证券",
+      "name": "股票002500",
       "current_price": 6.02,
       "tech_data": {
         "current_price": 6.02,
@@ -11284,12 +11284,12 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:47:30.511411",
+      "timestamp": "2025-11-27T11:22:40.955969",
       "data_source": "comprehensive_batch"
     },
     "002501": {
       "code": "002501",
-      "name": "利源股份",
+      "name": "股票002501",
       "current_price": 2.25,
       "tech_data": {
         "current_price": 2.25,
@@ -11341,11 +11341,11 @@
         "risk_level": "高"
       },
       "overall_score": 1.8,
-      "timestamp": "2025-11-26T13:47:30.727992",
+      "timestamp": "2025-11-27T11:22:41.174334",
       "data_source": "comprehensive_batch"
     }
   },
   "count": 200,
   "part": 5,
-  "total_parts": 16
+  "total_parts": 15
 }

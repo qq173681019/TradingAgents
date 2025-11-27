@@ -2,28 +2,17 @@
   "stocks": {
     "601456": {
       "code": "601456",
-      "timestamp": "2025-11-25T21:07:26.999449",
-      "collection_time": "2025-11-25 21:07:26",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601456",
-        "name": "国联民生",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2020-07-31",
-        "source": "baostock"
-      },
+      "name": "股票601456",
       "kline_data": {
         "daily": [
+          {
+            "date": "20251126",
+            "open": 10.26,
+            "high": 10.29,
+            "low": 10.19,
+            "close": 10.19,
+            "volume": 187705.62
+          },
           {
             "date": "20251125",
             "open": 10.3,
@@ -298,202 +287,192 @@
           }
         ],
         "latest_price": 11.34,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601456",
-        "source": "baostock",
-        "revenue": 0.200441,
-        "net_profit": null,
-        "eps": 401862636.67,
-        "roe": 0.120204,
-        "total_profit": null,
-        "roa": 5.258888,
-        "gross_profit_rate": 0.021102,
-        "net_profit_rate": 0.985044,
-        "debt_ratio": 0.200441
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:25:04.031664"
       },
       "technical_indicators": {
-        "current_price": 10.26,
-        "ma5": 10.309999999999999,
-        "ma10": 10.409,
-        "ma20": 10.6615,
-        "ma60": 10.26,
-        "rsi": 31.884057971014528,
-        "macd": -0.22231680365684703,
-        "signal": -0.19518300838209837,
-        "volume_ratio": 1.137462798717162,
+        "current_price": 10.19,
+        "ma5": 10.264,
+        "ma10": 10.378,
+        "ma20": 10.600999999999999,
+        "ma60": 10.19,
+        "rsi": 28.873239436619784,
+        "macd": -0.22762006599710816,
+        "signal": -0.20167041990510032,
+        "volume_ratio": 0.6695298525220064,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601456",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601456",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:07:27.027450",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:25:04.031664",
+      "timestamp": "2025-11-26T19:25:04.031664"
     },
     "601500": {
       "code": "601500",
-      "timestamp": "2025-11-25T21:07:27.339250",
-      "collection_time": "2025-11-25 21:07:27",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601500",
-        "name": "通用股份",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2016-09-19",
-        "source": "baostock"
-      },
+      "name": "股票601500",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 4.23,
-            "high": 4.26,
-            "low": 4.22,
-            "close": 4.22,
-            "volume": 141501.2
+            "date": "2025-10-09T00:00:00",
+            "open": 4.43,
+            "high": 4.49,
+            "low": 4.42,
+            "close": 4.48,
+            "volume": 142865.0
           },
           {
-            "date": "20251124",
-            "open": 4.21,
-            "high": 4.24,
-            "low": 4.17,
-            "close": 4.22,
-            "volume": 183842.14
-          },
-          {
-            "date": "20251121",
-            "open": 4.41,
-            "high": 4.41,
-            "low": 4.21,
-            "close": 4.22,
-            "volume": 362167.84
-          },
-          {
-            "date": "20251120",
-            "open": 4.45,
-            "high": 4.47,
-            "low": 4.4,
-            "close": 4.42,
-            "volume": 158532.8
-          },
-          {
-            "date": "20251119",
-            "open": 4.49,
-            "high": 4.5,
-            "low": 4.41,
-            "close": 4.44,
-            "volume": 191297.19
-          },
-          {
-            "date": "20251118",
-            "open": 4.55,
-            "high": 4.56,
+            "date": "2025-10-10T00:00:00",
+            "open": 4.48,
+            "high": 4.51,
             "low": 4.46,
             "close": 4.49,
-            "volume": 205050.4
+            "volume": 129636.0
           },
           {
-            "date": "20251117",
-            "open": 4.55,
-            "high": 4.56,
-            "low": 4.49,
-            "close": 4.55,
-            "volume": 178895.89
+            "date": "2025-10-13T00:00:00",
+            "open": 4.4,
+            "high": 4.44,
+            "low": 4.36,
+            "close": 4.43,
+            "volume": 177459.0
           },
           {
-            "date": "20251114",
-            "open": 4.56,
-            "high": 4.6,
-            "low": 4.55,
-            "close": 4.55,
-            "volume": 180623.27
+            "date": "2025-10-14T00:00:00",
+            "open": 4.43,
+            "high": 4.46,
+            "low": 4.43,
+            "close": 4.44,
+            "volume": 131932.0
           },
           {
-            "date": "20251113",
-            "open": 4.54,
-            "high": 4.59,
-            "low": 4.52,
-            "close": 4.58,
-            "volume": 198258.0
+            "date": "2025-10-15T00:00:00",
+            "open": 4.44,
+            "high": 4.49,
+            "low": 4.43,
+            "close": 4.48,
+            "volume": 99978.0
           },
           {
-            "date": "20251112",
-            "open": 4.6,
-            "high": 4.61,
-            "low": 4.53,
-            "close": 4.54,
-            "volume": 221921.4
+            "date": "2025-10-16T00:00:00",
+            "open": 4.48,
+            "high": 4.49,
+            "low": 4.42,
+            "close": 4.43,
+            "volume": 118622.0
           },
           {
-            "date": "20251111",
-            "open": 4.57,
-            "high": 4.6,
-            "low": 4.56,
-            "close": 4.59,
-            "volume": 177085.67
+            "date": "2025-10-17T00:00:00",
+            "open": 4.43,
+            "high": 4.44,
+            "low": 4.37,
+            "close": 4.38,
+            "volume": 140538.0
           },
           {
-            "date": "20251110",
-            "open": 4.54,
-            "high": 4.58,
-            "low": 4.52,
-            "close": 4.57,
-            "volume": 176098.6
+            "date": "2025-10-20T00:00:00",
+            "open": 4.39,
+            "high": 4.41,
+            "low": 4.38,
+            "close": 4.39,
+            "volume": 86819.0
           },
           {
-            "date": "20251107",
-            "open": 4.52,
-            "high": 4.55,
-            "low": 4.51,
-            "close": 4.54,
-            "volume": 150312.0
+            "date": "2025-10-21T00:00:00",
+            "open": 4.39,
+            "high": 4.44,
+            "low": 4.38,
+            "close": 4.43,
+            "volume": 138895.0
           },
           {
-            "date": "20251106",
+            "date": "2025-10-22T00:00:00",
+            "open": 4.42,
+            "high": 4.45,
+            "low": 4.41,
+            "close": 4.41,
+            "volume": 136760.0
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 4.41,
+            "high": 4.46,
+            "low": 4.4,
+            "close": 4.45,
+            "volume": 145324.0
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 4.44,
+            "high": 4.46,
+            "low": 4.43,
+            "close": 4.44,
+            "volume": 116427.0
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 4.46,
+            "high": 4.47,
+            "low": 4.44,
+            "close": 4.45,
+            "volume": 138218.0
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 4.45,
+            "high": 4.46,
+            "low": 4.42,
+            "close": 4.43,
+            "volume": 105297.0
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 4.43,
+            "high": 4.44,
+            "low": 4.39,
+            "close": 4.41,
+            "volume": 154643.0
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 4.41,
+            "high": 4.47,
+            "low": 4.39,
+            "close": 4.43,
+            "volume": 220022.0
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 4.43,
+            "high": 4.46,
+            "low": 4.42,
+            "close": 4.44,
+            "volume": 146598.0
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 4.44,
+            "high": 4.48,
+            "low": 4.43,
+            "close": 4.48,
+            "volume": 169222.0
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 4.48,
+            "high": 4.5,
+            "low": 4.46,
+            "close": 4.48,
+            "volume": 171725.0
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 4.47,
+            "high": 4.53,
+            "low": 4.45,
+            "close": 4.52,
+            "volume": 174973.0
+          },
+          {
+            "date": "2025-11-06T00:00:00",
             "open": 4.51,
             "high": 4.53,
             "low": 4.49,
@@ -501,507 +480,161 @@
             "volume": 144251.0
           },
           {
-            "date": "20251105",
-            "open": 4.47,
-            "high": 4.53,
-            "low": 4.45,
-            "close": 4.52,
-            "volume": 174972.5
+            "date": "2025-11-07T00:00:00",
+            "open": 4.52,
+            "high": 4.55,
+            "low": 4.51,
+            "close": 4.54,
+            "volume": 150312.0
           },
           {
-            "date": "20251104",
-            "open": 4.48,
-            "high": 4.5,
-            "low": 4.46,
-            "close": 4.48,
-            "volume": 171725.4
+            "date": "2025-11-10T00:00:00",
+            "open": 4.54,
+            "high": 4.58,
+            "low": 4.52,
+            "close": 4.57,
+            "volume": 176099.0
           },
           {
-            "date": "20251103",
-            "open": 4.44,
-            "high": 4.48,
-            "low": 4.43,
-            "close": 4.48,
-            "volume": 169221.63
+            "date": "2025-11-11T00:00:00",
+            "open": 4.57,
+            "high": 4.6,
+            "low": 4.56,
+            "close": 4.59,
+            "volume": 177086.0
           },
           {
-            "date": "20251031",
-            "open": 4.43,
-            "high": 4.46,
-            "low": 4.42,
-            "close": 4.44,
-            "volume": 146597.8
+            "date": "2025-11-12T00:00:00",
+            "open": 4.6,
+            "high": 4.61,
+            "low": 4.53,
+            "close": 4.54,
+            "volume": 221921.0
           },
           {
-            "date": "20251030",
-            "open": 4.41,
-            "high": 4.47,
-            "low": 4.39,
-            "close": 4.43,
-            "volume": 220022.04
+            "date": "2025-11-13T00:00:00",
+            "open": 4.54,
+            "high": 4.59,
+            "low": 4.52,
+            "close": 4.58,
+            "volume": 198258.0
           },
           {
-            "date": "20251029",
-            "open": 4.43,
-            "high": 4.44,
-            "low": 4.39,
-            "close": 4.41,
-            "volume": 154642.88
+            "date": "2025-11-14T00:00:00",
+            "open": 4.56,
+            "high": 4.6,
+            "low": 4.55,
+            "close": 4.55,
+            "volume": 180623.0
           },
           {
-            "date": "20251028",
-            "open": 4.45,
-            "high": 4.46,
-            "low": 4.42,
-            "close": 4.43,
-            "volume": 105297.4
+            "date": "2025-11-17T00:00:00",
+            "open": 4.55,
+            "high": 4.56,
+            "low": 4.49,
+            "close": 4.55,
+            "volume": 178896.0
           },
           {
-            "date": "20251027",
-            "open": 4.46,
-            "high": 4.47,
-            "low": 4.44,
-            "close": 4.45,
-            "volume": 138217.56
-          },
-          {
-            "date": "20251024",
-            "open": 4.44,
-            "high": 4.46,
-            "low": 4.43,
-            "close": 4.44,
-            "volume": 116426.71
-          },
-          {
-            "date": "20251023",
-            "open": 4.41,
-            "high": 4.46,
-            "low": 4.4,
-            "close": 4.45,
-            "volume": 145324.34
-          },
-          {
-            "date": "20251022",
-            "open": 4.42,
-            "high": 4.45,
-            "low": 4.41,
-            "close": 4.41,
-            "volume": 136759.8
-          },
-          {
-            "date": "20251021",
-            "open": 4.39,
-            "high": 4.44,
-            "low": 4.38,
-            "close": 4.43,
-            "volume": 138895.2
-          },
-          {
-            "date": "20251020",
-            "open": 4.39,
-            "high": 4.41,
-            "low": 4.38,
-            "close": 4.39,
-            "volume": 86819.4
-          },
-          {
-            "date": "20251017",
-            "open": 4.43,
-            "high": 4.44,
-            "low": 4.37,
-            "close": 4.38,
-            "volume": 140538.34
-          },
-          {
-            "date": "20251016",
-            "open": 4.48,
-            "high": 4.49,
-            "low": 4.42,
-            "close": 4.43,
-            "volume": 118622.05
-          },
-          {
-            "date": "20251015",
-            "open": 4.44,
-            "high": 4.49,
-            "low": 4.43,
-            "close": 4.48,
-            "volume": 99977.75
-          },
-          {
-            "date": "20251014",
-            "open": 4.43,
-            "high": 4.46,
-            "low": 4.43,
-            "close": 4.44,
-            "volume": 131932.4
-          },
-          {
-            "date": "20251013",
-            "open": 4.4,
-            "high": 4.44,
-            "low": 4.36,
-            "close": 4.43,
-            "volume": 177458.95
-          },
-          {
-            "date": "20251010",
-            "open": 4.48,
-            "high": 4.51,
+            "date": "2025-11-18T00:00:00",
+            "open": 4.55,
+            "high": 4.56,
             "low": 4.46,
             "close": 4.49,
-            "volume": 129635.64
+            "volume": 205050.0
           },
           {
-            "date": "20251009",
-            "open": 4.43,
-            "high": 4.49,
-            "low": 4.42,
-            "close": 4.48,
-            "volume": 142865.09
+            "date": "2025-11-19T00:00:00",
+            "open": 4.49,
+            "high": 4.5,
+            "low": 4.41,
+            "close": 4.44,
+            "volume": 191297.0
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 4.45,
+            "high": 4.47,
+            "low": 4.4,
+            "close": 4.42,
+            "volume": 158533.0
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 4.41,
+            "high": 4.41,
+            "low": 4.21,
+            "close": 4.22,
+            "volume": 362168.0
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 4.21,
+            "high": 4.24,
+            "low": 4.17,
+            "close": 4.22,
+            "volume": 183842.0
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 4.23,
+            "high": 4.26,
+            "low": 4.22,
+            "close": 4.22,
+            "volume": 141501.0
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 4.22,
+            "high": 4.24,
+            "low": 4.2,
+            "close": 4.22,
+            "volume": 98164.0
           }
         ],
-        "latest_price": 4.48,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601500",
-        "source": "baostock",
-        "revenue": 0.076282,
-        "net_profit": 0.166738,
-        "eps": 380484755.61,
-        "roe": 0.275306,
-        "total_profit": null,
-        "roa": 2.196878,
-        "gross_profit_rate": 0.395646,
-        "net_profit_rate": 0.998354,
-        "debt_ratio": 0.076282
+        "latest_price": 4.22,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:39:18.395994"
       },
       "technical_indicators": {
         "current_price": 4.22,
-        "ma5": 4.304,
-        "ma10": 4.423,
-        "ma20": 4.461,
+        "ma5": 4.26,
+        "ma10": 4.391,
+        "ma20": 4.4515,
         "ma60": 4.22,
-        "rsi": 21.153846153846203,
-        "macd": -0.046941845569847374,
-        "signal": -0.00804100377806918,
-        "volume_ratio": 0.6426670804650603,
+        "rsi": 19.607843137254847,
+        "macd": -0.05688733705729465,
+        "signal": -0.017810270433914276,
+        "volume_ratio": 0.4731520300460504,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601500",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601500",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:07:27.368280",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:39:18.395994",
+      "timestamp": "2025-11-26T19:39:18.395994"
     },
     "601512": {
       "code": "601512",
-      "timestamp": "2025-11-25T21:07:27.683147",
-      "collection_time": "2025-11-25 21:07:27",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601512",
-        "name": "中新集团",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2019-12-20",
-        "source": "baostock"
-      },
+      "name": "股票601512",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 8.9,
-            "high": 9.13,
-            "low": 8.84,
-            "close": 8.98,
-            "volume": 51640.0
-          },
-          {
-            "date": "20251124",
-            "open": 8.91,
-            "high": 8.93,
-            "low": 8.78,
-            "close": 8.81,
-            "volume": 39627.97
-          },
-          {
-            "date": "20251121",
-            "open": 9.05,
-            "high": 9.16,
-            "low": 8.83,
-            "close": 8.84,
-            "volume": 58373.0
-          },
-          {
-            "date": "20251120",
-            "open": 9.18,
-            "high": 9.25,
-            "low": 8.99,
-            "close": 9.12,
-            "volume": 63158.0
-          },
-          {
-            "date": "20251119",
-            "open": 9.38,
-            "high": 9.64,
-            "low": 9.18,
-            "close": 9.21,
-            "volume": 63817.0
-          },
-          {
-            "date": "20251118",
-            "open": 9.53,
-            "high": 9.53,
-            "low": 9.34,
-            "close": 9.4,
-            "volume": 55203.0
-          },
-          {
-            "date": "20251117",
-            "open": 9.75,
-            "high": 9.75,
-            "low": 9.42,
-            "close": 9.55,
-            "volume": 124941.0
-          },
-          {
-            "date": "20251114",
-            "open": 9.91,
-            "high": 10.02,
-            "low": 9.76,
-            "close": 9.76,
-            "volume": 87084.47
-          },
-          {
-            "date": "20251113",
-            "open": 10.06,
-            "high": 10.28,
-            "low": 9.97,
-            "close": 10.03,
-            "volume": 133610.96
-          },
-          {
-            "date": "20251112",
-            "open": 10.01,
-            "high": 10.3,
-            "low": 9.84,
-            "close": 10.25,
-            "volume": 126567.0
-          },
-          {
-            "date": "20251111",
-            "open": 10.0,
-            "high": 10.1,
-            "low": 9.93,
-            "close": 10.05,
-            "volume": 84252.5
-          },
-          {
-            "date": "20251110",
-            "open": 10.02,
-            "high": 10.15,
-            "low": 9.93,
-            "close": 10.01,
-            "volume": 143656.0
-          },
-          {
-            "date": "20251107",
-            "open": 9.86,
-            "high": 10.01,
-            "low": 9.71,
-            "close": 9.94,
-            "volume": 121459.0
-          },
-          {
-            "date": "20251106",
-            "open": 9.91,
-            "high": 10.08,
-            "low": 9.85,
-            "close": 9.89,
-            "volume": 139846.63
-          },
-          {
-            "date": "20251105",
-            "open": 9.78,
-            "high": 10.01,
-            "low": 9.78,
-            "close": 9.9,
-            "volume": 168745.63
-          },
-          {
-            "date": "20251104",
-            "open": 10.2,
-            "high": 10.63,
-            "low": 9.9,
-            "close": 9.94,
-            "volume": 372086.63
-          },
-          {
-            "date": "20251103",
-            "open": 9.22,
-            "high": 10.19,
-            "low": 9.16,
-            "close": 10.19,
-            "volume": 198238.53
-          },
-          {
-            "date": "20251031",
-            "open": 9.19,
-            "high": 9.29,
-            "low": 9.09,
-            "close": 9.26,
-            "volume": 48063.8
-          },
-          {
-            "date": "20251030",
-            "open": 9.33,
-            "high": 9.34,
-            "low": 9.18,
-            "close": 9.21,
-            "volume": 45472.0
-          },
-          {
-            "date": "20251029",
+            "date": "2025-10-09T00:00:00",
             "open": 9.3,
-            "high": 9.34,
-            "low": 9.03,
-            "close": 9.32,
-            "volume": 67869.0
-          },
-          {
-            "date": "20251028",
-            "open": 9.45,
-            "high": 9.57,
-            "low": 9.32,
-            "close": 9.34,
-            "volume": 45565.0
-          },
-          {
-            "date": "20251027",
-            "open": 9.52,
-            "high": 9.61,
-            "low": 9.47,
-            "close": 9.51,
-            "volume": 44029.0
-          },
-          {
-            "date": "20251024",
-            "open": 9.74,
-            "high": 9.76,
-            "low": 9.51,
-            "close": 9.54,
-            "volume": 52789.0
-          },
-          {
-            "date": "20251023",
-            "open": 9.69,
-            "high": 9.69,
-            "low": 9.41,
-            "close": 9.66,
-            "volume": 51675.96
-          },
-          {
-            "date": "20251022",
-            "open": 9.55,
-            "high": 9.6,
-            "low": 9.46,
-            "close": 9.52,
-            "volume": 46092.0
-          },
-          {
-            "date": "20251021",
-            "open": 9.4,
-            "high": 9.64,
-            "low": 9.38,
-            "close": 9.56,
-            "volume": 50677.0
-          },
-          {
-            "date": "20251020",
-            "open": 9.4,
-            "high": 9.53,
+            "high": 9.91,
             "low": 9.29,
-            "close": 9.42,
-            "volume": 64665.0
+            "close": 9.9,
+            "volume": 145159.0
           },
           {
-            "date": "20251017",
-            "open": 9.68,
-            "high": 9.72,
-            "low": 9.31,
-            "close": 9.36,
-            "volume": 74213.0
+            "date": "2025-10-10T00:00:00",
+            "open": 9.85,
+            "high": 10.18,
+            "low": 9.72,
+            "close": 10.05,
+            "volume": 135045.0
           },
           {
-            "date": "20251016",
-            "open": 9.82,
-            "high": 9.9,
-            "low": 9.61,
-            "close": 9.67,
-            "volume": 52102.0
-          },
-          {
-            "date": "20251015",
-            "open": 9.69,
-            "high": 9.79,
-            "low": 9.61,
-            "close": 9.74,
-            "volume": 63497.0
-          },
-          {
-            "date": "20251014",
-            "open": 9.93,
-            "high": 10.04,
-            "low": 9.68,
-            "close": 9.7,
-            "volume": 90836.0
-          },
-          {
-            "date": "20251013",
+            "date": "2025-10-13T00:00:00",
             "open": 9.71,
             "high": 10.0,
             "low": 9.61,
@@ -1009,655 +642,683 @@
             "volume": 88473.0
           },
           {
-            "date": "20251010",
-            "open": 9.85,
-            "high": 10.18,
-            "low": 9.72,
-            "close": 10.05,
-            "volume": 135045.44
+            "date": "2025-10-14T00:00:00",
+            "open": 9.93,
+            "high": 10.04,
+            "low": 9.68,
+            "close": 9.7,
+            "volume": 90836.0
           },
           {
-            "date": "20251009",
-            "open": 9.3,
-            "high": 9.91,
+            "date": "2025-10-15T00:00:00",
+            "open": 9.69,
+            "high": 9.79,
+            "low": 9.61,
+            "close": 9.74,
+            "volume": 63497.0
+          },
+          {
+            "date": "2025-10-16T00:00:00",
+            "open": 9.82,
+            "high": 9.9,
+            "low": 9.61,
+            "close": 9.67,
+            "volume": 52102.0
+          },
+          {
+            "date": "2025-10-17T00:00:00",
+            "open": 9.68,
+            "high": 9.72,
+            "low": 9.31,
+            "close": 9.36,
+            "volume": 74213.0
+          },
+          {
+            "date": "2025-10-20T00:00:00",
+            "open": 9.4,
+            "high": 9.53,
             "low": 9.29,
+            "close": 9.42,
+            "volume": 64665.0
+          },
+          {
+            "date": "2025-10-21T00:00:00",
+            "open": 9.4,
+            "high": 9.64,
+            "low": 9.38,
+            "close": 9.56,
+            "volume": 50677.0
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 9.55,
+            "high": 9.6,
+            "low": 9.46,
+            "close": 9.52,
+            "volume": 46092.0
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 9.69,
+            "high": 9.69,
+            "low": 9.41,
+            "close": 9.66,
+            "volume": 51676.0
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 9.74,
+            "high": 9.76,
+            "low": 9.51,
+            "close": 9.54,
+            "volume": 52789.0
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 9.52,
+            "high": 9.61,
+            "low": 9.47,
+            "close": 9.51,
+            "volume": 44029.0
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 9.45,
+            "high": 9.57,
+            "low": 9.32,
+            "close": 9.34,
+            "volume": 45565.0
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 9.3,
+            "high": 9.34,
+            "low": 9.03,
+            "close": 9.32,
+            "volume": 67869.0
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 9.33,
+            "high": 9.34,
+            "low": 9.18,
+            "close": 9.21,
+            "volume": 45472.0
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 9.19,
+            "high": 9.29,
+            "low": 9.09,
+            "close": 9.26,
+            "volume": 48064.0
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 9.22,
+            "high": 10.19,
+            "low": 9.16,
+            "close": 10.19,
+            "volume": 198239.0
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 10.2,
+            "high": 10.63,
+            "low": 9.9,
+            "close": 9.94,
+            "volume": 372087.0
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 9.78,
+            "high": 10.01,
+            "low": 9.78,
             "close": 9.9,
-            "volume": 145158.68
+            "volume": 168746.0
+          },
+          {
+            "date": "2025-11-06T00:00:00",
+            "open": 9.91,
+            "high": 10.08,
+            "low": 9.85,
+            "close": 9.89,
+            "volume": 139847.0
+          },
+          {
+            "date": "2025-11-07T00:00:00",
+            "open": 9.86,
+            "high": 10.01,
+            "low": 9.71,
+            "close": 9.94,
+            "volume": 121459.0
+          },
+          {
+            "date": "2025-11-10T00:00:00",
+            "open": 10.02,
+            "high": 10.15,
+            "low": 9.93,
+            "close": 10.01,
+            "volume": 143656.0
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 10.0,
+            "high": 10.1,
+            "low": 9.93,
+            "close": 10.05,
+            "volume": 84253.0
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 10.01,
+            "high": 10.3,
+            "low": 9.84,
+            "close": 10.25,
+            "volume": 126567.0
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 10.06,
+            "high": 10.28,
+            "low": 9.97,
+            "close": 10.03,
+            "volume": 133611.0
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 9.91,
+            "high": 10.02,
+            "low": 9.76,
+            "close": 9.76,
+            "volume": 87084.0
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 9.75,
+            "high": 9.75,
+            "low": 9.42,
+            "close": 9.55,
+            "volume": 124941.0
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 9.53,
+            "high": 9.53,
+            "low": 9.34,
+            "close": 9.4,
+            "volume": 55203.0
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 9.38,
+            "high": 9.64,
+            "low": 9.18,
+            "close": 9.21,
+            "volume": 63817.0
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 9.18,
+            "high": 9.25,
+            "low": 8.99,
+            "close": 9.12,
+            "volume": 63158.0
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 9.05,
+            "high": 9.16,
+            "low": 8.83,
+            "close": 8.84,
+            "volume": 58373.0
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 8.91,
+            "high": 8.93,
+            "low": 8.78,
+            "close": 8.81,
+            "volume": 39628.0
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 8.9,
+            "high": 9.13,
+            "low": 8.84,
+            "close": 8.98,
+            "volume": 51640.0
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 8.95,
+            "high": 9.02,
+            "low": 8.84,
+            "close": 8.88,
+            "volume": 37767.0
           }
         ],
-        "latest_price": 9.9,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601512",
-        "source": "baostock",
-        "revenue": 0.388734,
-        "net_profit": 0.561108,
-        "eps": 771859021.63,
-        "roe": 0.669552,
-        "total_profit": null,
-        "roa": 2.442854,
-        "gross_profit_rate": 0.056641,
-        "net_profit_rate": 0.871087,
-        "debt_ratio": 0.388734
+        "latest_price": 8.88,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:39:18.415995"
       },
       "technical_indicators": {
-        "current_price": 8.98,
-        "ma5": 8.992,
-        "ma10": 9.395,
-        "ma20": 9.583,
-        "ma60": 8.98,
-        "rsi": 26.767676767676747,
-        "macd": -0.19876727643485204,
-        "signal": -0.08871450263272013,
-        "volume_ratio": 0.9215538196888939,
+        "current_price": 8.88,
+        "ma5": 8.925999999999998,
+        "ma10": 9.258,
+        "ma20": 9.561,
+        "ma60": 8.88,
+        "rsi": 25.603864734299506,
+        "macd": -0.21876623647754734,
+        "signal": -0.11472484940168558,
+        "volume_ratio": 0.6826611620441334,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601512",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601512",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:07:27.712024",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:39:18.415995",
+      "timestamp": "2025-11-26T19:39:18.415995"
     },
     "601515": {
       "code": "601515",
-      "timestamp": "2025-11-25T21:07:28.026084",
-      "collection_time": "2025-11-25 21:07:28",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601515",
-        "name": "衢州东峰",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2012-02-16",
-        "source": "baostock"
-      },
+      "name": "股票601515",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 4.52,
-            "high": 4.7,
-            "low": 4.51,
-            "close": 4.64,
-            "volume": 287995.77
-          },
-          {
-            "date": "20251124",
-            "open": 4.49,
-            "high": 4.59,
-            "low": 4.46,
-            "close": 4.52,
-            "volume": 256499.13
-          },
-          {
-            "date": "20251121",
-            "open": 4.67,
-            "high": 4.67,
-            "low": 4.47,
-            "close": 4.49,
-            "volume": 353974.87
-          },
-          {
-            "date": "20251120",
-            "open": 4.72,
-            "high": 4.8,
-            "low": 4.6,
-            "close": 4.67,
-            "volume": 289338.57
-          },
-          {
-            "date": "20251119",
-            "open": 4.9,
-            "high": 4.94,
-            "low": 4.67,
-            "close": 4.69,
-            "volume": 552763.48
-          },
-          {
-            "date": "20251118",
-            "open": 5.17,
-            "high": 5.19,
-            "low": 4.9,
-            "close": 4.94,
-            "volume": 671468.93
-          },
-          {
-            "date": "20251117",
-            "open": 5.02,
-            "high": 5.35,
-            "low": 4.93,
-            "close": 5.18,
-            "volume": 860609.92
-          },
-          {
-            "date": "20251114",
-            "open": 4.97,
-            "high": 5.12,
-            "low": 4.93,
-            "close": 5.05,
-            "volume": 586791.6
-          },
-          {
-            "date": "20251113",
-            "open": 4.85,
-            "high": 4.99,
-            "low": 4.83,
-            "close": 4.98,
-            "volume": 442657.72
-          },
-          {
-            "date": "20251112",
-            "open": 4.98,
-            "high": 4.98,
-            "low": 4.83,
-            "close": 4.87,
-            "volume": 331214.07
-          },
-          {
-            "date": "20251111",
-            "open": 4.94,
-            "high": 5.14,
-            "low": 4.92,
-            "close": 4.99,
-            "volume": 602949.24
-          },
-          {
-            "date": "20251110",
-            "open": 4.88,
-            "high": 4.98,
-            "low": 4.8,
-            "close": 4.92,
-            "volume": 510487.09
-          },
-          {
-            "date": "20251107",
-            "open": 4.98,
-            "high": 5.02,
-            "low": 4.83,
-            "close": 4.89,
-            "volume": 428160.99
-          },
-          {
-            "date": "20251106",
-            "open": 4.87,
-            "high": 5.08,
-            "low": 4.84,
-            "close": 4.99,
-            "volume": 717467.74
-          },
-          {
-            "date": "20251105",
-            "open": 4.71,
-            "high": 4.83,
-            "low": 4.68,
-            "close": 4.8,
-            "volume": 240670.37
-          },
-          {
-            "date": "20251104",
-            "open": 4.78,
-            "high": 4.78,
-            "low": 4.7,
-            "close": 4.75,
-            "volume": 240767.03
-          },
-          {
-            "date": "20251103",
-            "open": 4.89,
-            "high": 4.89,
-            "low": 4.69,
-            "close": 4.79,
-            "volume": 331535.22
-          },
-          {
-            "date": "20251031",
-            "open": 4.77,
-            "high": 4.9,
-            "low": 4.76,
-            "close": 4.87,
-            "volume": 298720.32
-          },
-          {
-            "date": "20251030",
-            "open": 4.88,
-            "high": 4.89,
-            "low": 4.76,
-            "close": 4.76,
-            "volume": 318162.85
-          },
-          {
-            "date": "20251029",
-            "open": 4.9,
-            "high": 4.9,
-            "low": 4.78,
-            "close": 4.87,
-            "volume": 277942.6
-          },
-          {
-            "date": "20251028",
-            "open": 4.82,
-            "high": 4.98,
-            "low": 4.82,
-            "close": 4.9,
-            "volume": 360704.77
-          },
-          {
-            "date": "20251027",
-            "open": 4.88,
-            "high": 4.97,
-            "low": 4.86,
-            "close": 4.86,
-            "volume": 430395.58
-          },
-          {
-            "date": "20251024",
-            "open": 4.85,
-            "high": 4.98,
-            "low": 4.75,
-            "close": 4.87,
-            "volume": 510745.86
-          },
-          {
-            "date": "20251023",
-            "open": 4.94,
-            "high": 4.99,
-            "low": 4.69,
-            "close": 4.81,
-            "volume": 598527.72
-          },
-          {
-            "date": "20251022",
-            "open": 5.0,
-            "high": 5.09,
-            "low": 4.85,
-            "close": 4.94,
-            "volume": 1141324.37
-          },
-          {
-            "date": "20251021",
-            "open": 4.5,
-            "high": 4.82,
-            "low": 4.48,
-            "close": 4.82,
-            "volume": 447502.56
-          },
-          {
-            "date": "20251020",
-            "open": 4.42,
-            "high": 4.51,
-            "low": 4.36,
-            "close": 4.38,
-            "volume": 214612.17
-          },
-          {
-            "date": "20251017",
-            "open": 4.55,
-            "high": 4.56,
-            "low": 4.38,
-            "close": 4.4,
-            "volume": 297440.6
-          },
-          {
-            "date": "20251016",
-            "open": 4.74,
-            "high": 4.75,
-            "low": 4.52,
-            "close": 4.55,
-            "volume": 340536.03
-          },
-          {
-            "date": "20251015",
-            "open": 4.81,
-            "high": 4.87,
-            "low": 4.71,
-            "close": 4.76,
-            "volume": 234937.01
-          },
-          {
-            "date": "20251014",
-            "open": 4.92,
-            "high": 4.99,
-            "low": 4.79,
-            "close": 4.82,
-            "volume": 440531.79
-          },
-          {
-            "date": "20251013",
-            "open": 4.67,
-            "high": 4.85,
-            "low": 4.65,
-            "close": 4.83,
-            "volume": 455218.91
-          },
-          {
-            "date": "20251010",
-            "open": 4.54,
-            "high": 4.89,
-            "low": 4.49,
-            "close": 4.83,
-            "volume": 797360.23
-          },
-          {
-            "date": "20251009",
+            "date": "2025-10-09T00:00:00",
             "open": 4.43,
             "high": 4.58,
             "low": 4.39,
             "close": 4.54,
-            "volume": 338187.91
+            "volume": 338188.0
+          },
+          {
+            "date": "2025-10-10T00:00:00",
+            "open": 4.54,
+            "high": 4.89,
+            "low": 4.49,
+            "close": 4.83,
+            "volume": 797360.0
+          },
+          {
+            "date": "2025-10-13T00:00:00",
+            "open": 4.67,
+            "high": 4.85,
+            "low": 4.65,
+            "close": 4.83,
+            "volume": 455219.0
+          },
+          {
+            "date": "2025-10-14T00:00:00",
+            "open": 4.92,
+            "high": 4.99,
+            "low": 4.79,
+            "close": 4.82,
+            "volume": 440532.0
+          },
+          {
+            "date": "2025-10-15T00:00:00",
+            "open": 4.81,
+            "high": 4.87,
+            "low": 4.71,
+            "close": 4.76,
+            "volume": 234937.0
+          },
+          {
+            "date": "2025-10-16T00:00:00",
+            "open": 4.74,
+            "high": 4.75,
+            "low": 4.52,
+            "close": 4.55,
+            "volume": 340536.0
+          },
+          {
+            "date": "2025-10-17T00:00:00",
+            "open": 4.55,
+            "high": 4.56,
+            "low": 4.38,
+            "close": 4.4,
+            "volume": 297441.0
+          },
+          {
+            "date": "2025-10-20T00:00:00",
+            "open": 4.42,
+            "high": 4.51,
+            "low": 4.36,
+            "close": 4.38,
+            "volume": 214612.0
+          },
+          {
+            "date": "2025-10-21T00:00:00",
+            "open": 4.5,
+            "high": 4.82,
+            "low": 4.48,
+            "close": 4.82,
+            "volume": 447503.0
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 5.0,
+            "high": 5.09,
+            "low": 4.85,
+            "close": 4.94,
+            "volume": 1141324.0
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 4.94,
+            "high": 4.99,
+            "low": 4.69,
+            "close": 4.81,
+            "volume": 598528.0
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 4.85,
+            "high": 4.98,
+            "low": 4.75,
+            "close": 4.87,
+            "volume": 510746.0
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 4.88,
+            "high": 4.97,
+            "low": 4.86,
+            "close": 4.86,
+            "volume": 430396.0
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 4.82,
+            "high": 4.98,
+            "low": 4.82,
+            "close": 4.9,
+            "volume": 360705.0
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 4.9,
+            "high": 4.9,
+            "low": 4.78,
+            "close": 4.87,
+            "volume": 277943.0
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 4.88,
+            "high": 4.89,
+            "low": 4.76,
+            "close": 4.76,
+            "volume": 318163.0
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 4.77,
+            "high": 4.9,
+            "low": 4.76,
+            "close": 4.87,
+            "volume": 298720.0
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 4.89,
+            "high": 4.89,
+            "low": 4.69,
+            "close": 4.79,
+            "volume": 331535.0
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 4.78,
+            "high": 4.78,
+            "low": 4.7,
+            "close": 4.75,
+            "volume": 240767.0
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 4.71,
+            "high": 4.83,
+            "low": 4.68,
+            "close": 4.8,
+            "volume": 240670.0
+          },
+          {
+            "date": "2025-11-06T00:00:00",
+            "open": 4.87,
+            "high": 5.08,
+            "low": 4.84,
+            "close": 4.99,
+            "volume": 717468.0
+          },
+          {
+            "date": "2025-11-07T00:00:00",
+            "open": 4.98,
+            "high": 5.02,
+            "low": 4.83,
+            "close": 4.89,
+            "volume": 428161.0
+          },
+          {
+            "date": "2025-11-10T00:00:00",
+            "open": 4.88,
+            "high": 4.98,
+            "low": 4.8,
+            "close": 4.92,
+            "volume": 510487.0
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 4.94,
+            "high": 5.14,
+            "low": 4.92,
+            "close": 4.99,
+            "volume": 602949.0
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 4.98,
+            "high": 4.98,
+            "low": 4.83,
+            "close": 4.87,
+            "volume": 331214.0
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 4.85,
+            "high": 4.99,
+            "low": 4.83,
+            "close": 4.98,
+            "volume": 442658.0
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 4.97,
+            "high": 5.12,
+            "low": 4.93,
+            "close": 5.05,
+            "volume": 586792.0
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 5.02,
+            "high": 5.35,
+            "low": 4.93,
+            "close": 5.18,
+            "volume": 860610.0
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 5.17,
+            "high": 5.19,
+            "low": 4.9,
+            "close": 4.94,
+            "volume": 671469.0
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 4.9,
+            "high": 4.94,
+            "low": 4.67,
+            "close": 4.69,
+            "volume": 552763.0
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 4.72,
+            "high": 4.8,
+            "low": 4.6,
+            "close": 4.67,
+            "volume": 289339.0
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 4.67,
+            "high": 4.67,
+            "low": 4.47,
+            "close": 4.49,
+            "volume": 353975.0
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 4.49,
+            "high": 4.59,
+            "low": 4.46,
+            "close": 4.52,
+            "volume": 256499.0
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 4.52,
+            "high": 4.7,
+            "low": 4.51,
+            "close": 4.64,
+            "volume": 287996.0
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 4.62,
+            "high": 4.67,
+            "low": 4.56,
+            "close": 4.58,
+            "volume": 222514.0
           }
         ],
-        "latest_price": 4.54,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601515",
-        "source": "baostock",
-        "revenue": -0.217966,
-        "net_profit": 0.210489,
-        "eps": -228267887.05,
-        "roe": -0.15038,
-        "total_profit": null,
-        "roa": 1.281716,
-        "gross_profit_rate": 0.146277,
-        "net_profit_rate": 0.833907,
-        "debt_ratio": -0.217966
+        "latest_price": 4.58,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:39:18.428996"
       },
       "technical_indicators": {
-        "current_price": 4.64,
-        "ma5": 4.602,
-        "ma10": 4.803,
-        "ma20": 4.833,
-        "ma60": 4.64,
-        "rsi": 45.180722891566255,
-        "macd": -0.025955361389732978,
-        "signal": 0.02929746466201716,
-        "volume_ratio": 0.67794178727797,
+        "current_price": 4.58,
+        "ma5": 4.58,
+        "ma10": 4.774,
+        "ma20": 4.818499999999999,
+        "ma60": 4.58,
+        "rsi": 36.601307189542474,
+        "macd": -0.03749442205263165,
+        "signal": 0.0159390873190874,
+        "volume_ratio": 0.6391979188450693,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601515",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601515",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:07:28.056083",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:39:18.428996",
+      "timestamp": "2025-11-26T19:39:18.428996"
     },
     "601518": {
       "code": "601518",
-      "timestamp": "2025-11-25T21:07:28.367642",
-      "collection_time": "2025-11-25 21:07:28",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601518",
-        "name": "吉林高速",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2010-03-19",
-        "source": "baostock"
-      },
+      "name": "股票601518",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 2.91,
-            "high": 2.94,
-            "low": 2.89,
-            "close": 2.91,
-            "volume": 184972.38
+            "date": "2025-10-09T00:00:00",
+            "open": 2.71,
+            "high": 2.73,
+            "low": 2.7,
+            "close": 2.73,
+            "volume": 133186.0
           },
           {
-            "date": "20251124",
-            "open": 2.9,
-            "high": 2.99,
-            "low": 2.88,
-            "close": 2.89,
-            "volume": 227718.6
+            "date": "2025-10-10T00:00:00",
+            "open": 2.72,
+            "high": 2.77,
+            "low": 2.71,
+            "close": 2.76,
+            "volume": 267965.0
           },
           {
-            "date": "20251121",
-            "open": 2.95,
-            "high": 2.99,
-            "low": 2.86,
-            "close": 2.88,
-            "volume": 216993.8
+            "date": "2025-10-13T00:00:00",
+            "open": 2.73,
+            "high": 2.77,
+            "low": 2.72,
+            "close": 2.77,
+            "volume": 216084.0
           },
           {
-            "date": "20251120",
-            "open": 2.99,
-            "high": 3.02,
-            "low": 2.95,
-            "close": 2.97,
-            "volume": 207760.2
+            "date": "2025-10-14T00:00:00",
+            "open": 2.77,
+            "high": 2.8,
+            "low": 2.76,
+            "close": 2.8,
+            "volume": 260378.0
           },
           {
-            "date": "20251119",
-            "open": 3.04,
-            "high": 3.06,
-            "low": 2.97,
-            "close": 2.99,
-            "volume": 215361.2
+            "date": "2025-10-15T00:00:00",
+            "open": 2.78,
+            "high": 2.81,
+            "low": 2.78,
+            "close": 2.8,
+            "volume": 148873.0
           },
           {
-            "date": "20251118",
-            "open": 3.07,
-            "high": 3.11,
-            "low": 3.01,
-            "close": 3.04,
-            "volume": 203666.68
+            "date": "2025-10-16T00:00:00",
+            "open": 2.8,
+            "high": 2.8,
+            "low": 2.78,
+            "close": 2.8,
+            "volume": 113177.0
           },
           {
-            "date": "20251117",
-            "open": 3.12,
-            "high": 3.12,
-            "low": 3.06,
-            "close": 3.07,
-            "volume": 170028.03
+            "date": "2025-10-17T00:00:00",
+            "open": 2.8,
+            "high": 2.82,
+            "low": 2.78,
+            "close": 2.79,
+            "volume": 151115.0
           },
           {
-            "date": "20251114",
-            "open": 3.08,
-            "high": 3.14,
-            "low": 3.08,
-            "close": 3.12,
-            "volume": 181596.79
+            "date": "2025-10-20T00:00:00",
+            "open": 2.8,
+            "high": 2.83,
+            "low": 2.77,
+            "close": 2.82,
+            "volume": 198792.0
           },
           {
-            "date": "20251113",
-            "open": 3.1,
-            "high": 3.11,
-            "low": 3.06,
-            "close": 3.09,
-            "volume": 149863.16
+            "date": "2025-10-21T00:00:00",
+            "open": 2.82,
+            "high": 2.87,
+            "low": 2.81,
+            "close": 2.86,
+            "volume": 252646.0
           },
           {
-            "date": "20251112",
-            "open": 3.1,
-            "high": 3.14,
-            "low": 3.09,
-            "close": 3.11,
-            "volume": 152952.93
-          },
-          {
-            "date": "20251111",
-            "open": 3.09,
-            "high": 3.11,
-            "low": 3.07,
-            "close": 3.1,
-            "volume": 161938.66
-          },
-          {
-            "date": "20251110",
-            "open": 3.1,
-            "high": 3.11,
-            "low": 3.05,
-            "close": 3.08,
-            "volume": 170315.58
-          },
-          {
-            "date": "20251107",
-            "open": 3.11,
-            "high": 3.15,
-            "low": 3.08,
-            "close": 3.09,
-            "volume": 154910.0
-          },
-          {
-            "date": "20251106",
-            "open": 3.08,
-            "high": 3.18,
-            "low": 3.05,
-            "close": 3.11,
-            "volume": 270895.93
-          },
-          {
-            "date": "20251105",
-            "open": 3.05,
-            "high": 3.11,
-            "low": 3.04,
-            "close": 3.08,
-            "volume": 195007.5
-          },
-          {
-            "date": "20251104",
-            "open": 3.04,
-            "high": 3.12,
-            "low": 3.02,
-            "close": 3.07,
-            "volume": 283629.11
-          },
-          {
-            "date": "20251103",
-            "open": 2.97,
-            "high": 3.05,
-            "low": 2.97,
-            "close": 3.03,
-            "volume": 288503.22
-          },
-          {
-            "date": "20251031",
-            "open": 2.95,
-            "high": 3.0,
-            "low": 2.93,
-            "close": 2.96,
-            "volume": 337849.18
-          },
-          {
-            "date": "20251030",
-            "open": 2.89,
-            "high": 3.06,
-            "low": 2.88,
-            "close": 3.0,
-            "volume": 803771.64
-          },
-          {
-            "date": "20251029",
-            "open": 2.88,
-            "high": 2.88,
-            "low": 2.83,
-            "close": 2.84,
-            "volume": 144626.46
-          },
-          {
-            "date": "20251028",
-            "open": 2.85,
-            "high": 2.89,
-            "low": 2.84,
-            "close": 2.88,
-            "volume": 165176.81
-          },
-          {
-            "date": "20251027",
+            "date": "2025-10-22T00:00:00",
             "open": 2.86,
-            "high": 2.86,
-            "low": 2.82,
-            "close": 2.84,
-            "volume": 179388.4
+            "high": 2.91,
+            "low": 2.85,
+            "close": 2.88,
+            "volume": 235380.0
           },
           {
-            "date": "20251024",
+            "date": "2025-10-23T00:00:00",
+            "open": 2.89,
+            "high": 2.91,
+            "low": 2.86,
+            "close": 2.9,
+            "volume": 190804.0
+          },
+          {
+            "date": "2025-10-24T00:00:00",
             "open": 2.91,
             "high": 2.91,
             "low": 2.84,
@@ -1665,323 +1326,345 @@
             "volume": 179658.0
           },
           {
-            "date": "20251023",
-            "open": 2.89,
-            "high": 2.91,
-            "low": 2.86,
-            "close": 2.9,
-            "volume": 190804.44
-          },
-          {
-            "date": "20251022",
+            "date": "2025-10-27T00:00:00",
             "open": 2.86,
-            "high": 2.91,
-            "low": 2.85,
+            "high": 2.86,
+            "low": 2.82,
+            "close": 2.84,
+            "volume": 179388.0
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 2.85,
+            "high": 2.89,
+            "low": 2.84,
             "close": 2.88,
-            "volume": 235379.79
+            "volume": 165177.0
           },
           {
-            "date": "20251021",
-            "open": 2.82,
-            "high": 2.87,
-            "low": 2.81,
-            "close": 2.86,
-            "volume": 252646.19
+            "date": "2025-10-29T00:00:00",
+            "open": 2.88,
+            "high": 2.88,
+            "low": 2.83,
+            "close": 2.84,
+            "volume": 144626.0
           },
           {
-            "date": "20251020",
-            "open": 2.8,
-            "high": 2.83,
-            "low": 2.77,
-            "close": 2.82,
-            "volume": 198791.8
+            "date": "2025-10-30T00:00:00",
+            "open": 2.89,
+            "high": 3.06,
+            "low": 2.88,
+            "close": 3.0,
+            "volume": 803772.0
           },
           {
-            "date": "20251017",
-            "open": 2.8,
-            "high": 2.82,
-            "low": 2.78,
-            "close": 2.79,
-            "volume": 151115.4
+            "date": "2025-10-31T00:00:00",
+            "open": 2.95,
+            "high": 3.0,
+            "low": 2.93,
+            "close": 2.96,
+            "volume": 337849.0
           },
           {
-            "date": "20251016",
-            "open": 2.8,
-            "high": 2.8,
-            "low": 2.78,
-            "close": 2.8,
-            "volume": 113177.2
+            "date": "2025-11-03T00:00:00",
+            "open": 2.97,
+            "high": 3.05,
+            "low": 2.97,
+            "close": 3.03,
+            "volume": 288503.0
           },
           {
-            "date": "20251015",
-            "open": 2.78,
-            "high": 2.81,
-            "low": 2.78,
-            "close": 2.8,
-            "volume": 148873.35
+            "date": "2025-11-04T00:00:00",
+            "open": 3.04,
+            "high": 3.12,
+            "low": 3.02,
+            "close": 3.07,
+            "volume": 283629.0
           },
           {
-            "date": "20251014",
-            "open": 2.77,
-            "high": 2.8,
-            "low": 2.76,
-            "close": 2.8,
-            "volume": 260378.47
+            "date": "2025-11-05T00:00:00",
+            "open": 3.05,
+            "high": 3.11,
+            "low": 3.04,
+            "close": 3.08,
+            "volume": 195008.0
           },
           {
-            "date": "20251013",
-            "open": 2.73,
-            "high": 2.77,
-            "low": 2.72,
-            "close": 2.77,
-            "volume": 216083.72
+            "date": "2025-11-06T00:00:00",
+            "open": 3.08,
+            "high": 3.18,
+            "low": 3.05,
+            "close": 3.11,
+            "volume": 270896.0
           },
           {
-            "date": "20251010",
-            "open": 2.72,
-            "high": 2.77,
-            "low": 2.71,
-            "close": 2.76,
-            "volume": 267964.67
+            "date": "2025-11-07T00:00:00",
+            "open": 3.11,
+            "high": 3.15,
+            "low": 3.08,
+            "close": 3.09,
+            "volume": 154910.0
           },
           {
-            "date": "20251009",
-            "open": 2.71,
-            "high": 2.73,
-            "low": 2.7,
-            "close": 2.73,
-            "volume": 133185.65
+            "date": "2025-11-10T00:00:00",
+            "open": 3.1,
+            "high": 3.11,
+            "low": 3.05,
+            "close": 3.08,
+            "volume": 170316.0
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 3.09,
+            "high": 3.11,
+            "low": 3.07,
+            "close": 3.1,
+            "volume": 161939.0
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 3.1,
+            "high": 3.14,
+            "low": 3.09,
+            "close": 3.11,
+            "volume": 152953.0
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 3.1,
+            "high": 3.11,
+            "low": 3.06,
+            "close": 3.09,
+            "volume": 149863.0
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 3.08,
+            "high": 3.14,
+            "low": 3.08,
+            "close": 3.12,
+            "volume": 181597.0
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 3.12,
+            "high": 3.12,
+            "low": 3.06,
+            "close": 3.07,
+            "volume": 170028.0
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 3.07,
+            "high": 3.11,
+            "low": 3.01,
+            "close": 3.04,
+            "volume": 203667.0
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 3.04,
+            "high": 3.06,
+            "low": 2.97,
+            "close": 2.99,
+            "volume": 215361.0
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 2.99,
+            "high": 3.02,
+            "low": 2.95,
+            "close": 2.97,
+            "volume": 207760.0
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 2.95,
+            "high": 2.99,
+            "low": 2.86,
+            "close": 2.88,
+            "volume": 216994.0
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 2.9,
+            "high": 2.99,
+            "low": 2.88,
+            "close": 2.89,
+            "volume": 227719.0
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 2.91,
+            "high": 2.94,
+            "low": 2.89,
+            "close": 2.91,
+            "volume": 184972.0
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 2.92,
+            "high": 2.94,
+            "low": 2.9,
+            "close": 2.9,
+            "volume": 137954.0
           }
         ],
-        "latest_price": 2.73,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601518",
-        "source": "baostock",
-        "revenue": 0.487735,
-        "net_profit": 0.701762,
-        "eps": 423853661.31,
-        "roe": 0.28798,
-        "total_profit": null,
-        "roa": 1.303274,
-        "gross_profit_rate": 0.130043,
-        "net_profit_rate": 0.919519,
-        "debt_ratio": 0.487735
+        "latest_price": 2.9,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:39:18.440994"
       },
       "technical_indicators": {
-        "current_price": 2.91,
-        "ma5": 2.928,
-        "ma10": 3.007,
-        "ma20": 3.0215,
-        "ma60": 2.91,
-        "rsi": 29.268292682926855,
-        "macd": 0.015564090528425112,
-        "signal": 0.04746917837439433,
-        "volume_ratio": 0.8631465102096826,
+        "current_price": 2.9,
+        "ma5": 2.91,
+        "ma10": 2.9859999999999998,
+        "ma20": 3.0244999999999997,
+        "ma60": 2.9,
+        "rsi": 23.076923076923123,
+        "macd": 0.008145334174195717,
+        "signal": 0.03960440953435461,
+        "volume_ratio": 0.6551729378441992,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601518",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601518",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:07:28.395377",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:39:18.440994",
+      "timestamp": "2025-11-26T19:39:18.440994"
     },
     "601519": {
       "code": "601519",
-      "timestamp": "2025-11-25T21:07:28.708033",
-      "collection_time": "2025-11-25 21:07:28",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601519",
-        "name": "大智慧",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2011-01-28",
-        "source": "baostock"
-      },
+      "name": "股票601519",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 12.73,
-            "high": 12.89,
-            "low": 12.6,
-            "close": 12.67,
-            "volume": 253064.0
+            "date": "2025-10-09T00:00:00",
+            "open": 16.15,
+            "high": 16.26,
+            "low": 15.77,
+            "close": 15.99,
+            "volume": 716675.0
           },
           {
-            "date": "20251124",
-            "open": 12.52,
-            "high": 12.77,
-            "low": 12.31,
-            "close": 12.73,
-            "volume": 286573.0
+            "date": "2025-10-10T00:00:00",
+            "open": 15.85,
+            "high": 16.25,
+            "low": 15.75,
+            "close": 15.91,
+            "volume": 854524.0
           },
           {
-            "date": "20251121",
-            "open": 12.51,
-            "high": 12.89,
-            "low": 12.44,
-            "close": 12.46,
-            "volume": 292467.96
+            "date": "2025-10-13T00:00:00",
+            "open": 15.31,
+            "high": 16.1,
+            "low": 15.25,
+            "close": 16.0,
+            "volume": 614190.0
           },
           {
-            "date": "20251120",
-            "open": 13.56,
-            "high": 13.62,
-            "low": 12.78,
-            "close": 12.79,
-            "volume": 313507.43
+            "date": "2025-10-14T00:00:00",
+            "open": 16.16,
+            "high": 16.4,
+            "low": 15.3,
+            "close": 15.32,
+            "volume": 796938.0
           },
           {
-            "date": "20251119",
-            "open": 13.1,
-            "high": 13.26,
-            "low": 12.9,
-            "close": 13.01,
-            "volume": 192798.73
+            "date": "2025-10-15T00:00:00",
+            "open": 15.32,
+            "high": 15.4,
+            "low": 14.4,
+            "close": 14.93,
+            "volume": 759739.0
           },
           {
-            "date": "20251118",
-            "open": 13.19,
-            "high": 13.26,
-            "low": 13.02,
-            "close": 13.1,
-            "volume": 240784.41
+            "date": "2025-10-16T00:00:00",
+            "open": 14.8,
+            "high": 14.89,
+            "low": 14.39,
+            "close": 14.44,
+            "volume": 474203.0
           },
           {
-            "date": "20251117",
-            "open": 12.92,
-            "high": 13.25,
-            "low": 12.9,
-            "close": 13.16,
-            "volume": 376030.33
+            "date": "2025-10-17T00:00:00",
+            "open": 14.55,
+            "high": 14.7,
+            "low": 13.74,
+            "close": 13.79,
+            "volume": 565088.0
           },
           {
-            "date": "20251114",
-            "open": 12.74,
-            "high": 12.91,
-            "low": 12.7,
-            "close": 12.7,
-            "volume": 232714.54
-          },
-          {
-            "date": "20251113",
-            "open": 12.41,
-            "high": 12.98,
-            "low": 12.4,
-            "close": 12.91,
-            "volume": 519893.76
-          },
-          {
-            "date": "20251112",
-            "open": 13.35,
-            "high": 13.39,
-            "low": 12.34,
-            "close": 12.6,
-            "volume": 961418.15
-          },
-          {
-            "date": "20251111",
-            "open": 14.13,
-            "high": 14.15,
-            "low": 13.66,
-            "close": 13.71,
-            "volume": 377108.12
-          },
-          {
-            "date": "20251110",
-            "open": 13.83,
+            "date": "2025-10-20T00:00:00",
+            "open": 13.98,
             "high": 14.19,
-            "low": 13.81,
-            "close": 14.14,
-            "volume": 327269.11
+            "low": 13.82,
+            "close": 14.01,
+            "volume": 396471.0
           },
           {
-            "date": "20251107",
-            "open": 14.2,
+            "date": "2025-10-21T00:00:00",
+            "open": 14.02,
+            "high": 14.35,
+            "low": 13.91,
+            "close": 14.13,
+            "volume": 383445.0
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 14.01,
             "high": 14.2,
-            "low": 13.85,
-            "close": 13.87,
-            "volume": 371131.65
+            "low": 13.83,
+            "close": 14.09,
+            "volume": 268642.0
           },
           {
-            "date": "20251106",
-            "open": 14.24,
-            "high": 14.44,
-            "low": 14.18,
-            "close": 14.28,
-            "volume": 291710.8
+            "date": "2025-10-23T00:00:00",
+            "open": 14.2,
+            "high": 14.21,
+            "low": 13.76,
+            "close": 14.16,
+            "volume": 323395.0
           },
           {
-            "date": "20251105",
-            "open": 14.0,
-            "high": 14.41,
-            "low": 13.98,
-            "close": 14.18,
-            "volume": 232318.62
+            "date": "2025-10-24T00:00:00",
+            "open": 14.29,
+            "high": 14.38,
+            "low": 14.08,
+            "close": 14.34,
+            "volume": 411720.0
           },
           {
-            "date": "20251104",
-            "open": 14.41,
-            "high": 14.46,
-            "low": 14.05,
-            "close": 14.23,
-            "volume": 332575.5
+            "date": "2025-10-27T00:00:00",
+            "open": 14.9,
+            "high": 15.26,
+            "low": 14.66,
+            "close": 14.68,
+            "volume": 818063.0
           },
           {
-            "date": "20251103",
-            "open": 14.44,
-            "high": 14.52,
-            "low": 14.23,
-            "close": 14.47,
-            "volume": 250846.78
+            "date": "2025-10-28T00:00:00",
+            "open": 14.5,
+            "high": 14.8,
+            "low": 14.43,
+            "close": 14.59,
+            "volume": 443229.0
           },
           {
-            "date": "20251031",
+            "date": "2025-10-29T00:00:00",
+            "open": 14.45,
+            "high": 15.15,
+            "low": 14.4,
+            "close": 14.97,
+            "volume": 689350.0
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 14.98,
+            "high": 15.14,
+            "low": 14.46,
+            "close": 14.48,
+            "volume": 477947.0
+          },
+          {
+            "date": "2025-10-31T00:00:00",
             "open": 14.51,
             "high": 14.65,
             "low": 14.42,
@@ -1989,225 +1672,183 @@
             "volume": 271239.0
           },
           {
-            "date": "20251030",
-            "open": 14.98,
-            "high": 15.14,
-            "low": 14.46,
-            "close": 14.48,
-            "volume": 477946.87
+            "date": "2025-11-03T00:00:00",
+            "open": 14.44,
+            "high": 14.52,
+            "low": 14.23,
+            "close": 14.47,
+            "volume": 250847.0
           },
           {
-            "date": "20251029",
-            "open": 14.45,
-            "high": 15.15,
-            "low": 14.4,
-            "close": 14.97,
-            "volume": 689349.85
+            "date": "2025-11-04T00:00:00",
+            "open": 14.41,
+            "high": 14.46,
+            "low": 14.05,
+            "close": 14.23,
+            "volume": 332576.0
           },
           {
-            "date": "20251028",
-            "open": 14.5,
-            "high": 14.8,
-            "low": 14.43,
-            "close": 14.59,
-            "volume": 443229.2
+            "date": "2025-11-05T00:00:00",
+            "open": 14.0,
+            "high": 14.41,
+            "low": 13.98,
+            "close": 14.18,
+            "volume": 232319.0
           },
           {
-            "date": "20251027",
-            "open": 14.9,
-            "high": 15.26,
-            "low": 14.66,
-            "close": 14.68,
-            "volume": 818063.26
+            "date": "2025-11-06T00:00:00",
+            "open": 14.24,
+            "high": 14.44,
+            "low": 14.18,
+            "close": 14.28,
+            "volume": 291711.0
           },
           {
-            "date": "20251024",
-            "open": 14.29,
-            "high": 14.38,
-            "low": 14.08,
-            "close": 14.34,
-            "volume": 411720.35
-          },
-          {
-            "date": "20251023",
+            "date": "2025-11-07T00:00:00",
             "open": 14.2,
-            "high": 14.21,
-            "low": 13.76,
-            "close": 14.16,
-            "volume": 323395.44
-          },
-          {
-            "date": "20251022",
-            "open": 14.01,
             "high": 14.2,
-            "low": 13.83,
-            "close": 14.09,
-            "volume": 268642.32
+            "low": 13.85,
+            "close": 13.87,
+            "volume": 371132.0
           },
           {
-            "date": "20251021",
-            "open": 14.02,
-            "high": 14.35,
-            "low": 13.91,
-            "close": 14.13,
-            "volume": 383444.67
-          },
-          {
-            "date": "20251020",
-            "open": 13.98,
+            "date": "2025-11-10T00:00:00",
+            "open": 13.83,
             "high": 14.19,
-            "low": 13.82,
-            "close": 14.01,
-            "volume": 396470.58
+            "low": 13.81,
+            "close": 14.14,
+            "volume": 327269.0
           },
           {
-            "date": "20251017",
-            "open": 14.55,
-            "high": 14.7,
-            "low": 13.74,
-            "close": 13.79,
-            "volume": 565087.89
+            "date": "2025-11-11T00:00:00",
+            "open": 14.13,
+            "high": 14.15,
+            "low": 13.66,
+            "close": 13.71,
+            "volume": 377108.0
           },
           {
-            "date": "20251016",
-            "open": 14.8,
-            "high": 14.89,
-            "low": 14.39,
-            "close": 14.44,
-            "volume": 474202.54
+            "date": "2025-11-12T00:00:00",
+            "open": 13.35,
+            "high": 13.39,
+            "low": 12.34,
+            "close": 12.6,
+            "volume": 961418.0
           },
           {
-            "date": "20251015",
-            "open": 15.32,
-            "high": 15.4,
-            "low": 14.4,
-            "close": 14.93,
-            "volume": 759738.99
+            "date": "2025-11-13T00:00:00",
+            "open": 12.41,
+            "high": 12.98,
+            "low": 12.4,
+            "close": 12.91,
+            "volume": 519894.0
           },
           {
-            "date": "20251014",
-            "open": 16.16,
-            "high": 16.4,
-            "low": 15.3,
-            "close": 15.32,
-            "volume": 796937.59
+            "date": "2025-11-14T00:00:00",
+            "open": 12.74,
+            "high": 12.91,
+            "low": 12.7,
+            "close": 12.7,
+            "volume": 232715.0
           },
           {
-            "date": "20251013",
-            "open": 15.31,
-            "high": 16.1,
-            "low": 15.25,
-            "close": 16.0,
-            "volume": 614190.18
+            "date": "2025-11-17T00:00:00",
+            "open": 12.92,
+            "high": 13.25,
+            "low": 12.9,
+            "close": 13.16,
+            "volume": 376030.0
           },
           {
-            "date": "20251010",
-            "open": 15.85,
-            "high": 16.25,
-            "low": 15.75,
-            "close": 15.91,
-            "volume": 854524.25
+            "date": "2025-11-18T00:00:00",
+            "open": 13.19,
+            "high": 13.26,
+            "low": 13.02,
+            "close": 13.1,
+            "volume": 240784.0
           },
           {
-            "date": "20251009",
-            "open": 16.15,
-            "high": 16.26,
-            "low": 15.77,
-            "close": 15.99,
-            "volume": 716675.04
+            "date": "2025-11-19T00:00:00",
+            "open": 13.1,
+            "high": 13.26,
+            "low": 12.9,
+            "close": 13.01,
+            "volume": 192799.0
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 13.56,
+            "high": 13.62,
+            "low": 12.78,
+            "close": 12.79,
+            "volume": 313507.0
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 12.51,
+            "high": 12.89,
+            "low": 12.44,
+            "close": 12.46,
+            "volume": 292468.0
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 12.52,
+            "high": 12.77,
+            "low": 12.31,
+            "close": 12.73,
+            "volume": 286573.0
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 12.73,
+            "high": 12.89,
+            "low": 12.6,
+            "close": 12.67,
+            "volume": 253064.0
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 12.62,
+            "high": 12.79,
+            "low": 12.59,
+            "close": 12.63,
+            "volume": 183183.0
           }
         ],
-        "latest_price": 15.99,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601519",
-        "source": "baostock",
-        "revenue": -0.39313,
-        "net_profit": 0.586133,
-        "eps": -203743315.52,
-        "roe": -0.164696,
-        "total_profit": null,
-        "roa": 1.366849,
-        "gross_profit_rate": 0.242118,
-        "net_profit_rate": 0.98731,
-        "debt_ratio": -0.39313
+        "latest_price": 12.63,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:39:18.451994"
       },
       "technical_indicators": {
-        "current_price": 12.67,
-        "ma5": 12.732000000000001,
-        "ma10": 12.812999999999999,
-        "ma20": 13.549000000000001,
-        "ma60": 12.67,
-        "rsi": 32.56351039260973,
-        "macd": -0.5867075213896236,
-        "signal": -0.5558184131152386,
-        "volume_ratio": 0.9541436662772056,
+        "current_price": 12.63,
+        "ma5": 12.656,
+        "ma10": 12.815999999999999,
+        "ma20": 13.431999999999999,
+        "ma60": 12.63,
+        "rsi": 30.679156908665135,
+        "macd": -0.5769978574046988,
+        "signal": -0.5600543019731307,
+        "volume_ratio": 0.6843301497073768,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601519",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601519",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:07:28.734035",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:39:18.451994",
+      "timestamp": "2025-11-26T19:39:18.451994"
     },
     "601528": {
       "code": "601528",
-      "timestamp": "2025-11-25T21:07:29.050116",
-      "collection_time": "2025-11-25 21:07:29",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601528",
-        "name": "瑞丰银行",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2021-06-25",
-        "source": "baostock"
-      },
+      "name": "股票601528",
       "kline_data": {
         "daily": [
+          {
+            "date": "20251126",
+            "open": 5.56,
+            "high": 5.61,
+            "low": 5.54,
+            "close": 5.55,
+            "volume": 99569.65
+          },
           {
             "date": "20251125",
             "open": 5.5,
@@ -2482,460 +2123,344 @@
           }
         ],
         "latest_price": 5.32,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601528",
-        "source": "baostock",
-        "revenue": 0.4398,
-        "net_profit": null,
-        "eps": 1461070000.0,
-        "roe": 0.973632,
-        "total_profit": null,
-        "roa": 11.828672,
-        "gross_profit_rate": 0.016277,
-        "net_profit_rate": 0.986688,
-        "debt_ratio": 0.4398
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:40:02.438932"
       },
       "technical_indicators": {
-        "current_price": 5.56,
-        "ma5": 5.555999999999999,
-        "ma10": 5.6,
-        "ma20": 5.5920000000000005,
-        "ma60": 5.56,
-        "rsi": 41.66666666666667,
-        "macd": 0.019171104070903056,
-        "signal": 0.03978987718152709,
-        "volume_ratio": 0.9286196813212069,
+        "current_price": 5.55,
+        "ma5": 5.5520000000000005,
+        "ma10": 5.587,
+        "ma20": 5.593999999999999,
+        "ma60": 5.55,
+        "rsi": 40.816326530612265,
+        "macd": 0.015396721105221722,
+        "signal": 0.034911245966266026,
+        "volume_ratio": 0.6679949909256481,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601528",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601528",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:07:29.077943",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:40:02.438932",
+      "timestamp": "2025-11-26T19:40:02.438932"
     },
     "601555": {
       "code": "601555",
-      "timestamp": "2025-11-25T21:08:46.968751",
-      "collection_time": "2025-11-25 21:08:46",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601555",
-        "name": "东吴证券",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2011-12-12",
-        "source": "baostock"
-      },
+      "name": "股票601555",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 8.96,
-            "high": 8.98,
-            "low": 8.89,
-            "close": 8.89,
-            "volume": 315743.2
-          },
-          {
-            "date": "20251124",
-            "open": 9.0,
-            "high": 9.04,
-            "low": 8.91,
-            "close": 8.91,
-            "volume": 349479.15
-          },
-          {
-            "date": "20251121",
-            "open": 9.21,
-            "high": 9.27,
-            "low": 8.96,
-            "close": 8.99,
-            "volume": 765769.44
-          },
-          {
-            "date": "20251120",
-            "open": 9.45,
-            "high": 9.48,
-            "low": 9.27,
-            "close": 9.28,
-            "volume": 526184.48
-          },
-          {
-            "date": "20251119",
-            "open": 9.28,
-            "high": 9.33,
-            "low": 9.22,
-            "close": 9.29,
-            "volume": 278679.83
-          },
-          {
-            "date": "20251118",
-            "open": 9.28,
-            "high": 9.34,
-            "low": 9.25,
-            "close": 9.29,
-            "volume": 284016.83
-          },
-          {
-            "date": "20251117",
-            "open": 9.35,
-            "high": 9.37,
-            "low": 9.28,
-            "close": 9.29,
-            "volume": 344259.15
-          },
-          {
-            "date": "20251114",
-            "open": 9.43,
-            "high": 9.46,
-            "low": 9.36,
-            "close": 9.36,
-            "volume": 303641.82
-          },
-          {
-            "date": "20251113",
-            "open": 9.36,
-            "high": 9.48,
-            "low": 9.36,
-            "close": 9.46,
-            "volume": 327731.68
-          },
-          {
-            "date": "20251112",
-            "open": 9.42,
-            "high": 9.46,
-            "low": 9.36,
-            "close": 9.39,
-            "volume": 339557.2
-          },
-          {
-            "date": "20251111",
-            "open": 9.57,
-            "high": 9.58,
-            "low": 9.4,
-            "close": 9.43,
-            "volume": 441491.3
-          },
-          {
-            "date": "20251110",
-            "open": 9.48,
-            "high": 9.6,
-            "low": 9.42,
-            "close": 9.55,
-            "volume": 391342.79
-          },
-          {
-            "date": "20251107",
-            "open": 9.53,
-            "high": 9.56,
-            "low": 9.46,
-            "close": 9.47,
-            "volume": 361089.22
-          },
-          {
-            "date": "20251106",
-            "open": 9.44,
-            "high": 9.61,
-            "low": 9.43,
-            "close": 9.58,
-            "volume": 553381.35
-          },
-          {
-            "date": "20251105",
-            "open": 9.37,
-            "high": 9.45,
-            "low": 9.33,
-            "close": 9.41,
-            "volume": 309343.71
-          },
-          {
-            "date": "20251104",
-            "open": 9.49,
-            "high": 9.51,
-            "low": 9.4,
-            "close": 9.42,
-            "volume": 468042.57
-          },
-          {
-            "date": "20251103",
-            "open": 9.59,
-            "high": 9.59,
-            "low": 9.4,
-            "close": 9.53,
-            "volume": 611516.16
-          },
-          {
-            "date": "20251031",
-            "open": 9.77,
-            "high": 9.8,
-            "low": 9.6,
-            "close": 9.6,
-            "volume": 748962.61
-          },
-          {
-            "date": "20251030",
-            "open": 9.95,
-            "high": 9.95,
-            "low": 9.75,
-            "close": 9.77,
-            "volume": 809674.0
-          },
-          {
-            "date": "20251029",
-            "open": 9.7,
-            "high": 10.0,
-            "low": 9.68,
-            "close": 9.99,
-            "volume": 1245142.85
-          },
-          {
-            "date": "20251028",
-            "open": 9.76,
-            "high": 9.79,
-            "low": 9.66,
-            "close": 9.68,
-            "volume": 491276.56
-          },
-          {
-            "date": "20251027",
-            "open": 9.71,
-            "high": 9.82,
-            "low": 9.69,
-            "close": 9.78,
-            "volume": 874416.0
-          },
-          {
-            "date": "20251024",
-            "open": 9.54,
-            "high": 9.64,
-            "low": 9.48,
-            "close": 9.62,
-            "volume": 539576.6
-          },
-          {
-            "date": "20251023",
-            "open": 9.44,
-            "high": 9.56,
-            "low": 9.36,
-            "close": 9.54,
-            "volume": 403021.36
-          },
-          {
-            "date": "20251022",
-            "open": 9.58,
-            "high": 9.59,
-            "low": 9.43,
-            "close": 9.45,
-            "volume": 520621.81
-          },
-          {
-            "date": "20251021",
-            "open": 9.59,
-            "high": 9.75,
-            "low": 9.56,
-            "close": 9.61,
-            "volume": 637762.48
-          },
-          {
-            "date": "20251020",
-            "open": 9.69,
-            "high": 9.71,
-            "low": 9.51,
-            "close": 9.56,
-            "volume": 579203.75
-          },
-          {
-            "date": "20251017",
-            "open": 9.71,
-            "high": 9.88,
-            "low": 9.58,
-            "close": 9.61,
-            "volume": 860645.71
-          },
-          {
-            "date": "20251016",
-            "open": 9.7,
-            "high": 9.83,
-            "low": 9.67,
-            "close": 9.7,
-            "volume": 657640.59
-          },
-          {
-            "date": "20251015",
-            "open": 9.6,
-            "high": 9.82,
-            "low": 9.51,
-            "close": 9.75,
-            "volume": 1064794.9
-          },
-          {
-            "date": "20251014",
-            "open": 9.92,
-            "high": 10.11,
-            "low": 9.84,
-            "close": 9.88,
-            "volume": 767958.54
-          },
-          {
-            "date": "20251013",
-            "open": 9.79,
-            "high": 9.96,
-            "low": 9.74,
-            "close": 9.93,
-            "volume": 857854.53
-          },
-          {
-            "date": "20251010",
-            "open": 9.88,
-            "high": 10.14,
-            "low": 9.87,
-            "close": 10.0,
-            "volume": 1014398.45
-          },
-          {
-            "date": "20251009",
+            "date": "2025-10-09T00:00:00",
             "open": 9.77,
             "high": 9.97,
             "low": 9.68,
             "close": 9.95,
-            "volume": 1062810.96
+            "volume": 106281096
+          },
+          {
+            "date": "2025-10-10T00:00:00",
+            "open": 9.88,
+            "high": 10.14,
+            "low": 9.87,
+            "close": 10.0,
+            "volume": 101439845
+          },
+          {
+            "date": "2025-10-13T00:00:00",
+            "open": 9.79,
+            "high": 9.96,
+            "low": 9.74,
+            "close": 9.93,
+            "volume": 85785453
+          },
+          {
+            "date": "2025-10-14T00:00:00",
+            "open": 9.92,
+            "high": 10.11,
+            "low": 9.84,
+            "close": 9.88,
+            "volume": 76795854
+          },
+          {
+            "date": "2025-10-15T00:00:00",
+            "open": 9.6,
+            "high": 9.82,
+            "low": 9.51,
+            "close": 9.75,
+            "volume": 106479490
+          },
+          {
+            "date": "2025-10-16T00:00:00",
+            "open": 9.7,
+            "high": 9.83,
+            "low": 9.67,
+            "close": 9.7,
+            "volume": 65764059
+          },
+          {
+            "date": "2025-10-17T00:00:00",
+            "open": 9.71,
+            "high": 9.88,
+            "low": 9.58,
+            "close": 9.61,
+            "volume": 86064571
+          },
+          {
+            "date": "2025-10-20T00:00:00",
+            "open": 9.69,
+            "high": 9.71,
+            "low": 9.51,
+            "close": 9.56,
+            "volume": 57920375
+          },
+          {
+            "date": "2025-10-21T00:00:00",
+            "open": 9.59,
+            "high": 9.75,
+            "low": 9.56,
+            "close": 9.61,
+            "volume": 63776248
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 9.58,
+            "high": 9.59,
+            "low": 9.43,
+            "close": 9.45,
+            "volume": 52062181
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 9.44,
+            "high": 9.56,
+            "low": 9.36,
+            "close": 9.54,
+            "volume": 40302136
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 9.54,
+            "high": 9.64,
+            "low": 9.48,
+            "close": 9.62,
+            "volume": 53957660
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 9.71,
+            "high": 9.82,
+            "low": 9.69,
+            "close": 9.78,
+            "volume": 87441600
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 9.76,
+            "high": 9.79,
+            "low": 9.66,
+            "close": 9.68,
+            "volume": 49127656
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 9.7,
+            "high": 10.0,
+            "low": 9.68,
+            "close": 9.99,
+            "volume": 124514285
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 9.95,
+            "high": 9.95,
+            "low": 9.75,
+            "close": 9.77,
+            "volume": 80967400
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 9.77,
+            "high": 9.8,
+            "low": 9.6,
+            "close": 9.6,
+            "volume": 74896261
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 9.59,
+            "high": 9.59,
+            "low": 9.4,
+            "close": 9.53,
+            "volume": 61151616
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 9.49,
+            "high": 9.51,
+            "low": 9.4,
+            "close": 9.42,
+            "volume": 46804257
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 9.37,
+            "high": 9.45,
+            "low": 9.33,
+            "close": 9.41,
+            "volume": 30934371
+          },
+          {
+            "date": "2025-11-06T00:00:00",
+            "open": 9.44,
+            "high": 9.61,
+            "low": 9.43,
+            "close": 9.58,
+            "volume": 55338135
+          },
+          {
+            "date": "2025-11-07T00:00:00",
+            "open": 9.53,
+            "high": 9.56,
+            "low": 9.46,
+            "close": 9.47,
+            "volume": 36108922
+          },
+          {
+            "date": "2025-11-10T00:00:00",
+            "open": 9.48,
+            "high": 9.6,
+            "low": 9.42,
+            "close": 9.55,
+            "volume": 39134279
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 9.57,
+            "high": 9.58,
+            "low": 9.4,
+            "close": 9.43,
+            "volume": 44149130
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 9.42,
+            "high": 9.46,
+            "low": 9.36,
+            "close": 9.39,
+            "volume": 33955720
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 9.36,
+            "high": 9.48,
+            "low": 9.36,
+            "close": 9.46,
+            "volume": 32773168
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 9.43,
+            "high": 9.46,
+            "low": 9.36,
+            "close": 9.36,
+            "volume": 30364182
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 9.35,
+            "high": 9.37,
+            "low": 9.28,
+            "close": 9.29,
+            "volume": 34425915
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 9.28,
+            "high": 9.34,
+            "low": 9.25,
+            "close": 9.29,
+            "volume": 28401683
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 9.28,
+            "high": 9.33,
+            "low": 9.22,
+            "close": 9.29,
+            "volume": 27867983
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 9.45,
+            "high": 9.48,
+            "low": 9.27,
+            "close": 9.28,
+            "volume": 52618448
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 9.21,
+            "high": 9.27,
+            "low": 8.96,
+            "close": 8.99,
+            "volume": 76576944
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 9.0,
+            "high": 9.04,
+            "low": 8.91,
+            "close": 8.91,
+            "volume": 34947915
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 8.96,
+            "high": 8.98,
+            "low": 8.89,
+            "close": 8.89,
+            "volume": 31574320
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 8.92,
+            "high": 8.93,
+            "low": 8.86,
+            "close": 8.86,
+            "volume": 22771054
           }
         ],
-        "latest_price": 9.95,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601555",
-        "source": "baostock",
-        "revenue": 0.217676,
-        "net_profit": null,
-        "eps": 1836437858.95,
-        "roe": 0.420232,
-        "total_profit": null,
-        "roa": 4.197522,
-        "gross_profit_rate": 0.050132,
-        "net_profit_rate": 0.997341,
-        "debt_ratio": 0.217676
+        "latest_price": 8.86,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:47:25.677163"
       },
       "technical_indicators": {
-        "current_price": 8.89,
-        "ma5": 9.072,
-        "ma10": 9.215,
-        "ma20": 9.395,
-        "ma60": 8.89,
-        "rsi": 27.586206896551744,
-        "macd": -0.18825877819070946,
-        "signal": -0.14078453671671554,
-        "volume_ratio": 0.7162536662485833,
+        "current_price": 8.86,
+        "ma5": 8.986,
+        "ma10": 9.161999999999999,
+        "ma20": 9.3385,
+        "ma60": 8.86,
+        "rsi": 14.705882352941188,
+        "macd": -0.2021589711770897,
+        "signal": -0.15305942360879038,
+        "volume_ratio": 0.5092244979451048,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601555",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601555",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:46.997751",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:47:25.677163",
+      "timestamp": "2025-11-26T19:47:25.677163"
     },
     "601566": {
       "code": "601566",
-      "timestamp": "2025-11-25T21:08:47.303643",
-      "collection_time": "2025-11-25 21:08:47",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601566",
-        "name": "九牧王",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2011-05-30",
-        "source": "baostock"
-      },
+      "name": "股票601566",
       "kline_data": {
         "daily": [
+          {
+            "date": "20251126",
+            "open": 12.87,
+            "high": 13.98,
+            "low": 12.87,
+            "close": 13.1,
+            "volume": 676096.05
+          },
           {
             "date": "20251125",
             "open": 15.3,
@@ -3210,96 +2735,38 @@
           }
         ],
         "latest_price": 8.51,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601566",
-        "source": "baostock",
-        "revenue": 0.058338,
-        "net_profit": 0.655351,
-        "eps": 132207448.41,
-        "roe": 0.400319,
-        "total_profit": null,
-        "roa": 1.467058,
-        "gross_profit_rate": 0.39574,
-        "net_profit_rate": 1.021714,
-        "debt_ratio": 0.058338
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:48:08.319453"
       },
       "technical_indicators": {
-        "current_price": 14.3,
-        "ma5": 16.186,
-        "ma10": 14.440999999999999,
-        "ma20": 11.8505,
-        "ma60": 14.3,
-        "rsi": 68.34319526627219,
-        "macd": 1.840824011976725,
-        "signal": 1.4349458568197104,
-        "volume_ratio": 1.8740431897153618,
+        "current_price": 13.1,
+        "ma5": 15.458000000000002,
+        "ma10": 14.711000000000002,
+        "ma20": 12.046499999999998,
+        "ma60": 13.1,
+        "rsi": 63.50515463917526,
+        "macd": 1.6364865490097227,
+        "signal": 1.4752539952577128,
+        "volume_ratio": 1.1956128099479417,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601566",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601566",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:47.330647",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:48:08.319453",
+      "timestamp": "2025-11-26T19:48:08.319453"
     },
     "601567": {
       "code": "601567",
-      "timestamp": "2025-11-25T21:08:47.642914",
-      "collection_time": "2025-11-25 21:08:47",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601567",
-        "name": "三星医疗",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2011-06-15",
-        "source": "baostock"
-      },
+      "name": "股票601567",
       "kline_data": {
         "daily": [
+          {
+            "date": "20251126",
+            "open": 22.96,
+            "high": 23.12,
+            "low": 22.7,
+            "close": 22.81,
+            "volume": 213521.32
+          },
           {
             "date": "20251125",
             "open": 23.53,
@@ -3574,96 +3041,38 @@
           }
         ],
         "latest_price": 24.99,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601567",
-        "source": "baostock",
-        "revenue": 0.174701,
-        "net_profit": 0.36213,
-        "eps": 1822779409.65,
-        "roe": 1.580393,
-        "total_profit": null,
-        "roa": 1.885958,
-        "gross_profit_rate": 0.48731,
-        "net_profit_rate": 0.996114,
-        "debt_ratio": 0.174701
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:48:08.336582"
       },
       "technical_indicators": {
-        "current_price": 22.96,
-        "ma5": 23.756,
-        "ma10": 25.06,
-        "ma20": 25.157000000000004,
-        "ma60": 22.96,
-        "rsi": 33.236434108527106,
-        "macd": -0.26925319746188237,
-        "signal": 0.1204921061586666,
-        "volume_ratio": 2.590011226616223,
+        "current_price": 22.81,
+        "ma5": 23.346,
+        "ma10": 24.636,
+        "ma20": 25.034,
+        "ma60": 22.81,
+        "rsi": 28.08988764044942,
+        "macd": -0.3947821339019022,
+        "signal": 0.017437258146552836,
+        "volume_ratio": 0.9328681196431793,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601567",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601567",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:47.668728",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:48:08.336582",
+      "timestamp": "2025-11-26T19:48:08.336582"
     },
     "601568": {
       "code": "601568",
-      "timestamp": "2025-11-25T21:08:47.985040",
-      "collection_time": "2025-11-25 21:08:47",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601568",
-        "name": "北元集团",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2020-10-20",
-        "source": "baostock"
-      },
+      "name": "股票601568",
       "kline_data": {
         "daily": [
+          {
+            "date": "20251126",
+            "open": 3.9,
+            "high": 3.91,
+            "low": 3.88,
+            "close": 3.88,
+            "volume": 173900.4
+          },
           {
             "date": "20251125",
             "open": 3.9,
@@ -3938,96 +3347,38 @@
           }
         ],
         "latest_price": 3.97,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601568",
-        "source": "baostock",
-        "revenue": 0.031956,
-        "net_profit": 0.12802,
-        "eps": 239835917.55,
-        "roe": 0.045882,
-        "total_profit": null,
-        "roa": 1.260181,
-        "gross_profit_rate": 0.507933,
-        "net_profit_rate": 1.0,
-        "debt_ratio": 0.031956
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:48:08.355132"
       },
       "technical_indicators": {
-        "current_price": 3.89,
-        "ma5": 3.9699999999999998,
-        "ma10": 4.0600000000000005,
-        "ma20": 4.039,
-        "ma60": 3.89,
-        "rsi": 42.187499999999986,
-        "macd": -0.00619470077278006,
-        "signal": 0.022354837945895913,
-        "volume_ratio": 0.8153888978444448,
+        "current_price": 3.88,
+        "ma5": 3.9260000000000006,
+        "ma10": 4.036,
+        "ma20": 4.036,
+        "ma60": 3.88,
+        "rsi": 39.682539682539684,
+        "macd": -0.016618879424465938,
+        "signal": 0.014560094471823545,
+        "volume_ratio": 0.7218885537481364,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601568",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601568",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:48.013035",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:48:08.355132",
+      "timestamp": "2025-11-26T19:48:08.355132"
     },
     "601577": {
       "code": "601577",
-      "timestamp": "2025-11-25T21:08:48.327823",
-      "collection_time": "2025-11-25 21:08:48",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601577",
-        "name": "长沙银行",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2018-09-26",
-        "source": "baostock"
-      },
+      "name": "股票601577",
       "kline_data": {
         "daily": [
+          {
+            "date": "20251126",
+            "open": 9.7,
+            "high": 9.75,
+            "low": 9.61,
+            "close": 9.63,
+            "volume": 124890.96
+          },
           {
             "date": "20251125",
             "open": 9.6,
@@ -4302,96 +3653,38 @@
           }
         ],
         "latest_price": 9.03,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601577",
-        "source": "baostock",
-        "revenue": 0.325203,
-        "net_profit": null,
-        "eps": 6331878000.0,
-        "roe": 1.940779,
-        "total_profit": null,
-        "roa": 15.074831,
-        "gross_profit_rate": 0.01817,
-        "net_profit_rate": 0.977049,
-        "debt_ratio": 0.325203
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:48:08.363126"
       },
       "technical_indicators": {
-        "current_price": 9.69,
-        "ma5": 9.703999999999999,
-        "ma10": 9.799,
-        "ma20": 9.7855,
-        "ma60": 9.69,
-        "rsi": 42.85714285714281,
-        "macd": 0.07374942358583603,
-        "signal": 0.12776997166540588,
-        "volume_ratio": 0.860958621291628,
+        "current_price": 9.63,
+        "ma5": 9.688,
+        "ma10": 9.754,
+        "ma20": 9.7985,
+        "ma60": 9.63,
+        "rsi": 37.22627737226278,
+        "macd": 0.05857009355796983,
+        "signal": 0.11392999604391868,
+        "volume_ratio": 0.6681866757870496,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601577",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601577",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:48.354751",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:48:08.363126",
+      "timestamp": "2025-11-26T19:48:08.363126"
     },
     "601579": {
       "code": "601579",
-      "timestamp": "2025-11-25T21:08:48.666843",
-      "collection_time": "2025-11-25 21:08:48",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601579",
-        "name": "会稽山",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2014-08-25",
-        "source": "baostock"
-      },
+      "name": "股票601579",
       "kline_data": {
         "daily": [
+          {
+            "date": "20251126",
+            "open": 21.01,
+            "high": 21.43,
+            "low": 20.96,
+            "close": 21.27,
+            "volume": 114234.82
+          },
           {
             "date": "20251125",
             "open": 20.44,
@@ -4666,346 +3959,48 @@
           }
         ],
         "latest_price": 20.16,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601579",
-        "source": "baostock",
-        "revenue": 0.105978,
-        "net_profit": 0.501482,
-        "eps": 112508377.48,
-        "roe": 0.366812,
-        "total_profit": null,
-        "roa": 1.212412,
-        "gross_profit_rate": 0.240976,
-        "net_profit_rate": 1.001105,
-        "debt_ratio": 0.105978
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:48:08.374127"
       },
       "technical_indicators": {
-        "current_price": 20.82,
-        "ma5": 21.442,
-        "ma10": 22.408,
-        "ma20": 22.311,
-        "ma60": 20.82,
-        "rsi": 42.136150234741784,
-        "macd": -0.1051750069027122,
-        "signal": 0.22365751736930306,
-        "volume_ratio": 0.6219695407292863,
+        "current_price": 21.27,
+        "ma5": 21.144,
+        "ma10": 22.139000000000003,
+        "ma20": 22.2955,
+        "ma60": 21.27,
+        "rsi": 49.32844932844934,
+        "macd": -0.15132899744841666,
+        "signal": 0.14866021440575913,
+        "volume_ratio": 0.8608501754204947,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601579",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601579",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:48.693843",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:48:08.374127",
+      "timestamp": "2025-11-26T19:48:08.374127"
     },
     "601588": {
       "code": "601588",
-      "timestamp": "2025-11-25T21:08:49.008982",
-      "collection_time": "2025-11-25 21:08:49",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601588",
-        "name": "北辰实业",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2006-10-16",
-        "source": "baostock"
-      },
+      "name": "股票601588",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 1.86,
-            "high": 1.88,
-            "low": 1.84,
-            "close": 1.87,
-            "volume": 397031.19
-          },
-          {
-            "date": "20251124",
-            "open": 1.88,
-            "high": 1.89,
-            "low": 1.85,
-            "close": 1.86,
-            "volume": 433384.01
-          },
-          {
-            "date": "20251121",
+            "date": "2025-10-09T00:00:00",
             "open": 1.91,
-            "high": 1.95,
+            "high": 1.92,
             "low": 1.86,
-            "close": 1.88,
-            "volume": 655934.01
+            "close": 1.91,
+            "volume": 355023.0
           },
           {
-            "date": "20251120",
+            "date": "2025-10-10T00:00:00",
             "open": 1.91,
-            "high": 1.97,
-            "low": 1.88,
-            "close": 1.94,
-            "volume": 610981.0
-          },
-          {
-            "date": "20251119",
-            "open": 1.97,
-            "high": 2.0,
-            "low": 1.9,
-            "close": 1.91,
-            "volume": 615259.0
-          },
-          {
-            "date": "20251118",
-            "open": 2.08,
-            "high": 2.09,
-            "low": 1.94,
-            "close": 1.98,
-            "volume": 662039.49
-          },
-          {
-            "date": "20251117",
-            "open": 2.05,
-            "high": 2.1,
-            "low": 2.05,
-            "close": 2.09,
-            "volume": 438266.0
-          },
-          {
-            "date": "20251114",
-            "open": 2.02,
-            "high": 2.08,
-            "low": 2.01,
-            "close": 2.06,
-            "volume": 539767.61
-          },
-          {
-            "date": "20251113",
-            "open": 1.99,
-            "high": 2.03,
-            "low": 1.96,
-            "close": 2.03,
-            "volume": 474648.1
-          },
-          {
-            "date": "20251112",
-            "open": 2.0,
-            "high": 2.03,
-            "low": 1.97,
-            "close": 2.0,
-            "volume": 456357.0
-          },
-          {
-            "date": "20251111",
-            "open": 2.0,
-            "high": 2.02,
-            "low": 1.97,
-            "close": 2.01,
-            "volume": 410235.63
-          },
-          {
-            "date": "20251110",
-            "open": 1.94,
             "high": 1.99,
-            "low": 1.92,
-            "close": 1.99,
-            "volume": 494633.1
-          },
-          {
-            "date": "20251107",
-            "open": 1.92,
-            "high": 1.94,
-            "low": 1.91,
-            "close": 1.93,
-            "volume": 308170.1
-          },
-          {
-            "date": "20251106",
-            "open": 1.93,
-            "high": 1.94,
-            "low": 1.91,
-            "close": 1.92,
-            "volume": 280077.0
-          },
-          {
-            "date": "20251105",
-            "open": 1.89,
-            "high": 1.94,
-            "low": 1.88,
-            "close": 1.94,
-            "volume": 425018.1
-          },
-          {
-            "date": "20251104",
-            "open": 1.9,
-            "high": 1.92,
-            "low": 1.88,
-            "close": 1.91,
-            "volume": 455076.1
-          },
-          {
-            "date": "20251103",
-            "open": 1.9,
-            "high": 1.91,
-            "low": 1.87,
-            "close": 1.91,
-            "volume": 428396.69
-          },
-          {
-            "date": "20251031",
-            "open": 1.89,
-            "high": 1.92,
-            "low": 1.88,
-            "close": 1.89,
-            "volume": 364016.09
-          },
-          {
-            "date": "20251030",
-            "open": 1.92,
-            "high": 1.96,
-            "low": 1.89,
-            "close": 1.89,
-            "volume": 466161.0
-          },
-          {
-            "date": "20251029",
-            "open": 1.93,
-            "high": 1.94,
             "low": 1.9,
-            "close": 1.91,
-            "volume": 342198.0
-          },
-          {
-            "date": "20251028",
-            "open": 1.95,
-            "high": 1.96,
-            "low": 1.92,
-            "close": 1.93,
-            "volume": 263285.02
-          },
-          {
-            "date": "20251027",
-            "open": 1.97,
-            "high": 1.99,
-            "low": 1.93,
             "close": 1.95,
-            "volume": 480792.17
+            "volume": 493857.0
           },
           {
-            "date": "20251024",
-            "open": 2.09,
-            "high": 2.1,
-            "low": 1.96,
-            "close": 1.98,
-            "volume": 659695.0
-          },
-          {
-            "date": "20251023",
-            "open": 2.07,
-            "high": 2.11,
-            "low": 2.02,
-            "close": 2.1,
-            "volume": 599223.0
-          },
-          {
-            "date": "20251022",
-            "open": 2.01,
-            "high": 2.11,
-            "low": 2.01,
-            "close": 2.09,
-            "volume": 637300.0
-          },
-          {
-            "date": "20251021",
-            "open": 1.93,
-            "high": 2.02,
-            "low": 1.91,
-            "close": 2.01,
-            "volume": 582042.98
-          },
-          {
-            "date": "20251020",
-            "open": 1.9,
-            "high": 1.94,
-            "low": 1.89,
-            "close": 1.93,
-            "volume": 313785.01
-          },
-          {
-            "date": "20251017",
-            "open": 1.93,
-            "high": 1.96,
-            "low": 1.88,
-            "close": 1.89,
-            "volume": 385887.0
-          },
-          {
-            "date": "20251016",
-            "open": 1.96,
-            "high": 1.96,
-            "low": 1.91,
-            "close": 1.93,
-            "volume": 299761.1
-          },
-          {
-            "date": "20251015",
-            "open": 1.96,
-            "high": 2.03,
-            "low": 1.94,
-            "close": 1.96,
-            "volume": 392977.0
-          },
-          {
-            "date": "20251014",
-            "open": 1.93,
-            "high": 2.02,
-            "low": 1.93,
-            "close": 1.96,
-            "volume": 645595.11
-          },
-          {
-            "date": "20251013",
+            "date": "2025-10-13T00:00:00",
             "open": 1.93,
             "high": 1.93,
             "low": 1.88,
@@ -5013,1091 +4008,917 @@
             "volume": 422340.0
           },
           {
-            "date": "20251010",
-            "open": 1.91,
-            "high": 1.99,
-            "low": 1.9,
-            "close": 1.95,
-            "volume": 493856.76
+            "date": "2025-10-14T00:00:00",
+            "open": 1.93,
+            "high": 2.02,
+            "low": 1.93,
+            "close": 1.96,
+            "volume": 645595.0
           },
           {
-            "date": "20251009",
-            "open": 1.91,
-            "high": 1.92,
-            "low": 1.86,
+            "date": "2025-10-15T00:00:00",
+            "open": 1.96,
+            "high": 2.03,
+            "low": 1.94,
+            "close": 1.96,
+            "volume": 392977.0
+          },
+          {
+            "date": "2025-10-16T00:00:00",
+            "open": 1.96,
+            "high": 1.96,
+            "low": 1.91,
+            "close": 1.93,
+            "volume": 299761.0
+          },
+          {
+            "date": "2025-10-17T00:00:00",
+            "open": 1.93,
+            "high": 1.96,
+            "low": 1.88,
+            "close": 1.89,
+            "volume": 385887.0
+          },
+          {
+            "date": "2025-10-20T00:00:00",
+            "open": 1.9,
+            "high": 1.94,
+            "low": 1.89,
+            "close": 1.93,
+            "volume": 313785.0
+          },
+          {
+            "date": "2025-10-21T00:00:00",
+            "open": 1.93,
+            "high": 2.02,
+            "low": 1.91,
+            "close": 2.01,
+            "volume": 582043.0
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 2.01,
+            "high": 2.11,
+            "low": 2.01,
+            "close": 2.09,
+            "volume": 637300.0
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 2.07,
+            "high": 2.11,
+            "low": 2.02,
+            "close": 2.1,
+            "volume": 599223.0
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 2.09,
+            "high": 2.1,
+            "low": 1.96,
+            "close": 1.98,
+            "volume": 659695.0
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 1.97,
+            "high": 1.99,
+            "low": 1.93,
+            "close": 1.95,
+            "volume": 480792.0
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 1.95,
+            "high": 1.96,
+            "low": 1.92,
+            "close": 1.93,
+            "volume": 263285.0
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 1.93,
+            "high": 1.94,
+            "low": 1.9,
             "close": 1.91,
-            "volume": 355023.11
+            "volume": 342198.0
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 1.92,
+            "high": 1.96,
+            "low": 1.89,
+            "close": 1.89,
+            "volume": 466161.0
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 1.89,
+            "high": 1.92,
+            "low": 1.88,
+            "close": 1.89,
+            "volume": 364016.0
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 1.9,
+            "high": 1.91,
+            "low": 1.87,
+            "close": 1.91,
+            "volume": 428397.0
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 1.9,
+            "high": 1.92,
+            "low": 1.88,
+            "close": 1.91,
+            "volume": 455076.0
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 1.89,
+            "high": 1.94,
+            "low": 1.88,
+            "close": 1.94,
+            "volume": 425018.0
+          },
+          {
+            "date": "2025-11-06T00:00:00",
+            "open": 1.93,
+            "high": 1.94,
+            "low": 1.91,
+            "close": 1.92,
+            "volume": 280077.0
+          },
+          {
+            "date": "2025-11-07T00:00:00",
+            "open": 1.92,
+            "high": 1.94,
+            "low": 1.91,
+            "close": 1.93,
+            "volume": 308170.0
+          },
+          {
+            "date": "2025-11-10T00:00:00",
+            "open": 1.94,
+            "high": 1.99,
+            "low": 1.92,
+            "close": 1.99,
+            "volume": 494633.0
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 2.0,
+            "high": 2.02,
+            "low": 1.97,
+            "close": 2.01,
+            "volume": 410236.0
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 2.0,
+            "high": 2.03,
+            "low": 1.97,
+            "close": 2.0,
+            "volume": 456357.0
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 1.99,
+            "high": 2.03,
+            "low": 1.96,
+            "close": 2.03,
+            "volume": 474648.0
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 2.02,
+            "high": 2.08,
+            "low": 2.01,
+            "close": 2.06,
+            "volume": 539768.0
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 2.05,
+            "high": 2.1,
+            "low": 2.05,
+            "close": 2.09,
+            "volume": 438266.0
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 2.08,
+            "high": 2.09,
+            "low": 1.94,
+            "close": 1.98,
+            "volume": 662039.0
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 1.97,
+            "high": 2.0,
+            "low": 1.9,
+            "close": 1.91,
+            "volume": 615259.0
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 1.91,
+            "high": 1.97,
+            "low": 1.88,
+            "close": 1.94,
+            "volume": 610981.0
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 1.91,
+            "high": 1.95,
+            "low": 1.86,
+            "close": 1.88,
+            "volume": 655934.0
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 1.88,
+            "high": 1.89,
+            "low": 1.85,
+            "close": 1.86,
+            "volume": 433384.0
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 1.86,
+            "high": 1.88,
+            "low": 1.84,
+            "close": 1.87,
+            "volume": 397031.0
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 1.87,
+            "high": 1.91,
+            "low": 1.86,
+            "close": 1.86,
+            "volume": 390188.0
           }
         ],
-        "latest_price": 1.91,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601588",
-        "source": "baostock",
-        "revenue": -0.222516,
-        "net_profit": 0.292421,
-        "eps": -1052709814.0,
-        "roe": -0.263524,
-        "total_profit": null,
-        "roa": 4.454833,
-        "gross_profit_rate": 0.086923,
-        "net_profit_rate": 0.881631,
-        "debt_ratio": -0.222516
+        "latest_price": 1.86,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:54:20.743157"
       },
       "technical_indicators": {
-        "current_price": 1.87,
-        "ma5": 1.892,
-        "ma10": 1.9619999999999997,
-        "ma20": 1.9460000000000002,
-        "ma60": 1.87,
-        "rsi": 43.13725490196079,
-        "macd": -0.011117259698354864,
-        "signal": 0.004943445742657418,
-        "volume_ratio": 0.666697209187282,
+        "current_price": 1.86,
+        "ma5": 1.8820000000000001,
+        "ma10": 1.948,
+        "ma20": 1.9434999999999998,
+        "ma60": 1.86,
+        "rsi": 44.00000000000001,
+        "macd": -0.016231522096956663,
+        "signal": 0.0007084521747346018,
+        "volume_ratio": 0.7192169547248034,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601588",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601588",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:49.033888",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:54:20.743157",
+      "timestamp": "2025-11-26T19:54:20.743157"
     },
     "601595": {
       "code": "601595",
-      "timestamp": "2025-11-25T21:08:49.349918",
-      "collection_time": "2025-11-25 21:08:49",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601595",
-        "name": "上海电影",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2016-08-17",
-        "source": "baostock"
-      },
+      "name": "股票601595",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 32.8,
-            "high": 34.64,
-            "low": 32.8,
-            "close": 33.3,
-            "volume": 273192.25
-          },
-          {
-            "date": "20251124",
-            "open": 30.66,
-            "high": 32.46,
-            "low": 30.2,
-            "close": 32.41,
-            "volume": 228849.07
-          },
-          {
-            "date": "20251121",
-            "open": 31.07,
-            "high": 32.42,
-            "low": 30.62,
-            "close": 30.79,
-            "volume": 169539.22
-          },
-          {
-            "date": "20251120",
-            "open": 30.67,
-            "high": 31.28,
-            "low": 30.05,
-            "close": 30.9,
-            "volume": 113994.47
-          },
-          {
-            "date": "20251119",
-            "open": 31.3,
-            "high": 33.05,
-            "low": 30.64,
-            "close": 30.65,
-            "volume": 210349.66
-          },
-          {
-            "date": "20251118",
-            "open": 30.29,
-            "high": 31.48,
-            "low": 30.06,
-            "close": 30.94,
-            "volume": 152490.0
-          },
-          {
-            "date": "20251117",
-            "open": 29.2,
-            "high": 30.45,
-            "low": 28.64,
-            "close": 30.27,
-            "volume": 101224.03
-          },
-          {
-            "date": "20251114",
-            "open": 29.3,
-            "high": 29.99,
-            "low": 29.1,
-            "close": 29.15,
-            "volume": 52253.91
-          },
-          {
-            "date": "20251113",
-            "open": 28.99,
-            "high": 29.85,
-            "low": 28.88,
-            "close": 29.42,
-            "volume": 46828.0
-          },
-          {
-            "date": "20251112",
-            "open": 29.7,
-            "high": 29.88,
-            "low": 28.9,
-            "close": 29.15,
-            "volume": 54395.91
-          },
-          {
-            "date": "20251111",
-            "open": 30.0,
-            "high": 30.24,
-            "low": 29.7,
-            "close": 29.79,
-            "volume": 54209.0
-          },
-          {
-            "date": "20251110",
-            "open": 29.92,
-            "high": 30.66,
-            "low": 29.92,
-            "close": 30.13,
-            "volume": 64157.0
-          },
-          {
-            "date": "20251107",
-            "open": 29.78,
-            "high": 30.56,
-            "low": 29.7,
-            "close": 29.73,
-            "volume": 81246.2
-          },
-          {
-            "date": "20251106",
-            "open": 30.66,
-            "high": 30.66,
-            "low": 29.83,
-            "close": 29.96,
-            "volume": 103893.0
-          },
-          {
-            "date": "20251105",
-            "open": 29.15,
-            "high": 31.5,
-            "low": 29.05,
-            "close": 30.94,
-            "volume": 184699.0
-          },
-          {
-            "date": "20251104",
-            "open": 29.75,
-            "high": 29.98,
-            "low": 29.2,
-            "close": 29.48,
-            "volume": 66720.0
-          },
-          {
-            "date": "20251103",
-            "open": 30.02,
-            "high": 30.13,
-            "low": 29.41,
-            "close": 29.75,
-            "volume": 87386.62
-          },
-          {
-            "date": "20251031",
-            "open": 28.24,
-            "high": 30.69,
-            "low": 28.22,
-            "close": 30.05,
-            "volume": 216409.85
-          },
-          {
-            "date": "20251030",
-            "open": 27.97,
-            "high": 28.8,
-            "low": 27.69,
-            "close": 28.35,
-            "volume": 88983.97
-          },
-          {
-            "date": "20251029",
-            "open": 27.74,
-            "high": 28.19,
-            "low": 27.61,
-            "close": 28.08,
-            "volume": 60041.38
-          },
-          {
-            "date": "20251028",
-            "open": 27.51,
-            "high": 27.88,
-            "low": 27.3,
-            "close": 27.73,
-            "volume": 54952.34
-          },
-          {
-            "date": "20251027",
-            "open": 27.78,
-            "high": 27.95,
-            "low": 27.44,
-            "close": 27.48,
-            "volume": 63477.9
-          },
-          {
-            "date": "20251024",
-            "open": 27.62,
-            "high": 27.75,
-            "low": 27.5,
-            "close": 27.6,
-            "volume": 36449.2
-          },
-          {
-            "date": "20251023",
-            "open": 27.71,
-            "high": 27.81,
-            "low": 27.28,
-            "close": 27.74,
-            "volume": 51961.41
-          },
-          {
-            "date": "20251022",
-            "open": 27.52,
-            "high": 28.11,
-            "low": 27.38,
-            "close": 27.74,
-            "volume": 44414.0
-          },
-          {
-            "date": "20251021",
-            "open": 27.61,
-            "high": 27.79,
-            "low": 27.44,
-            "close": 27.6,
-            "volume": 44366.0
-          },
-          {
-            "date": "20251020",
-            "open": 27.45,
-            "high": 27.74,
-            "low": 27.36,
-            "close": 27.6,
-            "volume": 37189.2
-          },
-          {
-            "date": "20251017",
-            "open": 27.56,
-            "high": 27.83,
-            "low": 27.28,
-            "close": 27.3,
-            "volume": 41202.21
-          },
-          {
-            "date": "20251016",
-            "open": 27.5,
-            "high": 27.67,
-            "low": 27.35,
-            "close": 27.49,
-            "volume": 37829.86
-          },
-          {
-            "date": "20251015",
-            "open": 27.58,
-            "high": 27.88,
-            "low": 27.38,
-            "close": 27.59,
-            "volume": 53854.6
-          },
-          {
-            "date": "20251014",
-            "open": 28.01,
-            "high": 28.44,
-            "low": 27.5,
-            "close": 27.57,
-            "volume": 48648.77
-          },
-          {
-            "date": "20251013",
-            "open": 27.95,
-            "high": 28.2,
-            "low": 27.49,
-            "close": 28.03,
-            "volume": 47862.91
-          },
-          {
-            "date": "20251010",
-            "open": 28.82,
-            "high": 29.0,
-            "low": 28.6,
-            "close": 28.68,
-            "volume": 43326.34
-          },
-          {
-            "date": "20251009",
+            "date": "2025-10-09T00:00:00",
             "open": 29.96,
             "high": 29.96,
             "low": 28.65,
             "close": 28.78,
-            "volume": 81571.73
+            "volume": 8157173
+          },
+          {
+            "date": "2025-10-10T00:00:00",
+            "open": 28.82,
+            "high": 29.0,
+            "low": 28.6,
+            "close": 28.68,
+            "volume": 4332634
+          },
+          {
+            "date": "2025-10-13T00:00:00",
+            "open": 27.95,
+            "high": 28.2,
+            "low": 27.49,
+            "close": 28.03,
+            "volume": 4786291
+          },
+          {
+            "date": "2025-10-14T00:00:00",
+            "open": 28.01,
+            "high": 28.44,
+            "low": 27.5,
+            "close": 27.57,
+            "volume": 4864877
+          },
+          {
+            "date": "2025-10-15T00:00:00",
+            "open": 27.58,
+            "high": 27.88,
+            "low": 27.38,
+            "close": 27.59,
+            "volume": 5385460
+          },
+          {
+            "date": "2025-10-16T00:00:00",
+            "open": 27.5,
+            "high": 27.67,
+            "low": 27.35,
+            "close": 27.49,
+            "volume": 3782986
+          },
+          {
+            "date": "2025-10-17T00:00:00",
+            "open": 27.56,
+            "high": 27.83,
+            "low": 27.28,
+            "close": 27.3,
+            "volume": 4120221
+          },
+          {
+            "date": "2025-10-20T00:00:00",
+            "open": 27.45,
+            "high": 27.74,
+            "low": 27.36,
+            "close": 27.6,
+            "volume": 3718920
+          },
+          {
+            "date": "2025-10-21T00:00:00",
+            "open": 27.61,
+            "high": 27.79,
+            "low": 27.44,
+            "close": 27.6,
+            "volume": 4436600
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 27.52,
+            "high": 28.11,
+            "low": 27.38,
+            "close": 27.74,
+            "volume": 4441400
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 27.71,
+            "high": 27.81,
+            "low": 27.28,
+            "close": 27.74,
+            "volume": 5196141
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 27.62,
+            "high": 27.75,
+            "low": 27.5,
+            "close": 27.6,
+            "volume": 3644920
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 27.78,
+            "high": 27.95,
+            "low": 27.44,
+            "close": 27.48,
+            "volume": 6347790
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 27.51,
+            "high": 27.88,
+            "low": 27.3,
+            "close": 27.73,
+            "volume": 5495234
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 27.74,
+            "high": 28.19,
+            "low": 27.61,
+            "close": 28.08,
+            "volume": 6004138
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 27.97,
+            "high": 28.8,
+            "low": 27.69,
+            "close": 28.35,
+            "volume": 8898397
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 28.24,
+            "high": 30.69,
+            "low": 28.22,
+            "close": 30.05,
+            "volume": 21640985
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 30.02,
+            "high": 30.13,
+            "low": 29.41,
+            "close": 29.75,
+            "volume": 8738662
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 29.75,
+            "high": 29.98,
+            "low": 29.2,
+            "close": 29.48,
+            "volume": 6672000
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 29.15,
+            "high": 31.5,
+            "low": 29.05,
+            "close": 30.94,
+            "volume": 18469900
+          },
+          {
+            "date": "2025-11-06T00:00:00",
+            "open": 30.66,
+            "high": 30.66,
+            "low": 29.83,
+            "close": 29.96,
+            "volume": 10389300
+          },
+          {
+            "date": "2025-11-07T00:00:00",
+            "open": 29.78,
+            "high": 30.56,
+            "low": 29.7,
+            "close": 29.73,
+            "volume": 8124620
+          },
+          {
+            "date": "2025-11-10T00:00:00",
+            "open": 29.92,
+            "high": 30.66,
+            "low": 29.92,
+            "close": 30.13,
+            "volume": 6415700
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 30.0,
+            "high": 30.24,
+            "low": 29.7,
+            "close": 29.79,
+            "volume": 5420900
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 29.7,
+            "high": 29.88,
+            "low": 28.9,
+            "close": 29.15,
+            "volume": 5439591
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 28.99,
+            "high": 29.85,
+            "low": 28.88,
+            "close": 29.42,
+            "volume": 4682800
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 29.3,
+            "high": 29.99,
+            "low": 29.1,
+            "close": 29.15,
+            "volume": 5225391
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 29.2,
+            "high": 30.45,
+            "low": 28.64,
+            "close": 30.27,
+            "volume": 10122403
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 30.29,
+            "high": 31.48,
+            "low": 30.06,
+            "close": 30.94,
+            "volume": 15249000
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 31.3,
+            "high": 33.05,
+            "low": 30.64,
+            "close": 30.65,
+            "volume": 21034966
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 30.67,
+            "high": 31.28,
+            "low": 30.05,
+            "close": 30.9,
+            "volume": 11399447
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 31.07,
+            "high": 32.42,
+            "low": 30.62,
+            "close": 30.79,
+            "volume": 16953922
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 30.66,
+            "high": 32.46,
+            "low": 30.2,
+            "close": 32.41,
+            "volume": 22884907
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 32.8,
+            "high": 34.64,
+            "low": 32.8,
+            "close": 33.3,
+            "volume": 27319225
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 33.33,
+            "high": 33.98,
+            "low": 32.32,
+            "close": 33.42,
+            "volume": 17763860
           }
         ],
-        "latest_price": 28.78,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601595",
-        "source": "baostock",
-        "revenue": 0.248653,
-        "net_profit": 0.242728,
-        "eps": 139184342.52,
-        "roe": 0.245126,
-        "total_profit": null,
-        "roa": 1.705001,
-        "gross_profit_rate": 0.195839,
-        "net_profit_rate": 0.771708,
-        "debt_ratio": 0.248653
+        "latest_price": 33.42,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:54:20.752159"
       },
       "technical_indicators": {
-        "current_price": 33.3,
-        "ma5": 31.609999999999996,
-        "ma10": 30.697999999999997,
-        "ma20": 30.162,
-        "ma60": 33.3,
-        "rsi": 64.60396039603955,
-        "macd": 0.8849302664516792,
-        "signal": 0.5806452108118517,
-        "volume_ratio": 1.5607018499366139,
+        "current_price": 33.42,
+        "ma5": 32.164,
+        "ma10": 31.125,
+        "ma20": 30.429000000000002,
+        "ma60": 33.42,
+        "rsi": 73.96121883656505,
+        "macd": 1.018745921890197,
+        "signal": 0.6682653530275209,
+        "volume_ratio": 0.891827491330243,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601595",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601595",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:49.378812",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:54:20.752159",
+      "timestamp": "2025-11-26T19:54:20.752159"
     },
     "601598": {
       "code": "601598",
-      "timestamp": "2025-11-25T21:08:49.692115",
-      "collection_time": "2025-11-25 21:08:49",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601598",
-        "name": "中国外运",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2019-01-18",
-        "source": "baostock"
-      },
+      "name": "股票601598",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 6.14,
-            "high": 6.3,
-            "low": 6.11,
-            "close": 6.25,
-            "volume": 152001.95
-          },
-          {
-            "date": "20251124",
-            "open": 6.12,
-            "high": 6.17,
-            "low": 6.07,
-            "close": 6.13,
-            "volume": 117332.0
-          },
-          {
-            "date": "20251121",
-            "open": 6.14,
-            "high": 6.18,
-            "low": 6.09,
-            "close": 6.09,
-            "volume": 149599.22
-          },
-          {
-            "date": "20251120",
-            "open": 6.16,
-            "high": 6.22,
-            "low": 6.15,
-            "close": 6.16,
-            "volume": 109409.36
-          },
-          {
-            "date": "20251119",
-            "open": 6.16,
-            "high": 6.2,
-            "low": 6.12,
-            "close": 6.18,
-            "volume": 95453.0
-          },
-          {
-            "date": "20251118",
-            "open": 6.24,
-            "high": 6.26,
-            "low": 6.12,
-            "close": 6.15,
-            "volume": 142919.43
-          },
-          {
-            "date": "20251117",
-            "open": 6.32,
-            "high": 6.33,
-            "low": 6.23,
-            "close": 6.26,
-            "volume": 111650.28
-          },
-          {
-            "date": "20251114",
-            "open": 6.37,
-            "high": 6.42,
-            "low": 6.31,
-            "close": 6.31,
-            "volume": 113833.95
-          },
-          {
-            "date": "20251113",
-            "open": 6.41,
-            "high": 6.45,
-            "low": 6.34,
-            "close": 6.4,
-            "volume": 116756.77
-          },
-          {
-            "date": "20251112",
-            "open": 6.34,
-            "high": 6.46,
-            "low": 6.34,
-            "close": 6.38,
-            "volume": 149773.81
-          },
-          {
-            "date": "20251111",
-            "open": 6.47,
-            "high": 6.47,
-            "low": 6.31,
-            "close": 6.34,
-            "volume": 183357.85
-          },
-          {
-            "date": "20251110",
-            "open": 6.45,
-            "high": 6.51,
-            "low": 6.38,
-            "close": 6.44,
-            "volume": 146290.55
-          },
-          {
-            "date": "20251107",
-            "open": 6.39,
-            "high": 6.5,
-            "low": 6.37,
-            "close": 6.44,
-            "volume": 178490.87
-          },
-          {
-            "date": "20251106",
-            "open": 6.39,
-            "high": 6.43,
-            "low": 6.34,
-            "close": 6.38,
-            "volume": 188860.65
-          },
-          {
-            "date": "20251105",
-            "open": 6.47,
-            "high": 6.52,
-            "low": 6.37,
-            "close": 6.4,
-            "volume": 232029.51
-          },
-          {
-            "date": "20251104",
-            "open": 6.79,
-            "high": 6.81,
-            "low": 6.49,
-            "close": 6.52,
-            "volume": 279725.69
-          },
-          {
-            "date": "20251103",
-            "open": 6.7,
-            "high": 6.88,
-            "low": 6.63,
-            "close": 6.8,
-            "volume": 449629.8
-          },
-          {
-            "date": "20251031",
-            "open": 6.68,
-            "high": 6.87,
-            "low": 6.58,
-            "close": 6.73,
-            "volume": 672023.65
-          },
-          {
-            "date": "20251030",
-            "open": 6.22,
-            "high": 6.8,
-            "low": 6.2,
-            "close": 6.68,
-            "volume": 779901.07
-          },
-          {
-            "date": "20251029",
-            "open": 6.02,
-            "high": 6.24,
-            "low": 5.95,
-            "close": 6.22,
-            "volume": 274077.45
-          },
-          {
-            "date": "20251028",
-            "open": 6.16,
-            "high": 6.17,
-            "low": 6.01,
-            "close": 6.02,
-            "volume": 309198.07
-          },
-          {
-            "date": "20251027",
-            "open": 6.18,
-            "high": 6.28,
-            "low": 6.16,
-            "close": 6.19,
-            "volume": 196104.38
-          },
-          {
-            "date": "20251024",
-            "open": 6.22,
-            "high": 6.25,
-            "low": 6.12,
-            "close": 6.14,
-            "volume": 221387.27
-          },
-          {
-            "date": "20251023",
-            "open": 6.2,
-            "high": 6.24,
-            "low": 6.17,
-            "close": 6.21,
-            "volume": 190691.36
-          },
-          {
-            "date": "20251022",
-            "open": 6.31,
-            "high": 6.32,
-            "low": 6.18,
-            "close": 6.22,
-            "volume": 203909.64
-          },
-          {
-            "date": "20251021",
-            "open": 6.2,
-            "high": 6.32,
-            "low": 6.19,
-            "close": 6.3,
-            "volume": 205127.82
-          },
-          {
-            "date": "20251020",
-            "open": 6.15,
-            "high": 6.22,
-            "low": 6.12,
-            "close": 6.2,
-            "volume": 221107.21
-          },
-          {
-            "date": "20251017",
-            "open": 6.29,
-            "high": 6.32,
-            "low": 6.24,
-            "close": 6.26,
-            "volume": 197831.86
-          },
-          {
-            "date": "20251016",
-            "open": 6.32,
-            "high": 6.36,
-            "low": 6.26,
-            "close": 6.28,
-            "volume": 162948.78
-          },
-          {
-            "date": "20251015",
-            "open": 6.26,
-            "high": 6.34,
-            "low": 6.17,
-            "close": 6.33,
-            "volume": 238011.96
-          },
-          {
-            "date": "20251014",
-            "open": 6.43,
-            "high": 6.44,
-            "low": 6.21,
-            "close": 6.23,
-            "volume": 376579.86
-          },
-          {
-            "date": "20251013",
-            "open": 6.24,
-            "high": 6.41,
-            "low": 6.17,
-            "close": 6.39,
-            "volume": 281979.62
-          },
-          {
-            "date": "20251010",
-            "open": 6.45,
-            "high": 6.57,
-            "low": 6.4,
-            "close": 6.46,
-            "volume": 310843.56
-          },
-          {
-            "date": "20251009",
+            "date": "2025-10-09T00:00:00",
             "open": 6.32,
             "high": 6.49,
             "low": 6.25,
             "close": 6.46,
-            "volume": 374633.91
+            "volume": 37463391
+          },
+          {
+            "date": "2025-10-10T00:00:00",
+            "open": 6.45,
+            "high": 6.57,
+            "low": 6.4,
+            "close": 6.46,
+            "volume": 31084356
+          },
+          {
+            "date": "2025-10-13T00:00:00",
+            "open": 6.24,
+            "high": 6.41,
+            "low": 6.17,
+            "close": 6.39,
+            "volume": 28197962
+          },
+          {
+            "date": "2025-10-14T00:00:00",
+            "open": 6.43,
+            "high": 6.44,
+            "low": 6.21,
+            "close": 6.23,
+            "volume": 37657986
+          },
+          {
+            "date": "2025-10-15T00:00:00",
+            "open": 6.26,
+            "high": 6.34,
+            "low": 6.17,
+            "close": 6.33,
+            "volume": 23801196
+          },
+          {
+            "date": "2025-10-16T00:00:00",
+            "open": 6.32,
+            "high": 6.36,
+            "low": 6.26,
+            "close": 6.28,
+            "volume": 16294878
+          },
+          {
+            "date": "2025-10-17T00:00:00",
+            "open": 6.29,
+            "high": 6.32,
+            "low": 6.24,
+            "close": 6.26,
+            "volume": 19783186
+          },
+          {
+            "date": "2025-10-20T00:00:00",
+            "open": 6.15,
+            "high": 6.22,
+            "low": 6.12,
+            "close": 6.2,
+            "volume": 22110721
+          },
+          {
+            "date": "2025-10-21T00:00:00",
+            "open": 6.2,
+            "high": 6.32,
+            "low": 6.19,
+            "close": 6.3,
+            "volume": 20512782
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 6.31,
+            "high": 6.32,
+            "low": 6.18,
+            "close": 6.22,
+            "volume": 20390964
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 6.2,
+            "high": 6.24,
+            "low": 6.17,
+            "close": 6.21,
+            "volume": 19069136
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 6.22,
+            "high": 6.25,
+            "low": 6.12,
+            "close": 6.14,
+            "volume": 22138727
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 6.18,
+            "high": 6.28,
+            "low": 6.16,
+            "close": 6.19,
+            "volume": 19610438
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 6.16,
+            "high": 6.17,
+            "low": 6.01,
+            "close": 6.02,
+            "volume": 30919807
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 6.02,
+            "high": 6.24,
+            "low": 5.95,
+            "close": 6.22,
+            "volume": 27407745
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 6.22,
+            "high": 6.8,
+            "low": 6.2,
+            "close": 6.68,
+            "volume": 77990107
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 6.68,
+            "high": 6.87,
+            "low": 6.58,
+            "close": 6.73,
+            "volume": 67202365
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 6.7,
+            "high": 6.88,
+            "low": 6.63,
+            "close": 6.8,
+            "volume": 44962980
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 6.79,
+            "high": 6.81,
+            "low": 6.49,
+            "close": 6.52,
+            "volume": 27972569
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 6.47,
+            "high": 6.52,
+            "low": 6.37,
+            "close": 6.4,
+            "volume": 23202951
+          },
+          {
+            "date": "2025-11-06T00:00:00",
+            "open": 6.39,
+            "high": 6.43,
+            "low": 6.34,
+            "close": 6.38,
+            "volume": 18886065
+          },
+          {
+            "date": "2025-11-07T00:00:00",
+            "open": 6.39,
+            "high": 6.5,
+            "low": 6.37,
+            "close": 6.44,
+            "volume": 17849087
+          },
+          {
+            "date": "2025-11-10T00:00:00",
+            "open": 6.45,
+            "high": 6.51,
+            "low": 6.38,
+            "close": 6.44,
+            "volume": 14629055
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 6.47,
+            "high": 6.47,
+            "low": 6.31,
+            "close": 6.34,
+            "volume": 18335785
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 6.34,
+            "high": 6.46,
+            "low": 6.34,
+            "close": 6.38,
+            "volume": 14977381
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 6.41,
+            "high": 6.45,
+            "low": 6.34,
+            "close": 6.4,
+            "volume": 11675677
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 6.37,
+            "high": 6.42,
+            "low": 6.31,
+            "close": 6.31,
+            "volume": 11383395
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 6.32,
+            "high": 6.33,
+            "low": 6.23,
+            "close": 6.26,
+            "volume": 11165028
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 6.24,
+            "high": 6.26,
+            "low": 6.12,
+            "close": 6.15,
+            "volume": 14291943
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 6.16,
+            "high": 6.2,
+            "low": 6.12,
+            "close": 6.18,
+            "volume": 9545300
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 6.16,
+            "high": 6.22,
+            "low": 6.15,
+            "close": 6.16,
+            "volume": 10940936
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 6.14,
+            "high": 6.18,
+            "low": 6.09,
+            "close": 6.09,
+            "volume": 14959922
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 6.12,
+            "high": 6.17,
+            "low": 6.07,
+            "close": 6.13,
+            "volume": 11733200
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 6.14,
+            "high": 6.3,
+            "low": 6.11,
+            "close": 6.25,
+            "volume": 15200195
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 6.24,
+            "high": 6.42,
+            "low": 6.24,
+            "close": 6.26,
+            "volume": 16696221
           }
         ],
-        "latest_price": 6.46,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601598",
-        "source": "baostock",
-        "revenue": 0.035373,
-        "net_profit": 0.048761,
-        "eps": 3037531717.24,
-        "roe": 0.533767,
-        "total_profit": null,
-        "roa": 2.06206,
-        "gross_profit_rate": 1.091555,
-        "net_profit_rate": 0.930107,
-        "debt_ratio": 0.035373
+        "latest_price": 6.26,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:54:20.768159"
       },
       "technical_indicators": {
-        "current_price": 6.25,
-        "ma5": 6.162,
-        "ma10": 6.231,
-        "ma20": 6.363,
-        "ma60": 6.25,
-        "rsi": 40.259740259740255,
-        "macd": -0.05993059943802681,
-        "signal": -0.038437479692246763,
-        "volume_ratio": 1.2363651616874027,
+        "current_price": 6.26,
+        "ma5": 6.178,
+        "ma10": 6.219,
+        "ma20": 6.365,
+        "ma60": 6.26,
+        "rsi": 42.10526315789474,
+        "macd": -0.054019159488679414,
+        "signal": -0.041553815651533293,
+        "volume_ratio": 1.3382767427012503,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601598",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601598",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:49.720116",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:54:20.768159",
+      "timestamp": "2025-11-26T19:54:20.768159"
     },
     "601599": {
       "code": "601599",
-      "timestamp": "2025-11-25T21:08:50.033522",
-      "collection_time": "2025-11-25 21:08:50",
-      "data_source": "specialized_distribution_v2",
-      "api_strategy": {
-        "kline": "tushare_akshare_rotation",
-        "basic_info": "baostock_tencent_akshare",
-        "financial": "baostock_yfinance_tencent_akshare",
-        "industry": "baostock_akshare_mapping",
-        "fund_flow": "tencent_akshare_realtime",
-        "news": "akshare_realtime"
-      },
-      "basic_info": {
-        "code": "601599",
-        "name": "浙文影业",
-        "type": "1",
-        "status": "1",
-        "industry": "未知",
-        "listing_date": "2011-05-27",
-        "source": "baostock"
-      },
+      "name": "股票601599",
       "kline_data": {
         "daily": [
           {
-            "date": "20251125",
-            "open": 3.83,
-            "high": 3.92,
-            "low": 3.83,
-            "close": 3.89,
-            "volume": 342794.0
+            "date": "2025-10-09T00:00:00",
+            "open": 3.57,
+            "high": 3.58,
+            "low": 3.53,
+            "close": 3.56,
+            "volume": 195394.0
           },
           {
-            "date": "20251124",
-            "open": 3.77,
-            "high": 3.85,
-            "low": 3.72,
-            "close": 3.83,
-            "volume": 273945.04
+            "date": "2025-10-10T00:00:00",
+            "open": 3.56,
+            "high": 3.61,
+            "low": 3.55,
+            "close": 3.57,
+            "volume": 185968.0
           },
           {
-            "date": "20251121",
-            "open": 3.78,
-            "high": 3.84,
-            "low": 3.66,
-            "close": 3.71,
-            "volume": 277606.0
-          },
-          {
-            "date": "20251120",
-            "open": 3.81,
-            "high": 3.83,
-            "low": 3.76,
-            "close": 3.8,
-            "volume": 198914.0
-          },
-          {
-            "date": "20251119",
-            "open": 3.88,
-            "high": 3.9,
-            "low": 3.78,
-            "close": 3.8,
-            "volume": 206987.02
-          },
-          {
-            "date": "20251118",
-            "open": 3.88,
-            "high": 3.89,
-            "low": 3.83,
-            "close": 3.88,
-            "volume": 201936.0
-          },
-          {
-            "date": "20251117",
-            "open": 3.85,
-            "high": 3.88,
-            "low": 3.83,
-            "close": 3.88,
-            "volume": 165016.0
-          },
-          {
-            "date": "20251114",
-            "open": 3.84,
-            "high": 3.89,
-            "low": 3.84,
-            "close": 3.86,
-            "volume": 190032.0
-          },
-          {
-            "date": "20251113",
-            "open": 3.84,
-            "high": 3.86,
-            "low": 3.81,
-            "close": 3.86,
-            "volume": 186898.0
-          },
-          {
-            "date": "20251112",
-            "open": 3.81,
-            "high": 3.87,
-            "low": 3.81,
-            "close": 3.84,
-            "volume": 232111.0
-          },
-          {
-            "date": "20251111",
-            "open": 3.83,
-            "high": 3.84,
-            "low": 3.8,
-            "close": 3.83,
-            "volume": 185284.0
-          },
-          {
-            "date": "20251110",
-            "open": 3.8,
-            "high": 3.83,
-            "low": 3.78,
-            "close": 3.82,
-            "volume": 194624.0
-          },
-          {
-            "date": "20251107",
-            "open": 3.8,
-            "high": 3.83,
-            "low": 3.79,
-            "close": 3.8,
-            "volume": 172309.0
-          },
-          {
-            "date": "20251106",
-            "open": 3.82,
-            "high": 3.84,
-            "low": 3.77,
-            "close": 3.8,
-            "volume": 246595.02
-          },
-          {
-            "date": "20251105",
-            "open": 3.76,
-            "high": 3.84,
-            "low": 3.76,
-            "close": 3.82,
-            "volume": 308200.9
-          },
-          {
-            "date": "20251104",
-            "open": 3.74,
-            "high": 3.81,
-            "low": 3.72,
-            "close": 3.8,
-            "volume": 314638.92
-          },
-          {
-            "date": "20251103",
-            "open": 3.7,
-            "high": 3.77,
-            "low": 3.69,
-            "close": 3.75,
-            "volume": 256363.02
-          },
-          {
-            "date": "20251031",
-            "open": 3.64,
-            "high": 3.71,
-            "low": 3.62,
-            "close": 3.7,
-            "volume": 206354.92
-          },
-          {
-            "date": "20251030",
-            "open": 3.66,
-            "high": 3.67,
-            "low": 3.62,
-            "close": 3.63,
-            "volume": 142400.0
-          },
-          {
-            "date": "20251029",
-            "open": 3.69,
-            "high": 3.69,
-            "low": 3.61,
-            "close": 3.66,
-            "volume": 232824.02
-          },
-          {
-            "date": "20251028",
-            "open": 3.69,
-            "high": 3.72,
-            "low": 3.66,
-            "close": 3.69,
-            "volume": 154906.0
-          },
-          {
-            "date": "20251027",
-            "open": 3.71,
-            "high": 3.74,
-            "low": 3.67,
-            "close": 3.7,
-            "volume": 261228.02
-          },
-          {
-            "date": "20251024",
-            "open": 3.75,
-            "high": 3.79,
-            "low": 3.67,
-            "close": 3.71,
-            "volume": 505797.51
-          },
-          {
-            "date": "20251023",
-            "open": 3.63,
-            "high": 3.95,
-            "low": 3.61,
-            "close": 3.8,
-            "volume": 726438.51
-          },
-          {
-            "date": "20251022",
-            "open": 3.59,
-            "high": 3.66,
-            "low": 3.59,
-            "close": 3.63,
-            "volume": 176264.0
-          },
-          {
-            "date": "20251021",
-            "open": 3.51,
-            "high": 3.62,
-            "low": 3.49,
-            "close": 3.61,
-            "volume": 231544.02
-          },
-          {
-            "date": "20251020",
-            "open": 3.48,
-            "high": 3.52,
-            "low": 3.48,
-            "close": 3.52,
-            "volume": 100097.98
-          },
-          {
-            "date": "20251017",
-            "open": 3.51,
-            "high": 3.53,
-            "low": 3.46,
-            "close": 3.46,
-            "volume": 119215.0
-          },
-          {
-            "date": "20251016",
-            "open": 3.54,
-            "high": 3.54,
-            "low": 3.49,
-            "close": 3.51,
-            "volume": 101422.0
-          },
-          {
-            "date": "20251015",
-            "open": 3.49,
-            "high": 3.54,
-            "low": 3.48,
-            "close": 3.54,
-            "volume": 140766.21
-          },
-          {
-            "date": "20251014",
-            "open": 3.53,
-            "high": 3.57,
-            "low": 3.47,
-            "close": 3.49,
-            "volume": 187021.37
-          },
-          {
-            "date": "20251013",
+            "date": "2025-10-13T00:00:00",
             "open": 3.5,
             "high": 3.54,
             "low": 3.41,
@@ -6105,90 +4926,283 @@
             "volume": 189426.0
           },
           {
-            "date": "20251010",
-            "open": 3.56,
-            "high": 3.61,
-            "low": 3.55,
-            "close": 3.57,
-            "volume": 185968.02
+            "date": "2025-10-14T00:00:00",
+            "open": 3.53,
+            "high": 3.57,
+            "low": 3.47,
+            "close": 3.49,
+            "volume": 187021.0
           },
           {
-            "date": "20251009",
-            "open": 3.57,
-            "high": 3.58,
-            "low": 3.53,
-            "close": 3.56,
-            "volume": 195394.0
+            "date": "2025-10-15T00:00:00",
+            "open": 3.49,
+            "high": 3.54,
+            "low": 3.48,
+            "close": 3.54,
+            "volume": 140766.0
+          },
+          {
+            "date": "2025-10-16T00:00:00",
+            "open": 3.54,
+            "high": 3.54,
+            "low": 3.49,
+            "close": 3.51,
+            "volume": 101422.0
+          },
+          {
+            "date": "2025-10-17T00:00:00",
+            "open": 3.51,
+            "high": 3.53,
+            "low": 3.46,
+            "close": 3.46,
+            "volume": 119215.0
+          },
+          {
+            "date": "2025-10-20T00:00:00",
+            "open": 3.48,
+            "high": 3.52,
+            "low": 3.48,
+            "close": 3.52,
+            "volume": 100098.0
+          },
+          {
+            "date": "2025-10-21T00:00:00",
+            "open": 3.51,
+            "high": 3.62,
+            "low": 3.49,
+            "close": 3.61,
+            "volume": 231544.0
+          },
+          {
+            "date": "2025-10-22T00:00:00",
+            "open": 3.59,
+            "high": 3.66,
+            "low": 3.59,
+            "close": 3.63,
+            "volume": 176264.0
+          },
+          {
+            "date": "2025-10-23T00:00:00",
+            "open": 3.63,
+            "high": 3.95,
+            "low": 3.61,
+            "close": 3.8,
+            "volume": 726439.0
+          },
+          {
+            "date": "2025-10-24T00:00:00",
+            "open": 3.75,
+            "high": 3.79,
+            "low": 3.67,
+            "close": 3.71,
+            "volume": 505798.0
+          },
+          {
+            "date": "2025-10-27T00:00:00",
+            "open": 3.71,
+            "high": 3.74,
+            "low": 3.67,
+            "close": 3.7,
+            "volume": 261228.0
+          },
+          {
+            "date": "2025-10-28T00:00:00",
+            "open": 3.69,
+            "high": 3.72,
+            "low": 3.66,
+            "close": 3.69,
+            "volume": 154906.0
+          },
+          {
+            "date": "2025-10-29T00:00:00",
+            "open": 3.69,
+            "high": 3.69,
+            "low": 3.61,
+            "close": 3.66,
+            "volume": 232824.0
+          },
+          {
+            "date": "2025-10-30T00:00:00",
+            "open": 3.66,
+            "high": 3.67,
+            "low": 3.62,
+            "close": 3.63,
+            "volume": 142400.0
+          },
+          {
+            "date": "2025-10-31T00:00:00",
+            "open": 3.64,
+            "high": 3.71,
+            "low": 3.62,
+            "close": 3.7,
+            "volume": 206355.0
+          },
+          {
+            "date": "2025-11-03T00:00:00",
+            "open": 3.7,
+            "high": 3.77,
+            "low": 3.69,
+            "close": 3.75,
+            "volume": 256363.0
+          },
+          {
+            "date": "2025-11-04T00:00:00",
+            "open": 3.74,
+            "high": 3.81,
+            "low": 3.72,
+            "close": 3.8,
+            "volume": 314639.0
+          },
+          {
+            "date": "2025-11-05T00:00:00",
+            "open": 3.76,
+            "high": 3.84,
+            "low": 3.76,
+            "close": 3.82,
+            "volume": 308201.0
+          },
+          {
+            "date": "2025-11-06T00:00:00",
+            "open": 3.82,
+            "high": 3.84,
+            "low": 3.77,
+            "close": 3.8,
+            "volume": 246595.0
+          },
+          {
+            "date": "2025-11-07T00:00:00",
+            "open": 3.8,
+            "high": 3.83,
+            "low": 3.79,
+            "close": 3.8,
+            "volume": 172309.0
+          },
+          {
+            "date": "2025-11-10T00:00:00",
+            "open": 3.8,
+            "high": 3.83,
+            "low": 3.78,
+            "close": 3.82,
+            "volume": 194624.0
+          },
+          {
+            "date": "2025-11-11T00:00:00",
+            "open": 3.83,
+            "high": 3.84,
+            "low": 3.8,
+            "close": 3.83,
+            "volume": 185284.0
+          },
+          {
+            "date": "2025-11-12T00:00:00",
+            "open": 3.81,
+            "high": 3.87,
+            "low": 3.81,
+            "close": 3.84,
+            "volume": 232111.0
+          },
+          {
+            "date": "2025-11-13T00:00:00",
+            "open": 3.84,
+            "high": 3.86,
+            "low": 3.81,
+            "close": 3.86,
+            "volume": 186898.0
+          },
+          {
+            "date": "2025-11-14T00:00:00",
+            "open": 3.84,
+            "high": 3.89,
+            "low": 3.84,
+            "close": 3.86,
+            "volume": 190032.0
+          },
+          {
+            "date": "2025-11-17T00:00:00",
+            "open": 3.85,
+            "high": 3.88,
+            "low": 3.83,
+            "close": 3.88,
+            "volume": 165016.0
+          },
+          {
+            "date": "2025-11-18T00:00:00",
+            "open": 3.88,
+            "high": 3.89,
+            "low": 3.83,
+            "close": 3.88,
+            "volume": 201936.0
+          },
+          {
+            "date": "2025-11-19T00:00:00",
+            "open": 3.88,
+            "high": 3.9,
+            "low": 3.78,
+            "close": 3.8,
+            "volume": 206987.0
+          },
+          {
+            "date": "2025-11-20T00:00:00",
+            "open": 3.81,
+            "high": 3.83,
+            "low": 3.76,
+            "close": 3.8,
+            "volume": 198914.0
+          },
+          {
+            "date": "2025-11-21T00:00:00",
+            "open": 3.78,
+            "high": 3.84,
+            "low": 3.66,
+            "close": 3.71,
+            "volume": 277606.0
+          },
+          {
+            "date": "2025-11-24T00:00:00",
+            "open": 3.77,
+            "high": 3.85,
+            "low": 3.72,
+            "close": 3.83,
+            "volume": 273945.0
+          },
+          {
+            "date": "2025-11-25T00:00:00",
+            "open": 3.83,
+            "high": 3.92,
+            "low": 3.83,
+            "close": 3.89,
+            "volume": 342794.0
+          },
+          {
+            "date": "2025-11-26T00:00:00",
+            "open": 3.89,
+            "high": 3.94,
+            "low": 3.85,
+            "close": 3.87,
+            "volume": 229904.0
           }
         ],
-        "latest_price": 3.56,
-        "data_points": 34,
-        "source": "batch_rotation"
-      },
-      "financial_data": {
-        "code": "601599",
-        "source": "baostock",
-        "revenue": 0.053348,
-        "net_profit": 0.160221,
-        "eps": 137419494.5,
-        "roe": 0.10281,
-        "total_profit": null,
-        "roa": 2.326492,
-        "gross_profit_rate": 0.75709,
-        "net_profit_rate": 0.993381,
-        "debt_ratio": 0.053348
+        "latest_price": 3.87,
+        "data_points": 35,
+        "source": "new",
+        "update_time": "2025-11-26T19:54:20.784157"
       },
       "technical_indicators": {
-        "current_price": 3.89,
-        "ma5": 3.806,
-        "ma10": 3.835,
-        "ma20": 3.7980000000000005,
-        "ma60": 3.89,
+        "current_price": 3.87,
+        "ma5": 3.8199999999999994,
+        "ma10": 3.8379999999999996,
+        "ma20": 3.8084999999999996,
+        "ma60": 3.87,
         "rsi": 57.77777777777781,
-        "macd": 0.0492211643856062,
-        "signal": 0.055871896565034884,
-        "volume_ratio": 1.478340220271028,
+        "macd": 0.04984315008065243,
+        "signal": 0.0546661472681584,
+        "volume_ratio": 0.884078858923619,
         "status": "calculated"
       },
-      "industry_concept": {
-        "code": "601599",
-        "source": "baostock_default",
-        "industry": "大型国企",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
-      },
-      "fund_flow": {
-        "code": "601599",
-        "source": "default",
-        "main_fund_inflow": null,
-        "super_fund_inflow": null,
-        "large_fund_inflow": null,
-        "medium_fund_inflow": null,
-        "small_fund_inflow": null,
-        "main_fund_inflow_pct": null,
-        "message": "资金流向数据暂无"
-      },
-      "news_announcements": {
-        "recent_announcements": [],
-        "news_sentiment": null,
-        "important_events": [],
-        "source": "akshare"
-      },
-      "data_sources_used": {
-        "basic_info": "baostock",
-        "financial_data": "baostock",
-        "industry_concept": "baostock_default",
-        "fund_flow": "default",
-        "kline_data": "batch_rotation"
-      },
-      "collection_summary": {
-        "strategy": "specialized_api_distribution",
-        "timestamp": "2025-11-25T21:08:50.060524",
-        "success_rate": 1.0
-      }
+      "last_kline_update": "2025-11-26T19:54:20.784157",
+      "timestamp": "2025-11-26T19:54:20.784157"
     }
   },
-  "last_updated": "2025-11-25T21:08:53.445608",
+  "last_updated": "2025-11-26T23:18:46.881149",
   "total_stocks": 17
 }

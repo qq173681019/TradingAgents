@@ -46,6 +46,203 @@
                 "panel": "new"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "MiniMax - 代码质量分析",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "from minimax_integration import MiniMaxCodingPlan; client = MiniMaxCodingPlan(); print('📊 启动代码质量分析...'); print('请在MiniMax Agent中输入: 分析项目代码质量并提供改进建议')"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "使用MiniMax进行代码质量分析"
+        },
+        {
+            "label": "MiniMax - 性能优化建议",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "print('🚀 性能优化分析'); print('建议在MiniMax Agent中分析以下内容:'); print('1. 股票数据处理性能'); print('2. 内存使用优化'); print('3. 并发处理改进'); print('4. 缓存策略优化')"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "获取性能优化建议"
+        },
+        {
+            "label": "MiniMax - 生成单元测试",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "print('🧪 单元测试生成指南'); print('在MiniMax Agent中请求:'); print('\\\"为我的股票分析系统生成完整的单元测试套件\\\"\'); print('包括: API测试、数据处理测试、算法验证测试')"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "生成项目单元测试"
+        },
+        {
+            "label": "MiniMax - 智能文档生成",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "print('📚 智能文档生成'); print('建议在MiniMax Agent中请求:'); print('1. API接口文档'); print('2. 用户使用手册'); print('3. 开发者指南'); print('4. 系统架构说明')"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "生成项目文档"
+        },
+        {
+            "label": "MiniMax - 系统架构优化",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "print('🏗️ 系统架构优化建议'); print('在MiniMax Agent中咨询:'); print('1. 微服务架构设计'); print('2. 数据库优化方案'); print('3. API网关设计'); print('4. 缓存架构改进')"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "获取系统架构优化建议"
+        },
+        {
+            "label": "打开 MiniMax Agent 网页",
+            "type": "shell",
+            "command": "start",
+            "args": [
+                "https://agent.minimax.io"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "直接打开MiniMax Agent网页界面"
+        },
+        {
+            "label": "交易系统 - 数据处理优化",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('📊 4396只股票数据处理优化'); print('=' * 50); print(ext.generate_trading_data_optimization_prompt())"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "生成针对4396只股票的数据处理优化方案"
+        },
+        {
+            "label": "交易系统 - 智能预警系统",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('🚨 智能预警系统设计'); print('=' * 50); print(ext.generate_smart_alert_system_prompt())"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "设计智能预警系统"
+        },
+        {
+            "label": "交易系统 - 技术指标优化",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('📈 技术指标算法优化'); print('=' * 50); print(ext.generate_technical_indicators_optimization_prompt())"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "优化技术指标计算算法"
+        },
+        {
+            "label": "交易系统 - 风险控制优化",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('🛡️ 风险控制系统优化'); print('=' * 50); print(ext.generate_risk_management_optimization_prompt())"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "设计智能风险控制系统"
+        },
+        {
+            "label": "交易系统 - 微服务架构现代化",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "-c",
+                "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('🏗️ 微服务架构现代化'); print('=' * 50); print(ext.generate_microservices_architecture_prompt())"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "设计微服务架构现代化方案"
         }
     ]
 }

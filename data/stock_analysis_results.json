@@ -1,9 +1,9 @@
 {
-  "date": "2025-11-26",
-  "timestamp": "2025-11-26 14:33:33",
+  "date": "2025-11-27",
+  "timestamp": "2025-11-27 11:53:13",
   "version": "2.0",
-  "total_count": 3152,
+  "total_count": 2906,
   "split_storage": true,
-  "parts": 16,
+  "parts": 15,
   "file_pattern": "stock_analysis_results_part_*.json"
 }
