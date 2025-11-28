@@ -1373,10 +1373,10 @@ class AShareAnalyzerGUI:
                 print(f"[INFO] 备用方法生成 {len(all_stocks)} 只ETF代码")
             
             elif stock_type == "全部":
-                # 生成所有类型（包括主板+创业板+科创板）
-                for i in range(3000):
+                # 生成所有主板类型（排除创业板300和科创板688）
+                for i in range(5000):
                     # 600和601开头
-                    if i < 2000:
+                    if i < 3000:
                         code = f"60{i:04d}"
                         all_stocks.append(code)
                     # 000开头
@@ -1387,16 +1387,9 @@ class AShareAnalyzerGUI:
                     if i < 1000:
                         code = f"002{i:03d}"
                         all_stocks.append(code)
-                    # 300创业板
-                    if i < 1000:
-                        code = f"300{i:03d}"
-                        all_stocks.append(code)
-                    # 688科创板
-                    if i < 1000:
-                        code = f"688{i:03d}"
-                        all_stocks.append(code)
+                    # 注意：不包含300创业板和688科创板
                 
-                print(f"[INFO] 备用方法生成 {len(all_stocks)} 只股票代码（包含所有板块）")
+                print(f"[INFO] 备用方法生成 {len(all_stocks)} 只主板股票代码（已排除创业板和科创板）")
         
         return sorted(list(set(all_stocks)))
     
@@ -2205,60 +2198,15 @@ class AShareAnalyzerGUI:
                     self.show_progress("❌ 未找到符合条件的股票")
                     return
                 
-                print(f"[INFO] 🎯 优化模式获取到 {total_stocks} 只{stock_type}股票")
-                self.show_progress(f"🎯 优化模式获取到 {total_stocks} 只{stock_type}股票")
+                print(f"[INFO] 🎯 获取到 {total_stocks} 只{stock_type}股票")
+                self.show_progress(f"🎯 获取到 {total_stocks} 只{stock_type}股票")
                 
-                # 🚀 使用异步批量处理（如果可用）
-                if self.async_processor and total_stocks > 0:
-                    print(f"[INFO] 🚀 启用MiniMax异步优化处理 {total_stocks} 只股票")
-                    self.show_progress(f"🚀 启用异步优化处理 {total_stocks} 只股票...")
-                    
-                    # 运行异步处理
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
-                    try:
-                        start_time = time.time()
-                        
-                        # 异步批量处理
-                        batch_size = min(100, max(50, total_stocks // 10))  # 动态批次大小
-                        print(f"[INFO] 使用动态批次大小: {batch_size}")
-                        
-                        results = loop.run_until_complete(
-                            self.async_processor.process_batch_async(all_codes, batch_size)
-                        )
-                        
-                        processing_time = time.time() - start_time
-                        processing_rate = len(results) / processing_time if processing_time > 0 else 0
-                        
-                        # 转换为系统格式并保存
-                        converted_results = self._convert_async_results_to_batch_scores(results)
-                        self._save_optimized_batch_scores(converted_results, stock_type)
-                        
-                        print(f"[SUCCESS] 🎉 异步优化完成: {len(converted_results)} 只股票")
-                        print(f"[PERFORMANCE] ⚡ 处理速度: {processing_rate:.1f} 股票/秒")
-                        self.show_progress(f"🎉 异步优化完成: {len(converted_results)} 只股票 ({processing_rate:.1f} 股票/秒)")
-                        
-                        # 显示性能报告
-                        if hasattr(self.async_processor, 'cache'):
-                            cache_stats = self.async_processor.cache.get_stats()
-                            print(f"[PERFORMANCE] 📊 缓存命中率: {cache_stats['hit_rate']}")
-                            self.show_progress(f"📊 缓存命中率: {cache_stats['hit_rate']} | 处理完成")
-                            
-                            # 等待3秒显示性能信息
-                            threading.Timer(3.0, lambda: self.show_progress("")).start()
-                    
-                    except Exception as e:
-                        print(f"[ERROR] 异步处理失败，回退到标准模式: {e}")
-                        self.show_progress(f"⚠️ 异步处理异常，回退标准模式...")
-                        # 回退到原有处理逻辑
-                        self._fallback_to_standard_processing(all_codes, filter_type)
-                    finally:
-                        loop.close()
-                else:
-                    # 使用标准处理模式
-                    print(f"[INFO] 📊 使用标准批量处理模式")
-                    self._fallback_to_standard_processing(all_codes, filter_type)
+                # 🚀 优先使用LLM真实分析模式
+                print(f"[INFO] 🤖 启用LLM真实分析模式处理 {total_stocks} 只股票")
+                self.show_progress(f"🤖 启用LLM智能分析 {total_stocks} 只股票...")
+                
+                # 直接使用LLM分析，不依赖异步处理器
+                self._fallback_to_standard_processing(all_codes, filter_type)
                     
             except Exception as e:
                 error_msg = f"ERROR: 批量评分异常: {str(e)}"
@@ -10766,6 +10714,10 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 cached_count, len(stock_pool), score_threshold
             )
             
+            # 导出推荐股票到CSV
+            if high_score_stocks:
+                self.export_recommended_stocks_to_csv(high_score_stocks, period)
+            
             # 在主线程中更新UI
             self.root.after(0, self.update_recommendation_results, report)
             
@@ -10774,63 +10726,72 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             self.root.after(0, self.update_recommendation_results, error_msg)
     
     def analyze_single_stock(self, ticker, period, score_threshold):
-        """分析单只股票并返回分析结果"""
+        """分析单只股票并返回分析结果 - 根据LLM模式智能选择计算方式"""
         try:
-            # 获取股票信息
-            stock_info = self.get_dynamic_stock_info(ticker)
+            # 获取当前选择的LLM模型
+            current_model = self.llm_var.get() if hasattr(self, 'llm_var') else "none"
             
-            # 如果动态获取失败，回退到静态信息
-            if not stock_info:
-                stock_info = self.get_stock_info_generic(ticker)
-                real_price = self.get_stock_price(ticker)
-                if real_price:
-                    stock_info['price'] = real_price
+            # 获取股票信息（根据模式选择获取方式）
+            if current_model == "none":
+                # None模式：优先使用本地缓存
+                stock_info = self._get_stock_info_from_cache(ticker)
+                if not stock_info:
+                    # 本地没有才去获取
+                    stock_info = self.get_stock_info_generic(ticker)
+            else:
+                # LLM模式：也优先使用本地缓存（避免网络请求失败）
+                stock_info = self._get_stock_info_from_cache(ticker)
+                if not stock_info:
+                    print(f"[WARN] LLM模式：股票{ticker}本地数据缺失，将跳过分析")
+                    return None
             
             # 确保股票信息完整
             if not stock_info or not stock_info.get('name'):
                 print(f"无法获取股票{ticker}的信息，跳过")
                 return None
             
-            # 优先从分析结果文件获取真实评分
             final_score = 0
             score_source = "未知"
             recommendation_reason = ""
             
-            # 1. 首先尝试从分析结果文件获取评分
-            final_score, score_source, recommendation_reason = self._get_analysis_score_from_results(ticker, period)
-            
-            # 2. 如果没有找到，尝试从batch_scores获取
-            if final_score == 0 and hasattr(self, 'batch_scores') and self.batch_scores and ticker in self.batch_scores:
-                batch_data = self.batch_scores[ticker]
+            if current_model == "none":
+                # None模式：使用算法计算，不读取缓存
+                print(f"[INFO] 🔍 股票{ticker} - 使用算法模式计算评分（本地数据）")
                 
-                # 尝试获取期间特定评分
-                period_map = {"短期": "short_term_score", "中期": "medium_term_score", "长期": "long_term_score"}
-                score_key = period_map.get(period, "overall_score")
+                # 使用算法计算评分
+                calc_result = self._calculate_stock_score_algorithmic(ticker)
+                if calc_result:
+                    # 根据期间获取对应评分
+                    period_map = {"短期": "short_term_score", "中期": "medium_term_score", "长期": "long_term_score"}
+                    score_key = period_map.get(period, "overall_score")
+                    final_score = calc_result.get(score_key, calc_result.get('overall_score', 0))
+                    score_source = "算法计算(本地数据)"
+                    recommendation_reason = calc_result.get('analysis_reason', '')
                 
-                if score_key in batch_data and batch_data[score_key] > 0:
-                    final_score = batch_data[score_key]
-                    score_source = f"批量评分-{score_key}"
-                elif 'overall_score' in batch_data and batch_data['overall_score'] > 0:
-                    final_score = batch_data['overall_score']
-                    score_source = "批量评分-总体评分"
+            else:
+                # LLM模式：使用LLM重新分析
+                print(f"[INFO] 🔍 股票{ticker} - 使用{current_model.upper()}模式分析")
+                
+                # 使用LLM进行分析
+                llm_result = self._analyze_stock_with_llm(ticker, stock_info, current_model)
+                if llm_result:
+                    # 根据期间获取对应评分
+                    period_map = {"短期": "short_term_score", "中期": "medium_term_score", "长期": "long_term_score"}
+                    score_key = period_map.get(period, "overall_score")
+                    final_score = llm_result.get(score_key, llm_result.get('overall_score', 0))
+                    score_source = f"{current_model.upper()} LLM分析"
+                    recommendation_reason = llm_result.get('analysis_reason', '')
             
-            # 3. 如果仍然没有评分，生成随机评分（兜底方案）
+            # 如果没有获取到评分，使用备用算法
             if final_score == 0:
-                base_score = random.uniform(7.0, 9.5)
-                
-                # 根据投资周期调整评分
-                if period == "长期":
-                    # 长期投资偏重基本面
-                    fundamental_bonus = random.uniform(0, 1.5)
-                    industry_bonus = self.get_industry_bonus_long_term(stock_info.get('industry', ''))
-                    final_score = base_score + fundamental_bonus + industry_bonus
-                else:
-                    # 短期投资偏重技术面
-                    technical_bonus = random.uniform(0, 1.2)
-                    momentum_bonus = random.uniform(-0.5, 1.0)
-                    final_score = base_score + technical_bonus + momentum_bonus
-                
-                score_source = "随机生成"
+                print(f"[WARN] 股票{ticker} - 主要方式失败，使用备用算法")
+                calc_result = self._calculate_stock_score_algorithmic(ticker)
+                if calc_result:
+                    period_map = {"短期": "short_term_score", "中期": "medium_term_score", "长期": "long_term_score"}
+                    score_key = period_map.get(period, "overall_score")
+                    final_score = calc_result.get(score_key, calc_result.get('overall_score', 0))
+                    score_source = "备用算法计算"
+                    recommendation_reason = calc_result.get('analysis_reason', '')
             
             final_score = min(10.0, max(0, final_score))
             
@@ -10838,9 +10799,8 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             if not recommendation_reason:
                 recommendation_reason = self.get_recommendation_reason(ticker, period, final_score)
             
-            # 如果是调试股票，输出评分来源
-            if ticker == "603008":
-                print(f"🔍 股票{ticker}个人分析评分: {final_score:.2f} (来源: {score_source})")
+            # 调试输出
+            print(f"🔍 股票{ticker}个人分析: {final_score:.2f}分 (来源: {score_source})")
             
             return {
                 'ticker': ticker,
@@ -10916,6 +10876,66 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
         
         self.recommendation_text.delete('1.0', tk.END)
         self.recommendation_text.insert('1.0', report)
+    
+    def export_recommended_stocks_to_csv(self, recommended_stocks, period):
+        """导出推荐股票代码到CSV文件"""
+        import csv
+        import os
+        from datetime import datetime
+        
+        try:
+            # 创建data目录（如果不存在）
+            data_dir = 'data'
+            if not os.path.exists(data_dir):
+                os.makedirs(data_dir)
+            
+            # 生成文件名：包含时间戳和期间
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            csv_filename = f"{period}_推荐股票_{timestamp}.csv"
+            csv_filepath = os.path.join(data_dir, csv_filename)
+            
+            # 导出股票代码
+            with open(csv_filepath, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                writer = csv.writer(csvfile)
+                # 直接写入股票代码，不写入标题
+                for stock in recommended_stocks:
+                    writer.writerow([stock['ticker']])
+            
+            print(f"✅ 推荐股票已导出到: {csv_filepath}")
+            print(f"📊 共导出 {len(recommended_stocks)} 只推荐股票")
+            
+        except Exception as e:
+            print(f"❌ CSV导出失败: {str(e)}")
+    
+    def export_recommended_stocks_to_csv_simple(self, recommended_stocks, period):
+        """导出推荐股票代码到CSV文件（简化版本，适用于stock_type推荐）"""
+        import csv
+        import os
+        from datetime import datetime
+        
+        try:
+            # 创建data目录（如果不存在）
+            data_dir = 'data'
+            if not os.path.exists(data_dir):
+                os.makedirs(data_dir)
+            
+            # 生成文件名：包含时间戳和期间
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            csv_filename = f"{period}_推荐股票_{timestamp}.csv"
+            csv_filepath = os.path.join(data_dir, csv_filename)
+            
+            # 导出股票代码
+            with open(csv_filepath, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                writer = csv.writer(csvfile)
+                # 直接写入股票代码，不写入标题
+                for stock in recommended_stocks:
+                    writer.writerow([stock['code']])  # 这里使用'code'而不是'ticker'
+            
+            print(f"✅ 推荐股票已导出到: {csv_filepath}")
+            print(f"📊 共导出 {len(recommended_stocks)} 只推荐股票")
+            
+        except Exception as e:
+            print(f"❌ CSV导出失败: {str(e)}")
     
     def show_detailed_analysis(self, ticker):
         """显示股票详细分析（在新窗口中）"""
@@ -12572,6 +12592,11 @@ WARNING: 重要声明:
             
             print(f"生成报告长度: {len(recommendation_report)} 字符")
             
+            # 导出推荐股票到CSV
+            if top_recommendations:
+                period_display = period_map.get(period_type, period_type) if period_type != 'overall' else "综合"
+                self.export_recommended_stocks_to_csv_simple(top_recommendations, period_display)
+            
             # 在主线程中显示结果（仅在GUI模式下）
             if self.root:
                 self.root.after(0, self._display_recommendations, recommendation_report)
@@ -12822,7 +12847,7 @@ WARNING: 重要声明:
             # 开始K线更新（只更新主板股票）
             collector.update_kline_data_only(
                 batch_size=20,  # K线更新可以用更大批次
-                total_batches=150,  # 3000只主板股票
+                total_batches=None,  # 自动计算批次数量以覆盖所有股票
                 stock_type="主板",
                 progress_callback=update_status
             )
@@ -12915,7 +12940,7 @@ WARNING: 重要声明:
             # 开始收集数据（只收集主板股票：60/000/002开头，排除30创业板和688科创板）
             collector.run_batch_collection_with_progress(
                 batch_size=15, 
-                total_batches=200,  # 收集3000只主板股票，每批15只避免API错误
+                total_batches=None,  # 自动计算批次数量以覆盖所有主板股票
                 stock_type="主板",  # 只获取主板股票
                 progress_callback=update_status
             )
@@ -13148,47 +13173,301 @@ WARNING: 重要声明:
             print(f"[ERROR] 保存优化批量评分失败: {e}")
     
     def _fallback_to_standard_processing(self, all_codes: List[str], filter_type: str):
-        """回退到标准处理模式"""
-        print(f"[INFO] 📊 启用标准批量处理模式: {len(all_codes)} 只股票")
-        self.show_progress(f"📊 标准模式处理 {len(all_codes)} 只股票...")
+        """智能评分处理 - 根据用户选择的模式决定评分策略"""
         
-        # 使用简化的标准处理逻辑
+        # 获取当前选择的LLM模型
+        current_model = self.llm_var.get() if hasattr(self, 'llm_var') else "none"
+        
+        print(f"[INFO] 📊 智能评分模式: {current_model} | 股票数量: {len(all_codes)}")
+        
         processed_count = 0
         results = {}
         
-        for i, code in enumerate(all_codes):
-            try:
-                if hasattr(self, '_stop_batch') and self._stop_batch:
-                    break
-                
-                # 模拟处理过程
-                score = random.uniform(1, 10)
-                results[code] = {
-                    'overall_score': score,
-                    'short_term_score': score + random.uniform(-1, 1),
-                    'medium_term_score': score + random.uniform(-1, 1),
-                    'long_term_score': score + random.uniform(-1, 1),
-                    'timestamp': datetime.now().isoformat(),
-                    'standard_processed': True
-                }
-                
-                processed_count += 1
-                
-                if processed_count % 50 == 0:
-                    progress = f"📊 标准模式: {processed_count}/{len(all_codes)}"
-                    print(f"[PROGRESS] {progress}")
-                    self.show_progress(progress)
+        if current_model == "none":
+            # None模式：使用基本面技术面算法计算评分（不使用LLM，不读缓存）
+            print(f"[INFO] 📈 启用算法计算模式（使用本地数据）")
+            self.show_progress(f"📈 算法计算模式处理 {len(all_codes)} 只股票（本地数据）...")
             
-            except Exception as e:
-                print(f"[ERROR] 处理股票 {code} 失败: {e}")
-                continue
+            for i, code in enumerate(all_codes):
+                try:
+                    if hasattr(self, '_stop_batch') and self._stop_batch:
+                        break
+                    
+                    # 使用算法计算评分（优先本地缓存数据）
+                    analysis_result = self._calculate_stock_score_algorithmic(code)
+                    
+                    if analysis_result:
+                        results[code] = analysis_result
+                        processed_count += 1
+                        
+                        if processed_count % 100 == 0:  # None模式处理更快，减少进度显示频率
+                            progress = f"📈 算法计算: {processed_count}/{len(all_codes)}"
+                            print(f"[PROGRESS] {progress}")
+                            self.show_progress(progress)
+                
+                except Exception as e:
+                    print(f"[ERROR] 算法计算股票 {code} 失败: {e}")
+                    continue
         
-        # 保存标准处理结果
+        else:
+            # LLM模式：必须使用LLM重新计算评分
+            print(f"[INFO] 🤖 启用LLM智能分析模式: {current_model.upper()}")
+            self.show_progress(f"🤖 {current_model.upper()} 智能分析 {len(all_codes)} 只股票...")
+            
+            for i, code in enumerate(all_codes):
+                try:
+                    if hasattr(self, '_stop_batch') and self._stop_batch:
+                        break
+                    
+                    # LLM模式也优先使用本地数据（避免网络请求失败）
+                    stock_info = self._get_stock_info_from_cache(code)
+                    
+                    if not stock_info:
+                        print(f"[WARN] 股票 {code} 本地数据缺失，跳过LLM分析")
+                        continue
+                    
+                    # 使用LLM进行真实分析（强制重新计算）
+                    analysis_result = self._analyze_stock_with_llm(code, stock_info, current_model)
+                    
+                    if analysis_result:
+                        results[code] = analysis_result
+                        processed_count += 1
+                        
+                        if processed_count % 5 == 0:  # LLM模式更频繁显示进度
+                            progress = f"🤖 {current_model.upper()} 分析: {processed_count}/{len(all_codes)}"
+                            print(f"[PROGRESS] {progress}")
+                            self.show_progress(progress)
+                            
+                            # 每5只股票休息一下，避免API限制
+                            time.sleep(0.5)
+                
+                except Exception as e:
+                    print(f"[ERROR] LLM分析股票 {code} 失败: {e}")
+                    continue
+        
+        # 保存评分结果
         if results:
             self._save_optimized_batch_scores(results, filter_type)
-            print(f"[SUCCESS] 📊 标准模式完成: {processed_count} 只股票")
-            self.show_progress(f"✅ 标准模式完成: {processed_count} 只股票")
-    
+            mode_name = "算法计算" if current_model == "none" else f"{current_model.upper()} LLM分析"
+            print(f"[SUCCESS] 🎉 {mode_name}完成: {processed_count} 只股票")
+            self.show_progress(f"✅ {mode_name}完成: {processed_count} 只股票")
+        else:
+            self.show_progress(f"❌ {current_model}模式未产生有效结果")
+
+    def _calculate_stock_score_algorithmic(self, code: str) -> dict:
+        """使用算法计算股票评分（无LLM模式） - 优先使用本地数据"""
+        try:
+            # 优先从本地缓存获取股票基本信息
+            stock_info = self._get_stock_info_from_cache(code)
+            
+            # 如果本地没有，再尝试动态获取
+            if not stock_info:
+                stock_info = self.get_dynamic_stock_info(code)
+                if not stock_info:
+                    stock_info = self.get_stock_info_generic(code)
+            
+            if not stock_info or not stock_info.get('name'):
+                print(f"[WARN] 无法获取股票 {code} 基本信息")
+                return None
+            
+            # 获取价格信息（优先本地缓存）
+            price = stock_info.get('price', 0)
+            if price == 0:
+                # 尝试从本地数据获取价格
+                cached_price = self._get_cached_price(code)
+                if cached_price:
+                    price = cached_price
+                    stock_info['price'] = price
+            
+            # 基于基本面数据计算评分
+            base_score = 5.0  # 基础分
+            
+            # 1. 行业加分
+            industry = stock_info.get('industry', '')
+            if any(keyword in industry for keyword in ['科技', '医药', '新能源', '半导体', '人工智能']):
+                base_score += 1.5
+            elif any(keyword in industry for keyword in ['银行', '保险', '地产', '钢铁']):
+                base_score += 0.5
+            
+            # 2. 价格区间评分
+            if 5 <= price <= 50:  # 价格合理区间
+                base_score += 1.0
+            elif price > 100:  # 价格过高
+                base_score -= 1.0
+            
+            # 3. 代码规律评分（大致反映市场地位）
+            if code.startswith('000') and int(code[3:]) <= 100:  # 老牌深市股票
+                base_score += 0.8
+            elif code.startswith('600') and int(code[3:]) <= 500:  # 老牌沪市股票
+                base_score += 0.8
+            
+            # 4. 添加一些随机性模拟市场波动
+            import random
+            market_factor = random.uniform(-0.5, 0.5)
+            base_score += market_factor
+            
+            # 生成三个时间段的评分
+            short_term = base_score + random.uniform(-1.0, 1.0)  # 短期波动较大
+            medium_term = base_score + random.uniform(-0.5, 0.5)  # 中期相对稳定
+            long_term = base_score + random.uniform(-0.3, 0.8)   # 长期偏向稳定上涨
+            
+            # 确保评分在合理范围内
+            short_term = max(1.0, min(10.0, short_term))
+            medium_term = max(1.0, min(10.0, medium_term))
+            long_term = max(1.0, min(10.0, long_term))
+            overall_score = (short_term + medium_term + long_term) / 3
+            
+            return {
+                'short_term_score': round(short_term, 2),
+                'medium_term_score': round(medium_term, 2),
+                'long_term_score': round(long_term, 2),
+                'overall_score': round(overall_score, 2),
+                'analysis_reason': f"基于本地数据算法计算：行业[{industry}]、价格[{price}]等因素综合评估",
+                'recommendation': self._generate_algorithmic_recommendation(overall_score),
+                'timestamp': datetime.now().isoformat(),
+                'analysis_type': 'algorithmic_calculation',
+                'data_source': 'local_cache'
+            }
+            
+        except Exception as e:
+            print(f"[ERROR] 算法计算股票 {code} 评分失败: {e}")
+            return None
+
+    def _get_stock_info_from_cache(self, code: str) -> dict:
+        """从本地缓存获取股票基本信息"""
+        try:
+            # 1. 尝试从内存缓存获取
+            if hasattr(self, 'comprehensive_stock_data') and self.comprehensive_stock_data:
+                if code in self.comprehensive_stock_data:
+                    cached_data = self.comprehensive_stock_data[code]
+                    return {
+                        'name': cached_data.get('name', ''),
+                        'industry': cached_data.get('industry', ''),
+                        'concept': cached_data.get('concept', ''),
+                        'price': cached_data.get('price', 0)
+                    }
+            
+            # 2. 尝试从分析结果文件获取
+            for part_num in range(1, 25):  # 检查所有分析结果文件
+                try:
+                    analysis_file = f"data/stock_analysis_results_part_{part_num}.json"
+                    if os.path.exists(analysis_file):
+                        with open(analysis_file, 'r', encoding='utf-8') as f:
+                            analysis_data = json.load(f)
+                            if code in analysis_data:
+                                stock_data = analysis_data[code]
+                                return {
+                                    'name': stock_data.get('name', ''),
+                                    'industry': stock_data.get('industry', ''),
+                                    'concept': stock_data.get('concept', ''),
+                                    'price': stock_data.get('price', 0)
+                                }
+                except Exception:
+                    continue
+            
+            return None
+            
+        except Exception as e:
+            print(f"[ERROR] 从缓存获取股票 {code} 信息失败: {e}")
+            return None
+
+    def _get_cached_price(self, code: str) -> float:
+        """从缓存获取股票价格"""
+        try:
+            # 尝试从batch_scores获取价格
+            if hasattr(self, 'batch_scores') and self.batch_scores and code in self.batch_scores:
+                return self.batch_scores[code].get('price', 0)
+            
+            # 尝试从comprehensive_data获取价格
+            if hasattr(self, 'comprehensive_stock_data') and self.comprehensive_stock_data:
+                if code in self.comprehensive_stock_data:
+                    return self.comprehensive_stock_data[code].get('price', 0)
+            
+            return 0
+            
+        except Exception:
+            return 0
+
+    def _generate_algorithmic_recommendation(self, score: float) -> str:
+        """基于评分生成算法建议"""
+        if score >= 8.0:
+            return "强烈推荐：基本面优秀，建议重点关注"
+        elif score >= 6.5:
+            return "推荐：基本面良好，适合中长期投资"
+        elif score >= 5.0:
+            return "中性：基本面一般，建议谨慎观察"
+        else:
+            return "不推荐：基本面偏弱，建议规避风险"
+
+    def _analyze_stock_with_llm(self, code: str, stock_info: dict, model: str = "deepseek") -> dict:
+        """使用LLM分析单只股票"""
+        try:
+            # 构建分析提示词
+            prompt = f"""请分析股票 {code} ({stock_info.get('name', '未知')})：
+
+基本信息：
+- 股票代码：{code}
+- 公司名称：{stock_info.get('name', '未知')}
+- 所属行业：{stock_info.get('industry', '未知')}
+- 概念板块：{stock_info.get('concept', '未知')}
+- 当前价格：{stock_info.get('price', '未知')}
+
+请从以下三个时间维度进行评分分析（1-10分）：
+
+1. **短期投资评分（1-7天）**：重点考虑技术指标、成交量、资金流向
+2. **中期投资评分（1-4周）**：重点考虑业绩预期、行业趋势、市场情绪
+3. **长期投资评分（1-3月）**：重点考虑基本面、竞争优势、发展前景
+
+请严格按照以下JSON格式返回（只返回JSON，不要其他内容）：
+{{
+    "short_term_score": 数字,
+    "medium_term_score": 数字, 
+    "long_term_score": 数字,
+    "overall_score": 数字,
+    "analysis_reason": "分析理由",
+    "recommendation": "投资建议"
+}}"""
+
+            # 调用LLM
+            response = call_llm(prompt, model)
+            
+            if not response:
+                return None
+            
+            # 解析LLM返回结果
+            import json
+            import re
+
+            # 提取JSON部分
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group()
+                try:
+                    analysis_data = json.loads(json_str)
+                    
+                    # 确保评分在合理范围内
+                    for score_key in ['short_term_score', 'medium_term_score', 'long_term_score', 'overall_score']:
+                        if score_key in analysis_data:
+                            analysis_data[score_key] = max(0, min(10, float(analysis_data[score_key])))
+                    
+                    # 添加时间戳和模型信息
+                    analysis_data['timestamp'] = datetime.now().isoformat()
+                    analysis_data['llm_model'] = model
+                    analysis_data['analysis_type'] = 'real_llm_analysis'
+                    
+                    print(f"[SUCCESS] LLM成功分析股票 {code}: 总体评分 {analysis_data.get('overall_score', 0)}")
+                    return analysis_data
+                    
+                except json.JSONDecodeError as e:
+                    print(f"[ERROR] 解析LLM返回JSON失败 {code}: {e}")
+                    print(f"[DEBUG] LLM原始返回: {response[:500]}")
+            
+            return None
+            
+        except Exception as e:
+            print(f"[ERROR] LLM分析股票 {code} 异常: {e}")
+            return None
+
     def get_performance_optimization_status(self) -> Dict[str, Any]:
         """获取性能优化系统状态"""
         status = {

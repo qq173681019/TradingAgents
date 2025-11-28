@@ -7,12 +7,13 @@ A股全面数据采集器 - 轮询多数据源
 """
 
 import json
-import time
 import os
-from datetime import datetime, timedelta, date
-from typing import Dict, List, Optional, Any
-import pandas as pd
+import time
+from datetime import date, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 import numpy as np
+import pandas as pd
 
 # 数据源可用性检查
 try:
@@ -779,8 +780,8 @@ class ComprehensiveDataCollector:
         ]
         return fallback_etf[:limit]
     
-    def get_all_stock_list(self, limit: int = 4000) -> List[str]:
-        """获取完整股票列表，包含创业板"""
+    def get_all_stock_list(self, limit: int = 5500) -> List[str]:
+        """获取完整股票列表，排除创业板和科创板"""
         stock_codes = []
         
         # 优先从 akshare 获取完整列表
@@ -788,14 +789,60 @@ class ComprehensiveDataCollector:
             try:
                 df = ak.stock_info_a_code_name()
                 all_codes = df['code'].astype(str).tolist()
-                # 不排除任何股票，包含创业板
-                stock_codes = all_codes[:limit]
-                print(f"[INFO] 从 akshare 获取 {len(stock_codes)} 只股票（包含创业板）")
+                # 排除创业板(300)和科创板(688)
+                filtered_codes = [code for code in all_codes if not (code.startswith('300') or code.startswith('688'))]
+                stock_codes = filtered_codes[:limit]
+                print(f"[INFO] 从 akshare 获取 {len(stock_codes)} 只主板股票（已排除创业板和科创板）")
                 return stock_codes
             except Exception as e:
                 print(f"[WARN] akshare 获取股票列表失败: {e}")
         
-        # 备选：内置股票池（包含创业板）
+        # 备选：从 BaoStock 获取完整股票列表
+        if BAOSTOCK_AVAILABLE and hasattr(self, 'bs'):
+            try:
+                print("[INFO] 尝试从 BaoStock 获取完整股票列表...")
+                
+                # 获取所有股票（排除创业板和科创板）
+                rs = bs.query_all_stock()
+                if rs.error_code != '0':
+                    raise Exception(f"BaoStock 查询错误: {rs.error_msg}")
+                
+                all_stocks = []
+                while rs.next():
+                    code = rs.get_row_data()[0]
+                    if code and '.' in code:
+                        # 转换格式：sh.600000 -> 600000
+                        clean_code = code.split('.')[1]
+                        if len(clean_code) == 6 and clean_code.isdigit():
+                            # 排除创业板(300)和科创板(688)
+                            if not (clean_code.startswith('300') or clean_code.startswith('688')):
+                                all_stocks.append(clean_code)
+                
+                stock_codes = all_stocks[:limit]
+                print(f"[SUCCESS] 从 BaoStock 获取 {len(stock_codes)} 只主板股票（已排除创业板和科创板）")
+                return stock_codes
+                
+            except Exception as e:
+                print(f"[WARN] BaoStock 获取完整股票列表失败: {e}")
+        
+        # 最后备选：从现有数据文件中获取股票列表
+        try:
+            import json
+
+            # 使用相对路径，因为data_dir可能未初始化
+            index_file = "data/stock_file_index.json"
+            if os.path.exists(index_file):
+                with open(index_file, "r", encoding="utf-8") as f:
+                    index_data = json.load(f)
+                    # 排除创业板(300)和科创板(688)
+                    filtered_codes = [code for code in index_data.keys() if not (code.startswith('300') or code.startswith('688'))]
+                    stock_codes = filtered_codes[:limit]
+                    print(f"[INFO] 从现有数据文件获取 {len(stock_codes)} 只主板股票（已排除创业板和科创板）")
+                    return stock_codes
+        except Exception as e:
+            print(f"[WARN] 从数据文件获取股票列表失败: {e}")
+        
+        # 最终备选：内置主板股票池（排除创业板和科创板）
         fallback_codes = [
             # 沪市主板
             '600000', '600036', '600519', '600276', '600887', '600585', '600309', '600028',
@@ -806,16 +853,9 @@ class ComprehensiveDataCollector:
             '000001', '000002', '000063', '000100', '000157', '000166', '000568', '000596',
             '000625', '000651', '000725', '000858', '000876', '000895', '000938', '000977',
             '002001', '002027', '002050', '002120', '002129', '002142', '002304', '002352',
-            '002714', '002415', '002594', '002174', '002475',
-            
-            # 创业板（300开头）
-            '300001', '300002', '300003', '300015', '300033', '300059', '300124', '300142',
-            '300144', '300347', '300408', '300498', '300750', '300760',
-            
-            # 科创板
-            '688981', '688036', '688111', '688599', '688169', '688180'
+            '002714', '002415', '002594', '002174', '002475'
         ]
-        
+        print(f"[INFO] 使用内置主板股票池 {len(fallback_codes)} 只股票（已排除创业板和科创板）")
         return fallback_codes[:limit]
     
     def standardize_kline_columns(self, df: pd.DataFrame, source: str = 'unknown') -> pd.DataFrame:
@@ -2025,7 +2065,7 @@ class ComprehensiveDataCollector:
             try:
                 # 确保baostock已导入
                 import baostock as bs
-                
+
                 # 确保已登录
                 lg = bs.login()
                 if lg.error_code != '0':
@@ -2311,7 +2351,7 @@ class ComprehensiveDataCollector:
         """
         try:
             import json
-            
+
             # 尝试JSON解析
             if content.strip().startswith('{') or content.strip().startswith('['):
                 try:
@@ -2422,7 +2462,7 @@ class ComprehensiveDataCollector:
         """
         try:
             import json
-            
+
             # 尝试JSON解析
             if content.strip().startswith('{') or content.strip().startswith('['):
                 try:
@@ -2780,6 +2820,7 @@ class ComprehensiveDataCollector:
             print(f"[INFO] Baostock标准行业分类映射...")
             try:
                 import baostock as bs
+
                 # 获取完整行业分类映射表（效率更高）
                 rs = bs.query_stock_industry()
                 industry_mapping = {}
@@ -3885,25 +3926,38 @@ class ComprehensiveDataCollector:
         except Exception as e:
             print(f"[WARN] 保存索引失败: {e}")
     
-    def update_kline_data_only(self, batch_size: int = 20, total_batches: int = 150, stock_type: str = "主板", progress_callback=None):
+    def update_kline_data_only(self, batch_size: int = 20, total_batches: int = None, stock_type: str = "主板", progress_callback=None):
         """只更新K线数据和技术指标（高效模式）"""
+        
+        # 首先获取股票列表来确定实际数量
+        if stock_type == "全部":
+            # 全部股票：先获取全量股票列表
+            all_codes = self.get_stock_list_by_type(stock_type, limit=6000)  # 获取更多股票
+        else:
+            # 其他类型：根据预估数量获取
+            estimated_limit = (total_batches * batch_size) if total_batches else 5000
+            all_codes = self.get_stock_list_by_type(stock_type, limit=estimated_limit)
+        
+        actual_total = len(all_codes)
+        
+        # 根据实际股票数量动态计算批次
+        if total_batches is None:
+            total_batches = (actual_total + batch_size - 1) // batch_size  # 向上取整
+        
         print(f"[INFO] 开始K线数据更新 (每批 {batch_size} 只股票，共 {total_batches} 批)")
         print(f"[INFO] 股票类型: {stock_type}")
+        print(f"[INFO] 实际股票数量: {actual_total} 只")
         print(f"[INFO] 更新策略: 只更新K线数据和技术指标，保留其他数据不变")
         
         if progress_callback:
-            progress_callback("获取股票列表...", 1, f"准备获取 {total_batches * batch_size} 只{stock_type}股票")
+            progress_callback("获取股票列表...", 1, f"获得 {actual_total} 只{stock_type}股票，将分 {total_batches} 批处理")
         
-        # 获取股票列表
-        all_codes = self.get_stock_list_by_type(stock_type, limit=batch_size * total_batches)
-        actual_total = len(all_codes)
-        
-        if actual_total < batch_size * total_batches:
-            msg = f"注意：获取到的股票数量 ({actual_total}) 少于计划数量 ({batch_size * total_batches})，将只处理可用股票。"
-            print(f"[WARN] {msg}")
+        if actual_total == 0:
+            msg = f"错误：没有找到{stock_type}类型的股票！"
+            print(f"[ERROR] {msg}")
             if progress_callback:
-                progress_callback("股票列表警告", 0, msg)
-                time.sleep(2)
+                progress_callback("错误", 0, msg)
+                return
         
         if progress_callback:
             progress_callback("开始K线更新...", 2, f"获得 {actual_total} 只股票，开始K线数据更新...")
@@ -4015,9 +4069,9 @@ class ComprehensiveDataCollector:
     
     def load_existing_data(self):
         """加载现有数据"""
-        import os
         import json
-        
+        import os
+
         # 尝试从分卷文件加载
         data_dir = 'data'
         all_data = {}
@@ -4038,28 +4092,38 @@ class ComprehensiveDataCollector:
         print(f"[INFO] 加载现有数据: {len(all_data)} 只股票")
         return all_data
     
-    def run_batch_collection_with_progress(self, batch_size: int = 15, total_batches: int = 166, stock_type: str = "主板", progress_callback=None):
+    def run_batch_collection_with_progress(self, batch_size: int = 15, total_batches: int = None, stock_type: str = "主板", progress_callback=None):
         """运行专门化数据源分配批量采集，支持进度回调"""
+        
+        # 首先获取股票列表来确定实际数量
+        if stock_type == "全部":
+            # 全部股票：先获取全量股票列表
+            all_codes = self.get_stock_list_by_type(stock_type, limit=6000)  # 获取更多股票
+        else:
+            # 其他类型：根据预估数量获取
+            estimated_limit = (total_batches * batch_size) if total_batches else 5000
+            all_codes = self.get_stock_list_by_type(stock_type, limit=estimated_limit)
+        
+        actual_total = len(all_codes)
+        
+        # 根据实际股票数量动态计算批次
+        if total_batches is None:
+            total_batches = (actual_total + batch_size - 1) // batch_size  # 向上取整
+        
         print(f"[INFO] 开始专门化数据源分配批量采集 (每批 {batch_size} 只股票，共 {total_batches} 批)")
         print(f"[INFO] 股票类型: {stock_type}")
+        print(f"[INFO] 实际股票数量: {actual_total} 只")
         print(f"[INFO] 数据源策略: Baostock基本面 | Tencent实时资金 | YFinance估值 | AKShare兜底")
         
         if progress_callback:
-            progress_callback("获取股票列表...", 1, f"准备获取 {total_batches * batch_size} 只{stock_type}股票")
+            progress_callback("获取股票列表...", 1, f"获得 {actual_total} 只{stock_type}股票，将分 {total_batches} 批处理")
         
-        # 获取股票列表（根据类型过滤）
-        all_codes = self.get_stock_list_by_type(stock_type, limit=batch_size * total_batches)
-        actual_total = len(all_codes)
-        
-        if actual_total < batch_size * total_batches:
-            msg = f"注意：获取到的股票数量 ({actual_total}) 少于计划数量 ({batch_size * total_batches})，将只处理可用股票。"
-            print(f"[WARN] {msg}")
+        if actual_total == 0:
+            msg = f"错误：没有找到{stock_type}类型的股票！"
+            print(f"[ERROR] {msg}")
             if progress_callback:
-                progress_callback("股票列表警告", 0, msg)
-                time.sleep(2) # 让用户看到警告
-        
-        if progress_callback:
-            progress_callback("开始专门化数据采集...", 2, f"获得 {actual_total} 只股票，使用专门化API分配策略...")
+                progress_callback("错误", 0, msg)
+                return
         
         for batch_num in range(total_batches):
             start_idx = batch_num * batch_size
