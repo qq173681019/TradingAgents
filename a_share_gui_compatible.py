@@ -20,15 +20,33 @@ def load_env_config():
         except Exception as e:
             print(f"⚠️ 读取 .env.local 文件失败: {e}")
     
+    # 尝试从config.py导入配置作为默认值
+    try:
+        import config as cfg
+        default_config = {
+            'DEEPSEEK_API_KEY': cfg.DEEPSEEK_API_KEY,
+            'MINIMAX_API_KEY': cfg.MINIMAX_API_KEY,
+            'MINIMAX_GROUP_ID': cfg.MINIMAX_GROUP_ID,
+            'OPENROUTER_API_KEY': cfg.OPENROUTER_API_KEY,
+            'GEMINI_API_KEY': cfg.GEMINI_API_KEY,
+            'OPENROUTER_API_URL': cfg.OPENROUTER_API_URL,
+            'OPENROUTER_MODEL_NAME': cfg.OPENROUTER_MODEL_NAME,
+        }
+        print("✅ 已从 config.py 加载默认配置")
+    except Exception as e:
+        print(f"⚠️ 无法从config.py加载配置: {e}")
+        default_config = {}
+    
     return {
-        'DEEPSEEK_API_KEY': os.environ.get('DEEPSEEK_API_KEY', ''),
-        'MINIMAX_API_KEY': os.environ.get('MINIMAX_API_KEY', ''),
-        'MINIMAX_GROUP_ID': os.environ.get('MINIMAX_GROUP_ID', ''),
+        'DEEPSEEK_API_KEY': os.environ.get('DEEPSEEK_API_KEY', default_config.get('DEEPSEEK_API_KEY', '')),
+        'MINIMAX_API_KEY': os.environ.get('MINIMAX_API_KEY', default_config.get('MINIMAX_API_KEY', '')),
+        'MINIMAX_GROUP_ID': os.environ.get('MINIMAX_GROUP_ID', default_config.get('MINIMAX_GROUP_ID', '')),
         'OPENAI_API_KEY': os.environ.get('OPENAI_API_KEY', ''),
-        'OPENROUTER_API_KEY': os.environ.get('OPENROUTER_API_KEY', ''),
+        'OPENROUTER_API_KEY': os.environ.get('OPENROUTER_API_KEY', default_config.get('OPENROUTER_API_KEY', '')),
+        'GEMINI_API_KEY': os.environ.get('GEMINI_API_KEY', default_config.get('GEMINI_API_KEY', 'AIzaSyAkNFSx_OiKA9VVdUcXFU64GCPc1seXxvQ')),
         'ALPHA_VANTAGE_API_KEY': os.environ.get('ALPHA_VANTAGE_API_KEY', ''),
         'ENABLE_ETF_BUTTONS': os.environ.get('ENABLE_ETF_BUTTONS', 'False').lower() == 'true',
-        'LLM_MODEL_OPTIONS': ["none", "deepseek", "minimax", "openai", "openrouter"],
+        'LLM_MODEL_OPTIONS': ["none", "deepseek", "minimax", "openrouter", "gemini"],
         'DEFAULT_LLM_MODEL': os.environ.get('DEFAULT_LLM_MODEL', 'none'),
         'DEEPSEEK_API_URL': os.environ.get('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1/chat/completions'),
         'DEEPSEEK_MODEL_NAME': os.environ.get('DEEPSEEK_MODEL_NAME', 'deepseek-chat'),
@@ -38,6 +56,8 @@ def load_env_config():
         'OPENAI_MODEL_NAME': os.environ.get('OPENAI_MODEL_NAME', 'gpt-3.5-turbo'),
         'OPENROUTER_API_URL': os.environ.get('OPENROUTER_API_URL', 'https://openrouter.ai/api/v1/chat/completions'),
         'OPENROUTER_MODEL_NAME': os.environ.get('OPENROUTER_MODEL_NAME', 'openai/gpt-3.5-turbo'),
+        'GEMINI_API_URL': os.environ.get('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent'),
+        'GEMINI_MODEL_NAME': os.environ.get('GEMINI_MODEL_NAME', 'gemini-2.0-flash-exp'),
         'API_TIMEOUT': int(os.environ.get('API_TIMEOUT', '30')),
         'AI_TEMPERATURE': float(os.environ.get('AI_TEMPERATURE', '0.7')),
         'AI_MAX_TOKENS': int(os.environ.get('AI_MAX_TOKENS', '1000')),
@@ -51,6 +71,7 @@ MINIMAX_API_KEY = config['MINIMAX_API_KEY']
 MINIMAX_GROUP_ID = config['MINIMAX_GROUP_ID']
 OPENAI_API_KEY = config['OPENAI_API_KEY']
 OPENROUTER_API_KEY = config['OPENROUTER_API_KEY']
+GEMINI_API_KEY = config['GEMINI_API_KEY']
 ENABLE_ETF_BUTTONS = config['ENABLE_ETF_BUTTONS']
 LLM_MODEL_OPTIONS = config['LLM_MODEL_OPTIONS']
 DEFAULT_LLM_MODEL = config['DEFAULT_LLM_MODEL']
@@ -62,6 +83,8 @@ OPENAI_API_URL = config['OPENAI_API_URL']
 OPENAI_MODEL_NAME = config['OPENAI_MODEL_NAME']
 OPENROUTER_API_URL = config['OPENROUTER_API_URL']
 OPENROUTER_MODEL_NAME = config['OPENROUTER_MODEL_NAME']
+GEMINI_API_URL = config['GEMINI_API_URL']
+GEMINI_MODEL_NAME = config['GEMINI_MODEL_NAME']
 API_TIMEOUT = config['API_TIMEOUT']
 AI_TEMPERATURE = config['AI_TEMPERATURE']
 AI_MAX_TOKENS = config['AI_MAX_TOKENS']
@@ -98,7 +121,7 @@ except ImportError:
 def call_llm(prompt, model="deepseek"):
     """
     调用大语言模型API进行智能分析
-    支持 deepseek、minimax、openai 和 openrouter 四种模型
+    支持 deepseek、minimax、openrouter 和 gemini 四种模型
     """
     try:
         if model == "deepseek":
@@ -184,7 +207,7 @@ def call_llm(prompt, model="deepseek"):
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": "https://github.com/your-username/TradingAgents",  # 可选，用于统计
-                "X-Title": "A股分析助手"  # 可选，用于统计
+                "X-Title": "A-Share Trading Assistant"  # 可选，用于统计（必须使用ASCII字符）
             }
             data = {
                 "model": OPENROUTER_MODEL_NAME,
@@ -306,6 +329,83 @@ def call_llm(prompt, model="deepseek"):
             
             print(f"[MiniMax] 返回格式异常: {result}")
             return "AI分析失败：返回格式异常"
+            
+        elif model == "gemini":
+            # Google Gemini API调用
+            # 尝试多个可能的端点（按优先级）
+            endpoints_to_try = [
+                ("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent", "gemini-2.0-flash-exp"),
+                ("https://generativelanguage.googleapis.com/v1beta/models/gemini-exp-1206:generateContent", "gemini-exp-1206"),
+                ("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent", "gemini-1.5-pro"),
+                ("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent", "gemini-1.5-flash"),
+            ]
+            
+            # 使用配置的URL，如果失败则尝试备用
+            url = f"{GEMINI_API_URL}?key={GEMINI_API_KEY}"
+            
+            headers = {
+                "Content-Type": "application/json"
+            }
+            
+            # Gemini API使用不同的请求格式
+            data = {
+                "contents": [{
+                    "parts": [{
+                        "text": f"你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文分析以下内容：\n\n{prompt}"
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": AI_TEMPERATURE,
+                    "maxOutputTokens": AI_MAX_TOKENS,
+                    "topP": AI_TOP_P
+                }
+            }
+            
+            print(f"[Gemini调试] 尝试模型: {GEMINI_MODEL_NAME}")
+            print(f"[Gemini调试] URL: {url[:90]}...")
+            print(f"[Gemini调试] API Key (前20字符): {GEMINI_API_KEY[:20]}...")
+            
+            response = requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT)
+            
+            print(f"[Gemini调试] HTTP状态码: {response.status_code}")
+            print(f"[Gemini调试] 响应内容: {response.text[:300]}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                
+                # Gemini返回格式：{"candidates": [{"content": {"parts": [{"text": "..."}]}}]}
+                if "candidates" in result and len(result["candidates"]) > 0:
+                    candidate = result["candidates"][0]
+                    if "content" in candidate and "parts" in candidate["content"]:
+                        parts = candidate["content"]["parts"]
+                        if len(parts) > 0 and "text" in parts[0]:
+                            return parts[0]["text"]
+                
+                print(f"[Gemini] 返回格式异常: {result}")
+                return "AI分析失败：返回格式异常"
+                
+            elif response.status_code == 400:
+                error_detail = response.json() if response.headers.get('content-type', '').startswith('application/json') else {"error": {"message": response.text}}
+                print(f"[Gemini] 请求错误: {error_detail}")
+                return f"AI分析失败：Gemini API请求错误 - {error_detail.get('error', {}).get('message', 'Unknown error')}"
+                
+            elif response.status_code == 403:
+                print("[Gemini] API Key无效或权限不足")
+                return "AI分析失败：Gemini API Key无效或权限不足"
+                
+            elif response.status_code == 429:
+                print("[Gemini] 请求限制：频率超限或配额不足")
+                return "AI分析失败：Gemini API请求限制"
+                
+            else:
+                try:
+                    error_detail = response.json()
+                    print(f"[Gemini] API错误: {error_detail}")
+                    return f"AI分析失败：Gemini API错误 - {error_detail.get('error', {}).get('message', 'Unknown error')}"
+                except:
+                    print(f"[Gemini] HTTP错误: {response.status_code} - {response.text}")
+                    return f"AI分析失败：Gemini HTTP错误 {response.status_code}"
+                    
         else:
             print(f"[LLM] 不支持的模型: {model}")
             return f"不支持的模型: {model}"
@@ -460,6 +560,7 @@ class AShareAnalyzerGUI:
         self.batch_score_file_minimax = "batch_stock_scores_minimax.json"
         self.batch_score_file_openai = "batch_stock_scores_openai.json"
         self.batch_score_file_openrouter = "batch_stock_scores_openrouter.json"
+        self.batch_score_file_gemini = "batch_stock_scores_gemini.json"
         self.batch_scores = {}           # 批量评分数据
 
         # 新增：完整推荐数据存储
@@ -910,6 +1011,9 @@ class AShareAnalyzerGUI:
             elif hasattr(self, 'llm_model') and self.llm_model == "openrouter":
                 load_file = self.batch_score_file_openrouter
                 model_name = "OpenRouter"
+            elif hasattr(self, 'llm_model') and self.llm_model == "gemini":
+                load_file = self.batch_score_file_gemini
+                model_name = "Gemini"
             else:
                 load_file = self.batch_score_file
                 model_name = "本地规则"
@@ -1074,6 +1178,9 @@ class AShareAnalyzerGUI:
             elif hasattr(self, 'llm_model') and self.llm_model == "openrouter":
                 save_file = self.batch_score_file_openrouter
                 model_name = "OpenRouter"
+            elif hasattr(self, 'llm_model') and self.llm_model == "gemini":
+                save_file = self.batch_score_file_gemini
+                model_name = "Gemini"
             else:
                 save_file = self.batch_score_file
                 model_name = "本地规则"
@@ -2547,7 +2654,7 @@ class AShareAnalyzerGUI:
                 self.show_progress(f"DATA: 准备分析 {total_stocks} 只{stock_type}股票...")
                 
                 # 检测评分模式
-                use_llm_mode = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax"]
+                use_llm_mode = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openrouter", "gemini"]
                 if use_llm_mode:
                     print(f"\033[1;35m[评分模式] 🤖 AI模式 - 使用{self.llm_model}大模型进行智能评分\033[0m")
                     self.show_progress(f"MODE: 🤖 AI模式 - 使用{self.llm_model}进行评分（较慢但更准确）")
@@ -2616,13 +2723,18 @@ class AShareAnalyzerGUI:
                                 self.comprehensive_data[code] = comprehensive_data
                                 
                                 # 【关键逻辑】批量评分强制重新计算，不使用缓存评分
-                                # 1. 如果选择了LLM模型（deepseek/minimax），使用AI评分
+                                # 1. 如果选择了LLM模型，使用AI评分
                                 # 2. 否则使用本地规则引擎评分
-                                use_llm = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax"]
+                                use_llm = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openrouter", "gemini"]
                                 
                                 if use_llm:
                                     # AI模式：使用LLM进行智能评分
                                     print(f"[AI-MODE] 使用{self.llm_model}评分: {code}")
+                                    # 更新进度显示AI调用状态
+                                    def update_ai_status(c=code, idx=i, t=total_stocks):
+                                        if hasattr(self, 'batch_scoring_detail_label'):
+                                            self.batch_scoring_detail_label.config(text=f"🤖 {self.llm_model.upper()}分析: {c} ({idx+1}/{t})")
+                                    self.root.after(0, update_ai_status)
                                 else:
                                     # 快速模式：使用本地规则引擎评分
                                     print(f"[LOCAL-MODE] 本地规则引擎评分: {code}")
@@ -2632,6 +2744,14 @@ class AShareAnalyzerGUI:
                                 if score is not None:
                                     comprehensive_data['overall_score'] = score
                                     recalculated_count += 1
+                                    
+                                    # 显示评分结果
+                                    if use_llm:
+                                        print(f"[AI完成] {code} 评分: {score:.1f}/10")
+                                        def update_score_result(c=code, s=score, idx=i, t=total_stocks):
+                                            if hasattr(self, 'batch_scoring_detail_label'):
+                                                self.batch_scoring_detail_label.config(text=f"✅ {c} 评分: {s:.1f}/10 ({idx+1}/{t})")
+                                        self.root.after(0, update_score_result)
                                 else:
                                     print(f"[ERROR] 评分失败: {code}")
                                     failed_count += 1
@@ -4232,11 +4352,14 @@ class AShareAnalyzerGUI:
         self.root.after(1000, self.update_ranking_display)
 
     def set_llm_model(self, model):
+        print(f"[DEBUG] set_llm_model 被调用: model={model}, type={type(model)}")
+        print(f"[DEBUG] LLM_MODEL_OPTIONS={LLM_MODEL_OPTIONS}")
         if model in LLM_MODEL_OPTIONS:
             self.llm_model = model
-            print(f"已切换大模型: {model}")
+            print(f"✅ 已切换大模型: {model}")
+            print(f"[DEBUG] self.llm_model 已设置为: {self.llm_model}")
         else:
-            print(f"不支持的LLM模型: {model}")
+            print(f"❌ 不支持的LLM模型: {model}")
     
     def update_ranking_display(self):
         """更新排行榜显示（非阻塞方式）"""
@@ -6947,14 +7070,28 @@ class AShareAnalyzerGUI:
         print(f"📊 {ticker} 数据来源({data_source}): 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
 
         # 如果选择了大模型，优先用大模型生成投资建议
-        print(f"[调试] generate_investment_advice: llm_model={getattr(self, 'llm_model', None)}")
-        if hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openai"]:
-            print(f"[调试] 命中大模型分支: {self.llm_model}")
+        print(f"[调试] generate_investment_advice 检查:")
+        print(f"  - hasattr(self, 'llm_model'): {hasattr(self, 'llm_model')}")
+        print(f"  - self.llm_model值: {getattr(self, 'llm_model', None)}")
+        print(f"  - 是否在支持列表中: {getattr(self, 'llm_model', None) in ['deepseek', 'minimax', 'openrouter', 'gemini']}")
+        
+        if hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openrouter", "gemini"]:
+            print(f"✅ [调试] 命中大模型分支: {self.llm_model}")
             
             # 安全获取股票信息，确保不为None
             stock_name = stock_info.get('name') or '未知'
             stock_industry = stock_info.get('industry') or '未知'
             stock_concept = stock_info.get('concept') or '未知'
+            
+            # 显示AI调用进度
+            if hasattr(self, 'root'):
+                try:
+                    def update_ai_progress():
+                        if hasattr(self, 'batch_scoring_detail_label'):
+                            self.batch_scoring_detail_label.config(text=f"🤖 AI分析中: {ticker} {stock_name}")
+                    self.root.after(0, update_ai_progress)
+                except:
+                    pass
             
             prompt = f"请根据以下A股股票的技术面和基本面数据，分别给出短期（1-7天）、中期（7-30天）、长期（30-90天）的投资建议，内容简明扼要，分条列出：\n" \
                      f"股票名称: {stock_name}\n行业: {stock_industry}\n概念: {stock_concept}\n当前价格: {current_price:.2f}\n" \
@@ -6962,8 +7099,9 @@ class AShareAnalyzerGUI:
                      f"基本面: PE={pe_ratio:.1f}, PB={pb_ratio:.2f}, ROE={roe:.1f}\n" \
                      f"请用简洁中文输出，分短期/中期/长期三段，每段3条建议。"
             
+            print(f"[AI调用] 正在请求{self.llm_model}分析 {ticker}...")
             ai_reply = call_llm(prompt, model=self.llm_model)
-            print(f"[调试] call_llm已调用, 返回内容前100字: {str(ai_reply)[:100]}")
+            print(f"[AI完成] {ticker} 分析完成, 返回内容前100字: {str(ai_reply)[:100]}")
             
             # 基于技术指标计算数值评分（用于推荐指数计算）
             short_score = self._calculate_technical_score(rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price)
