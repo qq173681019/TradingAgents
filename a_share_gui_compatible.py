@@ -531,6 +531,211 @@ class AShareAnalyzerGUI:
         
         # 添加通用股票验证函数，支持所有A股代码格式
         self.valid_a_share_codes = self.generate_valid_codes()
+        
+        # 初始化数据状态检查（在UI加载后）
+        if TKINTER_AVAILABLE and self.root is not None:
+            # 延迟执行数据状态检查，确保UI已完全加载
+            self.root.after(1000, self.check_data_status)
+    
+    def check_data_status(self):
+        """检查本地数据状态并更新界面提示"""
+        try:
+            # 检查全部数据状态
+            all_data_status = self._check_comprehensive_data_status()
+            if hasattr(self, 'all_data_status_label'):
+                self.all_data_status_label.config(text=all_data_status, fg=self._get_status_color(all_data_status))
+            
+            # 检查K线数据状态
+            kline_data_status = self._check_kline_data_status()
+            if hasattr(self, 'kline_status_label'):
+                if kline_data_status:  # 只有当状态不为空时才显示
+                    self.kline_status_label.config(text=kline_data_status, fg=self._get_status_color(kline_data_status))
+                    # 显示包含K线状态的整行
+                    if hasattr(self.kline_status_label, 'master') and hasattr(self.kline_status_label.master, 'pack'):
+                        self.kline_status_label.master.pack(fill="x", pady=2)
+                else:
+                    # 隐藏包含K线状态的整行
+                    if hasattr(self.kline_status_label, 'master') and hasattr(self.kline_status_label.master, 'pack_forget'):
+                        self.kline_status_label.master.pack_forget()
+            
+            # 检查评分数据状态
+            score_data_status = self._check_score_data_status()
+            if hasattr(self, 'score_status_label'):
+                self.score_status_label.config(text=score_data_status, fg=self._get_status_color(score_data_status))
+                
+        except Exception as e:
+            print(f"检查数据状态失败: {e}")
+    
+    def _check_comprehensive_data_status(self):
+        """检查综合数据状态"""
+        import os
+        from datetime import datetime
+        
+        try:
+            data_dir = 'data'
+            if not os.path.exists(data_dir):
+                return "📂 无本地数据"
+            
+            # 检查分卷数据文件
+            part_files = [f for f in os.listdir(data_dir) if f.startswith('comprehensive_stock_data_part_') and f.endswith('.json')]
+            
+            if not part_files:
+                return "📂 无本地数据"
+            
+            # 获取最新文件的修改时间
+            latest_time = None
+            for file in part_files:
+                file_path = os.path.join(data_dir, file)
+                mtime = os.path.getmtime(file_path)
+                if latest_time is None or mtime > latest_time:
+                    latest_time = mtime
+            
+            if latest_time:
+                latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
+                return f"📊 本地数据: {latest_date} ({len(part_files)}个文件)"
+            else:
+                return "📂 无本地数据"
+                
+        except Exception as e:
+            return "📂 数据检查失败"
+    
+    def _check_kline_data_status(self):
+        """检查K线数据状态"""
+        import os
+        from datetime import datetime
+        
+        try:
+            # 首先检查K线数据状态文件
+            kline_status_file = "kline_update_status.json"
+            
+            if os.path.exists(kline_status_file):
+                import json
+                with open(kline_status_file, 'r', encoding='utf-8') as f:
+                    status_data = json.load(f)
+                
+                last_update = status_data.get('last_update_date', '')
+                if last_update:
+                    return f"📈 K线数据: {last_update}"
+            
+            # 如果没有独立的K线状态文件，检查全部数据（因为全部数据包含K线数据）
+            data_dir = 'data'
+            if os.path.exists(data_dir):
+                part_files = [f for f in os.listdir(data_dir) if f.startswith('comprehensive_stock_data_part_') and f.endswith('.json')]
+                
+                if part_files:
+                    # 获取最新文件的修改时间
+                    latest_time = None
+                    for file in part_files:
+                        file_path = os.path.join(data_dir, file)
+                        mtime = os.path.getmtime(file_path)
+                        if latest_time is None or mtime > latest_time:
+                            latest_time = mtime
+                    
+                    if latest_time:
+                        latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
+                        return f"📈 K线数据: {latest_date} (来自全部数据)"
+            
+            # 如果没有任何数据，返回空字符串（不显示提示）
+            return ""
+                
+        except Exception as e:
+            return ""
+    
+    def _check_score_data_status(self):
+        """检查评分数据状态"""
+        import os
+        from datetime import datetime
+        
+        try:
+            # 检查批量评分文件 - 按优先级排序
+            score_files = [
+                ("batch_stock_scores_deepseek.json", "🤖 DeepSeek AI"),
+                ("batch_stock_scores_minimax.json", "🤖 MiniMax AI"),
+                ("batch_stock_scores_openai.json", "🤖 OpenAI"),
+                ("batch_stock_scores_openrouter.json", "🤖 OpenRouter"),
+                ("batch_stock_scores.json", "📋 本地算法"),
+            ]
+            
+            # 检查是否有优化版本的评分文件
+            optimized_files = []
+            try:
+                for file in os.listdir('.'):
+                    if file.startswith('batch_stock_scores_optimized_') and file.endswith('.json'):
+                        # 从文件名提取日期和类型信息
+                        parts = file.replace('batch_stock_scores_optimized_', '').replace('.json', '').split('_')
+                        if len(parts) >= 3:
+                            stock_type = parts[0]
+                            date_part = '_'.join(parts[1:3])
+                            optimized_files.append((file, f"⚡ 优化算法({stock_type})"))
+            except:
+                pass
+            
+            # 合并所有评分文件
+            all_files = optimized_files + score_files
+            
+            latest_file = None
+            latest_time = None
+            latest_model = None
+            
+            for filename, model_name in all_files:
+                if os.path.exists(filename):
+                    mtime = os.path.getmtime(filename)
+                    if latest_time is None or mtime > latest_time:
+                        latest_time = mtime
+                        latest_file = filename
+                        latest_model = model_name
+            
+            if latest_file:
+                latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
+                # 添加时间信息以区分同日不同时间的评分
+                latest_time_str = datetime.fromtimestamp(latest_time).strftime("%H:%M")
+                return f"{latest_date} {latest_time_str} | {latest_model}"
+            else:
+                return "❌ 暂无评分数据"
+                
+        except Exception as e:
+            return "❌ 评分检查失败"
+    
+    def _update_kline_status(self):
+        """更新K线数据状态文件"""
+        import json
+        import os
+        from datetime import datetime
+        
+        try:
+            status_data = {
+                'last_update_date': datetime.now().strftime("%Y-%m-%d"),
+                'last_update_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'update_type': 'kline_only'
+            }
+            
+            with open("kline_update_status.json", 'w', encoding='utf-8') as f:
+                json.dump(status_data, f, ensure_ascii=False, indent=2)
+                
+            print(f"✅ K线状态已更新: {status_data['last_update_date']}")
+            
+        except Exception as e:
+            print(f"❌ K线状态更新失败: {e}")
+    
+    def _refresh_kline_status(self):
+        """刷新K线状态显示"""
+        try:
+            kline_status = self._check_kline_data_status()
+            if hasattr(self, 'kline_status_label'):
+                if kline_status:  # 只有当状态不为空时才显示
+                    self.kline_status_label.config(text=kline_status, fg=self._get_status_color(kline_status))
+                    self.kline_status_label.master.pack(fill="x", pady=2)  # 显示父容器
+                else:
+                    self.kline_status_label.master.pack_forget()  # 隐藏整行
+        except Exception as e:
+            print(f"刷新K线状态失败: {e}")
+    
+    def _get_status_color(self, status_text):
+        """根据状态文本返回颜色"""
+        if "无" in status_text or "失败" in status_text:
+            return "#e74c3c"  # 红色
+        else:
+            return "#27ae60"  # 绿色
     
     def _load_stock_info_fallback(self):
         """从JSON文件加载后备股票信息数据"""
@@ -3771,6 +3976,84 @@ class AShareAnalyzerGUI:
                                         cursor="hand2",
                                         width=12)
             get_etf_score_btn.pack(side="left", padx=5)
+        
+        # 数据状态提示区域 - 重新设计布局
+        data_status_main_frame = tk.Frame(self.root, bg="#ecf0f1", relief="ridge", bd=1)
+        data_status_main_frame.pack(fill="x", padx=20, pady=(8, 12))
+        
+        # 状态提示标题
+        status_title_frame = tk.Frame(data_status_main_frame, bg="#ecf0f1")
+        status_title_frame.pack(fill="x", pady=(8, 4))
+        
+        tk.Label(status_title_frame,
+                text="📊 数据状态概览",
+                font=("微软雅黑", 11, "bold"),
+                fg="#2c3e50",
+                bg="#ecf0f1").pack(side="left", padx=10)
+        
+        # 状态提示内容区域 - 使用网格布局
+        status_content_frame = tk.Frame(data_status_main_frame, bg="#ecf0f1")
+        status_content_frame.pack(fill="x", padx=10, pady=(0, 8))
+        
+        # 第一行：全部数据状态
+        all_data_row = tk.Frame(status_content_frame, bg="#ecf0f1")
+        all_data_row.pack(fill="x", pady=2)
+        
+        tk.Label(all_data_row,
+                text="📂 全部数据：",
+                font=("微软雅黑", 9, "bold"),
+                fg="#34495e",
+                bg="#ecf0f1",
+                width=12,
+                anchor="w").pack(side="left")
+        
+        self.all_data_status_label = tk.Label(all_data_row,
+                                             text="🔍 检查本地数据中...",
+                                             font=("微软雅黑", 9),
+                                             fg="#7f8c8d",
+                                             bg="#ecf0f1",
+                                             anchor="w")
+        self.all_data_status_label.pack(side="left", fill="x", expand=True)
+        
+        # 第二行：K线数据状态
+        kline_data_row = tk.Frame(status_content_frame, bg="#ecf0f1")
+        kline_data_row.pack(fill="x", pady=2)
+        
+        tk.Label(kline_data_row,
+                text="📈 K线数据：",
+                font=("微软雅黑", 9, "bold"),
+                fg="#34495e",
+                bg="#ecf0f1",
+                width=12,
+                anchor="w").pack(side="left")
+        
+        self.kline_status_label = tk.Label(kline_data_row,
+                                           text="🔍 检查K线数据中...",
+                                           font=("微软雅黑", 9),
+                                           fg="#7f8c8d",
+                                           bg="#ecf0f1",
+                                           anchor="w")
+        self.kline_status_label.pack(side="left", fill="x", expand=True)
+        
+        # 第三行：评分数据状态
+        score_data_row = tk.Frame(status_content_frame, bg="#ecf0f1")
+        score_data_row.pack(fill="x", pady=2)
+        
+        tk.Label(score_data_row,
+                text="🎯 评分数据：",
+                font=("微软雅黑", 9, "bold"),
+                fg="#34495e",
+                bg="#ecf0f1",
+                width=12,
+                anchor="w").pack(side="left")
+        
+        self.score_status_label = tk.Label(score_data_row,
+                                          text="🔍 检查评分数据中...",
+                                          font=("微软雅黑", 9),
+                                          fg="#7f8c8d",
+                                          bg="#ecf0f1",
+                                          anchor="w")
+        self.score_status_label.pack(side="left", fill="x", expand=True)
         
         # CSV批量分析与热门板块按钮组
         analysis_button_frame = tk.Frame(self.root, bg="#f0f0f0")
@@ -12856,12 +13139,17 @@ WARNING: 重要声明:
             update_status("K线更新完成", 100, "正在重新加载数据...")
             self.data_collection_active = False
             
+            # 更新K线数据状态文件
+            self._update_kline_status()
+            
             # 尝试重新加载数据
             try:
                 loaded = self.load_comprehensive_stock_data()
                 if loaded:
                     count = len(self.comprehensive_stock_data)
                     update_status("更新完成", 100, f"已更新 {count} 只股票的K线数据")
+                    # 更新K线状态显示
+                    self.root.after(0, self._refresh_kline_status)
                     self.root.after(0, lambda: messagebox.showinfo("完成", f"K线数据更新完成！\n已更新 {count} 只主板股票的K线数据。"))
                 else:
                     update_status("更新完成", 100, "K线已更新，但未能自动重新加载")
@@ -13336,18 +13624,48 @@ WARNING: 重要声明:
     def _get_stock_info_from_cache(self, code: str) -> dict:
         """从本地缓存获取股票基本信息"""
         try:
-            # 1. 尝试从内存缓存获取
+            # 1. 尝试从内存缓存获取 - 支持多种数据结构
             if hasattr(self, 'comprehensive_stock_data') and self.comprehensive_stock_data:
                 if code in self.comprehensive_stock_data:
                     cached_data = self.comprehensive_stock_data[code]
-                    return {
-                        'name': cached_data.get('name', ''),
-                        'industry': cached_data.get('industry', ''),
-                        'concept': cached_data.get('concept', ''),
-                        'price': cached_data.get('price', 0)
-                    }
+                    
+                    # 处理新的数据结构：使用 basic_info, technical_indicators 等
+                    basic_info = cached_data.get('basic_info', {})
+                    technical_indicators = cached_data.get('technical_indicators', {})
+                    industry_concept = cached_data.get('industry_concept', {})
+                    
+                    # 支持两种数据结构
+                    if basic_info:
+                        # 结构1：有完整的 basic_info 字段
+                        result = {
+                            'name': basic_info.get('name', ''),
+                            'industry': industry_concept.get('industry', basic_info.get('industry', '')),
+                            'concept': ', '.join(industry_concept.get('concepts', [])) if industry_concept.get('concepts') else '',
+                            'price': technical_indicators.get('current_price', 0)
+                        }
+                    else:
+                        # 结构2：扁平化结构，直接有 name 字段
+                        result = {
+                            'name': cached_data.get('name', ''),
+                            'industry': cached_data.get('industry', ''),
+                            'concept': cached_data.get('concept', ''),
+                            'price': technical_indicators.get('current_price', cached_data.get('price', 0))
+                        }
+                    
+                    return result
             
-            # 2. 尝试从分析结果文件获取
+            # 2. 尝试从batch_scores获取（兼容旧格式）
+            if hasattr(self, 'batch_scores') and self.batch_scores and code in self.batch_scores:
+                batch_data = self.batch_scores[code]
+                result = {
+                    'name': batch_data.get('name', ''),
+                    'industry': batch_data.get('industry', ''),
+                    'concept': batch_data.get('concept', ''),
+                    'price': batch_data.get('price', 0)
+                }
+                return result
+            
+            # 3. 尝试从分析结果文件获取
             for part_num in range(1, 25):  # 检查所有分析结果文件
                 try:
                     analysis_file = f"data/stock_analysis_results_part_{part_num}.json"
@@ -13356,15 +13674,22 @@ WARNING: 重要声明:
                             analysis_data = json.load(f)
                             if code in analysis_data:
                                 stock_data = analysis_data[code]
-                                return {
+                                result = {
                                     'name': stock_data.get('name', ''),
                                     'industry': stock_data.get('industry', ''),
                                     'concept': stock_data.get('concept', ''),
                                     'price': stock_data.get('price', 0)
                                 }
-                except Exception:
+                                if code in ['000001', '000002', '000003', '000004', '000005']:
+                                    print(f"[DEBUG] 股票 {code} 从分析文件 part_{part_num} 获取到数据: {result}")
+                                return result
+                except Exception as e:
+                    if code in ['000001', '000002', '000003', '000004', '000005']:
+                        print(f"[DEBUG] 读取分析文件 part_{part_num} 失败: {e}")
                     continue
             
+            if code in ['000001', '000002', '000003', '000004', '000005']:
+                print(f"[DEBUG] 股票 {code} 在所有缓存中都未找到")
             return None
             
         except Exception as e:

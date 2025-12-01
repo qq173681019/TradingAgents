@@ -1030,6 +1030,28 @@ class ComprehensiveDataCollector:
             except Exception as e:
                 print(f"[ERROR] AKShare 批量处理异常: {e}")
                 fallback_codes.extend(primary_codes)
+        
+        elif primary_source == 'tencent' and TENCENT_KLINE_AVAILABLE and self.tencent_kline:
+            print(f"[INFO] 腾讯K线API 批量处理 {len(primary_codes)} 只股票...")
+            try:
+                # 使用腾讯K线API批量获取
+                tencent_results = self.tencent_kline.batch_get_klines(primary_codes, start_iso, end_iso)
+                
+                for code in primary_codes:
+                    if code in tencent_results:
+                        df = tencent_results[code]
+                        if df is not None and not df.empty:
+                            df = self.standardize_kline_columns(df, 'tencent')
+                            if not df.empty:
+                                result[code] = df
+                                primary_success.append(code)
+                                continue
+                    fallback_codes.append(code)
+                
+                print(f"[SUCCESS] 腾讯K线API 成功: {len(primary_success)}/{len(primary_codes)} 只")
+            except Exception as e:
+                print(f"[ERROR] 腾讯K线API 批量处理异常: {e}")
+                fallback_codes.extend(primary_codes)
         else:
             print(f"[WARN] {primary_source.upper()} 不可用，将所有股票转为后备处理")
             fallback_codes.extend(primary_codes)
