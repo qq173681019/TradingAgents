@@ -2190,10 +2190,22 @@ class AShareAnalyzerGUI:
             print(f"计算热门板块加权失败: {e}")
             return 0, f"计算失败: {str(e)}"
     
-    def start_batch_scoring(self):
-        """开始批量获取评分 - 增强稳定性版本"""
+    def start_batch_scoring(self, start_from_index=None):
+        """开始批量获取评分 - 增强稳定性版本，支持断点续传"""
         import gc
         import threading
+
+        # 检查是否启用断点续传
+        if start_from_index is None and hasattr(self, 'enable_resume_var') and self.enable_resume_var.get():
+            try:
+                start_from_index = int(self.resume_start_var.get()) - 1  # 转为0基索引
+                if start_from_index < 0:
+                    start_from_index = 0
+            except ValueError:
+                messagebox.showerror("输入错误", "请输入有效的数字")
+                return
+        elif start_from_index is None:
+            start_from_index = 0
 
         # 如果批量评分功能被禁用（如用户已请求移除相关按钮），则直接返回
         if not getattr(self, 'batch_scoring_enabled', True):
@@ -2214,20 +2226,35 @@ class AShareAnalyzerGUI:
             try:
                 # 获取用户选择的股票类型
                 stock_type = self.stock_type_var.get()
-                self.show_progress(f"START: 开始获取{stock_type}股票评分...")
+                
+                # 根据是否是断点续传显示不同的开始信息
+                if start_from_index > 0:
+                    self.show_progress(f"RESUME: 断点续传{stock_type}股票评分，从第{start_from_index + 1}只开始...")
+                else:
+                    self.show_progress(f"START: 开始获取{stock_type}股票评分...")
                 
                 # 获取符合类型要求的股票代码
                 try:
                     all_codes = self.get_all_stock_codes(stock_type)
                     total_stocks = len(all_codes)
-                    print(f"[DEBUG] 批量分析股票数: {total_stocks}")
+                    
+                    # 应用断点续传逻辑
+                    if start_from_index > 0:
+                        if start_from_index >= total_stocks:
+                            self.show_progress(f"ERROR: 起始位置({start_from_index + 1})超出总数({total_stocks})")
+                            return
+                        all_codes = all_codes[start_from_index:]
+                        print(f"[DEBUG] 断点续传评分: 跳过前{start_from_index}只，剩余{len(all_codes)}只")
+                    
+                    print(f"[DEBUG] 批量分析股票数: {len(all_codes)} (总数: {total_stocks})")
                 except Exception as e:
                     self.show_progress(f"ERROR: 获取股票列表失败: {e}")
                     print(f"[DEBUG] 获取股票列表失败: {e}")
                     return
-                if total_stocks == 0:
-                    self.show_progress(f"ERROR: 未找到{stock_type}类型的股票代码")
-                    print(f"[DEBUG] 未找到{stock_type}类型的股票代码")
+                
+                if len(all_codes) == 0:
+                    self.show_progress(f"ERROR: 未找到{stock_type}类型的股票代码或已全部处理")
+                    print(f"[DEBUG] 未找到{stock_type}类型的股票代码或已全部处理")
                     return
                 # 限制最大处理数量，防止内存溢出
                 max_process = min(total_stocks, 5000)  # 最多处理5000只
@@ -2244,16 +2271,17 @@ class AShareAnalyzerGUI:
                 batch_save_interval = 20  # 每20只保存一次，减少频率
                 
                 for i, code in enumerate(all_codes):
-                    print(f"[DEBUG] 分析第{i+1}只: {code}")
+                    current_position = start_from_index + i + 1  # 实际处理位置
+                    print(f"[DEBUG] 分析第{current_position}只: {code}")
                     try:
                         # 检查是否需要停止
                         if hasattr(self, '_stop_batch') and self._stop_batch:
                             self.show_progress("⏹️ 用户停止了批量分析")
                             break
                         
-                        # 更新进度
-                        progress = (i + 1) / total_stocks * 100
-                        self.show_progress(f"⏳ 分析 {code} ({i+1}/{total_stocks}) - {progress:.1f}%")
+                        # 更新进度 - 显示实际位置和总数
+                        progress = current_position / total_stocks * 100
+                        self.show_progress(f"⏳ 分析 {code} ({current_position}/{total_stocks}) - {progress:.1f}%")
                         
                         # 获取股票分析和评分
                         try:
@@ -2284,12 +2312,12 @@ class AShareAnalyzerGUI:
                             failed_count += 1
                         
                         # 定期保存和内存清理
-                        if (i + 1) % batch_save_interval == 0:
+                        if current_position % batch_save_interval == 0:
                             try:
                                 self.save_batch_scores()
                                 self.save_comprehensive_data()  # 保存完整数据
                                 gc.collect()  # 强制垃圾回收
-                                self.show_progress(f"💾 已保存进度 ({i+1}/{total_stocks})")
+                                self.show_progress(f"💾 已保存进度 ({current_position}/{total_stocks})")
                             except Exception as save_error:
                                 print(f"保存进度失败: {save_error}")
                             
@@ -2360,12 +2388,243 @@ class AShareAnalyzerGUI:
         else:
             self.show_progress("WARNING: 没有正在运行的批量评分任务")
     
+    def start_llm_batch_analysis(self, start_from_index=None):
+        """开始或恢复LLM批量分析"""
+        try:
+            # 检查是否启用断点续传
+            if start_from_index is None and hasattr(self, 'enable_resume_var') and self.enable_resume_var.get():
+                try:
+                    start_from_index = int(self.resume_start_var.get()) - 1  # 转为0基索引
+                    if start_from_index < 0:
+                        start_from_index = 0
+                except ValueError:
+                    messagebox.showerror("输入错误", "请输入有效的数字")
+                    return
+            elif start_from_index is None:
+                start_from_index = 0
+            
+            # 检查是否设置了LLM模型
+            if not hasattr(self, 'llm_model') or self.llm_model == "none":
+                self.show_progress("❌ 请先设置LLM模型")
+                return
+            
+            # 检查是否有综合数据
+            if not hasattr(self, 'comprehensive_data') or not self.comprehensive_data:
+                self.show_progress("❌ 请先运行综合数据收集")
+                return
+            
+            self.show_progress("🤖 开始LLM批量分析...")
+            
+            # 获取所有股票代码
+            all_codes = list(self.comprehensive_data.keys())
+            
+            # 验证开始索引
+            if start_from_index >= len(all_codes):
+                self.show_progress(f"❌ 开始索引 {start_from_index+1} 超出范围 (最大: {len(all_codes)})")
+                return
+            
+            # 从指定位置开始的代码列表
+            codes_to_process = all_codes[start_from_index:]
+            total_stocks = len(all_codes)
+            
+            if start_from_index > 0:
+                self.show_progress(f"🔄 从第{start_from_index+1}个股票开始LLM分析，剩余{len(codes_to_process)}个")
+            
+            # 初始化LLM分析结果存储
+            if not hasattr(self, 'llm_analysis_results'):
+                self.llm_analysis_results = {}
+            
+            success_count = 0
+            failed_count = 0
+            
+            for i, code in enumerate(codes_to_process):
+                current_position = start_from_index + i + 1
+                
+                try:
+                    # 检查是否已经分析过
+                    if code in self.llm_analysis_results:
+                        self.show_progress(f"⏭️ 跳过已分析的 {code} ({current_position}/{total_stocks})")
+                        success_count += 1
+                        continue
+                    
+                    # 更新进度
+                    progress = current_position / total_stocks * 100
+                    self.show_progress(f"🤖 LLM分析 {code} ({current_position}/{total_stocks}) - {progress:.1f}%")
+                    
+                    # 获取股票的综合数据
+                    stock_data = self.comprehensive_data.get(code)
+                    if not stock_data:
+                        print(f"跳过 {code}: 没有综合数据")
+                        failed_count += 1
+                        continue
+                    
+                    # 调用LLM分析
+                    llm_result = self.analyze_stock_with_llm(code, stock_data)
+                    
+                    if llm_result:
+                        self.llm_analysis_results[code] = {
+                            'analysis': llm_result,
+                            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                            'model': self.llm_model
+                        }
+                        success_count += 1
+                        print(f"LLM分析完成: {code} - {llm_result.get('recommendation', 'N/A')}")
+                    else:
+                        failed_count += 1
+                        print(f"LLM分析失败: {code}")
+                    
+                    # 定期保存结果
+                    if current_position % 10 == 0:
+                        self.save_llm_analysis_results()
+                        self.show_progress(f"💾 已保存LLM分析进度 ({current_position}/{total_stocks})")
+                    
+                    # 短暂休息避免API限制
+                    import time
+                    time.sleep(1.0)  # LLM调用间隔较长
+                    
+                except Exception as e:
+                    print(f"LLM分析失败 {code}: {e}")
+                    failed_count += 1
+                    continue
+            
+            # 最终保存
+            self.save_llm_analysis_results()
+            
+            # 完成报告
+            self.show_progress(f"✅ LLM批量分析完成！成功: {success_count}, 失败: {failed_count}")
+            print(f"LLM批量分析结果: 成功{success_count}个，失败{failed_count}个")
+            
+        except Exception as e:
+            print(f"LLM批量分析错误: {e}")
+            self.show_progress(f"❌ LLM分析失败: {e}")
+    
+    def analyze_stock_with_llm(self, code, stock_data):
+        """使用LLM分析单只股票"""
+        try:
+            # 构建分析提示
+            prompt = f"""
+请基于以下股票数据进行全面分析：
+
+股票代码: {code}
+股票名称: {stock_data.get('name', 'N/A')}
+当前价格: {stock_data.get('current_price', 'N/A')}
+行业: {stock_data.get('industry', 'N/A')}
+
+技术指标：
+{self._format_technical_data(stock_data)}
+
+基本面数据：
+{self._format_fundamental_data(stock_data)}
+
+市场数据：
+{self._format_market_data(stock_data)}
+
+请提供：
+1. 综合投资建议（买入/持有/卖出）
+2. 投资理由（3-5点关键因素）
+3. 风险提示
+4. 目标价位预期
+5. 投资评级（1-10分）
+
+请用JSON格式回复，包含recommendation, reasons, risks, target_price, rating字段。
+"""
+            
+            # 调用LLM
+            llm_response = call_llm(prompt, self.llm_model)
+            
+            if llm_response:
+                # 尝试解析JSON响应
+                import json
+                try:
+                    return json.loads(llm_response)
+                except:
+                    # 如果不是JSON格式，返回文本分析
+                    return {
+                        'recommendation': '分析完成',
+                        'analysis_text': llm_response,
+                        'rating': 5.0
+                    }
+            else:
+                return None
+                
+        except Exception as e:
+            print(f"LLM分析股票 {code} 失败: {e}")
+            return None
+    
+    def _format_technical_data(self, stock_data):
+        """格式化技术数据用于LLM分析"""
+        tech_data = stock_data.get('technical_data', {})
+        if not tech_data:
+            return "技术数据不可用"
+        
+        return f"""
+RSI: {tech_data.get('rsi', 'N/A')}
+MACD: {tech_data.get('macd', 'N/A')}
+KDJ: {tech_data.get('kdj', 'N/A')}
+成交量: {tech_data.get('volume', 'N/A')}
+移动平均线: {tech_data.get('ma_signals', 'N/A')}
+"""
+    
+    def _format_fundamental_data(self, stock_data):
+        """格式化基本面数据用于LLM分析"""
+        fund_data = stock_data.get('fund_data', {})
+        if not fund_data:
+            return "基本面数据不可用"
+        
+        return f"""
+市盈率(PE): {fund_data.get('pe_ratio', 'N/A')}
+市净率(PB): {fund_data.get('pb_ratio', 'N/A')}
+净资产收益率(ROE): {fund_data.get('roe', 'N/A')}%
+营收增长率: {fund_data.get('revenue_growth', 'N/A')}%
+净利润增长率: {fund_data.get('profit_growth', 'N/A')}%
+资产负债率: {fund_data.get('debt_ratio', 'N/A')}%
+"""
+    
+    def _format_market_data(self, stock_data):
+        """格式化市场数据用于LLM分析"""
+        market_data = stock_data.get('market_data', {})
+        if not market_data:
+            return "市场数据不可用"
+        
+        return f"""
+总市值: {market_data.get('market_cap', 'N/A')}
+流通市值: {market_data.get('float_cap', 'N/A')}
+换手率: {market_data.get('turnover_rate', 'N/A')}%
+涨跌幅: {market_data.get('change_pct', 'N/A')}%
+"""
+    
+    def save_llm_analysis_results(self):
+        """保存LLM分析结果"""
+        try:
+            if hasattr(self, 'llm_analysis_results'):
+                filename = f'llm_analysis_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+                with open(filename, 'w', encoding='utf-8') as f:
+                    json.dump(self.llm_analysis_results, f, ensure_ascii=False, indent=2)
+                print(f"LLM分析结果已保存到: {filename}")
+        except Exception as e:
+            print(f"保存LLM分析结果失败: {e}")
+            
+        except ValueError:
+            self.show_progress("ERROR: 请输入有效的起始位置数字")
+    
     def start_batch_scoring_by_type(self, stock_type):
         """按股票类型获取评分 - 集成MiniMax CodingPlan性能优化"""
         import gc
         import threading
         
         print(f"[DEBUG] 🚀 启动优化批量评分: {stock_type}")
+        
+        # 检查是否启用断点续传
+        start_from_index = 0
+        if hasattr(self, 'enable_resume_var') and self.enable_resume_var.get():
+            try:
+                start_from_index = int(self.resume_start_var.get()) - 1  # 转为0基索引
+                if start_from_index < 0:
+                    start_from_index = 0
+                print(f"[DEBUG] 断点续传模式: 从第{start_from_index + 1}只开始")
+            except ValueError:
+                messagebox.showerror("输入错误", "请输入有效的数字")
+                return
         
         # 检查是否已经在运行
         if hasattr(self, '_batch_running') and self._batch_running:
@@ -2397,21 +2656,30 @@ class AShareAnalyzerGUI:
                 
                 # 🎯 优化的股票代码获取策略
                 all_codes = self._get_optimized_stock_codes(filter_type)
-                total_stocks = len(all_codes)
+                original_total = len(all_codes)  # 保存原始总数
                 
-                if total_stocks == 0:
+                if original_total == 0:
                     self.show_progress("❌ 未找到符合条件的股票")
                     return
                 
-                print(f"[INFO] 🎯 获取到 {total_stocks} 只{stock_type}股票")
-                self.show_progress(f"🎯 获取到 {total_stocks} 只{stock_type}股票")
+                print(f"[INFO] 🎯 获取到 {original_total} 只{stock_type}股票")
+                self.show_progress(f"🎯 获取到 {original_total} 只{stock_type}股票")
                 
                 # 🚀 优先使用LLM真实分析模式
-                print(f"[INFO] 🤖 启用LLM真实分析模式处理 {total_stocks} 只股票")
-                self.show_progress(f"🤖 启用LLM智能分析 {total_stocks} 只股票...")
+                print(f"[INFO] 🤖 启用LLM真实分析模式处理 {original_total} 只股票")
+                self.show_progress(f"🤖 启用LLM智能分析 {original_total} 只股票...")
                 
-                # 直接使用LLM分析，不依赖异步处理器
-                self._fallback_to_standard_processing(all_codes, filter_type)
+                # 应用断点续传，从指定位置开始处理
+                if start_from_index > 0 and start_from_index < original_total:
+                    all_codes = all_codes[start_from_index:]
+                    print(f"[INFO] 断点续传: 跳过前{start_from_index}只股票，剩余{len(all_codes)}只股票")
+                    self.show_progress(f"🔄 断点续传: 从第{start_from_index+1}只开始，剩余{len(all_codes)}只股票")
+                elif start_from_index >= original_total:
+                    self.show_progress(f"❌ 起始位置{start_from_index+1}超出范围(最大:{original_total})")
+                    return
+                
+                # 直接使用LLM分析，传递原始总数用于正确计算进度
+                self._fallback_to_standard_processing(all_codes, filter_type, start_from_index, original_total)
                     
             except Exception as e:
                 error_msg = f"ERROR: 批量评分异常: {str(e)}"
@@ -2507,13 +2775,13 @@ class AShareAnalyzerGUI:
                         print(f"[ERROR] 异步处理失败，回退到标准模式: {e}")
                         self.show_progress(f"⚠️ 异步处理异常，回退标准模式...")
                         # 回退到原有处理逻辑
-                        self._fallback_to_standard_processing(all_codes, filter_type)
+                        self._fallback_to_standard_processing(all_codes, filter_type, start_from_index, total_stocks)
                     finally:
                         loop.close()
                 else:
                     # 使用标准处理模式
                     print(f"[INFO] 📊 使用标准批量处理模式")
-                    self._fallback_to_standard_processing(all_codes, filter_type)
+                    self._fallback_to_standard_processing(all_codes, filter_type, start_from_index, total_stocks)
                 
                 if total_stocks == 0:
                     self.show_progress(f"ERROR: 未找到{stock_type}类型的股票代码")
@@ -3135,6 +3403,17 @@ class AShareAnalyzerGUI:
             medium_score_data = self._calculate_medium_term_score(stock_code, tech_data, fund_data, stock_info)
             long_score_data = self._calculate_long_term_score(stock_code, tech_data, fund_data, stock_info)
             
+            # 调试：检查评分数据结构
+            if not isinstance(short_score_data, dict) or 'score' not in short_score_data:
+                print(f"[ERROR] {stock_code} 短期评分数据异常: {short_score_data}")
+                short_score_data = {'score': 0, 'code': stock_code}
+            if not isinstance(medium_score_data, dict) or 'score' not in medium_score_data:
+                print(f"[ERROR] {stock_code} 中期评分数据异常: {medium_score_data}")
+                medium_score_data = {'score': 0, 'code': stock_code}
+            if not isinstance(long_score_data, dict) or 'score' not in long_score_data:
+                print(f"[ERROR] {stock_code} 长期评分数据异常: {long_score_data}")
+                long_score_data = {'score': 0, 'code': stock_code}
+            
             # 计算中期建议数据
             medium_advice = self.get_medium_term_advice(
                 fund_data['pe_ratio'], 
@@ -3160,7 +3439,7 @@ class AShareAnalyzerGUI:
                 
                 # 三时间段评分数据
                 'short_term': {
-                    'score': short_score_data['score'],
+                    'score': short_score_data.get('score', 0),
                     'trend': short_score_data.get('trend', '未知'),
                     'target_range': short_score_data.get('target_range', '未知'),
                     'recommendation': short_score_data.get('recommendation', ''),
@@ -3170,7 +3449,7 @@ class AShareAnalyzerGUI:
                     'risk_level': short_score_data.get('risk_level', '中等')
                 },
                 'medium_term': {
-                    'score': medium_score_data['score'],
+                    'score': medium_score_data.get('score', 0),
                     'trend': medium_score_data.get('trend', '未知'),
                     'target_range': medium_score_data.get('target_range', '未知'),
                     'recommendation': medium_advice.get('recommendation', ''),
@@ -3180,7 +3459,7 @@ class AShareAnalyzerGUI:
                     'risk_level': medium_advice.get('risk_level', '中等')
                 },
                 'long_term': {
-                    'score': long_score_data['score'],
+                    'score': long_score_data.get('score', 0),
                     'trend': long_score_data.get('trend', '未知'),
                     'target_range': long_score_data.get('target_range', '未知'),
                     'recommendation': long_score_data.get('recommendation', ''),
@@ -3191,7 +3470,7 @@ class AShareAnalyzerGUI:
                 },
                 
                 # 综合评分 (保持兼容性)
-                'overall_score': (short_score_data['score'] + medium_score_data['score'] + long_score_data['score']) / 3,
+                'overall_score': (short_score_data.get('score', 0) + medium_score_data.get('score', 0) + long_score_data.get('score', 0)) / 3,
                 
                 # 时间戳
                 'timestamp': datetime.now().isoformat(),
@@ -3231,18 +3510,22 @@ class AShareAnalyzerGUI:
                         'current_price': tech_data['current_price'],
                         'tech_data': tech_data,
                         'fund_data': fund_data,
-                        'short_term': {'score': short_score_data['score']},
-                        'medium_term': {'score': medium_score_data['score']},
-                        'long_term': {'score': long_score_data['score']},
-                        'overall_score': (short_score_data['score'] + medium_score_data['score'] + long_score_data['score']) / 3,
+                        'short_term': {'score': short_score_data.get('score', 0)},
+                        'medium_term': {'score': medium_score_data.get('score', 0)},
+                        'long_term': {'score': long_score_data.get('score', 0)},
+                        'overall_score': (short_score_data.get('score', 0) + medium_score_data.get('score', 0) + long_score_data.get('score', 0)) / 3,
                         'timestamp': datetime.now().isoformat(),
                         'data_source': 'fallback_simulation'
                     }
             except Exception as fallback_error:
                 print(f"[FALLBACK] {stock_code} 模拟数据兜底也失败: {fallback_error}")
+                import traceback
+                traceback.print_exc()
             return None
         except Exception as e:
-            print(f"获取 {stock_code} 完整数据失败: {e}")
+            print(f"分析股票 {stock_code} 失败: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def import_csv_analysis(self):
@@ -3956,9 +4239,9 @@ class AShareAnalyzerGUI:
         get_main_score_btn = tk.Button(data_score_frame, 
                                      text="获取主板评分", 
                                      font=("微软雅黑", 11),
-                                     bg="#3498db", 
+                                     bg="#8e44ad", 
                                      fg="white",
-                                     activebackground="#2980b9",
+                                     activebackground="#7d3c98",
                                      command=lambda: self.start_batch_scoring_by_type("主板"),
                                      cursor="hand2",
                                      width=12)
@@ -3969,13 +4252,41 @@ class AShareAnalyzerGUI:
             get_etf_score_btn = tk.Button(data_score_frame, 
                                         text="获取ETF评分", 
                                         font=("微软雅黑", 11),
-                                        bg="#3498db", 
+                                        bg="#8e44ad", 
                                         fg="white",
-                                        activebackground="#2980b9",
+                                        activebackground="#7d3c98",
                                         command=lambda: self.start_batch_scoring_by_type("ETF"),
                                         cursor="hand2",
                                         width=12)
             get_etf_score_btn.pack(side="left", padx=5)
+        
+        # 断点续传控制区域
+        resume_frame = tk.Frame(self.root, bg="#f0f0f0")
+        resume_frame.pack(fill="x", padx=20, pady=5)
+        
+        # 断点续传复选框
+        self.enable_resume_var = tk.BooleanVar(value=False)
+        resume_checkbox = tk.Checkbutton(resume_frame, 
+                                       text="启用断点续传", 
+                                       variable=self.enable_resume_var,
+                                       font=("微软雅黑", 11),
+                                       bg="#f0f0f0",
+                                       activebackground="#f0f0f0")
+        resume_checkbox.pack(side="left", padx=(0, 15))
+        
+        # 起始进度输入
+        tk.Label(resume_frame, text="从第", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
+        self.resume_start_var = tk.StringVar(value="1")
+        self.resume_start_entry = tk.Entry(resume_frame, textvariable=self.resume_start_var, font=("微软雅黑", 10), width=6)
+        self.resume_start_entry.pack(side="left", padx=2)
+        tk.Label(resume_frame, text="只开始", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left", padx=(2, 10))
+        
+        # 说明文本
+        tk.Label(resume_frame, 
+                text="（勾选后，点击上方按钮将从指定位置开始执行）", 
+                font=("微软雅黑", 9), 
+                fg="#7f8c8d", 
+                bg="#f0f0f0").pack(side="left", padx=(10, 0))
         
         # 数据状态提示区域 - 重新设计布局
         data_status_main_frame = tk.Frame(self.root, bg="#ecf0f1", relief="ridge", bd=1)
@@ -4298,10 +4609,30 @@ class AShareAnalyzerGUI:
         self.progress_msg_var.set("")
         self.root.update()
     
-    def update_progress(self, message):
-        """更新进度消息"""
-        self.progress_msg_var.set(message)
-        self.root.update()
+    def update_progress_with_bar(self, message, progress_percent=None, detail=""):
+        """更新进度消息和进度条"""
+        try:
+            # 更新文本消息（如果提供）
+            if message is not None:
+                self.progress_msg_var.set(message)
+                
+                # 更新通用进度显示
+                if hasattr(self, 'universal_status_label'):
+                    self.universal_status_label.config(text=message)
+            
+            # 更新进度条
+            if progress_percent is not None and hasattr(self, 'universal_progress'):
+                self.universal_progress.config(value=progress_percent)
+                
+            # 更新详细信息
+            if detail and hasattr(self, 'universal_detail_label'):
+                self.universal_detail_label.config(text=detail)
+                
+            # 刷新界面
+            self.root.update()
+            
+        except Exception as e:
+            print(f"[进度更新失败] {e}")
     
     def fetch_stock_list_from_api(self, stock_type):
         """从API动态获取股票列表 - 多重备用方案"""
@@ -13171,19 +13502,34 @@ WARNING: 重要声明:
             self.root.after(0, lambda: self.data_collection_progress.config(value=0))
             self.root.after(0, lambda: messagebox.showerror("错误", error_msg))
     
-    def start_comprehensive_data_collection(self):
-        """开始全面数据收集"""
+    def start_comprehensive_data_collection(self, start_from_index=None):
+        """开始全面数据收集，支持断点续传"""
         if self.data_collection_active:
             messagebox.showinfo("提示", "数据收集正在进行中，请等待完成")
             return
         
+        # 检查是否启用断点续传
+        if start_from_index is None and hasattr(self, 'enable_resume_var') and self.enable_resume_var.get():
+            try:
+                start_from_index = int(self.resume_start_var.get()) - 1  # 转为0基索引
+                if start_from_index < 0:
+                    start_from_index = 0
+            except ValueError:
+                messagebox.showerror("输入错误", "请输入有效的数字")
+                return
+        elif start_from_index is None:
+            start_from_index = 0
+        
         try:
             self.data_collection_active = True
-            self.data_collection_status_label.config(text="正在收集数据...", fg="#e67e22")
+            if start_from_index > 0:
+                self.data_collection_status_label.config(text=f"从第{start_from_index+1}个继续收集数据...", fg="#e67e22")
+            else:
+                self.data_collection_status_label.config(text="正在收集数据...", fg="#e67e22")
             
             # 在后台线程中运行数据收集
             import threading
-            self.data_collection_thread = threading.Thread(target=self._run_data_collection)
+            self.data_collection_thread = threading.Thread(target=self._run_data_collection, args=(start_from_index,))
             self.data_collection_thread.daemon = True
             self.data_collection_thread.start()
             
@@ -13193,12 +13539,13 @@ WARNING: 重要声明:
             self.data_collection_status_label.config(text="启动失败", fg="#e74c3c")
             messagebox.showerror("错误", f"启动数据收集失败：{str(e)}")
     
-    def _run_data_collection(self):
-        """在后台线程中运行数据收集"""
+    def _run_data_collection(self, start_from_index=0):
+        """在后台线程中运行数据收集，支持断点续传"""
         try:
             # 导入并使用comprehensive_data_collector
             import os
             import sys
+            import time  # 添加time导入
 
             # 添加当前目录到Python路径
             current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13223,15 +13570,94 @@ WARNING: 重要声明:
                     self.root.after(0, lambda: self.data_collection_progress.config(value=progress))
             
             # 初始化进度条
-            update_status("开始数据采集...", 0, "准备获取主板股票列表...")
+            if start_from_index > 0:
+                update_status(f"从第{start_from_index+1}个继续数据采集...", 0, "准备获取主板股票列表...")
+            else:
+                update_status("开始数据采集...", 0, "准备获取主板股票列表...")
             
-            # 开始收集数据（只收集主板股票：60/000/002开头，排除30创业板和688科创板）
-            collector.run_batch_collection_with_progress(
-                batch_size=15, 
-                total_batches=None,  # 自动计算批次数量以覆盖所有主板股票
-                stock_type="主板",  # 只获取主板股票
-                progress_callback=update_status
-            )
+            # 获取股票列表
+            all_codes = collector.get_stock_list_by_type("主板", limit=5000)
+            total_stocks = len(all_codes)
+            
+            # 验证开始索引
+            if start_from_index >= total_stocks:
+                error_msg = f"开始索引 {start_from_index+1} 超出范围 (最大: {total_stocks})"
+                update_status("索引错误", 0, error_msg)
+                self.data_collection_active = False
+                self.root.after(0, lambda: messagebox.showerror("错误", error_msg))
+                return
+            
+            # 从指定位置开始的股票列表
+            codes_to_process = all_codes[start_from_index:]
+            
+            if start_from_index > 0:
+                update_status(f"从第{start_from_index+1}个股票开始收集", 0, f"剩余 {len(codes_to_process)} 只股票需要处理")
+                time.sleep(1)
+            
+            # 修改进度回调函数以反映断点续传的实际进度
+            def progress_callback_with_resume(message, progress=None, detail=""):
+                # 重新计算进度以反映总体进度
+                if progress is not None:
+                    # 计算实际完成的股票数
+                    completed_count = int(start_from_index + (progress / 100) * len(codes_to_process))
+                    actual_progress = (completed_count / total_stocks) * 100
+                    detail_with_position = f"{detail} | 总进度: {completed_count}/{total_stocks}"
+                else:
+                    actual_progress = progress
+                    detail_with_position = detail
+                
+                update_status(message, actual_progress, detail_with_position)
+            
+            # 开始收集数据，使用切片后的股票列表
+            if len(codes_to_process) > 0:
+                # 计算需要的批次数
+                batch_size = 15
+                needed_batches = (len(codes_to_process) + batch_size - 1) // batch_size
+                
+                # 手动批次处理以支持断点续传
+                for batch_num in range(needed_batches):
+                    batch_start = batch_num * batch_size
+                    batch_end = min(batch_start + batch_size, len(codes_to_process))
+                    batch_codes = codes_to_process[batch_start:batch_end]
+                    
+                    # 计算进度
+                    current_position = start_from_index + batch_end
+                    progress_pct = (batch_end / len(codes_to_process)) * 100
+                    actual_progress = (current_position / total_stocks) * 100
+                    
+                    # 更新进度
+                    progress_callback_with_resume(
+                        f"采集中 ({current_position}/{total_stocks})",
+                        actual_progress,
+                        f"第{batch_num+1}/{needed_batches}批 - {', '.join(batch_codes[:3])}{'...' if len(batch_codes) > 3 else ''}"
+                    )
+                    
+                    try:
+                        # 采集当前批次的数据
+                        batch_data = collector.collect_comprehensive_data(batch_codes, batch_size)
+                        
+                        # 保存数据
+                        if batch_data:
+                            collector.save_data(batch_data)
+                            print(f"批次 {batch_num+1}/{needed_batches} 完成，已保存 {len(batch_data)} 只股票数据")
+                        
+                        # 批次间休息
+                        if batch_num < needed_batches - 1:
+                            progress_callback_with_resume(
+                                "批次间休息...",
+                                actual_progress,
+                                f"第{batch_num+1}批完成，休息5秒后继续..."
+                            )
+                            time.sleep(5)
+                            
+                    except Exception as batch_error:
+                        print(f"批次 {batch_num+1} 处理失败: {batch_error}")
+                        continue
+            else:
+                update_status("没有需要处理的股票", 100, "所有股票已经处理完成")
+                self.data_collection_active = False
+                self.root.after(0, lambda: messagebox.showinfo("完成", "没有需要处理的股票，可能已经全部完成"))
+                return
             
             # 收集完成
             update_status("数据收集完成", 100, "正在加载数据到内存缓存...")
@@ -13460,13 +13886,17 @@ WARNING: 重要声明:
         except Exception as e:
             print(f"[ERROR] 保存优化批量评分失败: {e}")
     
-    def _fallback_to_standard_processing(self, all_codes: List[str], filter_type: str):
+    def _fallback_to_standard_processing(self, all_codes: List[str], filter_type: str, start_from_index: int = 0, original_total: int = None):
         """智能评分处理 - 根据用户选择的模式决定评分策略"""
         
         # 获取当前选择的LLM模型
         current_model = self.llm_var.get() if hasattr(self, 'llm_var') else "none"
         
-        print(f"[INFO] 📊 智能评分模式: {current_model} | 股票数量: {len(all_codes)}")
+        # 使用传入的original_total或计算正确的原始总数
+        if original_total is None:
+            original_total = len(all_codes) + start_from_index  # 计算真正的原始总数
+        
+        print(f"[INFO] 📊 智能评分模式: {current_model} | 当前处理: {len(all_codes)} | 原始总数: {original_total}")
         
         processed_count = 0
         results = {}
@@ -13474,7 +13904,8 @@ WARNING: 重要声明:
         if current_model == "none":
             # None模式：使用基本面技术面算法计算评分（不使用LLM，不读缓存）
             print(f"[INFO] 📈 启用算法计算模式（使用本地数据）")
-            self.show_progress(f"📈 算法计算模式处理 {len(all_codes)} 只股票（本地数据）...")
+            initial_msg = f"📈 算法计算模式处理 {len(all_codes)} 只股票（本地数据）..."
+            self.update_progress_with_bar(initial_msg, 0, "准备开始算法计算...")
             
             for i, code in enumerate(all_codes):
                 try:
@@ -13488,10 +13919,19 @@ WARNING: 重要声明:
                         results[code] = analysis_result
                         processed_count += 1
                         
+                        # 实时更新进度条
+                        actual_position = start_from_index + processed_count
+                        progress_percent = (actual_position / original_total) * 100
+                        
                         if processed_count % 100 == 0:  # None模式处理更快，减少进度显示频率
-                            progress = f"📈 算法计算: {processed_count}/{len(all_codes)}"
+                            progress = f"📈 算法计算: {actual_position}/{original_total}"
+                            detail = f"当前: {code} | 进度: {progress_percent:.1f}% | 已处理: {processed_count}"
+                            
                             print(f"[PROGRESS] {progress}")
-                            self.show_progress(progress)
+                            self.update_progress_with_bar(progress, progress_percent, detail)
+                        elif processed_count % 10 == 0:  # 更频繁的进度条更新
+                            detail = f"当前: {code} | 进度: {progress_percent:.1f}% | 已处理: {processed_count}"
+                            self.update_progress_with_bar(None, progress_percent, detail)
                 
                 except Exception as e:
                     print(f"[ERROR] 算法计算股票 {code} 失败: {e}")
@@ -13500,7 +13940,8 @@ WARNING: 重要声明:
         else:
             # LLM模式：必须使用LLM重新计算评分
             print(f"[INFO] 🤖 启用LLM智能分析模式: {current_model.upper()}")
-            self.show_progress(f"🤖 {current_model.upper()} 智能分析 {len(all_codes)} 只股票...")
+            initial_msg = f"🤖 {current_model.upper()} 智能分析 {len(all_codes)} 只股票..."
+            self.update_progress_with_bar(initial_msg, 0, "准备开始LLM分析...")
             
             for i, code in enumerate(all_codes):
                 try:
@@ -13521,10 +13962,22 @@ WARNING: 重要声明:
                         results[code] = analysis_result
                         processed_count += 1
                         
+                        # 计算实际位置（考虑断点续传）
+                        actual_position = start_from_index + processed_count
+                        progress_percent = (actual_position / original_total) * 100
+                        
+                        # 只输出一次成功日志
+                        print(f"[SUCCESS] LLM成功分析股票 {code} (第{actual_position}/{original_total}只): 总体评分 {analysis_result.get('overall_score', 'N/A')}")
+                        
+                        # 实时更新进度条（每个股票都更新）
+                        detail = f"当前: {code} | 进度: {progress_percent:.1f}% | 评分: {analysis_result.get('overall_score', 'N/A')}"
+                        self.update_progress_with_bar(None, progress_percent, detail)
+                        
                         if processed_count % 5 == 0:  # LLM模式更频繁显示进度
-                            progress = f"🤖 {current_model.upper()} 分析: {processed_count}/{len(all_codes)}"
+                            progress = f"🤖 LLM分析: {actual_position}/{original_total}"
+                            
                             print(f"[PROGRESS] {progress}")
-                            self.show_progress(progress)
+                            self.update_progress_with_bar(progress, progress_percent, detail)
                             
                             # 每5只股票休息一下，避免API限制
                             time.sleep(0.5)
@@ -13537,10 +13990,14 @@ WARNING: 重要声明:
         if results:
             self._save_optimized_batch_scores(results, filter_type)
             mode_name = "算法计算" if current_model == "none" else f"{current_model.upper()} LLM分析"
+            final_percent = 100.0
+            final_msg = f"✅ {mode_name}完成: {processed_count} 只股票"
+            final_detail = f"处理完成！成功: {processed_count}只 | 整体进度: {final_percent:.0f}%"
+            
             print(f"[SUCCESS] 🎉 {mode_name}完成: {processed_count} 只股票")
-            self.show_progress(f"✅ {mode_name}完成: {processed_count} 只股票")
+            self.update_progress_with_bar(final_msg, final_percent, final_detail)
         else:
-            self.show_progress(f"❌ {current_model}模式未产生有效结果")
+            self.update_progress_with_bar(f"❌ {current_model}模式未产生有效结果", 0, "处理失败")
 
     def _calculate_stock_score_algorithmic(self, code: str) -> dict:
         """使用算法计算股票评分（无LLM模式） - 优先使用本地数据"""
