@@ -276,9 +276,17 @@ class ComprehensiveDataCollector:
             except Exception as e:
                 print(f"[WARN] Polygon API 初始化失败: {e}")
         
-        # 初始化股票状态检测器
-        self.status_checker = StockStatusChecker()
-        print("[INFO] 股票状态检测器已初始化")
+        # 初始化股票状态检测器（如果可用）
+        if STOCK_STATUS_CHECKER_AVAILABLE:
+            try:
+                self.status_checker = StockStatusChecker()
+                print("[INFO] 股票状态检测器已初始化")
+            except Exception as e:
+                print(f"[WARN] 股票状态检测器初始化失败: {e}")
+                self.status_checker = None
+        else:
+            self.status_checker = None
+            print("[INFO] 股票状态检测器不可用，跳过初始化")
 
         # 确保输出目录存在
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
