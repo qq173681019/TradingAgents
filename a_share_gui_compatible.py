@@ -554,17 +554,17 @@ class AShareAnalyzerGUI:
         self.daily_cache = {}            # 当日股票分析缓存
         self.load_daily_cache()          # 加载当日缓存
 
-        # 新增：批量评分数据存储
-        self.batch_score_file = "batch_stock_scores.json"
-        self.batch_score_file_deepseek = "batch_stock_scores_deepseek.json"
-        self.batch_score_file_minimax = "batch_stock_scores_minimax.json"
-        self.batch_score_file_openai = "batch_stock_scores_openai.json"
-        self.batch_score_file_openrouter = "batch_stock_scores_openrouter.json"
-        self.batch_score_file_gemini = "batch_stock_scores_gemini.json"
+        # 新增：批量评分数据存储 - 按LLM模型分别保存在data目录下
+        self.batch_score_file = "data/batch_stock_scores_none.json"
+        self.batch_score_file_deepseek = "data/batch_stock_scores_deepseek.json"
+        self.batch_score_file_minimax = "data/batch_stock_scores_minimax.json"
+        self.batch_score_file_openai = "data/batch_stock_scores_openai.json"
+        self.batch_score_file_openrouter = "data/batch_stock_scores_openrouter.json"
+        self.batch_score_file_gemini = "data/batch_stock_scores_gemini.json"
         self.batch_scores = {}           # 批量评分数据
 
         # 新增：完整推荐数据存储
-        self.comprehensive_data_file = "comprehensive_stock_data.json"
+        self.comprehensive_data_file = "data/comprehensive_stock_data.json"
         self.comprehensive_data = {}     # 完整的三时间段推荐数据
         # 新增：内存缓存（分离收集/评分/推荐）
         self.comprehensive_stock_data = {}  # 从收集器加载的原始完整数据（供评分/推荐复用）
@@ -998,6 +998,9 @@ class AShareAnalyzerGUI:
         from datetime import datetime
         
         try:
+            # 首先处理旧文件迁移
+            self._migrate_old_score_files()
+            
             # 确定加载文件路径（根据当前使用的AI模型）
             if hasattr(self, 'llm_model') and self.llm_model == "deepseek":
                 load_file = self.batch_score_file_deepseek
@@ -1019,9 +1022,21 @@ class AShareAnalyzerGUI:
                 model_name = "本地规则"
             
             if not os.path.exists(load_file):
-                print(f"未找到{model_name}历史评分数据: {load_file}")
-                self.batch_scores = {}
-                return False
+                print(f"❌ 未找到{model_name}历史评分数据: {load_file}")
+                # 如果是特定模型文件不存在，尝试使用通用文件
+                if load_file != self.batch_score_file:
+                    print(f"🔄 尝试使用通用评分文件: {self.batch_score_file}")
+                    load_file = self.batch_score_file
+                    model_name = "通用"
+                    if not os.path.exists(load_file):
+                        print(f"❌ 通用评分文件也不存在: {load_file}")
+                        self.batch_scores = {}
+                        return False
+                else:
+                    self.batch_scores = {}
+                    return False
+                    
+            print(f"📂 正在加载{model_name}评分文件: {load_file}")
             
             # 检查文件大小
             file_size = os.path.getsize(load_file)
@@ -1049,7 +1064,24 @@ class AShareAnalyzerGUI:
             
             # 检查数据是否在48小时内
             if self._is_batch_scores_valid(data):
+                # 兼容两种数据格式：新格式使用'stocks'，旧格式使用'scores'
                 scores = data.get('scores', {})
+                if not scores and 'stocks' in data:
+                    # 新格式：从stocks数组转换为scores字典
+                    stocks_array = data.get('stocks', [])
+                    scores = {}
+                    for stock_item in stocks_array:
+                        if isinstance(stock_item, dict) and 'code' in stock_item:
+                            code = stock_item['code']
+                            score = stock_item.get('score', 0)
+                            if score > 0:  # 只保留有效评分
+                                scores[code] = {
+                                    'score': score,
+                                    'name': stock_item.get('name', ''),
+                                    'recommendation': stock_item.get('recommendation', ''),
+                                    'analysis_time': stock_item.get('analysis_time', ''),
+                                    'model': stock_item.get('model', model_name)
+                                }
                 
                 # 验证并清理无效数据
                 valid_scores = {}
@@ -1076,6 +1108,16 @@ class AShareAnalyzerGUI:
                 score_time = data.get('timestamp', data.get('date', '未知'))
                 score_model = data.get('model', model_name)
                 print(f"✅ 加载{model_name}批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time}, 模型: {score_model})")
+                
+                # 显示一些示例评分用于调试
+                if self.batch_scores:
+                    sample_codes = list(self.batch_scores.keys())[:3]
+                    print(f"📊 评分数据示例:")
+                    for code in sample_codes:
+                        score = self.batch_scores[code].get('score', 0)
+                        print(f"   {code}: {score}")
+                        
+                return True
             else:
                 print(f"{model_name}批量评分数据已超过48小时，将重新获取")
                 self.batch_scores = {}
@@ -1134,6 +1176,41 @@ class AShareAnalyzerGUI:
         except Exception as e:
             print(f"时间检查失败: {e}")
             return False
+    
+    def _migrate_old_score_files(self):
+        """迁移旧的评分文件到data目录"""
+        import os
+        import shutil
+        
+        try:
+            # 确保data目录存在
+            os.makedirs('data', exist_ok=True)
+            
+            # 要迁移的旧文件列表
+            old_files_map = {
+                "batch_stock_scores.json": "data/batch_stock_scores_none.json",
+                "batch_stock_scores_deepseek.json": "data/batch_stock_scores_deepseek.json",
+                "batch_stock_scores_minimax.json": "data/batch_stock_scores_minimax.json",
+                "batch_stock_scores_openai.json": "data/batch_stock_scores_openai.json",
+                "batch_stock_scores_openrouter.json": "data/batch_stock_scores_openrouter.json",
+                "batch_stock_scores_gemini.json": "data/batch_stock_scores_gemini.json"
+            }
+            
+            migrated_count = 0
+            for old_file, new_file in old_files_map.items():
+                if os.path.exists(old_file) and not os.path.exists(new_file):
+                    try:
+                        shutil.move(old_file, new_file)
+                        print(f"📦 迁移评分文件: {old_file} -> {new_file}")
+                        migrated_count += 1
+                    except Exception as e:
+                        print(f"⚠️ 迁移文件失败 {old_file}: {e}")
+            
+            if migrated_count > 0:
+                print(f"✅ 成功迁移 {migrated_count} 个评分文件到 data 目录")
+                
+        except Exception as e:
+            print(f"迁移文件过程出错: {e}")
     
     def save_batch_scores(self):
         """保存批量评分数据 - 增强版本"""
@@ -1203,6 +1280,9 @@ class AShareAnalyzerGUI:
                     print(f"创建备份失败: {backup_error}")
             
             # 保存主文件（不分卷）
+            # 确保data目录存在
+            os.makedirs('data', exist_ok=True)
+            
             with open(save_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             
@@ -4666,9 +4746,21 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         print(f"[DEBUG] set_llm_model 被调用: model={model}, type={type(model)}")
         print(f"[DEBUG] LLM_MODEL_OPTIONS={LLM_MODEL_OPTIONS}")
         if model in LLM_MODEL_OPTIONS:
+            old_model = getattr(self, 'llm_model', 'none')
             self.llm_model = model
-            print(f"✅ 已切换大模型: {model}")
+            print(f"✅ 已切换大模型: {old_model} -> {model}")
             print(f"[DEBUG] self.llm_model 已设置为: {self.llm_model}")
+            
+            # 重新加载对应模型的评分数据
+            print(f"🔄 重新加载{model}模型的评分数据...")
+            self.load_batch_scores()
+            
+            # 重新加载comprehensive数据（如果已加载过）
+            if hasattr(self, 'comprehensive_data') and self.comprehensive_data:
+                print(f"🔄 重新加载comprehensive数据...")
+                self.load_comprehensive_data()
+                
+            print(f"✅ {model}模型数据加载完成")
         else:
             print(f"❌ 不支持的LLM模型: {model}")
     
