@@ -1086,15 +1086,21 @@ class AShareAnalyzerGUI:
                                     'model': stock_item.get('model', model_name)
                                 }
                 
-                # 验证并清理无效数据
+                # 验证并清理无效数据（保留所有字段包括时间段评分）
                 valid_scores = {}
                 invalid_count = 0
                 
                 for code, score_data in scores.items():
-                    if isinstance(score_data, dict) and 'score' in score_data:
+                    if isinstance(score_data, dict):
+                        # 兼容两种格式：'score' 或 'overall_score'
+                        score_value = score_data.get('overall_score') or score_data.get('score', 0)
                         try:
-                            score = float(score_data['score'])
+                            score = float(score_value)
                             if 1.0 <= score <= 10.0:  # 评分范围检查
+                                # 完整保留所有字段，包括short_term_score, medium_term_score, long_term_score
+                                # 为了兼容性，如果没有'score'字段，添加一个
+                                if 'score' not in score_data and 'overall_score' in score_data:
+                                    score_data['score'] = score_data['overall_score']
                                 valid_scores[code] = score_data
                             else:
                                 invalid_count += 1
@@ -1117,8 +1123,12 @@ class AShareAnalyzerGUI:
                     sample_codes = list(self.batch_scores.keys())[:3]
                     print(f"📊 评分数据示例:")
                     for code in sample_codes:
-                        score = self.batch_scores[code].get('score', 0)
-                        print(f"   {code}: {score}")
+                        score_data = self.batch_scores[code]
+                        score = score_data.get('score', 0)
+                        short = score_data.get('short_term_score', 'N/A')
+                        medium = score_data.get('medium_term_score', 'N/A')
+                        long = score_data.get('long_term_score', 'N/A')
+                        print(f"   {code}: 综合={score:.2f}, 短期={short}, 中期={medium}, 长期={long}")
                         
                 return True
             else:
@@ -1227,7 +1237,7 @@ class AShareAnalyzerGUI:
                 print("没有评分数据需要保存")
                 return False
             
-            # 验证数据完整性
+            # 验证数据完整性（保留所有字段包括时间段评分）
             valid_scores = {}
             for code, data in self.batch_scores.items():
                 if isinstance(data, dict) and 'score' in data:
@@ -1235,6 +1245,7 @@ class AShareAnalyzerGUI:
                         # 确保评分是有效数字
                         score = float(data['score'])
                         if 1.0 <= score <= 10.0:  # 评分范围检查
+                            # 完整保留所有字段，包括short_term_score, medium_term_score, long_term_score
                             valid_scores[code] = data
                         else:
                             print(f"股票 {code} 评分异常: {score}")
@@ -2845,29 +2856,51 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     self.load_comprehensive_stock_data()
                 
                 # 🎯 优化的股票代码获取策略
-                all_codes = self._get_optimized_stock_codes(filter_type)
+                # 检查是否是快速评分模式
+                is_quick_mode = False
+                if hasattr(self, '_is_quick_scoring_mode') and self._is_quick_scoring_mode and hasattr(self, '_quick_score_filtered_codes'):
+                    all_codes = self._quick_score_filtered_codes
+                    is_quick_mode = True
+                    print(f"[DEBUG] 快速评分模式：使用预筛选的 {len(all_codes)} 只股票（已完成ST+低分筛选）")
+                    # 清除标记
+                    self._is_quick_scoring_mode = False
+                    delattr(self, '_quick_score_filtered_codes')
+                else:
+                    all_codes = self._get_optimized_stock_codes(filter_type)
                 original_total = len(all_codes)  # 保存原始总数
                 
-                # 应用ST股票筛选
-                if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                # 应用ST股票筛选（快速评分模式下跳过，因为已经筛选过了）
+                if not is_quick_mode and hasattr(self, 'filter_st_var') and self.filter_st_var.get():
                     # 为批量评分筛选ST股票
                     filtered_codes = []
                     st_filtered_count = 0
+                    st_filtered_list = []
                     
                     for code in all_codes:
-                        # 尝试从缓存数据中获取股票名称
+                        # 从缓存数据中获取股票名称（正确提取basic_info.name）
                         name = ""
                         if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
-                            name = self.comprehensive_stock_data[code].get('name', '')
+                            stock_data = self.comprehensive_stock_data[code]
+                            if isinstance(stock_data, dict):
+                                # 优先从basic_info中获取
+                                if 'basic_info' in stock_data and isinstance(stock_data['basic_info'], dict):
+                                    name = stock_data['basic_info'].get('name', '')
+                                # 备用：直接从顶层获取
+                                if not name:
+                                    name = stock_data.get('name', '')
                         
                         if not self.is_st_stock(code, name):
                             filtered_codes.append(code)
                         else:
                             st_filtered_count += 1
+                            if st_filtered_count <= 10:  # 记录前10个ST股票
+                                st_filtered_list.append(f"{code} {name}")
                     
                     all_codes = filtered_codes
                     if st_filtered_count > 0:
                         print(f"🚫 批量评分已筛选掉 {st_filtered_count} 只ST股票")
+                        if st_filtered_list:
+                            print(f"   前10只ST股票: {', '.join(st_filtered_list)}")
                         self.show_progress(f"🚫 已筛选掉 {st_filtered_count} 只ST股票")
                 
                 filtered_total = len(all_codes)
@@ -4296,6 +4329,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         self.root.geometry("1200x800")
         self.root.configure(bg="#f0f0f0")
         
+        # 初始化推荐评分滚动条变量（供快速评分和推荐功能使用）
+        self.min_score_var = tk.DoubleVar(value=6.0)
+        
         # 进度条相关属性初始化（必须在所有分析操作前定义）
         self.progress_msg_var = tk.StringVar()
         self.progress_val_var = tk.DoubleVar()
@@ -4362,14 +4398,13 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         # 评分条标签
         tk.Label(recommend_frame, text="推荐评分:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left")
         
-        # 评分条
-        self.score_var = tk.DoubleVar(value=8.0)
+        # 评分条（使用min_score_var统一管理，供快速评分和推荐功能共同使用）
         score_scale = tk.Scale(recommend_frame,
-                              from_=5.0,
+                              from_=3.0,
                               to=10.0,
                               resolution=0.1,
                               orient=tk.HORIZONTAL,
-                              variable=self.score_var,
+                              variable=self.min_score_var,
                               font=("微软雅黑", 10),
                               bg="#f0f0f0",
                               length=120)
@@ -4377,7 +4412,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         
         # 评分显示标签
         self.score_label = tk.Label(recommend_frame, 
-                                   text="≥8.0分", 
+                                   text=f"≥{self.min_score_var.get():.1f}分", 
                                    font=("微软雅黑", 11, "bold"),
                                    fg="#e74c3c",
                                    bg="#f0f0f0")
@@ -4882,7 +4917,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
 
     def update_score_label(self, event=None):
         """更新评分标签显示"""
-        score = self.score_var.get()
+        score = self.min_score_var.get()
         self.score_label.config(text=f"≥{score:.1f}分")
     
     def show_progress(self, message):
@@ -4950,7 +4985,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         filtered_count = 0
         
         for code, stock_data in stocks_data.items():
-            name = stock_data.get('name', '') if isinstance(stock_data, dict) else ''
+            # 从正确的位置获取股票名称
+            name = ''
+            if isinstance(stock_data, dict):
+                # 优先从basic_info中获取
+                if 'basic_info' in stock_data and isinstance(stock_data['basic_info'], dict):
+                    name = stock_data['basic_info'].get('name', '')
+                # 备用：直接从顶层获取
+                if not name:
+                    name = stock_data.get('name', '')
             
             if not self.is_st_stock(code, name):
                 filtered_stocks[code] = stock_data
@@ -5011,109 +5054,108 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             traceback.print_exc()
     
     def start_quick_scoring(self):
-        """开始快速评分：筛选和评价已有的股票数据"""
+        """开始快速评分：先筛选股票，然后使用完整评分逻辑（与常规评分完全相同）"""
         try:
             # 检查是否有数据
             if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
                 self.show_progress("ERROR: 请先获取全部数据")
                 return
             
-            # 显示开始信息
-            total_stocks = len(self.comprehensive_stock_data)
-            self.show_progress(f"🚀 开始快速评分：对 {total_stocks} 只股票进行筛选和评价")
+            # 第一步：应用ST筛选
+            print(f"=" * 60)
+            print(f"🔍 开始快速评分 - ST筛选")
+            print(f"   原始股票总数: {len(self.comprehensive_stock_data)} 只")
+            print(f"   ST筛选复选框状态: {'已勾选✓' if hasattr(self, 'filter_st_var') and self.filter_st_var.get() else '未勾选✗'}")
             
-            # 启动快速评分线程
-            import threading
-            scoring_thread = threading.Thread(target=self._quick_scoring_worker, daemon=True)
-            scoring_thread.start()
+            # 手动执行ST筛选并记录详细信息
+            filtered_stocks = {}
+            st_filtered_list = []
+            
+            for code, stock_data in self.comprehensive_stock_data.items():
+                # 从正确的位置获取股票名称
+                name = ''
+                if isinstance(stock_data, dict):
+                    # 优先从basic_info中获取
+                    if 'basic_info' in stock_data and isinstance(stock_data['basic_info'], dict):
+                        name = stock_data['basic_info'].get('name', '')
+                    # 备用：直接从顶层获取
+                    if not name:
+                        name = stock_data.get('name', '')
+                
+                if not self.is_st_stock(code, name):
+                    filtered_stocks[code] = stock_data
+                else:
+                    st_filtered_list.append(f"{code} {name}")
+            
+            print(f"   过滤掉ST股票: {len(st_filtered_list)} 只")
+            if len(st_filtered_list) > 0:
+                print(f"   前20只ST股票:") 
+                for st_info in st_filtered_list[:20]:
+                    print(f"      🚫 {st_info}")
+                if len(st_filtered_list) > 20:
+                    print(f"      ... 还有 {len(st_filtered_list) - 20} 只")
+            
+            st_filtered_count = len(filtered_stocks)
+            print(f"   ST筛选后剩余: {st_filtered_count} 只股票")
+            print(f"=" * 60)
+            
+            # 第二步：加载已有评分表，排除低分股票（使用UI滚动条的阈值）
+            # 获取UI滚动条的最低分数值（来自推荐窗口）
+            min_score_threshold = 6.0  # 默认值
+            if hasattr(self, 'min_score_var'):
+                min_score_threshold = self.min_score_var.get()
+                print(f"   使用推荐评分滚动条设置: {min_score_threshold:.1f} 分")
+            else:
+                print(f"   推荐评分滚动条未初始化，使用默认值: {min_score_threshold:.1f} 分")
+            
+            print(f"📂 开始加载评分表...")
+            print(f"   最低评分阈值: {min_score_threshold:.1f} 分")
+            self.load_batch_scores()
+            low_score_filtered_count = 0
+            
+            print(f"📊 评分表状态: batch_scores={'存在' if hasattr(self, 'batch_scores') else '不存在'}, 数量={len(self.batch_scores) if hasattr(self, 'batch_scores') and self.batch_scores else 0}")
+            
+            if hasattr(self, 'batch_scores') and self.batch_scores:
+                print(f"✅ 评分表已加载: {len(self.batch_scores)} 只股票")
+                final_filtered_stocks = {}
+                for code, stock_data in filtered_stocks.items():
+                    if code in self.batch_scores:
+                        score_data = self.batch_scores[code]
+                        # 检查综合评分（优先）或overall_score
+                        overall_score = score_data.get('score', score_data.get('overall_score', 0))
+                        if overall_score >= min_score_threshold:
+                            final_filtered_stocks[code] = stock_data
+                        else:
+                            low_score_filtered_count += 1
+                            if low_score_filtered_count <= 10:  # 只显示前10个
+                                print(f"   排除 {code} {score_data.get('name', '')} (评分: {overall_score:.2f} < {min_score_threshold:.1f})")
+                    else:
+                        # 如果评分表中没有这只股票，保留它（需要评分）
+                        final_filtered_stocks[code] = stock_data
+                
+                filtered_stocks = final_filtered_stocks
+                print(f"🚫 排除低分股票: {low_score_filtered_count} 只 (评分 < {min_score_threshold:.1f})")
+            else:
+                print(f"⚠️ 未找到历史评分表，跳过低分筛选")
+                print(f"   batch_scores 类型: {type(getattr(self, 'batch_scores', None))}")
+                print(f"   batch_scores 内容: {getattr(self, 'batch_scores', 'None')}")
+            
+            total_count = len(filtered_stocks)
+            self.show_progress(f"🎯 快速评分：筛选出 {total_count} 只候选股票 (ST筛选: {st_filtered_count} → 低分筛选: {total_count})")
+            
+            # 保存筛选后的股票列表，供批量评分使用
+            self._quick_score_filtered_codes = list(filtered_stocks.keys())
+            self._is_quick_scoring_mode = True  # 标记为快速评分模式
+            
+            # 直接调用常规批量评分（与"获取主板评分"使用相同逻辑）
+            self.start_batch_scoring_by_type("全部")
             
         except Exception as e:
             self.show_progress(f"ERROR: 启动快速评分失败: {e}")
-    
-    def _quick_scoring_worker(self):
-        """快速评分工作线程"""
-        try:
-            import time
-            from datetime import datetime, timedelta
-
-            # 获取所有股票数据
-            all_stocks = self.comprehensive_stock_data
-            
-            # 先应用ST筛选
-            all_stocks = self.filter_stocks_by_st(all_stocks)
-            total_count = len(all_stocks)
-            
-            # 定义热门板块（可根据需要调整）
-            hot_sectors = ['人工智能', '新能源', '半导体', '医疗', '生物医药', '芯片', 
-                         '电动车', '新能源车', '太阳能', '风能', '光伏', '驱动芯片']
-            
-            # 第一步：基础评分筛选
-            self.show_progress("📊 第一步：进行基础评分筛选...")
-            
-            qualified_stocks = {}
-            eliminated_low_score = 0
-            
-            for i, (code, stock_data) in enumerate(all_stocks.items()):
-                # 显示进度
-                if i % 100 == 0:
-                    progress = (i / total_count) * 50  # 第一步占总进度50%
-                    self.root.after(0, lambda p=progress: self.update_progress_with_bar(
-                        f"正在评价第{i+1}/{total_count}只股票...", p))
-                
-                # 计算基础评分
-                basic_score = self._calculate_basic_stock_score(code, stock_data)
-                
-                if basic_score >= 2.0:
-                    stock_data['basic_score'] = basic_score
-                    qualified_stocks[code] = stock_data
-                else:
-                    eliminated_low_score += 1
-            
-            # 第二步：成交量和热门板块筛选
-            self.show_progress(f"📈 第二步：成交量和板块筛选（已淘汰低分 {eliminated_low_score} 只）...")
-            
-            final_stocks = {}
-            eliminated_volume = 0
-            
-            for i, (code, stock_data) in enumerate(qualified_stocks.items()):
-                # 显示进度
-                if i % 50 == 0:
-                    progress = 50 + (i / len(qualified_stocks)) * 50  # 第二步占剩余50%
-                    self.root.after(0, lambda p=progress: self.update_progress_with_bar(
-                        f"正在分析第{i+1}/{len(qualified_stocks)}只股票成交量...", p))
-                
-                # 检查成交量和板块
-                if self._check_volume_and_sector(code, stock_data, hot_sectors):
-                    final_stocks[code] = stock_data
-                else:
-                    eliminated_volume += 1
-            
-            # 保存结果
-            self.quick_score_results = final_stocks
-            
-            # 显示结果
-            final_count = len(final_stocks)
-            summary = f"""
-✅ 快速评分完成！
-
-📊 筛选结果：
-• 初始股票：{total_count} 只
-• 基础评分淘汰：{eliminated_low_score} 只
-• 成交量/板块淘汰：{eliminated_volume} 只
-• 最终合格：{final_count} 只
-
-📈 筛选率：{(final_count/total_count)*100:.1f}%
-            """
-            
-            self.show_progress(summary)
-            
-            # 保存到文件
-            self._save_quick_score_results(final_stocks)
-            
-        except Exception as e:
-            self.show_progress(f"ERROR: 快速评分失败: {e}")
             import traceback
             traceback.print_exc()
+    
+
     
     def _calculate_basic_stock_score(self, code, stock_data):
         """计算股票基础评分"""
@@ -5215,51 +5257,6 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         except Exception as e:
             print(f"检查{code}成交量和板块失败: {e}")
             return True  # 错误时默认通过
-    
-    def _save_quick_score_results(self, results):
-        """保存快速评分结果"""
-        try:
-            import json
-            import os
-            from datetime import datetime
-
-            # 准备保存数据
-            save_data = {
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'total_qualified': len(results),
-                'model': getattr(self, 'llm_model', 'quick_score'),
-                'stocks': []
-            }
-            
-            # 按评分排序
-            sorted_stocks = sorted(results.items(), 
-                                 key=lambda x: x[1].get('basic_score', 0), 
-                                 reverse=True)
-            
-            for code, stock_data in sorted_stocks:
-                stock_info = {
-                    'code': code,
-                    'name': stock_data.get('name', code),
-                    'score': round(stock_data.get('basic_score', 0), 2),
-                    'pe_ratio': stock_data.get('fund_data', {}).get('pe_ratio'),
-                    'roe': stock_data.get('fund_data', {}).get('roe'),
-                    'price_change': stock_data.get('fund_data', {}).get('price_change'),
-                    'industry': stock_data.get('industry', ''),
-                    'concepts': stock_data.get('concept_data', {}).get('concepts', [])
-                }
-                save_data['stocks'].append(stock_info)
-            
-            # 保存到文件
-            os.makedirs('data', exist_ok=True)
-            filename = f'data/quick_score_results_{getattr(self, "llm_model", "quick")}.json'
-            
-            with open(filename, 'w', encoding='utf-8') as f:
-                json.dump(save_data, f, ensure_ascii=False, indent=2)
-            
-            print(f"✅ 快速评分结果已保存到: {filename}")
-            
-        except Exception as e:
-            print(f"保存快速评分结果失败: {e}")
     
     def _run_quick_scoring_for_kline_update(self):
         """为K线更新专门设计的快速评分筛选"""
@@ -10143,91 +10140,8 @@ WARNING:  风险管控:
     
     def format_fundamental_index(self, score, ticker=None):
         """格式化基本面推荐指数（10分制）"""
-        if score >= 8.0:
-            rating = "基本面优秀"
-            try:
-                # 获取股票基本信息
-                stock_info = self.get_stock_info_generic(ticker)
-                industry = stock_info.get("industry", "未知行业")
-                # 如果行业信息缺失，尝试根据股票代码智能推断
-                if industry == "未知行业":
-                    industry = self._infer_industry_from_ticker(ticker)
-                analysis = "\n" + "="*40 + "\n"
-                analysis += "           板块分析报告\n"
-                analysis += "="*40 + "\n\n"
-                analysis += f"所属行业: {industry}\n"
-                # 热门板块相关统计单独try，网络异常直接跳过加成
-                try:
-                    hot_sector_bonus, hot_sector_detail = self.calculate_hot_sector_bonus(ticker)
-                    sectors_info = self.check_stock_hot_sectors(ticker)
-                    if sectors_info['is_in_hot_sectors']:
-                        analysis += f"热门板块: ✅ 是\n"
-                        analysis += f"加权分数: +{hot_sector_bonus:.2f}分\n\n"
-                        if sectors_info['hot_concepts']:
-                            analysis += "🔥 热门概念板块:\n"
-                            for concept in sectors_info['hot_concepts']:
-                                if isinstance(concept, dict):
-                                    analysis += f"  • {concept['name']} (第{concept['rank']}名)\n"
-                                else:
-                                    analysis += f"  • {concept}\n"
-                        if sectors_info['hot_industries']:
-                            analysis += "🏭 热门行业板块:\n"
-                            for ind in sectors_info['hot_industries']:
-                                if isinstance(ind, dict):
-                                    analysis += f"  • {ind['name']} (第{ind['rank']}名)\n"
-                                else:
-                                    analysis += f"  • {ind}\n"
-                    else:
-                        analysis += "热门板块: ❌ 否\n"
-                except Exception as e:
-                    analysis += f"热门板块加成跳过（网络/数据异常）\n"
-                return analysis
-            except Exception as e:
-                return f"\n板块分析获取失败: {str(e)}\n"
-            industry_adjustment = 0.8  # 政策支持行业
-        elif "新能源" in industry or "锂电" in industry or "光伏" in industry:
-            industry_adjustment = 0.6  # 长期趋势向好
-        elif "白酒" in industry or "消费" in industry:
-            industry_adjustment = 0.4  # 消费复苏
-        elif "银行" in industry or "保险" in industry:
-            industry_adjustment = 0.2  # 稳定行业
-        elif "房地产" in industry or "建筑" in industry:
-            industry_adjustment = -0.3  # 政策敏感
-        elif "医药" in industry or "生物" in industry:
-            industry_adjustment = 0.5  # 长期成长
-        else:
-            industry_adjustment = 0.1  # 其他行业基础加分
-        
-        # 热门板块加权调整（新增）
-        hot_sector_bonus, hot_sector_detail = self.calculate_hot_sector_bonus(ticker)
-        
-        # 板块流动性调整（控制在±0.5分内）
-        board_adjustment = 0
-        if ticker.startswith('688'):
-            board_adjustment = 0.3  # 科创板活跃度高，创新溢价
-        elif ticker.startswith('300'):
-            board_adjustment = 0.2  # 创业板相对活跃
-        elif ticker.startswith('60'):
-            board_adjustment = 0.1  # 沪市主板稳定
-        else:
-            board_adjustment = 0.1  # 深市主板
-        
-        # 市场环境调整（控制在±0.5分内）
-        market_adjustment = 0.3  # 当前市场环境偏好，可根据实际情况调整
-        
-        # 计算最终得分（严格10分制）- 包含热门板块加权
-        # 修正未定义变量
-        tech_score = 6.0 if 'tech_score' not in locals() else tech_score
-        fund_score = 6.0 if 'fund_score' not in locals() else fund_score
-        base_score = tech_score
-        technical_score = tech_score
-        fundamental_score = fund_score
-        final_score = base_score + industry_adjustment + hot_sector_bonus + board_adjustment + market_adjustment
-        final_score = min(10.0, max(1.0, final_score))
-        # 记录热门板块加权信息（用于显示）
-        if hasattr(self, '_current_hot_sector_detail'):
-            self._current_hot_sector_detail = hot_sector_detail
-        return self.format_comprehensive_index(final_score, technical_score, fundamental_score)
+        # 只根据score返回，不做热门板块加权
+        return self.format_comprehensive_index(score, score, score)
     
     def format_comprehensive_index(self, score, tech_score, fund_score):
         """格式化综合推荐指数（10分制）"""
@@ -11399,7 +11313,7 @@ A股特色分析
             # 获取界面上的参数
             stock_type = self.stock_type_var.get()
             period = self.period_var.get()
-            score_threshold = self.score_var.get()
+            score_threshold = self.min_score_var.get()
             
             # 检查是否有批量评分数据（二次检查）
             if not self.batch_scores:
@@ -12029,7 +11943,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
 
             # 获取用户设置
             stock_type = self.stock_type_var.get()
-            score_threshold = self.score_var.get()
+            score_threshold = self.min_score_var.get()
             
             self.update_progress(f"正在获取{stock_type}股票池...")
             time.sleep(0.3)
@@ -12807,7 +12721,7 @@ WARNING: 免责声明: 本分析仅供参考，不构成投资建议，投资需
 
         # 获取用户设置
         stock_type = self.stock_type_var.get()
-        score_threshold = self.score_var.get()
+        score_threshold = self.min_score_var.get()
         
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         current_date = datetime.now().strftime("%Y-%m-%d")
@@ -12857,17 +12771,29 @@ DATA: 数据统计:
         
         for i, stock in enumerate(stocks, 1):
             cache_indicator = "💾" if stock.get('cache_time') else ""
+            # 检查是否属于热门板块
+            is_hot = False
+            hot_info = ""
+            hot_status = "否"
+            try:
+                sectors_info = self.check_stock_hot_sectors(stock['code'])
+                if sectors_info['is_in_hot_sectors']:
+                    is_hot = True
+                    hot_info = "🔥热门板块"
+                    hot_status = "是"
+            except Exception:
+                pass
             report += f"""
-{i:2d}. {cache_indicator} {stock['code']} - {stock['name']}
+{i:2d}. {cache_indicator} {stock['code']} - {stock['name']} {hot_info}
     评分: {stock['score']:.2f}/10.0 RATING:
     行业: {stock['industry']}
     概念: {stock['concept']}
     价格: ¥{stock['price']:.2f}
     推荐理由: {stock['recommendation_reason']}
+    是否处于热门板块: {hot_status}
 """
             if stock.get('cache_time'):
                 report += f"    缓存时间: {stock['cache_time']}\n"
-            
             report += "    " + "-" * 50 + "\n"
         
         report += f"""
@@ -12889,7 +12815,7 @@ WARNING:  免责声明: 本推荐仅供参考，不构成投资建议
 
         # 获取用户设置
         stock_type = self.stock_type_var.get()
-        score_threshold = self.score_var.get()
+        score_threshold = self.min_score_var.get()
         
         if not stocks:
             return f"""
@@ -12939,13 +12865,25 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
                 price_display = f"¥{real_price:.2f} (实时)"
             else:
                 price_display = "网络获取失败"
-            
+            # 检查是否属于热门板块
+            is_hot = False
+            hot_info = ""
+            hot_status = "否"
+            try:
+                sectors_info = self.check_stock_hot_sectors(stock['code'])
+                if sectors_info['is_in_hot_sectors']:
+                    is_hot = True
+                    hot_info = "🔥热门板块"
+                    hot_status = "是"
+            except Exception:
+                pass
             report += f"""
-【{i:02d}】 {stock['code']} - {stock['name']}
+【{i:02d}】 {stock['code']} - {stock['name']} {hot_info}
     评分: {stock['score']:.2f}/10.0
     行业: {stock['industry']}
     价格: {price_display}
     理由: {stock['recommendation_reason']}
+    是否处于热门板块: {hot_status}
     >>> 双击股票代码 {stock['code']} 查看详细分析 <<<
 
 """
@@ -13071,17 +13009,17 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
         score_frame.pack(fill=tk.X, pady=10)
         
         tk.Label(score_frame, text="最低投资分数:", font=("微软雅黑", 11)).pack(anchor=tk.W)
-        score_var = tk.DoubleVar(value=6.0)
+        # 使用已初始化的实例变量，供快速评分和推荐功能共同使用
         score_scale = tk.Scale(score_frame, 
-                              from_=5.0, to=10.0, 
+                              from_=3.0, to=10.0, 
                               resolution=0.1,
                               orient=tk.HORIZONTAL,
-                              variable=score_var,
+                              variable=self.min_score_var,
                               length=300)
         score_scale.pack(fill=tk.X, pady=5)
         
         score_desc = tk.Label(score_frame, 
-                             text="5.0-6.0分为观望级别，6.0-7.5分为推荐级别，7.5分以上为强烈推荐",
+                             text="3.0-5.0分为低分股票，5.0-7.0分为观望级别，7.0-8.5分为推荐级别，8.5分以上为强烈推荐",
                              font=("微软雅黑", 9),
                              fg="#7f8c8d")
         score_desc.pack(anchor=tk.W)
@@ -13917,9 +13855,27 @@ WARNING: 重要声明:
                     
                     print(f"📂 已加载综合推荐数据，共{len(self.comprehensive_data)}只股票")
                     
+                    # 调试：检查数据结构
+                    if self.comprehensive_data:
+                        sample_code = list(self.comprehensive_data.keys())[0]
+                        sample_data = self.comprehensive_data[sample_code]
+                        print(f"📊 数据结构示例 ({sample_code}):")
+                        print(f"   可用的键: {list(sample_data.keys())[:10]}")
+                        
+                        # 检查是否是评分数据结构
+                        has_score_structure = 'short_term' in sample_data or 'medium_term' in sample_data or 'long_term' in sample_data
+                        # 检查是否是原始数据结构
+                        has_raw_structure = 'basic_info' in sample_data or 'kline_data' in sample_data
+                        
+                        if has_score_structure:
+                            print(f"   ✓ 检测到评分数据结构")
+                        elif has_raw_structure:
+                            print(f"   ⚠️ 检测到原始数据结构（需要先运行批量评分）")
+                    
                     # 从comprehensive_data中筛选符合类型的股票
                     filtered_stocks = []
                     period_key = f"{period_type}_term"
+                    print(f"🔍 正在查找键名: '{period_key}'")
                     
                     for code, stock_data in self.comprehensive_data.items():
                         if self.is_stock_type_match(code, stock_type):
@@ -13950,7 +13906,27 @@ WARNING: 重要声明:
             
             if not filtered_stocks:
                 period_display = period_map.get(period_type, "综合") if period_type != 'overall' else "综合"
-                error_msg = f"未找到{stock_type}类型的{period_display}推荐数据"
+                
+                # 检查是否是数据结构问题
+                if self.comprehensive_data:
+                    sample_code = list(self.comprehensive_data.keys())[0]
+                    sample_data = self.comprehensive_data[sample_code]
+                    if 'basic_info' in sample_data or 'kline_data' in sample_data:
+                        error_msg = f"""未找到{stock_type}类型的{period_display}评分数据
+
+⚠️ 检测到您只收集了原始数据，还没有进行评分
+
+请按以下步骤操作：
+1. 点击"获取主板评分"按钮（或其他类型评分按钮）
+2. 等待评分完成
+3. 再次点击推荐按钮
+
+或者使用"快速评分"功能对已收集的数据进行评分。"""
+                    else:
+                        error_msg = f"未找到{stock_type}类型的{period_display}推荐数据"
+                else:
+                    error_msg = f"未找到{stock_type}类型的{period_display}推荐数据\n\n请先运行'获取全部数据'或'获取主板评分'"
+                    
                 print(error_msg)
                 if self.root:
                     self.root.after(0, self.show_error, error_msg)
@@ -14217,12 +14193,48 @@ WARNING: 重要声明:
             # 初始化进度条
             update_status("开始更新K线...", 0, "准备获取主板股票列表...")
             
-            # 开始K线更新（只更新主板股票）
+            # 获取主板股票列表
+            all_codes = collector.get_stock_list_by_type("主板", limit=5000)
+            original_count = len(all_codes)
+            
+            # 应用ST股票筛选
+            if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                # 先加载comprehensive_stock_data以获取股票名称
+                self.load_comprehensive_stock_data()
+                
+                filtered_codes = []
+                st_filtered_count = 0
+                
+                for code in all_codes:
+                    # 获取股票名称
+                    name = ""
+                    if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
+                        stock_data = self.comprehensive_stock_data[code]
+                        if isinstance(stock_data, dict):
+                            if 'basic_info' in stock_data and isinstance(stock_data['basic_info'], dict):
+                                name = stock_data['basic_info'].get('name', '')
+                            if not name:
+                                name = stock_data.get('name', '')
+                    
+                    if not self.is_st_stock(code, name):
+                        filtered_codes.append(code)
+                    else:
+                        st_filtered_count += 1
+                
+                all_codes = filtered_codes
+                if st_filtered_count > 0:
+                    print(f"🚫 K线更新已筛选掉 {st_filtered_count} 只ST股票")
+                    update_status(f"已筛选掉 {st_filtered_count} 只ST股票", 0, f"原始: {original_count} → 筛选后: {len(all_codes)}")
+                    import time
+                    time.sleep(1)
+            
+            # 开始K线更新（只更新筛选后的股票）
             collector.update_kline_data_only(
                 batch_size=20,  # K线更新可以用更大批次
                 total_batches=None,  # 自动计算批次数量以覆盖所有股票
                 stock_type="主板",
-                progress_callback=update_status
+                progress_callback=update_status,
+                stock_codes=all_codes  # 传入筛选后的股票列表
             )
             
             # 更新完成
@@ -14359,6 +14371,38 @@ WARNING: 重要声明:
             
             # 获取股票列表
             all_codes = collector.get_stock_list_by_type("主板", limit=5000)
+            original_count = len(all_codes)
+            
+            # 应用ST股票筛选
+            if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                filtered_codes = []
+                st_filtered_count = 0
+                
+                # 先加载comprehensive_stock_data以获取股票名称
+                self.load_comprehensive_stock_data()
+                
+                for code in all_codes:
+                    # 获取股票名称
+                    name = ""
+                    if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
+                        stock_data = self.comprehensive_stock_data[code]
+                        if isinstance(stock_data, dict):
+                            if 'basic_info' in stock_data and isinstance(stock_data['basic_info'], dict):
+                                name = stock_data['basic_info'].get('name', '')
+                            if not name:
+                                name = stock_data.get('name', '')
+                    
+                    if not self.is_st_stock(code, name):
+                        filtered_codes.append(code)
+                    else:
+                        st_filtered_count += 1
+                
+                all_codes = filtered_codes
+                if st_filtered_count > 0:
+                    print(f"🚫 数据收集已筛选掉 {st_filtered_count} 只ST股票")
+                    update_status(f"已筛选掉 {st_filtered_count} 只ST股票", 0, f"原始: {original_count} → 筛选后: {len(all_codes)}")
+                    time.sleep(1)
+            
             total_stocks = len(all_codes)
             
             # 验证开始索引
@@ -14652,16 +14696,17 @@ WARNING: 重要声明:
             
             self.batch_scores.update(results)
             
-            # 保存到文件
+            # 保存到文件（保存全部评分数据，不仅仅是本次评分）
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             save_data = {
+                'date': datetime.now().strftime('%Y-%m-%d'),
                 'timestamp': timestamp,
                 'model': 'optimized_async',
                 'stock_type': stock_type,
                 'optimization_version': 'MiniMax_CodingPlan_v1.0',
-                'total_stocks': len(results),
-                'performance_optimization': True,
-                'stocks': results
+                'count': len(self.batch_scores),  # 保存总数量，而不是本次评分数量
+                'last_update_count': len(results),  # 记录本次更新的数量
+                'scores': self.batch_scores  # 保存全部评分数据（包括之前的）
             }
             
             # 保存到主要评分文件
@@ -14855,6 +14900,8 @@ WARNING: 重要声明:
             overall_score = (short_term + medium_term + long_term) / 3
             
             return {
+                'name': stock_info.get('name', ''),
+                'industry': industry,
                 'short_term_score': round(short_term, 2),
                 'medium_term_score': round(medium_term, 2),
                 'long_term_score': round(long_term, 2),
