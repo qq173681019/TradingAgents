@@ -122,6 +122,15 @@ except ImportError:
     STOCK_STATUS_CHECKER_AVAILABLE = False
     print("[WARN] 股票状态检测器未找到")
 
+# Choice金融终端
+try:
+    from config import CHOICE_PASSWORD, CHOICE_USERNAME, ENABLE_CHOICE
+except ImportError:
+    ENABLE_CHOICE = False
+    CHOICE_USERNAME = ""
+    CHOICE_PASSWORD = ""
+    print("[WARN] Choice配置未找到")
+
 print(f"[INFO] BaoStock分析: 免费稳定的A股K线数据源，作为最终兜底方案：")
 print(f"       - K线数据: 免费稳定（日K线）")
 print(f"       - 历史数据: 覆盖全面（A股全市场）")
@@ -174,8 +183,69 @@ class ComprehensiveDataCollector:
     
     def __init__(self):
         self.tushare_token = os.environ.get('TUSHARE_TOKEN', '4a1bd8dea786a5525663fafcf729a2b081f9f66145a0671c8adf2f28')
-        self.data_sources = ['tushare', 'baostock', 'yfinance', 'tencent', 'akshare']
+        self.data_sources = ['choice', 'tushare', 'baostock', 'yfinance', 'tencent', 'akshare']
         self.current_source_index = 0
+        
+        # 初始化 Choice 金融终端 (最高优先级数据源) - 使用独立进程包装器
+        self.choice_wrapper = None
+        self.choice_available = False  # Choice可用性标志
+        self.choice_login_attempted = False  # 标记是否已尝试登录
+        if ENABLE_CHOICE:
+            try:
+                from choice_api_wrapper import ChoiceAPIWrapper
+                self.choice_wrapper = ChoiceAPIWrapper()
+                print("[INFO] Choice金融终端 已初始化 (独立进程模式)")
+                print("[INFO] 💡 使用独立进程避免调试器环境冲突")
+                print("[INFO] ⏰ Choice将在第一次使用时自动连接")
+                
+                # 不再在启动时测试连接，避免WinError 87导致SDK状态损坏
+                # 将在第一次实际使用时才尝试登录
+                if False:  # 禁用启动时的连接测试
+                    self.choice_available = True
+                    print("[SUCCESS] ✅ Choice连接测试成功，可以使用")
+                else:
+                    # Choice连接失败，直接退出程序
+                    print("\n" + "=" * 70)
+                    print("❌ FATAL ERROR: Choice金融终端连接失败，程序无法继续")
+                    print("=" * 70)
+                    print("\n常见问题和解决方法:")
+                    print("\n【问题1】WinError 87 参数错误 ⚠️")
+                    print("  这是最常见的问题！")
+                    print("  原因: Choice客户端虽然运行，但未完全就绪")
+                    print("  解决步骤:")
+                    print("    ✓ 1. 打开Choice客户端窗口（不要最小化）")
+                    print("    ✓ 2. 确认已成功登录（能看到实时行情跳动）")
+                    print("    ✓ 3. 等待30-60秒让客户端完全加载")
+                    print("    ✓ 4. 保持客户端窗口打开状态")
+                    print("    ✓ 5. 重新运行本程序")
+                    print("\n  💡 提示: 客户端登录后需要时间初始化内部服务")
+                    print("\n【问题2】setserverlistdir 错误")
+                    print("  原因: 重复初始化或客户端未就绪")
+                    print("  解决: 确保客户端已完全启动后再运行程序")
+                    print("\n【问题3】其他连接错误")
+                    print("  原因: 网络问题或账号权限问题")
+                    print("  解决:")
+                    print("    1. 检查网络连接")
+                    print("    2. 确认账号有数据访问权限")
+                    print("    3. 尝试重启Choice客户端")
+                    print("\n💡 提示: 必须先解决Choice连接问题，程序才能正常使用")
+                    print("=" * 70 + "\n")
+                    import sys
+                    sys.exit(1)  # 退出程序
+                    
+            except Exception as e:
+                # Choice初始化异常，直接退出程序
+                print("=" * 70)
+                print(f"❌ FATAL ERROR: Choice金融终端初始化异常")
+                print("=" * 70)
+                print(f"\n错误详情: {e}")
+                print("\n请检查:")
+                print("  1. Choice客户端是否已正确安装")
+                print("  2. EmQuantAPI模块是否正确安装")
+                print("  3. Choice客户端版本是否兼容")
+                print("=" * 70)
+                import sys
+                sys.exit(1)  # 退出程序
         
         # 等待期间数据源策略
         self.wait_period_strategy = {
@@ -208,6 +278,12 @@ class ComprehensiveDataCollector:
         # API轮换相关初始化
         self.last_api_switch_time = 0
         self.api_rotation_index = 0
+        
+        # AKShare动态监控机制
+        self.akshare_call_count = 0      # AKShare调用次数
+        self.akshare_success_count = 0   # AKShare成功次数
+        self.akshare_fail_count = 0      # AKShare失败次数
+        self.akshare_enabled = AKSHARE_AVAILABLE  # AKShare是否启用
         
         # 初始化 tushare
         if TUSHARE_AVAILABLE and self.tushare_token:
@@ -291,8 +367,9 @@ class ComprehensiveDataCollector:
         # 确保输出目录存在
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
         
-        # 测试AKShare连通性
-        self._test_akshare_connectivity()
+        # 不在初始化时测试AKShare，改为动态监控
+        if AKSHARE_AVAILABLE:
+            print("[INFO] AKShare可用，将在实际使用中动态监控其成功率")
     
     def _get_next_api(self):
         """
@@ -557,9 +634,45 @@ class ComprehensiveDataCollector:
             
         return 'other'
     
+    def _check_akshare_health(self) -> None:
+        """
+        检查AKShare健康状况，如果失败率超过50%则禁用
+        """
+        if self.akshare_call_count < 10:  # 至少需要10次调用才能判断
+            return
+        
+        fail_rate = self.akshare_fail_count / self.akshare_call_count
+        
+        if fail_rate > 0.5 and self.akshare_enabled:
+            self.akshare_enabled = False
+            print(f"[WARN] AKShare失败率过高 ({fail_rate*100:.1f}%)，已自动禁用")
+            print(f"[INFO] 统计: 总调用{self.akshare_call_count}次，成功{self.akshare_success_count}次，失败{self.akshare_fail_count}次")
+        elif fail_rate <= 0.3 and not self.akshare_enabled and self.akshare_call_count >= 20:
+            # 如果失败率降至30%以下，且已有足够样本，重新启用
+            self.akshare_enabled = True
+            print(f"[INFO] AKShare失败率已降低 ({fail_rate*100:.1f}%)，重新启用")
+    
+    def _record_akshare_call(self, success: bool) -> None:
+        """
+        记录AKShare调用结果
+        
+        Args:
+            success: 调用是否成功
+        """
+        self.akshare_call_count += 1
+        if success:
+            self.akshare_success_count += 1
+        else:
+            self.akshare_fail_count += 1
+        
+        # 每10次调用检查一次健康状况
+        if self.akshare_call_count % 10 == 0:
+            self._check_akshare_health()
+    
     def _test_akshare_connectivity(self) -> bool:
         """
-        测试AKShare连通性，如果失败则禁用AKShare
+        【已废弃】测试AKShare连通性
+        现在使用动态监控机制，不再在初始化时测试
         
         Returns:
             bool: True表示连接成功，False表示连接失败
@@ -691,11 +804,12 @@ class ComprehensiveDataCollector:
         """获取全部主板股票列表（排除创业板300、科创板688和ETF）"""
         stock_codes = []
         # 优先从 akshare 获取完整列表
-        if AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
+        if AKSHARE_AVAILABLE and self.akshare_enabled:
             try:
                 print("[INFO] 尝试从 akshare 获取股票列表...")
                 df = ak.stock_info_a_code_name()
                 all_codes = df['code'].astype(str).tolist()
+                self._record_akshare_call(True)  # 记录成功
                 # 只保留主板股票：沪市主板(60开头) + 深市主板(000开头) + 深市中小板(002开头)
                 main_board_codes = [code for code in all_codes 
                                   if (code.startswith('60') or code.startswith('000') or code.startswith('002'))
@@ -704,6 +818,7 @@ class ComprehensiveDataCollector:
                 print(f"[SUCCESS] 从 akshare 获取 {len(stock_codes)} 只主板股票（已排除创业板300、科创板688和ETF）")
                 return stock_codes
             except Exception as e:
+                self._record_akshare_call(False)  # 记录失败
                 print(f"[ERROR] akshare 获取股票列表失败: {type(e).__name__}: {e}")
         # 尝试从 Baostock 获取
         if BAOSTOCK_AVAILABLE:
@@ -931,7 +1046,7 @@ class ComprehensiveDataCollector:
         total_codes = len(codes)
         
         print(f"[INFO] 开始采集K线数据，共 {total_codes} 只股票")
-        print(f"[INFO] 新采集策略: 基于时间控制的TUSHARE优先 → AKShare替代 → 腾讯K线兜底")
+        print(f"[INFO] 新采集策略: Choice金融终端优先 → TUSHARE → AKShare → 腾讯K线兜底")
         
         # 计算日期范围
         end_date = datetime.now()
@@ -943,31 +1058,111 @@ class ComprehensiveDataCollector:
         
         print(f"[INFO] 获取日期范围: {start_iso} 到 {end_iso} ({self.kline_days}天)")
         
-        # 检查上次TUSHARE调用时间，决定使用哪个数据源
-        current_time = time.time()
-        time_since_last_tushare = current_time - self.last_tushare_call
-        can_use_tushare = time_since_last_tushare >= 60  # 1分钟间隔
+        # 优先尝试Choice金融终端(只有初始化测试成功才使用)
+        primary_source = None
+        primary_codes = codes.copy()
+        fallback_codes = []
         
-        if can_use_tushare:
-            print(f"[INFO] 距离上次TUSHARE调用已过 {time_since_last_tushare:.1f} 秒，优先使用TUSHARE获取全部 {total_codes} 只")
-            primary_source = 'tushare'
-            primary_codes = codes.copy()
-            fallback_codes = []
-        elif AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
-            wait_time = 60 - time_since_last_tushare
-            print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，使用AKShare获取全部 {total_codes} 只")
-            primary_source = 'akshare'
-            primary_codes = codes.copy()
-            fallback_codes = []
-        else:
-            # 如果AKShare不可用，使用腾讯API
-            wait_time = 60 - time_since_last_tushare
-            print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，AKShare不可用，使用腾讯API获取全部 {total_codes} 只")
-            primary_source = 'tencent'
-            primary_codes = codes.copy()
-            fallback_codes = []
+        # 延迟登录：第一次使用时才尝试连接
+        if self.choice_wrapper and not self.choice_login_attempted:
+            print(f"[INFO] 首次使用Choice，测试连接...")
+            self.choice_login_attempted = True
+            # 测试连接
+            test_result = self.choice_wrapper.get_kline_data("000001.SZ", days=5)
+            if test_result["success"]:
+                self.choice_available = True
+                print("[SUCCESS] ✅ Choice连接成功")
+            else:
+                print("[WARN] ⚠️ Choice连接失败，将使用备用数据源")
+                print(f"[INFO] 错误: {test_result.get('error', '未知')}")
+                print("[INFO] 💡 如需使用Choice，请:")
+                print("      1. 确保Choice客户端已完全启动")
+                print("      2. 重启本程序")
+                self.choice_available = False
         
-        print(f"[INFO] 主要数据源: {primary_source.upper()}处理 {len(primary_codes)} 只")
+        if self.choice_available and self.choice_wrapper:
+            print(f"[INFO] 使用 Choice金融终端 批量处理 {total_codes} 只股票...")
+            primary_source = 'choice'
+            try:
+                choice_success = []
+                for idx, code in enumerate(codes, 1):
+                    try:
+                        # 计算日期范围
+                        import pandas as pd
+                        start_date_str = pd.Timestamp(start_date).strftime("%Y-%m-%d")
+                        end_date_str = pd.Timestamp(end_date).strftime("%Y-%m-%d")
+                        
+                        # 使用wrapper获取K线数据
+                        choice_result = self.choice_wrapper.get_kline_data(
+                            code, 
+                            start_date=start_date_str, 
+                            end_date=end_date_str,
+                            indicators="OPEN,HIGH,LOW,CLOSE,VOLUME"
+                        )
+                        
+                        if choice_result["success"] and choice_result.get("dates"):
+                            # 转换为DataFrame
+                            df_data = {
+                                'date': choice_result['dates'],
+                            }
+                            for indicator, values in choice_result['data'].items():
+                                df_data[indicator.lower()] = values
+                            
+                            df = pd.DataFrame(df_data)
+                            df = self.standardize_kline_columns(df, 'choice')
+                            
+                            if not df.empty:
+                                result[code] = df
+                                choice_success.append(code)
+                            else:
+                                fallback_codes.append(code)
+                        else:
+                            fallback_codes.append(code)
+                            
+                        time.sleep(0.1)  # Choice请求间隔
+                    except Exception as e:
+                        print(f"[WARN] Choice获取{code}失败: {e}")
+                        fallback_codes.append(code)
+                        continue
+                
+                print(f"[SUCCESS] Choice 成功: {len(choice_success)}/{total_codes} 只")
+                    
+                    # 如果Choice全部成功，直接返回
+                    if not fallback_codes:
+                        print(f"[SUMMARY] K线数据采集完成: {len(result)}/{total_codes} 只成功 (100.0%)")
+                        print(f"[DETAIL] 数据源: Choice专业金融终端")
+                        return result
+                    else:
+                        print(f"[INFO] 有 {len(fallback_codes)} 只股票需要其他数据源处理")
+                        codes = fallback_codes
+                        primary_codes = fallback_codes.copy()
+                else:
+                    primary_source = None
+            except Exception as e:
+                print(f"[ERROR] Choice 批量处理异常: {e}")
+                primary_source = None
+        
+        # 如果Choice不可用或部分失败，使用其他数据源
+        if primary_source is None:
+            # 检查上次TUSHARE调用时间，决定使用哪个数据源
+            current_time = time.time()
+            time_since_last_tushare = current_time - self.last_tushare_call
+            can_use_tushare = time_since_last_tushare >= 60  # 1分钟间隔
+            
+            if can_use_tushare:
+                print(f"[INFO] 距离上次TUSHARE调用已过 {time_since_last_tushare:.1f} 秒，使用TUSHARE获取剩余 {len(primary_codes)} 只")
+                primary_source = 'tushare'
+            elif AKSHARE_AVAILABLE and self.akshare_enabled:
+                wait_time = 60 - time_since_last_tushare
+                print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，使用AKShare获取剩余 {len(primary_codes)} 只")
+                primary_source = 'akshare'
+            else:
+                # 如果AKShare不可用，使用腾讯API
+                wait_time = 60 - time_since_last_tushare
+                print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，AKShare不可用，使用腾讯API获取剩余 {len(primary_codes)} 只")
+                primary_source = 'tencent'
+        
+        print(f"[INFO] 备用数据源: {primary_source.upper()}处理 {len(primary_codes)} 只")
         
         # 1. 主要数据源处理
         primary_success = []

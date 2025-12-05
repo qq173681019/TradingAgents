@@ -642,6 +642,59 @@ class AShareAnalyzerGUI:
         else:
             print("使用标准性能处理模式")
 
+        # Choice金融终端配置
+        self.choice_enabled = False
+        self.choice_connected = False
+        self.choice_wrapper = None
+        self.choice_direct = None  # 直接调用模式
+        
+        try:
+            # 从config.py加载Choice配置
+            import config as cfg
+            if hasattr(cfg, 'ENABLE_CHOICE') and cfg.ENABLE_CHOICE:
+                self.choice_enabled = True
+                print("✅ Choice金融终端数据源已启用")
+                print(f"   账号: {cfg.CHOICE_USERNAME}")
+                
+                # 检测运行环境，决定使用哪种模式
+                import sys
+                is_debugger = sys.gettrace() is not None or 'debugpy' in sys.modules
+                
+                if is_debugger:
+                    # 调试器环境：直接禁用Choice
+                    print("   " + "="*60)
+                    print("   🐛 检测到调试器环境（F5调试模式）")
+                    print("   ⚠️  Choice SDK无法在调试器环境下工作（WinError 87）")
+                    print("   💡 解决方案：")
+                    print("      1. 关闭调试器")
+                    print("      2. 使用 启动系统.bat 批处理文件启动")
+                    print("      3. 或在终端运行: python a_share_gui_compatible.py")
+                    print("   ℹ️  调试期间Choice功能已禁用，其他数据源正常")
+                    print("   " + "="*60)
+                    self.choice_enabled = False
+                    self.choice_wrapper = None
+                    self.choice_direct = None
+                else:
+                    # 非调试环境：使用文件缓存模式（最可靠）
+                    print("   ⚡ 使用Choice文件缓存模式...")
+                    print("   ℹ️  GUI程序不直接调用Choice SDK")
+                    print("   ℹ️  请运行后台服务更新数据: python choice_background_service.py")
+                    print("   ℹ️  或使用定时任务自动更新")
+                    
+                    # 检查缓存文件是否存在
+                    import os
+                    cache_file = os.path.join("data", "choice_cache.json")
+                    if os.path.exists(cache_file):
+                        print(f"   ✅ 找到Choice缓存文件: {cache_file}")
+                        self.choice_cache_mode = True
+                    else:
+                        print(f"   ⚠️  缓存文件不存在，请先运行后台服务")
+                        self.choice_cache_mode = False
+            else:
+                print("ℹ️ Choice金融终端数据源未启用")
+        except Exception as e:
+            print(f"⚠️ 加载Choice配置失败: {e}")
+        
         # 加载现有数据
         self.load_batch_scores()         # 加载批量评分数据
         self.load_comprehensive_data()   # 加载完整推荐数据
@@ -4679,6 +4732,18 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                      width=12)
         long_analysis_btn.pack(side="left", padx=5)
         
+        # 测试Choice按钮
+        test_choice_btn = tk.Button(data_score_frame, 
+                                    text="测试Choice", 
+                                    font=("微软雅黑", 11),
+                                    bg="#e74c3c", 
+                                    fg="white",
+                                    activebackground="#c0392b",
+                                    command=self.test_choice_connection,
+                                    cursor="hand2",
+                                    width=12)
+        test_choice_btn.pack(side="left", padx=5)
+        
         # 断点续传控制区域
         resume_frame = tk.Frame(self.root, bg="#f0f0f0")
         resume_frame.pack(fill="x", padx=20, pady=5)
@@ -5137,6 +5202,473 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             print(f"🚫 已筛选掉 {filtered_count} 只ST股票")
             
         return filtered_stocks
+    
+    def test_choice_connection(self):
+        """测试Choice连接 - 使用wrapper测试"""
+        print("=" * 80)
+        print("测试Choice按钮被点击!")
+        print("=" * 80)
+        
+        def test_thread():
+            try:
+                print(">>> test_thread 启动")
+                
+                try:
+                    self.show_progress("\n🔍 正在测试Choice连接...\n")
+                except Exception as e:
+                    print(f">>> show_progress异常: {e}")
+                
+                print(f">>> choice_wrapper 状态: {self.choice_wrapper}")
+                print(f">>> choice_direct 状态: {self.choice_direct}")
+                print(f">>> choice_enabled: {self.choice_enabled}")
+                print(f">>> choice_cache_mode: {getattr(self, 'choice_cache_mode', False)}")
+                
+                # 检查Choice是否启用
+                if not self.choice_enabled:
+                    self.show_progress("❌ Choice功能未启用")
+                    self.show_progress("💡 请在config.py中设置 ENABLE_CHOICE = True")
+                    return
+                
+                # 优先使用直接调用模式
+                if self.choice_direct:
+                    print(">>> 使用直接调用模式测试")
+                    self._test_choice_direct()
+                    return
+                elif self.choice_wrapper:
+                    print(">>> 使用wrapper模式测试")
+                    self._test_choice_wrapper()
+                    return
+                elif getattr(self, 'choice_cache_mode', False):
+                    print(">>> 使用缓存文件模式测试")
+                    self._test_choice_wrapper()  # 复用此方法，已改为读取缓存
+                    return
+                else:
+                    self.show_progress("❌ Choice未初始化")
+                    self.show_progress("💡 请运行后台服务: C:\\veighna_studio\\python.exe choice_background_service.py")
+                    return
+                
+                # 测试连接
+                print(">>> 准备调用 show_progress [1/3]")
+                self.show_progress("[1/3] 测试连接...")
+                print(">>> 准备调用 get_kline_data")
+                result = self.choice_wrapper.get_kline_data("000001.SZ", days=5)
+                print(f">>> get_kline_data 返回: success={result.get('success')}")
+                print(f">>> 完整结果: {result}")
+                
+                if result["success"]:
+                    self.show_progress("✅ 连接成功\n")
+                    
+                    # 显示获取的数据
+                    self.show_progress(f"[2/3] 股票代码: {result['stock_code']}")
+                    self.show_progress(f"      数据条数: {len(result['dates'])}条")
+                    self.show_progress(f"      日期范围: {result['dates'][0]} ~ {result['dates'][-1]}")
+                    
+                    if 'CLOSE' in result['data']:
+                        closes = result['data']['CLOSE']
+                        # 过滤None值
+                        valid_closes = [c for c in closes if c is not None]
+                        if valid_closes:
+                            self.show_progress(f"      收盘价: {valid_closes[-3:]}")
+                    
+                    # 测试实时行情
+                    self.show_progress("\n[3/3] 测试实时行情...")
+                    quote_result = self.choice_wrapper.get_realtime_quote("000001.SZ")
+                    
+                    if quote_result["success"]:
+                        self.show_progress("✅ 实时行情获取成功")
+                        if 'LASTPRICE' in quote_result['data']:
+                            price = quote_result['data']['LASTPRICE'][0]
+                            self.show_progress(f"      最新价: {price}")
+                    
+                    self.show_progress("\n" + "="*50)
+                    self.show_progress("✅✅✅ Choice测试完全成功！")
+                    self.show_progress("💡 可以在主程序中正常使用Choice数据源")
+                    self.show_progress("="*50)
+                    self.choice_connected = True
+                    
+                else:
+                    error_msg = result.get('error', '未知错误')
+                    print(f">>> 测试失败: {error_msg}")
+                    self.show_progress(f"❌ 测试失败: {error_msg}")
+                    if 'stderr' in result:
+                        stderr_preview = result['stderr'][:500]
+                        print(f">>> stderr: {stderr_preview}")
+                        self.show_progress(f"错误详情: {stderr_preview}")
+                    if 'stdout' in result:
+                        print(f">>> stdout: {result['stdout'][:500]}")
+                    
+            except Exception as e:
+                print(f">>> 捕获异常: {type(e).__name__}: {e}")
+                self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+                import traceback
+                traceback.print_exc()
+            finally:
+                print(">>> test_thread 结束")
+        
+        import threading
+        thread = threading.Thread(target=test_thread, daemon=True)
+        thread.start()
+    
+    def _test_choice_direct(self):
+        """直接调用Choice SDK测试（非调试模式）"""
+        try:
+            from datetime import datetime, timedelta
+            
+            self.show_progress("[1/3] 初始化Choice SDK...")
+            result = self.choice_direct.start("")
+            
+            if result.ErrorCode != 0:
+                self.show_progress(f"❌ 初始化失败: {result.ErrorMsg}")
+                return
+            
+            self.show_progress("✅ 初始化成功\n")
+            self.choice_connected = True
+            
+            # 获取K线数据
+            self.show_progress("[2/3] 获取K线数据...")
+            end_date = datetime.now().strftime("%Y-%m-%d")
+            start_date = (datetime.now() - timedelta(days=5)).strftime("%Y-%m-%d")
+            
+            data = self.choice_direct.csd("000001.SZ", "OPEN,HIGH,LOW,CLOSE,VOLUME", start_date, end_date, "")
+            
+            if data.ErrorCode == 0:
+                num_dates = len(data.Dates) if hasattr(data, 'Dates') else 0
+                self.show_progress(f"✅ 成功获取{num_dates}条数据")
+                if num_dates > 0:
+                    self.show_progress(f"   日期范围: {data.Dates[0]} ~ {data.Dates[-1]}")
+            else:
+                self.show_progress(f"❌ 数据获取失败: {data.ErrorMsg}")
+                
+            self.show_progress("\n" + "="*50)
+            self.show_progress("✅✅✅ Choice直接调用测试成功！")
+            self.show_progress("⚡ 性能最优模式")
+            self.show_progress("="*50)
+            
+        except Exception as e:
+            self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def _test_choice_wrapper(self):
+        """测试Choice缓存文件读取"""
+        print(">>> _test_choice_wrapper 开始执行")
+        
+        # 清空并准备输出区域
+        if hasattr(self, 'recommendation_text'):
+            self.recommendation_text.delete('1.0', tk.END)
+        
+        def output(msg):
+            """输出到GUI"""
+            print(f"[GUI输出] {msg}")
+            if hasattr(self, 'recommendation_text'):
+                self.recommendation_text.insert(tk.END, msg + "\n")
+                self.recommendation_text.see(tk.END)
+                self.root.update()
+        
+        try:
+            output("[1/2] 读取Choice缓存数据...")
+            
+            import json
+            import os
+
+            # 优先读取全量数据文件
+            cache_file = os.path.join("data", "choice_all_stocks.json")
+            if not os.path.exists(cache_file):
+                cache_file = os.path.join("data", "choice_cache.json")  # 兼容旧文件
+            
+            print(f">>> 缓存文件路径: {cache_file}")
+            print(f">>> 检查文件是否存在: {os.path.exists(cache_file)}")
+            
+            if not os.path.exists(cache_file):
+                output("❌ 缓存文件不存在")
+                output("")
+                output("💡 解决方案：")
+                output("   在新终端运行: C:\\veighna_studio\\python.exe choice_background_service.py")
+                return
+            
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+            
+            output("✅ 缓存文件读取成功")
+            output("")
+            
+            # 显示数据信息
+            last_update = cache_data.get("last_update", "未知")
+            output(f"[2/2] 最后更新时间: {last_update}")
+            
+            # 检查是否是全量数据
+            if "stocks" in cache_data:
+                # 全量数据模式
+                total_stocks = cache_data.get("total_stocks", 0)
+                success_count = cache_data.get("success_count", 0)
+                fail_count = cache_data.get("fail_count", 0)
+                
+                output(f"      数据类型: 全量A股主板数据")
+                output(f"      股票总数: {total_stocks} 只")
+                output(f"      成功获取: {success_count} 只")
+                output(f"      获取失败: {fail_count} 只")
+                
+                # 显示测试股票数据
+                if "test_stock" in cache_data and cache_data["test_stock"]:
+                    test_data = cache_data["test_stock"]
+                    dates = test_data.get("dates", [])
+                    output(f"      测试股票: 000001.SZ")
+                    output(f"      数据条数: {len(dates)}条")
+                    if len(dates) > 0:
+                        output(f"      日期范围: {dates[0]} ~ {dates[-1]}")
+                
+                output("")
+                output("="*50)
+                output("✅✅✅ Choice全量数据测试成功！")
+                output("💡 文件缓存模式（最稳定）")
+                output("="*50)
+                self.choice_connected = True
+                
+            elif "test_stock" in cache_data:
+                stock_data = cache_data["test_stock"]
+                stock_code = stock_data.get("stock_code", "未知")
+                dates = stock_data.get("dates", [])
+                data = stock_data.get("data", {})
+                
+                output(f"      股票代码: {stock_code}")
+                output(f"      数据条数: {len(dates)}条")
+                
+                if len(dates) > 0:
+                    output(f"      日期范围: {dates[0]} ~ {dates[-1]}")
+                    
+                    # 显示最近一日数据
+                    if data:
+                        output("")
+                        output("      最新一日数据:")
+                        for indicator, values in data.items():
+                            if values and len(values) > 0:
+                                last_val = values[-1]
+                                if last_val is not None:
+                                    output(f"        {indicator}: {last_val}")
+                
+                output("")
+                output("="*50)
+                output("✅✅✅ Choice缓存数据测试成功！")
+                output("💡 文件缓存模式（最稳定）")
+                output("="*50)
+                self.choice_connected = True
+            else:
+                output("⚠️  缓存文件格式异常")
+                    
+        except Exception as e:
+            self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def _test_choice_subprocess(self):
+        """在独立的Python进程中测试Choice"""
+        import subprocess
+        import sys
+        
+        print(">>> _test_choice_subprocess 开始执行")
+        
+        try:
+            print(">>> 准备运行子进程")
+            self.show_progress("\n[1/2] 启动独立Python进程...")
+            print(">>> show_progress 调用完成")
+            
+            # 使用终端成功的Python解释器 (C:\veighna_studio\python.exe)
+            # 运行实际的Choice K线数据测试
+            python_exe = r"C:\veighna_studio\python.exe"
+            test_script = 'test_choice_kline.py'
+            
+            print(f">>> 执行命令: {python_exe} {test_script}")
+            
+            # 设置干净的环境（移除调试器相关路径）
+            import os
+            env = os.environ.copy()
+            # 不设置PYTHONPATH，让Python使用默认路径
+            if 'PYTHONPATH' in env:
+                del env['PYTHONPATH']
+            
+            # 明确设置工作目录
+            work_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            result = subprocess.run(
+                [python_exe, test_script],
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                timeout=30,
+                cwd=work_dir,  # 使用脚本所在目录
+                env=env        # 使用干净的环境
+            )
+            
+            print(f">>> 子进程执行完成，返回码: {result.returncode}")
+            print(f">>> stdout长度: {len(result.stdout) if result.stdout else 0}")
+            print(f">>> stderr长度: {len(result.stderr) if result.stderr else 0}")
+            
+            self.show_progress("[2/2] 测试完成，输出结果:\n")
+            
+            # 显示完整输出
+            if result.stdout:
+                print(">>> 处理stdout")
+                print(f">>> stdout内容:\n{result.stdout}")
+                lines = result.stdout.split('\n')
+                print(f">>> 共{len(lines)}行输出")
+                for line in lines:
+                    if line.strip():
+                        self.show_progress(line)
+            else:
+                print(">>> 没有stdout输出")
+                self.show_progress("(无输出)")
+            
+            # 同时显示stderr（可能有重要信息）
+            if result.stderr:
+                print(f">>> stderr内容:\n{result.stderr}")
+                self.show_progress("\n--- SDK消息 ---")
+                for line in result.stderr.split('\n'):
+                    if line.strip():
+                        self.show_progress(line)
+            
+            if result.returncode == 0:
+                print(">>> 测试成功")
+                self.show_progress("\n✅✅✅ Choice K线数据测试成功！")
+                self.show_progress("💡 已验证：独立进程可以正常获取Choice数据")
+                self.show_progress("📊 可以使用此方式在主程序中调用Choice接口")
+            else:
+                print(f">>> 测试失败: {result.returncode}")
+                self.show_progress(f"\n❌ 测试失败，退出码: {result.returncode}")
+                if result.stderr:
+                    print(f">>> stderr: {result.stderr[:200]}")
+                    self.show_progress(f"错误信息: {result.stderr[:500]}")
+                    
+        except subprocess.TimeoutExpired as e:
+            print(">>> 超时异常")
+            self.show_progress("\n⏱️ 测试超时（30秒）")
+            self.show_progress("Choice客户端可能响应缓慢")
+        except Exception as e:
+            print(f">>> 捕获异常: {type(e).__name__}: {e}")
+            self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        print(">>> _test_choice_subprocess 执行完成")
+    
+    def _test_choice_worker(self):
+        """Choice测试工作线程 - 使用单元测试中成功的代码"""
+        print(">>> _test_choice_worker 线程开始执行")
+        try:
+            from datetime import datetime, timedelta
+            print(">>> datetime 导入成功")
+
+            # 1. 导入SDK
+            self.show_progress("[1/4] 导入 EmQuantAPI...")
+            print(">>> 准备导入 EmQuantAPI")
+            from EmQuantAPI import c
+            print(">>> EmQuantAPI 导入成功")
+            self.show_progress("    ✅ 导入成功")
+            print(">>> show_progress 调用成功")
+            
+            # 2. 登录/初始化
+            print(">>> 准备调用 c.start()")
+            self.show_progress("[2/4] 调用 c.start() 初始化...")
+            result = c.start("")
+            print(f">>> c.start() 返回: ErrorCode={result.ErrorCode}")
+            self.show_progress(f"    返回: ErrorCode={result.ErrorCode}, ErrorMsg={result.ErrorMsg}")
+            
+            if result.ErrorCode != 0:
+                print(f">>> 初始化失败: ErrorCode={result.ErrorCode}")
+                self.show_progress(f"    ❌ 初始化失败")
+                return
+            print(">>> 初始化成功")
+            self.show_progress("    ✅ 初始化成功")
+            
+            # 3. 获取000001.SZ的K线
+            print(">>> 准备获取K线数据")
+            self.show_progress("[3/4] 获取 000001.SZ (平安银行) 最近K线数据...")
+            end_date = datetime.now().strftime("%Y-%m-%d")
+            start_date = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%d")
+            print(f">>> 日期范围: {start_date} 到 {end_date}")
+            
+            self.show_progress(f"    日期范围: {start_date} 到 {end_date}")
+            
+            print(">>> 调用 c.csd()...")
+            data = c.csd("000001.SZ", "OPEN,HIGH,LOW,CLOSE,VOLUME", start_date, end_date, "")
+            print(f">>> c.csd() 返回: ErrorCode={data.ErrorCode}")
+            
+            self.show_progress(f"    ErrorCode: {data.ErrorCode}, ErrorMsg: {data.ErrorMsg}")
+            
+            if data.ErrorCode != 0:
+                print(">>> 数据获取失败")
+                self.show_progress(f"    ❌ 数据获取失败")
+                return
+            
+            # 4. 解析并显示数据
+            print(">>> 开始解析数据")
+            self.show_progress("[4/4] 解析数据...")
+            print(f">>> data.Data keys: {list(data.Data.keys())}")
+            if "000001.SZ" in data.Data:
+                stock_data = data.Data["000001.SZ"]
+                num_records = len(stock_data[3])
+                self.show_progress(f"    ✅ 获取到 {num_records} 条K线数据")
+                
+                # 显示最近3日数据
+                self.show_progress(f"\n    📊 最近3日K线数据:")
+                num_days = min(3, num_records)
+                for i in range(num_days):
+                    idx = -(num_days - i)
+                    self.show_progress(
+                        f"    日期{i+1}: 开={stock_data[0][idx]:.2f}, "
+                        f"高={stock_data[1][idx]:.2f}, "
+                        f"低={stock_data[2][idx]:.2f}, "
+                        f"收={stock_data[3][idx]:.2f}, "
+                        f"量={stock_data[4][idx]:.0f}"
+                    )
+                
+                print(">>> 测试完成！")
+                self.show_progress(f"\n✅✅✅ Choice测试成功！SDK工作正常！")
+            else:
+                print(">>> 数据中没有 000001.SZ")
+                self.show_progress(f"    ❌ 返回数据中没有 000001.SZ")
+                
+        except OSError as e:
+            if 'WinError 87' in str(e) or getattr(e, 'winerror', None) == 87:
+                error_msg = "\n⚠️ Choice客户端未完全就绪"
+                print(f">>> {error_msg}")
+                self.show_progress(error_msg)
+                self.show_progress("\n📋 当前状态:")
+                self.show_progress("   → Choice客户端进程正在运行")
+                self.show_progress("   → 但内部服务尚未完全启动")
+                self.show_progress("   → SDK无法加载DLL文件 (WinError 87)")
+                self.show_progress("\n💡 解决方案:")
+                self.show_progress("   ⏰ 等待30-60秒后重试")
+                self.show_progress("   或:")
+                self.show_progress("   1. 打开Choice客户端窗口")
+                self.show_progress("   2. 查看一次行情数据（确保完全加载）")
+                self.show_progress("   3. 稍等片刻后点击【测试Choice】")
+                self.show_progress("\n📌 提示: Choice首次启动需要较长初始化时间")
+            else:
+                print(f">>> OSError: {e}")
+                self.show_progress(f"\n❌ 测试失败: OSError: {e}")
+        except KeyError as e:
+            if 'setserverlistdir' in str(e):
+                error_msg = "\n❌ Choice SDK状态已损坏"
+                print(f">>> {error_msg}")
+                self.show_progress(error_msg)
+                self.show_progress("\n⚠️  原因分析:")
+                self.show_progress("   → 之前的WinError 87导致SDK状态损坏")
+                self.show_progress("   → 无法在当前进程中恢复")
+                self.show_progress("\n💡 解决方案:")
+                self.show_progress("   1. 完全关闭本程序")
+                self.show_progress("   2. 确认Choice客户端已完全启动")
+                self.show_progress("   3. 重新启动本程序")
+            else:
+                print(f">>> KeyError: {e}")
+                self.show_progress(f"\n❌ 测试失败: KeyError: {e}")
+        except Exception as e:
+            error_msg = f"\n❌ Choice测试失败: {type(e).__name__}: {e}"
+            print(f">>> 异常: {error_msg}")
+            self.show_progress(error_msg)
+            import traceback
+            traceback.print_exc()
+            self.show_progress(traceback.format_exc())
     
     def start_long_analysis(self):
         """开始漫长分析：先获取全部数据，然后获取主板评分"""
@@ -7040,7 +7572,7 @@ K线更新后快速评分完成！
             return None
     
     def _try_get_real_technical_data(self, ticker):
-        """尝试获取真实技术数据 - 增强网络诊断和连接稳定性"""
+        """尝试获取真实技术数据 - Choice优先，多数据源备用"""
         import os
         import socket
         import urllib.request
@@ -7051,7 +7583,73 @@ K线更新后快速评分完成！
         from requests.adapters import HTTPAdapter
         from urllib3.util.retry import Retry
         
-        print(f"{ticker} 开始网络诊断...")
+        print(f"{ticker} 开始获取K线数据...")
+        
+        # 使用更稳定的日期范围和参数
+        from datetime import datetime, timedelta
+        end_date = datetime.now().strftime('%Y%m%d')
+        start_date = (datetime.now() - timedelta(days=90)).strftime('%Y%m%d')
+        
+        # 尝试多种数据源
+        stock_hist = None
+        
+        # 注意：Choice集成已统一到 ComprehensiveDataCollector
+        # 不要在这里直接调用 c.start()，会导致重复初始化错误
+        
+        # 跳过旧的Choice代码，使用下面的数据源
+        if False:
+            # 获取最新价格
+            current_price = float(stock_hist['收盘'].iloc[-1])
+            
+            # 计算移动平均线
+            ma5 = float(stock_hist['收盘'].tail(5).mean()) if len(stock_hist) >= 5 else current_price
+            ma10 = float(stock_hist['收盘'].tail(10).mean()) if len(stock_hist) >= 10 else current_price
+            ma20 = float(stock_hist['收盘'].tail(20).mean()) if len(stock_hist) >= 20 else current_price
+            ma60 = float(stock_hist['收盘'].tail(60).mean()) if len(stock_hist) >= 60 else current_price
+            
+            # 计算RSI
+            if len(stock_hist) >= 14:
+                import pandas as pd
+                close_prices = stock_hist['收盘'].astype(float)
+                delta = close_prices.diff()
+                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+                rs = gain / loss
+                rsi = 100 - (100 / (1 + rs.iloc[-1]))
+            else:
+                rsi = 50
+            
+            # 计算成交量比率
+            if len(stock_hist) >= 5:
+                avg_volume = stock_hist['成交量'].tail(5).mean()
+                current_volume = stock_hist['成交量'].iloc[-1]
+                volume_ratio = float(current_volume / avg_volume) if avg_volume > 0 else 1.0
+            else:
+                volume_ratio = 1.0
+            
+            # 计算MACD
+            if len(stock_hist) >= 26:
+                ema12 = stock_hist['收盘'].ewm(span=12).mean().iloc[-1]
+                ema26 = stock_hist['收盘'].ewm(span=26).mean().iloc[-1]
+                macd = float(ema12 - ema26)
+                signal = float(stock_hist['收盘'].ewm(span=9).mean().iloc[-1])
+            else:
+                macd = 0
+                signal = 0
+            
+            print(f"\033[92m✓ {ticker} Choice数据+技术指标计算完成\033[0m")
+            return {
+                'current_price': current_price,
+                'ma5': ma5,
+                'ma10': ma10,
+                'ma20': ma20,
+                'ma60': ma60,
+                'rsi': float(rsi) if not pd.isna(rsi) else 50,
+                'macd': macd,
+                'signal': signal,
+                'volume_ratio': volume_ratio,
+                'data_source': 'choice'
+            }
         
         # 完全禁用代理和SSL验证，避免代理连接问题
         original_proxies = {}
@@ -7098,17 +7696,9 @@ K线更新后快速评分完成！
             socket_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(10)  # 增加到10秒，提高成功率
             
-            print(f"📡 尝试获取 {ticker} 实时数据...")
+            print(f"📡 尝试备用数据源获取 {ticker} 数据...")
             
-            # 使用更稳定的日期范围和参数
-            from datetime import datetime, timedelta
-            end_date = datetime.now().strftime('%Y%m%d')
-            start_date = (datetime.now() - timedelta(days=90)).strftime('%Y%m%d')
-            
-            # 尝试多种数据源
-            stock_hist = None
-            
-            # 1. Tushare优先 (最稳定)
+            # 1. Tushare (稳定)
             try:
                 print(f"{ticker} 尝试Tushare数据源...")
                 import tushare as ts
