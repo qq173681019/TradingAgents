@@ -1,0 +1,28 @@
+{
+  "total_codes": 3998,
+  "elapsed_seconds": 0.0,
+  "technical": {
+    "computed_count": 3998,
+    "none_count": 0,
+    "stats": {
+      "count": 3998,
+      "mean": 5.0,
+      "stdev": 0.0,
+      "min": 5.0,
+      "max": 5.0
+    },
+    "examples_none": []
+  },
+  "fundamental": {
+    "computed_count": 3998,
+    "none_count": 0,
+    "stats": {
+      "count": 3998,
+      "mean": 2.0,
+      "stdev": 0.0,
+      "min": 2.0,
+      "max": 2.0
+    },
+    "examples_none": []
+  }
+}

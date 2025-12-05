@@ -16,9 +16,9 @@ def load_env_config():
                         key = key.strip()
                         value = value.strip().strip('\'"')
                         os.environ[key] = value
-            print("✅ 已从 .env.local 加载环境配置")
+            print("已从 .env.local 加载环境配置")
         except Exception as e:
-            print(f"⚠️ 读取 .env.local 文件失败: {e}")
+            print(f"读取 .env.local 文件失败: {e}")
     
     # 尝试从config.py导入配置作为默认值
     try:
@@ -32,9 +32,9 @@ def load_env_config():
             'OPENROUTER_API_URL': cfg.OPENROUTER_API_URL,
             'OPENROUTER_MODEL_NAME': cfg.OPENROUTER_MODEL_NAME,
         }
-        print("✅ 已从 config.py 加载默认配置")
+        print("已从 config.py 加载默认配置")
     except Exception as e:
-        print(f"⚠️ 无法从config.py加载配置: {e}")
+        print(f"无法从config.py加载配置: {e}")
         default_config = {}
     
     return {
@@ -95,12 +95,29 @@ import hashlib
 import json
 import os
 import random
+# 在 Windows 控制台上可能默认使用 GBK 编码，会导致打印包含 emoji 或特殊符号时报错。
+# 尝试把 stdout/stderr 重新配置为 UTF-8，避免 UnicodeEncodeError。
+import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import requests
+
+try:
+    # Python 3.7+ 提供 reconfigure / reconfigure stdout encoding
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    else:
+        # 回退：包装 stdout/stderr
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+except Exception:
+    # 若在某些嵌入式环境不可用，忽略并继续（只影响打印行为）
+    pass
 
 # 🚀 性能优化模块导入 (基于MiniMax CodingPlan)
 try:
@@ -562,6 +579,9 @@ class AShareAnalyzerGUI:
         self.batch_score_file_openrouter = "data/batch_stock_scores_openrouter.json"
         self.batch_score_file_gemini = "data/batch_stock_scores_gemini.json"
         self.batch_scores = {}           # 批量评分数据
+        # 回退/异常统计（记录在批量处理时触发的评分异常）
+        self.fallback_counts = {'technical': 0, 'fundamental': 0, 'combined': 0}
+        self.fallback_examples = {'technical': [], 'fundamental': [], 'combined': []}
 
         # 新增：完整推荐数据存储
         self.comprehensive_data_file = "data/comprehensive_stock_data.json"
@@ -572,6 +592,8 @@ class AShareAnalyzerGUI:
         self.comprehensive_data_loaded = False
         # 控制批量评分功能开关（用户已请求移除相关按钮/功能）
         self.batch_scoring_enabled = False
+        # 静默控制（保留）：默认关闭。仅用于临时静默详细逐行显示。
+        self.suppress_console_details = False
         
         # 新增：数据收集相关属性
         self.data_collection_active = False  # 数据收集是否正在进行
@@ -589,16 +611,16 @@ class AShareAnalyzerGUI:
             try:
                 self.high_performance_cache = HighPerformanceCache()
                 self.async_processor = AsyncDataProcessor(self.high_performance_cache)
-                print("✅ MiniMax CodingPlan性能优化系统已启用")
+                print("MiniMax CodingPlan 性能优化系统已启用")
                 print(f"   - 多级缓存系统: {'Redis + 内存' if REDIS_AVAILABLE else '纯内存'}")
                 print(f"   - 异步处理器: {self.async_processor.max_workers} 并发")
                 print(f"   - 批量处理: 优化后批次大小")
             except Exception as e:
-                print(f"⚠️ 性能优化系统初始化失败: {e}")
+                print(f"性能优化系统初始化失败: {e}")
                 self.high_performance_cache = None
                 self.async_processor = None
         else:
-            print("📊 使用标准性能处理模式")
+            print("使用标准性能处理模式")
         
         # 🚀 性能优化系统集成 (基于MiniMax CodingPlan)
         self.performance_optimizer = None
@@ -609,16 +631,16 @@ class AShareAnalyzerGUI:
             try:
                 self.high_performance_cache = HighPerformanceCache()
                 self.async_processor = AsyncDataProcessor(self.high_performance_cache)
-                print("✅ MiniMax CodingPlan性能优化系统已启用")
+                print("MiniMax CodingPlan 性能优化系统已启用")
                 print(f"   - 多级缓存系统: {'Redis + 内存' if REDIS_AVAILABLE else '纯内存'}")
                 print(f"   - 异步处理器: {self.async_processor.max_workers} 并发")
                 print(f"   - 批量处理: 优化后批次大小")
             except Exception as e:
-                print(f"⚠️ 性能优化系统初始化失败: {e}")
+                print(f"性能优化系统初始化失败: {e}")
                 self.high_performance_cache = None
                 self.async_processor = None
         else:
-            print("📊 使用标准性能处理模式")
+            print("使用标准性能处理模式")
 
         # 加载现有数据
         self.load_batch_scores()         # 加载批量评分数据
@@ -678,13 +700,13 @@ class AShareAnalyzerGUI:
         try:
             data_dir = 'data'
             if not os.path.exists(data_dir):
-                return "📂 无本地数据"
+                return "无本地数据"
             
             # 检查分卷数据文件
             part_files = [f for f in os.listdir(data_dir) if f.startswith('comprehensive_stock_data_part_') and f.endswith('.json')]
             
             if not part_files:
-                return "📂 无本地数据"
+                return "无本地数据"
             
             # 获取最新文件的修改时间
             latest_time = None
@@ -696,12 +718,12 @@ class AShareAnalyzerGUI:
             
             if latest_time:
                 latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
-                return f"📊 本地数据: {latest_date} ({len(part_files)}个文件)"
+                return f"本地数据: {latest_date} ({len(part_files)}个文件)"
             else:
                 return "📂 无本地数据"
                 
         except Exception as e:
-            return "📂 数据检查失败"
+            return "数据检查失败"
     
     def _check_kline_data_status(self):
         """检查K线数据状态"""
@@ -719,7 +741,7 @@ class AShareAnalyzerGUI:
                 
                 last_update = status_data.get('last_update_date', '')
                 if last_update:
-                    return f"📈 K线数据: {last_update}"
+                    return f"K线数据: {last_update}"
             
             # 如果没有独立的K线状态文件，检查全部数据（因为全部数据包含K线数据）
             data_dir = 'data'
@@ -737,7 +759,7 @@ class AShareAnalyzerGUI:
                     
                     if latest_time:
                         latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
-                        return f"📈 K线数据: {latest_date} (来自全部数据)"
+                        return f"K线数据: {latest_date} (来自全部数据)"
             
             # 如果没有任何数据，返回空字符串（不显示提示）
             return ""
@@ -753,11 +775,11 @@ class AShareAnalyzerGUI:
         try:
             # 检查批量评分文件 - 按优先级排序
             score_files = [
-                ("batch_stock_scores_deepseek.json", "🤖 DeepSeek AI"),
-                ("batch_stock_scores_minimax.json", "🤖 MiniMax AI"),
-                ("batch_stock_scores_openai.json", "🤖 OpenAI"),
-                ("batch_stock_scores_openrouter.json", "🤖 OpenRouter"),
-                ("batch_stock_scores.json", "📋 本地算法"),
+                ("batch_stock_scores_deepseek.json", "DeepSeek AI"),
+                ("batch_stock_scores_minimax.json", "MiniMax AI"),
+                ("batch_stock_scores_openai.json", "OpenAI"),
+                ("batch_stock_scores_openrouter.json", "OpenRouter"),
+                ("batch_stock_scores.json", "本地算法"),
             ]
             
             # 检查是否有优化版本的评分文件
@@ -795,10 +817,10 @@ class AShareAnalyzerGUI:
                 latest_time_str = datetime.fromtimestamp(latest_time).strftime("%H:%M")
                 return f"{latest_date} {latest_time_str} | {latest_model}"
             else:
-                return "❌ 暂无评分数据"
+                return "暂无评分数据"
                 
         except Exception as e:
-            return "❌ 评分检查失败"
+            return "评分检查失败"
     
     def _update_kline_status(self):
         """更新K线数据状态文件"""
@@ -816,10 +838,10 @@ class AShareAnalyzerGUI:
             with open("kline_update_status.json", 'w', encoding='utf-8') as f:
                 json.dump(status_data, f, ensure_ascii=False, indent=2)
                 
-            print(f"✅ K线状态已更新: {status_data['last_update_date']}")
+            print(f"K线状态已更新: {status_data['last_update_date']}")
             
         except Exception as e:
-            print(f"❌ K线状态更新失败: {e}")
+            print(f"K线状态更新失败: {e}")
     
     def _refresh_kline_status(self):
         """刷新K线状态显示"""
@@ -852,13 +874,13 @@ class AShareAnalyzerGUI:
             if os.path.exists(fallback_file):
                 with open(fallback_file, 'r', encoding='utf-8') as f:
                     stock_info = json.load(f)
-                print(f"✅ 已加载后备股票信息：{len(stock_info)} 只股票")
+                print(f"已加载后备股票信息：{len(stock_info)} 只股票")
                 return stock_info
             else:
-                print(f"⚠️ 后备数据文件不存在: {fallback_file}，使用空字典")
+                print(f"后备数据文件不存在: {fallback_file}，使用空字典")
                 return {}
         except Exception as e:
-            print(f"❌ 加载后备股票信息失败: {e}")
+            print(f"加载后备股票信息失败: {e}")
             return {}
     
     def _update_stock_info_fallback(self):
@@ -869,7 +891,7 @@ class AShareAnalyzerGUI:
         
         try:
             if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
-                print("⚠️ 没有可用的股票数据用于更新后备文件")
+                print("没有可用的股票数据用于更新后备文件")
                 return False
             
             updated_stock_info = {}
@@ -919,18 +941,18 @@ class AShareAnalyzerGUI:
                 with open(fallback_file, 'w', encoding='utf-8') as f:
                     json.dump(updated_stock_info, f, ensure_ascii=False, indent=2)
                 
-                print(f"✅ 已更新后备股票信息：{update_count} 只股票 → {fallback_file}")
+                print(f"已更新后备股票信息：{update_count} 只股票 → {fallback_file}")
                 
                 # 同步更新内存中的stock_info
                 self.stock_info = updated_stock_info
                 
                 return True
             else:
-                print("⚠️ 没有有效的股票信息可更新")
+                print("没有有效的股票信息可更新")
                 return False
                 
         except Exception as e:
-            print(f"❌ 更新后备股票信息失败: {e}")
+            print(f"更新后备股票信息失败: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -1025,21 +1047,22 @@ class AShareAnalyzerGUI:
                 model_name = "本地规则"
             
             if not os.path.exists(load_file):
-                print(f"❌ 未找到{model_name}历史评分数据: {load_file}")
+                print(f"未找到{model_name}历史评分数据: {load_file}")
                 # 如果是特定模型文件不存在，尝试使用通用文件
                 if load_file != self.batch_score_file:
-                    print(f"🔄 尝试使用通用评分文件: {self.batch_score_file}")
+                    print(f"尝试使用通用评分文件: {self.batch_score_file}")
                     load_file = self.batch_score_file
                     model_name = "通用"
                     if not os.path.exists(load_file):
-                        print(f"❌ 通用评分文件也不存在: {load_file}")
+                        print(f"通用评分文件也不存在: {load_file}")
                         self.batch_scores = {}
                         return False
                 else:
                     self.batch_scores = {}
                     return False
                     
-            print(f"📂 正在加载{model_name}评分文件: {load_file}")
+            if not getattr(self, 'suppress_console_details', False):
+                print(f"正在加载{model_name}评分文件: {load_file}")
             
             # 检查文件大小
             file_size = os.path.getsize(load_file)
@@ -1050,17 +1073,21 @@ class AShareAnalyzerGUI:
             
             # 检查文件大小是否合理（超过100MB可能有问题）
             if file_size > 100 * 1024 * 1024:
-                print(f"{model_name}评分文件过大: {file_size / (1024*1024):.1f}MB")
-                # 尝试备份大文件
+                if not getattr(self, 'suppress_console_details', False):
+                    print(f"{model_name}评分文件过大: {file_size / (1024*1024):.1f}MB")
+                # 在静默模式下不创建备份文件，直接放弃加载以避免额外 IO
                 try:
-                    backup_file = f"{load_file}.large_backup"
-                    import shutil
-                    shutil.move(load_file, backup_file)
-                    print(f"📦 大文件已备份为: {backup_file}")
+                    if not getattr(self, 'suppress_console_details', False):
+                        backup_file = f"{load_file}.large_backup"
+                        import shutil
+                        shutil.move(load_file, backup_file)
+                        print(f"大文件已备份为: {backup_file}")
                     self.batch_scores = {}
                     return False
                 except:
-                    pass
+                    # 忽略备份失败
+                    self.batch_scores = {}
+                    return False
             
             with open(load_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -1116,12 +1143,12 @@ class AShareAnalyzerGUI:
                 
                 score_time = data.get('timestamp', data.get('date', '未知'))
                 score_model = data.get('model', model_name)
-                print(f"✅ 加载{model_name}批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time}, 模型: {score_model})")
+                print(f"加载{model_name}批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time}, 模型: {score_model})")
                 
                 # 显示一些示例评分用于调试
                 if self.batch_scores:
                     sample_codes = list(self.batch_scores.keys())[:3]
-                    print(f"📊 评分数据示例:")
+                    print(f"评分数据示例:")
                     for code in sample_codes:
                         score_data = self.batch_scores[code]
                         score = score_data.get('score', 0)
@@ -1143,7 +1170,7 @@ class AShareAnalyzerGUI:
                 try:
                     import shutil
                     shutil.copy2(backup_file, load_file)
-                    print(f"� 已尝试从备份恢复{model_name}评分")
+                    print(f"已尝试从备份恢复{model_name}评分")
                     return self.load_batch_scores()  # 递归调用一次
                 except:
                     pass
@@ -1217,10 +1244,10 @@ class AShareAnalyzerGUI:
                         print(f"📦 迁移评分文件: {old_file} -> {new_file}")
                         migrated_count += 1
                     except Exception as e:
-                        print(f"⚠️ 迁移文件失败 {old_file}: {e}")
+                        print(f"迁移文件失败 {old_file}: {e}")
             
             if migrated_count > 0:
-                print(f"✅ 成功迁移 {migrated_count} 个评分文件到 data 目录")
+                print(f"成功迁移 {migrated_count} 个评分文件到 data 目录")
                 
         except Exception as e:
             print(f"迁移文件过程出错: {e}")
@@ -1284,14 +1311,15 @@ class AShareAnalyzerGUI:
                 'count': len(valid_scores)
             }
             
-            # 创建备份
-            backup_file = f"{save_file}.backup"
-            if os.path.exists(save_file):
-                try:
-                    import shutil
-                    shutil.copy2(save_file, backup_file)
-                except Exception as backup_error:
-                    print(f"创建备份失败: {backup_error}")
+            # 创建备份（静默模式下跳过备份以避免额外输出/文件）
+            if not getattr(self, 'suppress_console_details', False):
+                backup_file = f"{save_file}.backup"
+                if os.path.exists(save_file):
+                    try:
+                        import shutil
+                        shutil.copy2(save_file, backup_file)
+                    except Exception as backup_error:
+                        print(f"创建备份失败: {backup_error}")
             
             # 保存主文件（不分卷）
             # 确保data目录存在
@@ -1299,15 +1327,15 @@ class AShareAnalyzerGUI:
             
             with open(save_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-            
-            print(f"💾 {model_name}批量评分已保存：{len(valid_scores)}只股票 → {save_file} (时间: {data['timestamp']})")
-            
-            # 清理旧备份（只保留最新的）
-            try:
-                if os.path.exists(backup_file) and os.path.getsize(save_file) > 0:
-                    pass  # 保留备份
-            except:
-                pass
+
+            if not getattr(self, 'suppress_console_details', False):
+                print(f"💾 {model_name}批量评分已保存：{len(valid_scores)}只股票 → {save_file} (时间: {data['timestamp']})")
+                # 清理旧备份（只保留最新的）
+                try:
+                    if os.path.exists(backup_file) and os.path.getsize(save_file) > 0:
+                        pass  # 保留备份
+                except:
+                    pass
                 
             return True
             
@@ -1330,26 +1358,33 @@ class AShareAnalyzerGUI:
         
         miss_count = len(cache_miss_list)
         print(f"\n{'='*80}")
-        print(f"📊 {stock_type}评分 - 缓存未命中统计 (共 {miss_count} 只)")
+        print(f"{stock_type}评分 - 缓存未命中统计 (共 {miss_count} 只)")
         print(f"{'='*80}")
-        print(f"{'序号':<6} {'股票代码':<10} {'股票名称':<30}")
-        print(f"{'-'*80}")
-        
-        for i, stock in enumerate(cache_miss_list, 1):
-            code = stock['code']
-            name = stock['name'][:25] + '...' if len(stock['name']) > 25 else stock['name']
-            print(f"{i:<6} {code:<10} {name:<30}")
-        
-        print(f"{'='*80}")
-        print(f"提示: 这些股票不在本地缓存中，已使用实时数据获取")
-        print(f"建议: 如需加快下次评分速度，可先运行'获取全部数据'收集这些股票的数据")
-        print(f"{'='*80}\n")
+        # 根据 suppress_console_details 决定是否打印逐行明细
+        if not getattr(self, 'suppress_console_details', False):
+            print(f"{'序号':<6} {'股票代码':<10} {'股票名称':<30}")
+            print(f"{'-'*80}")
+            for i, stock in enumerate(cache_miss_list, 1):
+                code = stock['code']
+                name = stock['name'][:25] + '...' if len(stock['name']) > 25 else stock['name']
+                print(f"{i:<6} {code:<10} {name:<30}")
+            print(f"{'='*80}")
+            print(f"提示: 这些股票不在本地缓存中，已使用实时数据获取")
+            print(f"建议: 如需加快下次评分速度，可先运行'获取全部数据'收集这些股票的数据")
+            print(f"{'='*80}\n")
+        else:
+            # 简要提示（避免控制台输出逐行明细）
+            print(f"{stock_type}评分 - 缓存未命中统计 (共 {miss_count} 只) - 详细名单已保存到 data/cache_miss_stocks.txt 如需查看请打开文件")
         
         # 同时在界面显示简要信息
         if hasattr(self, 'show_progress'):
             self.show_progress(f"INFO: {miss_count} 只股票未在缓存中，已实时获取数据")
 
-        # 保存到文件以便查看
+        # 保存到文件以便查看（仅在未静默时保存）
+        if getattr(self, 'suppress_console_details', False):
+            # 在静默模式下不创建任何额外文件或输出
+            return
+
         try:
             import os
             from datetime import datetime
@@ -1364,13 +1399,12 @@ class AShareAnalyzerGUI:
                 f.write(f"{'='*50}\n")
                 f.write(f"{'序号':<6} {'股票代码':<10} {'股票名称':<30}\n")
                 f.write(f"{'-'*50}\n")
-                
                 for i, stock in enumerate(cache_miss_list, 1):
                     code = stock['code']
                     name = stock['name']
                     f.write(f"{i:<6} {code:<10} {name:<30}\n")
             
-            print(f"✅ 未命中名单已保存至: {file_path}")
+            print(f"未命中名单已保存至: {file_path}")
             if hasattr(self, 'show_progress'):
                 self.show_progress(f"INFO: 未命中名单已保存至 data/cache_miss_stocks.txt")
                 
@@ -2162,13 +2196,13 @@ class AShareAnalyzerGUI:
         report += "热门概念板块 TOP5:\n"
         report += "-" * 30 + "\n"
         for i, concept in enumerate(hot_sectors['concepts'][:5], 1):
-            change_color = "↗" if concept['change_pct'] > 0 else "↘"
+            change_color = "上升" if concept['change_pct'] > 0 else "下降"
             report += f"{i}. {concept['name']:<12} {change_color} {concept['change_pct']:+.2f}%\n"
         
         report += "\n热门行业板块 TOP5:\n"
         report += "-" * 30 + "\n"
         for i, industry in enumerate(hot_sectors['industries'][:5], 1):
-            change_color = "↗" if industry['change_pct'] > 0 else "↘"
+            change_color = "上升" if industry['change_pct'] > 0 else "下降"
             report += f"{i}. {industry['name']:<12} {change_color} {industry['change_pct']:+.2f}%\n"
         
         report += "\n" + "="*50 + "\n"
@@ -2295,39 +2329,39 @@ class AShareAnalyzerGUI:
         
         # 热门板块归属
         if sectors_info['is_in_hot_sectors']:
-            report += "✓ 该股票属于以下热门板块:\n"
+            report += "该股票属于以下热门板块:\n"
             report += "-" * 30 + "\n"
             
             if sectors_info['hot_concepts']:
                 report += "热门概念板块:\n"
                 for concept in sectors_info['hot_concepts']:
                     if isinstance(concept, dict):
-                        change_color = "↗" if concept['change_pct'] > 0 else "↘"
-                        report += f"  • {concept['name']} (第{concept['rank']}名) {change_color} {concept['change_pct']:+.2f}%\n"
+                        change_color = "上升" if concept['change_pct'] > 0 else "下降"
+                        report += f"  - {concept['name']} (第{concept['rank']}名) {change_color} {concept['change_pct']:+.2f}%\n"
                     else:
-                        report += f"  • {concept}\n"
+                        report += f"  - {concept}\n"
             
             if sectors_info['hot_industries']:
                 report += "热门行业板块:\n"
                 for industry in sectors_info['hot_industries']:
                     if isinstance(industry, dict):
-                        change_color = "↗" if industry['change_pct'] > 0 else "↘"
-                        report += f"  • {industry['name']} (第{industry['rank']}名) {change_color} {industry['change_pct']:+.2f}%\n"
+                        change_color = "上升" if industry['change_pct'] > 0 else "下降"
+                        report += f"  - {industry['name']} (第{industry['rank']}名) {change_color} {industry['change_pct']:+.2f}%\n"
                     else:
-                        report += f"  • {industry}\n"
+                        report += f"  - {industry}\n"
         else:
-            report += "✗ 该股票目前不属于热门板块\n"
+            report += "该股票目前不属于热门板块\n"
             report += "-" * 30 + "\n"
             
             if sectors_info['all_concepts']:
                 report += "所属概念板块:\n"
                 for concept in sectors_info['all_concepts']:
-                    report += f"  • {concept}\n"
+                    report += f"  - {concept}\n"
             
             if sectors_info['all_industries']:
                 report += "所属行业板块:\n"
                 for industry in sectors_info['all_industries']:
-                    report += f"  • {industry}\n"
+                    report += f"  - {industry}\n"
         
         report += "\n" + "="*50 + "\n"
         report += "分析时间: " + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "\n"
@@ -2606,22 +2640,22 @@ class AShareAnalyzerGUI:
             
             # 检查是否设置了LLM模型
             if not hasattr(self, 'llm_model') or self.llm_model == "none":
-                self.show_progress("❌ 请先设置LLM模型")
+                self.show_progress("请先设置LLM模型")
                 return
             
             # 检查是否有综合数据
             if not hasattr(self, 'comprehensive_data') or not self.comprehensive_data:
-                self.show_progress("❌ 请先运行综合数据收集")
+                self.show_progress("请先运行综合数据收集")
                 return
             
-            self.show_progress("🤖 开始LLM批量分析...")
+            self.show_progress("开始LLM批量分析...")
             
             # 获取所有股票代码
             all_codes = list(self.comprehensive_data.keys())
             
             # 验证开始索引
             if start_from_index >= len(all_codes):
-                self.show_progress(f"❌ 开始索引 {start_from_index+1} 超出范围 (最大: {len(all_codes)})")
+                self.show_progress(f"开始索引 {start_from_index+1} 超出范围 (最大: {len(all_codes)})")
                 return
             
             # 从指定位置开始的代码列表
@@ -2650,7 +2684,7 @@ class AShareAnalyzerGUI:
                     
                     # 更新进度
                     progress = current_position / total_stocks * 100
-                    self.show_progress(f"🤖 LLM分析 {code} ({current_position}/{total_stocks}) - {progress:.1f}%")
+                    self.show_progress(f"LLM分析 {code} ({current_position}/{total_stocks}) - {progress:.1f}%")
                     
                     # 获取股票的综合数据
                     stock_data = self.comprehensive_data.get(code)
@@ -2692,12 +2726,12 @@ class AShareAnalyzerGUI:
             self.save_llm_analysis_results()
             
             # 完成报告
-            self.show_progress(f"✅ LLM批量分析完成！成功: {success_count}, 失败: {failed_count}")
+            self.show_progress(f"LLM批量分析完成！成功: {success_count}, 失败: {failed_count}")
             print(f"LLM批量分析结果: 成功{success_count}个，失败{failed_count}个")
             
         except Exception as e:
             print(f"LLM批量分析错误: {e}")
-            self.show_progress(f"❌ LLM分析失败: {e}")
+            self.show_progress(f"LLM分析失败: {e}")
     
     def analyze_stock_with_llm(self, code, stock_data):
         """使用LLM分析单只股票"""
@@ -2906,15 +2940,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 filtered_total = len(all_codes)
                 
                 if filtered_total == 0:
-                    self.show_progress("❌ 筛选后未找到符合条件的股票")
+                    self.show_progress("筛选后未找到符合条件的股票")
                     return
                 
                 print(f"[INFO] 🎯 获取到 {filtered_total} 只{stock_type}股票（原始:{original_total}只）")
                 self.show_progress(f"🎯 获取到 {filtered_total} 只{stock_type}股票")
                 
                 # 🚀 优先使用LLM真实分析模式
-                print(f"[INFO] 🤖 启用LLM真实分析模式处理 {filtered_total} 只股票")
-                self.show_progress(f"🤖 启用LLM智能分析 {filtered_total} 只股票...")
+                print(f"[INFO] 启用LLM真实分析模式处理 {filtered_total} 只股票")
+                self.show_progress(f"启用LLM智能分析 {filtered_total} 只股票...")
                 
                 # 应用断点续传，从指定位置开始处理
                 if start_from_index > 0 and start_from_index < filtered_total:
@@ -2922,7 +2956,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     print(f"[INFO] 断点续传: 跳过前{start_from_index}只股票，剩余{len(all_codes)}只股票")
                     self.show_progress(f"🔄 断点续传: 从第{start_from_index+1}只开始，剩余{len(all_codes)}只股票")
                 elif start_from_index >= filtered_total:
-                    self.show_progress(f"❌ 起始位置{start_from_index+1}超出范围(最大:{filtered_total})")
+                    self.show_progress(f"起始位置{start_from_index+1}超出范围(最大:{filtered_total})")
                     return
                 
                 # 直接使用LLM分析，传递原始总数用于正确计算进度
@@ -3020,14 +3054,14 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     
                     except Exception as e:
                         print(f"[ERROR] 异步处理失败，回退到标准模式: {e}")
-                        self.show_progress(f"⚠️ 异步处理异常，回退标准模式...")
+                        self.show_progress(f"异步处理异常，回退标准模式...")
                         # 回退到原有处理逻辑
                         self._fallback_to_standard_processing(all_codes, filter_type, start_from_index, total_stocks)
                     finally:
                         loop.close()
                 else:
                     # 使用标准处理模式
-                    print(f"[INFO] 📊 使用标准批量处理模式")
+                    print(f"[INFO] 使用标准批量处理模式")
                     self._fallback_to_standard_processing(all_codes, filter_type, start_from_index, total_stocks)
                 
                 if total_stocks == 0:
@@ -3064,8 +3098,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 # 检测评分模式
                 use_llm_mode = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openrouter", "gemini"]
                 if use_llm_mode:
-                    print(f"\033[1;35m[评分模式] 🤖 AI模式 - 使用{self.llm_model}大模型进行智能评分\033[0m")
-                    self.show_progress(f"MODE: 🤖 AI模式 - 使用{self.llm_model}进行评分（较慢但更准确）")
+                    print(f"\033[1;35m[评分模式] AI模式 - 使用{self.llm_model}大模型进行智能评分\033[0m")
+                    self.show_progress(f"MODE: AI模式 - 使用{self.llm_model}进行评分（较慢但更准确）")
                 else:
                     print(f"\033[1;36m[评分模式] ⚡ 快速模式 - 使用本地规则引擎评分\033[0m")
                     self.show_progress(f"MODE: ⚡ 快速模式 - 使用本地规则引擎强制重新计算")
@@ -3141,7 +3175,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                     # 更新进度显示AI调用状态
                                     def update_ai_status(c=code, idx=i, t=total_stocks):
                                         if hasattr(self, 'batch_scoring_detail_label'):
-                                            self.batch_scoring_detail_label.config(text=f"🤖 {self.llm_model.upper()}分析: {c} ({idx+1}/{t})")
+                                            self.batch_scoring_detail_label.config(text=f"{self.llm_model.upper()}分析: {c} ({idx+1}/{t})")
                                     self.root.after(0, update_ai_status)
                                 else:
                                     # 快速模式：使用本地规则引擎评分
@@ -3158,7 +3192,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                         print(f"[AI完成] {code} 评分: {score:.1f}/10")
                                         def update_score_result(c=code, s=score, idx=i, t=total_stocks):
                                             if hasattr(self, 'batch_scoring_detail_label'):
-                                                self.batch_scoring_detail_label.config(text=f"✅ {c} 评分: {s:.1f}/10 ({idx+1}/{t})")
+                                                self.batch_scoring_detail_label.config(text=f"{c} 评分: {s:.1f}/10 ({idx+1}/{t})")
                                         self.root.after(0, update_score_result)
                                 else:
                                     print(f"[ERROR] 评分失败: {code}")
@@ -3229,15 +3263,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 
                 # 显示完成信息和统计
                 print(f"\n{'='*80}")
-                print(f"📊 {stock_type}评分统计")
+                print(f"{stock_type}评分统计")
                 print(f"{'='*80}")
-                print(f"✅ 成功: {success_count} 只")
-                print(f"❌ 失败: {failed_count} 只")
-                print(f"🔄 全部重新计算: {recalculated_count} 只")
+                print(f"成功: {success_count} 只")
+                print(f"失败: {failed_count} 只")
+                print(f"全部重新计算: {recalculated_count} 只")
                 if use_llm_mode:
-                    print(f"🤖 AI模式: 使用{self.llm_model}大模型评分")
+                    print(f"AI模式: 使用{self.llm_model}大模型评分")
                 else:
-                    print(f"⚡ 快速模式: 使用本地规则引擎评分")
+                    print(f"快速模式: 使用本地规则引擎评分")
                 print(f"{'='*80}\n")
                 
                 self.show_progress(f"SUCCESS: {stock_type}评分完成！成功:{success_count} 失败:{failed_count} 缓存:{cache_hit_count} 计算:{recalculated_count}")
@@ -3627,7 +3661,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 for field in missing_fields:
                     if field in simulated_data:
                         tech_data[field] = simulated_data[field]
-                        print(f"  ✓ 已补全字段: {field}")
+                        print(f"  - 已补全字段: {field}")
                 
                 # 更新缓存
                 if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
@@ -3648,7 +3682,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 for field in missing_fund_fields:
                     if field in simulated_data:
                         fund_data[field] = simulated_data[field]
-                        print(f"  ✓ 已补全字段: {field}")
+                        print(f"  - 已补全字段: {field}")
                 
                 # 更新缓存
                 if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
@@ -3855,16 +3889,20 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 # 清空之前的失败记录
                 self.failed_real_data_stocks = []
                 
-                self.show_progress("正在进行CSV批量分析...")
-                
+                # 初始化进度条
                 results = []
                 total = len(stock_codes)
+                self.update_progress_with_bar("正在进行CSV批量分析...", progress_percent=0, detail="0%")
                 
                 for i, code in enumerate(stock_codes):
                     try:
                         # 更新进度
                         progress = (i + 1) / total * 100
-                        self.show_progress(f"分析进度: {i+1}/{total} ({progress:.1f}%) - {code}")
+                        self.update_progress_with_bar(
+                            f"正在分析: {i+1}/{total} - {code}",
+                            progress_percent=progress,
+                            detail=f"{progress:.1f}%"
+                        )
                         
                         # 获取股票名称
                         stock_name = self.get_stock_name(code)
@@ -3979,20 +4017,20 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                             
                             # 确保所有分数都是数字类型
                             try:
-                                final_score = float(score) if score is not None else 7.0
-                                tech_score_final = float(tech_score) if tech_score is not None else 7.0
-                                fund_score_final = float(fund_score) if fund_score is not None else 7.0
+                                final_score = float(score) if score is not None else None
+                                tech_score_final = float(tech_score) if tech_score is not None else None
+                                fund_score_final = float(fund_score) if fund_score is not None else None
                             except (ValueError, TypeError):
-                                final_score = 7.0
-                                tech_score_final = 7.0
-                                fund_score_final = 7.0
+                                final_score = None
+                                tech_score_final = None
+                                fund_score_final = None
                             
                             results.append({
                                 '股票代码': code,
                                 '股票名称': stock_name,
-                                '综合评分': round(final_score, 1),
-                                '技术面评分': round(tech_score_final, 1),
-                                '基本面评分': round(fund_score_final, 1),
+                                '综合评分': round(final_score, 1) if final_score is not None else None,
+                                '技术面评分': round(tech_score_final, 1) if tech_score_final is not None else None,
+                                '基本面评分': round(fund_score_final, 1) if fund_score_final is not None else None,
                                 'RSI状态': rsi_status,
                                 '趋势': trend,
                                 '所属行业': fund_data.get('industry', '未知'),
@@ -4006,21 +4044,16 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         print(f"分析股票 {code} 失败: {e}")
                         continue
                 
-                # 保存结果
+                # 批量分析完成 - 显示统计摘要（不包含逐行明细）
                 if results:
-                    self.save_csv_analysis_results(results)
-                    self.display_csv_results_in_ui(results)  # 新增：在UI中显示结果
-                    self.show_progress(f"SUCCESS: CSV批量分析完成！成功分析 {len(results)} 只股票")
-                    
-                    # 显示无法获取真实数据的股票清单
-                    self.show_failed_real_data_summary()
+                    self.update_progress_with_bar(f"SUCCESS: CSV批量分析完成！成功分析 {len(results)} 只股票", progress_percent=100, detail="100%")
+                    # 显示统计摘要
+                    self.display_csv_summary_only(results)
                 else:
-                    self.show_progress("ERROR: CSV批量分析失败，没有成功分析任何股票")
-                    # 即使没有成功分析的股票，也显示失败清单
-                    self.show_failed_real_data_summary()
+                    self.update_progress_with_bar("ERROR: CSV批量分析失败，没有成功分析任何股票", progress_percent=100, detail="失败")
                 
                 # 3秒后清除进度信息
-                threading.Timer(3.0, lambda: self.show_progress("")).start()
+                threading.Timer(3.0, lambda: self.hide_progress()).start()
                 
             except Exception as e:
                 self.show_progress(f"ERROR: CSV批量分析失败: {e}")
@@ -4033,11 +4066,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     def show_failed_real_data_summary(self):
         """显示被跳过的股票清单"""
         if not self.failed_real_data_stocks:
-            print("所有股票均成功获取真实数据")
+            if not getattr(self, 'suppress_console_details', False):
+                print("所有股票均成功获取真实数据")
             return
-        
+        # 在静默模式下不打印被跳过的详细清单
+        if getattr(self, 'suppress_console_details', False):
+            return
+
         print(f"\n{'='*80}")
-        print(f"� 由于网络问题被跳过的股票清单 (共 {len(self.failed_real_data_stocks)} 只)")
+        print(f"由于网络问题被跳过的股票清单 (共 {len(self.failed_real_data_stocks)} 只)")
         print(f"{'='*80}")
         print(f"{'序号':<4} {'股票代码':<10} {'股票名称':<25} {'跳过原因':<20}")
         print(f"{'-'*80}")
@@ -4064,7 +4101,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         try:
             import csv
             from datetime import datetime
-            from tkinter import messagebox
+
+            # 在静默模式下仍保存主要 CSV 文件，但不弹出消息或在控制台打印
+            try:
+                from tkinter import messagebox
+            except Exception:
+                messagebox = None
 
             # 生成文件名
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -4076,13 +4118,129 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     fieldnames = results[0].keys()
                     writer = csv.DictWriter(f, fieldnames=fieldnames)
                     writer.writeheader()
-                    writer.writerows(results)
-            
-            messagebox.showinfo("保存成功", f"分析结果已保存到文件：{filename}")
-            print(f"CSV分析结果已保存到: {filename}")
+                    # 将 None 转为空字符串，避免 CSV 中写入文字 'None'
+                    sanitized = []
+                    for row in results:
+                        sanitized_row = {k: ('' if v is None else v) for k, v in row.items()}
+                        sanitized.append(sanitized_row)
+                    writer.writerows(sanitized)
+
+            # 根据静默标志决定是否弹窗或打印
+            if not getattr(self, 'suppress_console_details', False):
+                if messagebox is not None:
+                    try:
+                        messagebox.showinfo("保存成功", f"分析结果已保存到文件：{filename}")
+                    except Exception:
+                        pass
+                print(f"CSV分析结果已保存到: {filename}")
             
         except Exception as e:
             print(f"保存CSV分析结果失败: {e}")
+    
+    def display_csv_summary_only(self, results):
+        """在UI中仅显示CSV分析统计摘要（不包含逐行明细）"""
+        try:
+            # 清空当前显示的内容
+            self.overview_text.delete('1.0', tk.END)
+            
+            # 统计分析
+            valid_results = [r for r in results if r['综合评分'] and r['综合评分'] > 0]
+            if valid_results:
+                scores = [float(r['综合评分']) for r in valid_results]
+                avg_score = sum(scores) / len(scores)
+                max_score = max(scores)
+                min_score = min(scores)
+                high_quality = len([s for s in scores if s >= 8.0])
+                medium_quality = len([s for s in scores if 6.0 <= s < 8.0])
+                low_quality = len([s for s in scores if s < 6.0])
+            else:
+                avg_score = max_score = min_score = 0
+                high_quality = medium_quality = low_quality = 0
+            
+            # RSI状态统计
+            oversold = len([r for r in results if r['RSI状态'] == '超卖'])
+            normal = len([r for r in results if r['RSI状态'] == '正常'])
+            overbought = len([r for r in results if r['RSI状态'] == '超买'])
+            
+            # 趋势统计
+            trend_counts = {}
+            for stock in results:
+                trend = stock['趋势']
+                if trend != "无法分析":
+                    trend_counts[trend] = trend_counts.get(trend, 0) + 1
+            
+            # 创建摘要报告
+            report = "=" * 100 + "\n"
+            report += f"📊 CSV批量分析结果 (共 {len(results)} 只股票)\n"
+            report += "=" * 100 + "\n\n"
+            
+            # 显示每只股票的评分
+            report += f"{'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'RSI':<6} {'趋势':<10} {'行业':<12}\n"
+            report += "=" * 100 + "\n"
+            for stock in results:
+                code = stock['股票代码']
+                name = stock['股票名称'][:10]
+                综合 = f"{stock['综合评分']:.1f}" if stock['综合评分'] else "N/A"
+                技术 = f"{stock['技术面评分']:.1f}" if stock['技术面评分'] else "N/A"
+                基本 = f"{stock['基本面评分']:.1f}" if stock['基本面评分'] else "N/A"
+                rsi = stock['RSI状态'][:4]
+                trend = stock['趋势'][:8]
+                industry = stock['所属行业'][:10]
+                report += f"{code:<8} {name:<12} {综合:<6} {技术:<6} {基本:<6} {rsi:<6} {trend:<10} {industry:<12}\n"
+            
+            report += "=" * 100 + "\n\n"
+            report += "TREND: 评分统计:\n"
+            report += f"平均评分: {avg_score:.1f}  |  最高评分: {max_score:.1f}  |  最低评分: {min_score:.1f}\n"
+            report += f"有效分析: {len(valid_results)} 只\n\n"
+            
+            report += "DATA: 评分分布:\n"
+            total_valid = len(valid_results) if len(valid_results) > 0 else 1
+            report += f"高质量股票 (8.0分以上): {high_quality} 只 ({high_quality/total_valid*100:.1f}%)\n"
+            report += f"中等质量股票 (6.0-8.0分): {medium_quality} 只 ({medium_quality/total_valid*100:.1f}%)\n"
+            report += f"低质量股票 (6.0分以下): {low_quality} 只 ({low_quality/total_valid*100:.1f}%)\n\n"
+            
+            report += "TREND: RSI状态分布:\n"
+            report += f"超卖状态: {oversold} 只 - 潜在买入机会\n"
+            report += f"正常区域: {normal} 只 - 持续观察\n"
+            report += f"超买状态: {overbought} 只 - 注意回调风险\n\n"
+            
+            report += "DATA: 趋势分布:\n"
+            for trend, count in sorted(trend_counts.items(), key=lambda x: x[1], reverse=True):
+                report += f"{trend}: {count} 只 ({count/len(results)*100:.1f}%)\n"
+            
+            report += "\n" + "=" * 100 + "\n"
+            report += "IDEA: 投资建议:\n"
+            if high_quality > 0:
+                report += f"✓ 重点关注: 评分8.0以上的 {high_quality} 只股票\n"
+            if medium_quality > 0:
+                report += f"⚖️ 适度配置: 评分6.0-8.0的 {medium_quality} 只股票\n"
+            if low_quality > 0:
+                report += f"WARNING: 谨慎投资: 评分6.0以下的 {low_quality} 只股票\n"
+            
+            if oversold > 0:
+                report += f"TREND: 潜在机会: {oversold} 只股票处于超卖状态\n"
+            if overbought > 0:
+                report += f"📉 风险提示: {overbought} 只股票处于超买状态\n"
+            
+            # 趋势建议
+            uptrend_count = sum(count for trend, count in trend_counts.items() if '上涨' in trend or '偏多' in trend)
+            downtrend_count = sum(count for trend, count in trend_counts.items() if '下跌' in trend or '偏空' in trend)
+            
+            if uptrend_count > downtrend_count:
+                report += f"DATA: 市场偏向: {uptrend_count} 只股票呈上涨趋势\n"
+            elif downtrend_count > uptrend_count:
+                report += f"DATA: 市场偏向: {downtrend_count} 只股票呈下跌趋势\n"
+            
+            report += "\nWARNING: 风险提示: 以上分析仅供参考，投资有风险，决策需谨慎！"
+            
+            # 在UI中显示
+            self.overview_text.insert('1.0', report)
+            
+            # 切换到概览页面
+            self.notebook.select(0)
+            
+        except Exception as e:
+            print(f"显示摘要失败: {e}")
     
     def display_csv_results_in_ui(self, results):
         """在UI面板中显示CSV分析结果"""
@@ -4095,21 +4253,11 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             report += f"DATA: CSV批量分析结果 ({len(results)} 只股票)\n"
             report += "=" * 100 + "\n\n"
             
-            # 按勾选框决定是否排序
-            if hasattr(self, 'sort_csv_var') and hasattr(self.sort_csv_var, 'get') and not self.sort_csv_var.get():
-                sorted_results = results  # 不排序，保持原顺序
-            else:
-                sorted_results = sorted(results, key=lambda x: float(x['综合评分']), reverse=True)
-            
-            # 显示Top 10
-            report += "评分排行榜 (Top 10):\n"
-            report += "-" * 88 + "\n"
-            report += f"{'排名':<4} {'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'RSI':<6} {'趋势':<8}\n"
-            report += "-" * 88 + "\n"
-            
-            for i, stock in enumerate(sorted_results[:10], 1):
-                report += f"{i:<4} {stock['股票代码']:<8} {stock['股票名称']:<12} {stock['综合评分']:<6} {stock['技术面评分']:<6} {stock['基本面评分']:<6} {stock['RSI状态']:<6} {stock['趋势']:<8}\n"
-            
+            # 按原始顺序显示全部结果
+            report += "评分结果 (按输入顺序):\n"
+            # 移除逐行明细显示（仅保留汇总）；如需查看逐行数据，请打开导出的 CSV 文件
+            report += "(逐行明细已移除 — 详细结果已保存为 CSV，可在需要时打开查看)\n"
+
             report += "\n" + "-" * 88 + "\n\n"
             
             # 统计分析 (排除获取失败的股票)
@@ -4167,33 +4315,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 report += f"{trend}: {count} 只 ({count/len(results)*100:.1f}%)\n"
             report += "\n"
             
-            # 详细列表
-            report += "📋 完整分析结果:\n"
-            report += "=" * 100 + "\n"
-            report += f"{'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'RSI':<6} {'趋势':<10} {'行业':<12}\n"
-            report += "=" * 100 + "\n"
-            
-            # 先插入表头
-            start_line = self.overview_text.index(tk.END)
-            for stock in sorted_results:
-                trend = stock['趋势']
-                line = f"{stock['股票代码']:<8} {stock['股票名称']:<12} {stock['综合评分']:<6} {stock['技术面评分']:<6} {stock['基本面评分']:<6} {stock['RSI状态']:<6} {trend:<10} {stock['所属行业']:<12}\n"
-                # 判断趋势关键词
-                tag = None
-                if stock['RSI状态'] == "数据获取失败":
-                    tag = "failed_data"
-                elif any(key in trend for key in ["偏空", "下跌", "消极", "弱势", "空头"]):
-                    tag = "neg_trend"
-                elif any(key in trend for key in ["偏多", "上涨", "积极", "强势", "多头"]):
-                    tag = "pos_trend"
-                cur_index = self.overview_text.index(tk.END)
-                self.overview_text.insert(tk.END, line)
-                if tag:
-                    self.overview_text.tag_add(tag, cur_index, f"{cur_index} lineend")
-            # 配置tag颜色（始终生效）
-            self.overview_text.tag_configure("neg_trend", foreground="#d32f2f")  # 红色
-            self.overview_text.tag_configure("pos_trend", foreground="#388e3c")  # 绿色
-            self.overview_text.tag_configure("failed_data", foreground="#d32f2f")  # 红色 (失败)
+            # 详细列表（逐行明细已移除）
+            report += "📋 完整分析结果: (逐行明细已移除 — 详细结果已保存为 CSV，可在需要时打开查看)\n"
             
             report += "\n" + "=" * 100 + "\n"
             report += "IDEA: 投资建议:\n"
@@ -4247,37 +4370,47 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     def calculate_technical_score(self, tech_data):
         """计算技术面评分 (5-10分)"""
         try:
-            score = self.calculate_technical_index(
-                tech_data['rsi'],
-                tech_data['macd'],
-                tech_data['signal'],
-                tech_data['volume_ratio'],
-                tech_data['ma5'],
-                tech_data['ma10'],
-                tech_data['ma20'],
-                tech_data['ma60'],
-                tech_data['current_price']
+            # 兼容缺失字段：使用安全的默认值以避免抛 KeyError
+            if isinstance(tech_data, dict):
+                rsi = tech_data.get('rsi', 50)
+                macd = tech_data.get('macd', 0)
+                signal = tech_data.get('signal', 0)
+                volume_ratio = tech_data.get('volume_ratio', 1.0)
+                current_price = tech_data.get('current_price', 0)
+                ma5 = tech_data.get('ma5', current_price or 0)
+                ma10 = tech_data.get('ma10', current_price or 0)
+                ma20 = tech_data.get('ma20', current_price or 0)
+                ma60 = tech_data.get('ma60', current_price or 0)
+            else:
+                # tech_data 不是 dict 时使用一组安全默认值
+                rsi, macd, signal, volume_ratio = 50, 0, 0, 1.0
+                ma5 = ma10 = ma20 = ma60 = current_price = 0
+
+            # 使用数值版本的技术面指数函数，避免 format 导致的字符串返回
+            score = self.calculate_technical_index_value(
+                rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price
             )
-            # 确保返回数字类型
-            return float(score) if score is not None else 7.0
-        except:
-            return 7.0  # 默认分数
+            return float(score) if score is not None else None
+        except Exception:
+            # 出现异常时返回 None，调用方记录并处理
+            return None
     
     def calculate_fundamental_score(self, fund_data):
         """计算基本面评分 (5-10分)"""
         try:
-            score = self.calculate_fundamental_index( 
-                fund_data['pe_ratio'],
-                fund_data['pb_ratio'],
-                fund_data['roe'],
-                fund_data['revenue_growth'],
-                fund_data['profit_growth'],
+            # 使用数值版本的基本面指数函数，避免 format 导致的字符串返回
+            score = self.calculate_fundamental_index_value(
+                fund_data.get('pe_ratio'),
+                fund_data.get('pb_ratio'),
+                fund_data.get('roe'),
+                fund_data.get('revenue_growth', 0),
+                fund_data.get('profit_growth', 0),
                 fund_data.get('code', '000000')
             )
-            # 确保返回数字类型
-            return float(score) if score is not None else 7.0
-        except:
-            return 7.0  # 默认分数
+            return float(score) if score is not None else None
+        except Exception:
+            # 不再在此处隐式回退为7.0，交由调用方决定如何处理
+            return None
     
     def get_trend_signal(self, tech_data):
         """判断趋势信号"""
@@ -4594,7 +4727,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         status_title_frame.pack(fill="x", pady=(8, 4))
         
         tk.Label(status_title_frame,
-                text="📊 数据状态概览",
+            text="数据状态概览",
                 font=("微软雅黑", 11, "bold"),
                 fg="#2c3e50",
                 bg="#ecf0f1").pack(side="left", padx=10)
@@ -4608,7 +4741,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         all_data_row.pack(fill="x", pady=2)
         
         tk.Label(all_data_row,
-                text="📂 全部数据：",
+            text="全部数据：",
                 font=("微软雅黑", 9, "bold"),
                 fg="#34495e",
                 bg="#ecf0f1",
@@ -4616,7 +4749,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 anchor="w").pack(side="left")
         
         self.all_data_status_label = tk.Label(all_data_row,
-                                             text="🔍 检查本地数据中...",
+                             text="检查本地数据中...",
                                              font=("微软雅黑", 9),
                                              fg="#7f8c8d",
                                              bg="#ecf0f1",
@@ -4628,7 +4761,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         kline_data_row.pack(fill="x", pady=2)
         
         tk.Label(kline_data_row,
-                text="📈 K线数据：",
+            text="K线数据：",
                 font=("微软雅黑", 9, "bold"),
                 fg="#34495e",
                 bg="#ecf0f1",
@@ -4636,7 +4769,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 anchor="w").pack(side="left")
         
         self.kline_status_label = tk.Label(kline_data_row,
-                                           text="🔍 检查K线数据中...",
+                           text="检查K线数据中...",
                                            font=("微软雅黑", 9),
                                            fg="#7f8c8d",
                                            bg="#ecf0f1",
@@ -4845,7 +4978,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         if model in LLM_MODEL_OPTIONS:
             old_model = getattr(self, 'llm_model', 'none')
             self.llm_model = model
-            print(f"✅ 已切换大模型: {old_model} -> {model}")
+            print(f"已切换大模型: {old_model} -> {model}")
             print(f"[DEBUG] self.llm_model 已设置为: {self.llm_model}")
             
             # 重新加载对应模型的评分数据
@@ -4859,7 +4992,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 
             print(f"✅ {model}模型数据加载完成")
         else:
-            print(f"❌ 不支持的LLM模型: {model}")
+            print(f"不支持的LLM模型: {model}")
     
     def update_ranking_display(self):
         """更新排行榜显示（非阻塞方式）"""
@@ -5023,7 +5156,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         """漫长分析工作线程"""
         try:
             # 第一步：获取全部数据
-            self.show_progress("📊 第一步：开始获取全部数据...")
+            self.show_progress("第一步：开始获取全部数据...")
             
             # 调用现有的获取全部数据功能
             self.root.after(0, self.start_comprehensive_data_collection)
@@ -5046,7 +5179,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             time.sleep(5)  # 给评分一些时间启动
             
             # 显示完成信息
-            self.show_progress("✅ 漫长分析完成！数据收集和主板评分均已启动")
+            self.show_progress("漫长分析完成！数据收集和主板评分均已启动")
             
         except Exception as e:
             self.show_progress(f"ERROR: 漫长分析失败: {e}")
@@ -5063,9 +5196,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             # 第一步：应用ST筛选
             print(f"=" * 60)
-            print(f"🔍 开始快速评分 - ST筛选")
+            print(f"开始快速评分 - ST筛选")
             print(f"   原始股票总数: {len(self.comprehensive_stock_data)} 只")
-            print(f"   ST筛选复选框状态: {'已勾选✓' if hasattr(self, 'filter_st_var') and self.filter_st_var.get() else '未勾选✗'}")
+            print(f"   ST筛选复选框状态: {'已勾选' if hasattr(self, 'filter_st_var') and self.filter_st_var.get() else '未勾选'}")
             
             # 手动执行ST筛选并记录详细信息
             filtered_stocks = {}
@@ -5091,7 +5224,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             if len(st_filtered_list) > 0:
                 print(f"   前20只ST股票:") 
                 for st_info in st_filtered_list[:20]:
-                    print(f"      🚫 {st_info}")
+                    print(f"      被过滤 {st_info}")
                 if len(st_filtered_list) > 20:
                     print(f"      ... 还有 {len(st_filtered_list) - 20} 只")
             
@@ -5108,15 +5241,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             else:
                 print(f"   推荐评分滚动条未初始化，使用默认值: {min_score_threshold:.1f} 分")
             
-            print(f"📂 开始加载评分表...")
+            print(f"开始加载评分表...")
             print(f"   最低评分阈值: {min_score_threshold:.1f} 分")
             self.load_batch_scores()
             low_score_filtered_count = 0
             
-            print(f"📊 评分表状态: batch_scores={'存在' if hasattr(self, 'batch_scores') else '不存在'}, 数量={len(self.batch_scores) if hasattr(self, 'batch_scores') and self.batch_scores else 0}")
+            print(f"评分表状态: batch_scores={'存在' if hasattr(self, 'batch_scores') else '不存在'}, 数量={len(self.batch_scores) if hasattr(self, 'batch_scores') and self.batch_scores else 0}")
             
             if hasattr(self, 'batch_scores') and self.batch_scores:
-                print(f"✅ 评分表已加载: {len(self.batch_scores)} 只股票")
+                print(f"评分表已加载: {len(self.batch_scores)} 只股票")
                 final_filtered_stocks = {}
                 for code, stock_data in filtered_stocks.items():
                     if code in self.batch_scores:
@@ -5271,14 +5404,14 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             all_stocks = self.comprehensive_stock_data
             total_count = len(all_stocks)
             
-            print(f"🚀 开始对K线更新后的 {total_count} 只股票进行快速评分筛选...")
+            print(f"开始对K线更新后的 {total_count} 只股票进行快速评分筛选...")
             
             # 定义热门板块
             hot_sectors = ['人工智能', '新能源', '半导体', '医疗', '生物医药', '芯片', 
                          '电动车', '新能源车', '太阳能', '风能', '光伏', '驱动芯片']
             
             # 第一步：基础评分筛选
-            print("📊 执行基础评分筛选...")
+            print("执行基础评分筛选...")
             
             qualified_stocks = {}
             eliminated_low_score = 0
@@ -5294,7 +5427,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     eliminated_low_score += 1
             
             # 第二步：成交量和热门板块筛选
-            print(f"📈 执行成交量和板块筛选（已淘汰低分 {eliminated_low_score} 只）...")
+            print(f"执行成交量和板块筛选（已淘汰低分 {eliminated_low_score} 只）...")
             
             final_stocks = {}
             eliminated_volume = 0
@@ -5312,15 +5445,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             # 显示结果
             final_count = len(final_stocks)
             summary_msg = f"""
-✅ K线更新后快速评分完成！
+K线更新后快速评分完成！
 
-📊 筛选结果：
-• 初始股票：{total_count} 只
-• 基础评分淘汰：{eliminated_low_score} 只
-• 成交量/板块淘汰：{eliminated_volume} 只
-• 最终合格：{final_count} 只
+筛选结果：
+- 初始股票：{total_count} 只
+- 基础评分淘汰：{eliminated_low_score} 只
+- 成交量/板块淘汰：{eliminated_volume} 只
+- 最终合格：{final_count} 只
 
-📈 筛选率：{(final_count/total_count)*100:.1f}%
+筛选率：{(final_count/total_count)*100:.1f}%
             """
             
             print(summary_msg)
@@ -5330,7 +5463,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             # 在主界面显示完成消息
             self.root.after(0, lambda: messagebox.showinfo("K线更新完成", 
-                f"K线数据更新完成！\n已更新 {total_count} 只主板股票的K线数据。\n\n快速评分筛选结果：\n• 最终合格：{final_count} 只\n• 筛选率：{(final_count/total_count)*100:.1f}%"))
+                f"K线数据更新完成！\n已更新 {total_count} 只主板股票的K线数据。\n\n快速评分筛选结果：\n- 最终合格：{final_count} 只\n- 筛选率：{(final_count/total_count)*100:.1f}%"))
             
         except Exception as e:
             print(f"K线更新后快速评分失败: {e}")
@@ -8723,7 +8856,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     print("没有可用的推荐数据，请先点击'开始获取评分'")
                     return []
             
-            print(f"📂 找到comprehensive_data，共{len(self.comprehensive_data)}只股票")
+                print(f"找到comprehensive_data，共{len(self.comprehensive_data)}只股票")
             
             # 检查数据结构
             if self.comprehensive_data:
@@ -9942,8 +10075,60 @@ WARNING:  风险管控:
         
         # 限制在1-10分之间并转换为10分制
         score = min(10.0, max(1.0, score / 10.0))
-        
+
+        # 返回格式化字符串（用于人类可读报告）
         return self.format_technical_index(score)
+
+    def calculate_technical_index_value(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price):
+        """计算技术面推荐指数的数值表示（返回 1-10 的数值）
+        这个函数与 `calculate_technical_index` 的逻辑一致，但只返回数值，便于程序化使用。
+        """
+        score = 50
+        # RSI评分
+        if 30 <= rsi <= 70:
+            score += 15
+        elif rsi < 30:
+            score += 10
+        else:
+            score -= 10
+
+        # MACD评分
+        if macd > signal:
+            score += 15
+        else:
+            score -= 10
+
+        # 成交量评分
+        if 1.2 <= volume_ratio <= 2.0:
+            score += 10
+        elif volume_ratio > 2.0:
+            score += 5
+        else:
+            score -= 5
+
+        # 均线评分
+        ma_score = 0
+        if current_price > ma5:
+            ma_score += 5
+        if current_price > ma10:
+            ma_score += 5
+        if current_price > ma20:
+            ma_score += 5
+        if current_price > ma60:
+            ma_score += 5
+        score += ma_score
+
+        # 均线排列评分
+        if ma5 > ma10 > ma20 > ma60:
+            score += 15
+        elif ma5 > ma10 > ma20:
+            score += 10
+        elif ma5 < ma10 < ma20 < ma60:
+            score -= 15
+
+        # 限制并转换为 1-10
+        score = min(10.0, max(1.0, score / 10.0))
+        return score
     
     def format_technical_index(self, score):
         """格式化技术面推荐指数（10分制）"""
@@ -10024,8 +10209,85 @@ WARNING:  风险管控:
         
         # 限制在1-10分之间并转换为10分制
         score = min(10.0, max(1.0, score / 10.0))
-        
+
+        # 返回格式化字符串（用于人类可读报告）
         return self.format_fundamental_index(score, ticker)
+
+    def calculate_fundamental_index_value(self, pe_ratio, pb_ratio, roe, revenue_growth, profit_growth, ticker):
+        """计算基本面推荐指数的数值表示（返回 1-10 的数值）
+        与 `calculate_fundamental_index` 逻辑一致，但仅返回数值，便于程序化使用。
+        """
+        score = 50
+        # PE估值评分
+        try:
+            if pe_ratio is None:
+                pe_ratio = 20
+            if pe_ratio < 20:
+                score += 20
+            elif pe_ratio < 35:
+                score += 10
+            else:
+                score -= 15
+        except Exception:
+            pass
+
+        # ROE评分
+        try:
+            if roe is None:
+                roe = 10
+            if roe > 15:
+                score += 20
+            elif roe > 10:
+                score += 10
+            else:
+                score -= 10
+        except Exception:
+            pass
+
+        # 营收增长评分
+        try:
+            if revenue_growth is None:
+                revenue_growth = 0
+            if revenue_growth > 15:
+                score += 15
+            elif revenue_growth > 5:
+                score += 8
+            elif revenue_growth > 0:
+                score += 3
+            else:
+                score -= 15
+        except Exception:
+            pass
+
+        # 净利润增长评分
+        try:
+            if profit_growth is None:
+                profit_growth = 0
+            if profit_growth > 20:
+                score += 15
+            elif profit_growth > 10:
+                score += 8
+            elif profit_growth > 0:
+                score += 3
+            else:
+                score -= 15
+        except Exception:
+            pass
+
+        # 行业特殊加成
+        try:
+            stock_info = self.get_stock_info_generic(ticker)
+            industry = stock_info.get("industry", "")
+            if "半导体" in industry or "新能源" in industry:
+                score += 5
+            elif "银行" in industry or "白酒" in industry:
+                score += 3
+        except Exception:
+            pass
+
+        # 限制并转换为 1-10
+        score = min(10.0, max(1.0, score / 10.0))
+        return score
     
     def generate_sector_analysis(self, ticker):
         """生成板块分析报告"""
@@ -13785,7 +14047,7 @@ WARNING: 重要声明:
                         self.root.after(0, self.show_error, error_msg)
                     return
                 
-                print(f"📂 已加载{model_name}评分数据，共{len(self.batch_scores)}只股票")
+                print(f"已加载{model_name}评分数据，共{len(self.batch_scores)}只股票")
                 
                 # 从batch_scores中筛选符合类型的股票
                 filtered_stocks = []
@@ -13822,7 +14084,7 @@ WARNING: 重要声明:
                 if has_period_scores:
                     # 使用批量评分数据中的时间段评分
                     print(f"使用批量评分数据中的{period_name}评分...")
-                    print(f"📂 已加载批量评分数据，共{len(self.batch_scores)}只股票")
+                    print(f"已加载批量评分数据，共{len(self.batch_scores)}只股票")
                     
                     filtered_stocks = []
                     period_score_key = f"{period_type}_term_score"
@@ -13853,7 +14115,7 @@ WARNING: 重要声明:
                             self.root.after(0, self.show_error, error_msg)
                         return
                     
-                    print(f"📂 已加载综合推荐数据，共{len(self.comprehensive_data)}只股票")
+                    print(f"已加载综合推荐数据，共{len(self.comprehensive_data)}只股票")
                     
                     # 调试：检查数据结构
                     if self.comprehensive_data:
