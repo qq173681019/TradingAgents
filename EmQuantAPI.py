@@ -7,10 +7,12 @@ __author__ = 'weijie,zzx'
 *   Copyright(c)2016-2024,  Shanghai Choice Information Technology Co,. Ltd. All Rights Reserved. * 
 """
 
-from ctypes import *
+import os as _os
 import platform as _platform
-import sys as _sys, os as _os
-from datetime import datetime as _datetime, date as _date
+import sys as _sys
+from ctypes import *
+from datetime import date as _date
+from datetime import datetime as _datetime
 
 OS_Window = 1
 OS_Linux = 2
@@ -504,7 +506,26 @@ class c:
         cls.EncodeType = UtilAccess.GetEncodeType()
         cls.__InitSucceed = True
         cls.__apiDllPath = UtilAccess.GetLibraryPath()
-        cls.__quantLib = CDLL(cls.__apiDllPath)
+        
+        # 修复 WinError 87: Python 3.8+ 需要使用 winmode 参数加载 DLL
+        import sys
+        if sys.version_info >= (3, 8):
+            # Python 3.8+ 使用 winmode 参数，指定 LOAD_WITH_ALTERED_SEARCH_PATH
+            # 这会让系统从 DLL 所在目录搜索依赖项
+            import os
+            dll_dir = os.path.dirname(cls.__apiDllPath)
+            if dll_dir and dll_dir not in os.environ.get('PATH', ''):
+                os.environ['PATH'] = dll_dir + os.pathsep + os.environ.get('PATH', '')
+            try:
+                os.add_dll_directory(dll_dir)
+            except (OSError, AttributeError):
+                pass
+            # 使用 winmode=0 让 Windows 使用默认的 DLL 搜索顺序
+            cls.__quantLib = CDLL(cls.__apiDllPath, winmode=0)
+        else:
+            # Python 3.7 及以下使用原有方式
+            cls.__quantLib = CDLL(cls.__apiDllPath)
+        
         cls.__AsynDataFunc = cls.Type_AsynDataFunc(cls.__HandleAsynData)
 
         quantLib = cls.__quantLib

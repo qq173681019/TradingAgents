@@ -1,5 +1,6 @@
 # ==================== 环境变量配置加载 ====================
 import os
+from typing import Any, Dict, List, Optional
 
 
 def load_env_config():
@@ -95,31 +96,11 @@ import hashlib
 import json
 import os
 import random
-# 在 Windows 控制台上可能默认使用 GBK 编码，会导致打印包含 emoji 或特殊符号时报错。
-# 尝试把 stdout/stderr 重新配置为 UTF-8，避免 UnicodeEncodeError。
 import sys
-import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+import tempfile
+import time
+from typing import Dict, List, Optional
 
-import requests
-
-try:
-    # Python 3.7+ 提供 reconfigure / reconfigure stdout encoding
-    if hasattr(sys.stdout, 'reconfigure'):
-        sys.stdout.reconfigure(encoding='utf-8')
-        sys.stderr.reconfigure(encoding='utf-8')
-    else:
-        # 回退：包装 stdout/stderr
-        import io
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-except Exception:
-    # 若在某些嵌入式环境不可用，忽略并继续（只影响打印行为）
-    pass
-
-# 🚀 性能优化模块导入 (基于MiniMax CodingPlan)
 try:
     import redis
     REDIS_AVAILABLE = True
@@ -5204,106 +5185,18 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         return filtered_stocks
     
     def test_choice_connection(self):
-        """测试Choice连接 - 使用wrapper测试"""
-        print("=" * 80)
-        print("测试Choice按钮被点击!")
-        print("=" * 80)
-        
+        """测试Choice数据 - 读取Choice数据文件并进行完整评分"""
         def test_thread():
             try:
-                print(">>> test_thread 启动")
+                self.show_progress("\n🔍 开始处理Choice数据...\n")
                 
-                try:
-                    self.show_progress("\n🔍 正在测试Choice连接...\n")
-                except Exception as e:
-                    print(f">>> show_progress异常: {e}")
-                
-                print(f">>> choice_wrapper 状态: {self.choice_wrapper}")
-                print(f">>> choice_direct 状态: {self.choice_direct}")
-                print(f">>> choice_enabled: {self.choice_enabled}")
-                print(f">>> choice_cache_mode: {getattr(self, 'choice_cache_mode', False)}")
-                
-                # 检查Choice是否启用
-                if not self.choice_enabled:
-                    self.show_progress("❌ Choice功能未启用")
-                    self.show_progress("💡 请在config.py中设置 ENABLE_CHOICE = True")
-                    return
-                
-                # 优先使用直接调用模式
-                if self.choice_direct:
-                    print(">>> 使用直接调用模式测试")
-                    self._test_choice_direct()
-                    return
-                elif self.choice_wrapper:
-                    print(">>> 使用wrapper模式测试")
-                    self._test_choice_wrapper()
-                    return
-                elif getattr(self, 'choice_cache_mode', False):
-                    print(">>> 使用缓存文件模式测试")
-                    self._test_choice_wrapper()  # 复用此方法，已改为读取缓存
-                    return
-                else:
-                    self.show_progress("❌ Choice未初始化")
-                    self.show_progress("💡 请运行后台服务: C:\\veighna_studio\\python.exe choice_background_service.py")
-                    return
-                
-                # 测试连接
-                print(">>> 准备调用 show_progress [1/3]")
-                self.show_progress("[1/3] 测试连接...")
-                print(">>> 准备调用 get_kline_data")
-                result = self.choice_wrapper.get_kline_data("000001.SZ", days=5)
-                print(f">>> get_kline_data 返回: success={result.get('success')}")
-                print(f">>> 完整结果: {result}")
-                
-                if result["success"]:
-                    self.show_progress("✅ 连接成功\n")
-                    
-                    # 显示获取的数据
-                    self.show_progress(f"[2/3] 股票代码: {result['stock_code']}")
-                    self.show_progress(f"      数据条数: {len(result['dates'])}条")
-                    self.show_progress(f"      日期范围: {result['dates'][0]} ~ {result['dates'][-1]}")
-                    
-                    if 'CLOSE' in result['data']:
-                        closes = result['data']['CLOSE']
-                        # 过滤None值
-                        valid_closes = [c for c in closes if c is not None]
-                        if valid_closes:
-                            self.show_progress(f"      收盘价: {valid_closes[-3:]}")
-                    
-                    # 测试实时行情
-                    self.show_progress("\n[3/3] 测试实时行情...")
-                    quote_result = self.choice_wrapper.get_realtime_quote("000001.SZ")
-                    
-                    if quote_result["success"]:
-                        self.show_progress("✅ 实时行情获取成功")
-                        if 'LASTPRICE' in quote_result['data']:
-                            price = quote_result['data']['LASTPRICE'][0]
-                            self.show_progress(f"      最新价: {price}")
-                    
-                    self.show_progress("\n" + "="*50)
-                    self.show_progress("✅✅✅ Choice测试完全成功！")
-                    self.show_progress("💡 可以在主程序中正常使用Choice数据源")
-                    self.show_progress("="*50)
-                    self.choice_connected = True
-                    
-                else:
-                    error_msg = result.get('error', '未知错误')
-                    print(f">>> 测试失败: {error_msg}")
-                    self.show_progress(f"❌ 测试失败: {error_msg}")
-                    if 'stderr' in result:
-                        stderr_preview = result['stderr'][:500]
-                        print(f">>> stderr: {stderr_preview}")
-                        self.show_progress(f"错误详情: {stderr_preview}")
-                    if 'stdout' in result:
-                        print(f">>> stdout: {result['stdout'][:500]}")
+                # 调用Choice数据处理和评分
+                self._test_choice_wrapper()
                     
             except Exception as e:
-                print(f">>> 捕获异常: {type(e).__name__}: {e}")
-                self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+                self.show_progress(f"\n❌ 处理异常: {type(e).__name__}: {e}")
                 import traceback
                 traceback.print_exc()
-            finally:
-                print(">>> test_thread 结束")
         
         import threading
         thread = threading.Thread(target=test_thread, daemon=True)
@@ -5350,113 +5243,380 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             traceback.print_exc()
     
     def _test_choice_wrapper(self):
-        """测试Choice缓存文件读取"""
+        """读取Choice数据并进行完整评分（与快速评分使用相同逻辑）"""
         print(">>> _test_choice_wrapper 开始执行")
         
-        # 清空并准备输出区域
-        if hasattr(self, 'recommendation_text'):
-            self.recommendation_text.delete('1.0', tk.END)
-        
-        def output(msg):
-            """输出到GUI"""
-            print(f"[GUI输出] {msg}")
-            if hasattr(self, 'recommendation_text'):
-                self.recommendation_text.insert(tk.END, msg + "\n")
-                self.recommendation_text.see(tk.END)
-                self.root.update()
-        
         try:
-            output("[1/2] 读取Choice缓存数据...")
-            
             import json
             import os
 
-            # 优先读取全量数据文件
-            cache_file = os.path.join("data", "choice_all_stocks.json")
-            if not os.path.exists(cache_file):
-                cache_file = os.path.join("data", "choice_cache.json")  # 兼容旧文件
+            # 检查Choice数据文件（优先使用choice_mainboard_all.json，如果不存在则使用choice_mainboard_50days.json）
+            result_file = os.path.join("data", "choice_mainboard_all.json")
+            if not os.path.exists(result_file):
+                result_file = os.path.join("data", "choice_mainboard_50days.json")
             
-            print(f">>> 缓存文件路径: {cache_file}")
-            print(f">>> 检查文件是否存在: {os.path.exists(cache_file)}")
+            print(f">>> 检查文件: {result_file}")
             
-            if not os.path.exists(cache_file):
-                output("❌ 缓存文件不存在")
-                output("")
-                output("💡 解决方案：")
-                output("   在新终端运行: C:\\veighna_studio\\python.exe choice_background_service.py")
+            if not os.path.exists(result_file):
+                print(f">>> 文件不存在: {result_file}")
+                self.show_progress("ERROR: Choice数据文件不存在，请先运行 run_test_choice_mainboard_50days.bat")
                 return
             
-            with open(cache_file, 'r', encoding='utf-8') as f:
+            print(f">>> 文件存在，开始读取")
+            # 读取Choice数据
+            self.show_progress("正在读取Choice数据...")
+            with open(result_file, 'r', encoding='utf-8') as f:
                 cache_data = json.load(f)
+            print(f">>> JSON加载完成")
+            print(f">>> JSON加载完成")
             
-            output("✅ 缓存文件读取成功")
-            output("")
+            stocks = cache_data.get("stocks", {})
+            print(f">>> stocks数量: {len(stocks)}")
+            if not stocks:
+                print(f">>> stocks为空")
+                self.show_progress("ERROR: Choice数据为空")
+                return
             
-            # 显示数据信息
-            last_update = cache_data.get("last_update", "未知")
-            output(f"[2/2] 最后更新时间: {last_update}")
+            self.show_progress(f"✅ 读取到 {len(stocks)} 只股票的Choice数据")
             
-            # 检查是否是全量数据
-            if "stocks" in cache_data:
-                # 全量数据模式
-                total_stocks = cache_data.get("total_stocks", 0)
-                success_count = cache_data.get("success_count", 0)
-                fail_count = cache_data.get("fail_count", 0)
-                
-                output(f"      数据类型: 全量A股主板数据")
-                output(f"      股票总数: {total_stocks} 只")
-                output(f"      成功获取: {success_count} 只")
-                output(f"      获取失败: {fail_count} 只")
-                
-                # 显示测试股票数据
-                if "test_stock" in cache_data and cache_data["test_stock"]:
-                    test_data = cache_data["test_stock"]
-                    dates = test_data.get("dates", [])
-                    output(f"      测试股票: 000001.SZ")
-                    output(f"      数据条数: {len(dates)}条")
-                    if len(dates) > 0:
-                        output(f"      日期范围: {dates[0]} ~ {dates[-1]}")
-                
-                output("")
-                output("="*50)
-                output("✅✅✅ Choice全量数据测试成功！")
-                output("💡 文件缓存模式（最稳定）")
-                output("="*50)
-                self.choice_connected = True
-                
-            elif "test_stock" in cache_data:
-                stock_data = cache_data["test_stock"]
-                stock_code = stock_data.get("stock_code", "未知")
-                dates = stock_data.get("dates", [])
-                data = stock_data.get("data", {})
-                
-                output(f"      股票代码: {stock_code}")
-                output(f"      数据条数: {len(dates)}条")
-                
-                if len(dates) > 0:
-                    output(f"      日期范围: {dates[0]} ~ {dates[-1]}")
+            # 转换Choice数据格式为系统格式
+            print(f">>> 开始转换数据格式")
+            self.show_progress("正在转换数据格式...")
+            converted_data = {}
+            
+            for code, stock_data in stocks.items():
+                try:
+                    # 优先使用新格式 daily_data
+                    daily_data = stock_data.get("daily_data")
                     
-                    # 显示最近一日数据
-                    if data:
-                        output("")
-                        output("      最新一日数据:")
-                        for indicator, values in data.items():
-                            if values and len(values) > 0:
-                                last_val = values[-1]
-                                if last_val is not None:
-                                    output(f"        {indicator}: {last_val}")
+                    # 如果没有 daily_data，从旧格式 kline 转换
+                    if not daily_data:
+                        kline = stock_data.get("kline", {})
+                        raw_data = kline.get("data", {})
+                        dates = kline.get("dates", [])
+                        
+                        if not raw_data or len(dates) == 0:
+                            continue
+                        
+                        # 转换为系统兼容格式
+                        daily_data = []
+                        closes = raw_data.get("CLOSE", [])
+                        volumes = raw_data.get("VOLUME", [])
+                        opens = raw_data.get("OPEN", [])
+                        highs = raw_data.get("HIGH", [])
+                        lows = raw_data.get("LOW", [])
+                        
+                        for i, date in enumerate(dates):
+                            day_record = {'date': date}
+                            if i < len(closes): day_record['close'] = closes[i]
+                            if i < len(volumes): day_record['volume'] = volumes[i]
+                            if i < len(opens): day_record['open'] = opens[i]
+                            if i < len(highs): day_record['high'] = highs[i]
+                            if i < len(lows): day_record['low'] = lows[i]
+                            daily_data.append(day_record)
+                    
+                    if not daily_data:
+                        continue
+                    
+                    # 计算技术指标
+                    tech_data = self._calculate_tech_data_from_kline(daily_data)
+                    if not tech_data:
+                        continue
+                    
+                    # 获取基本面数据
+                    fund_data = stock_data.get("fund_data", {})
+                    
+                    # 转换为系统标准格式
+                    converted_data[code] = {
+                        'tech_data': tech_data,
+                        'fund_data': fund_data,
+                        'basic_info': {
+                            'name': stock_data.get('name', '')
+                        }
+                    }
+                    
+                except Exception as e:
+                    print(f"转换股票 {code} 数据失败: {e}")
+                    continue
+            
+            print(f">>> 转换完成，有效股票数: {len(converted_data)}")
+            if not converted_data:
+                print(f">>> 转换后数据为空")
+                self.show_progress("ERROR: 数据转换后无有效股票")
+                return
+            
+            self.show_progress(f"✅ 成功转换 {len(converted_data)} 只股票数据")
+            
+            # 将转换后的数据存储到 comprehensive_stock_data
+            print(f">>> 存储到 comprehensive_stock_data")
+            self.comprehensive_stock_data = converted_data
+            
+            # 使用与快速评分相同的筛选和评分逻辑
+            print(f">>> 开始筛选")
+            self.show_progress("\n开始筛选和评分...")
+            
+            # ST筛选
+            filtered_stocks = {}
+            st_filtered_list = []
+            
+            for code, stock_data in converted_data.items():
+                name = stock_data.get('basic_info', {}).get('name', '')
+                if not self.is_st_stock(code, name):
+                    filtered_stocks[code] = stock_data
+                else:
+                    st_filtered_list.append(f"{code} {name}")
+            
+            st_filtered_count = len(st_filtered_list)
+            print(f">>> ST筛选完成: 过滤{st_filtered_count}只，剩余{len(filtered_stocks)}只")
+            self.show_progress(f"ST筛选: 排除 {st_filtered_count} 只ST股票")
+            
+            # 低分筛选
+            print(f">>> 开始低分筛选")
+            min_score_threshold = 6.0
+            if hasattr(self, 'min_score_var'):
+                min_score_threshold = self.min_score_var.get()
+            
+            print(f">>> 加载评分表")
+            self.load_batch_scores()
+            low_score_filtered_count = 0
+            
+            if hasattr(self, 'batch_scores') and self.batch_scores:
+                final_filtered_stocks = {}
+                for code, stock_data in filtered_stocks.items():
+                    if code in self.batch_scores:
+                        score_data = self.batch_scores[code]
+                        overall_score = score_data.get('score', score_data.get('overall_score', 0))
+                        if overall_score >= min_score_threshold:
+                            final_filtered_stocks[code] = stock_data
+                        else:
+                            low_score_filtered_count += 1
+                    else:
+                        final_filtered_stocks[code] = stock_data
                 
-                output("")
-                output("="*50)
-                output("✅✅✅ Choice缓存数据测试成功！")
-                output("💡 文件缓存模式（最稳定）")
-                output("="*50)
-                self.choice_connected = True
-            else:
-                output("⚠️  缓存文件格式异常")
+                filtered_stocks = final_filtered_stocks
+            
+            total_count = len(filtered_stocks)
+            print(f">>> 低分筛选完成: 过滤{low_score_filtered_count}只，剩余{total_count}只")
+            self.show_progress(f"低分筛选: 排除 {low_score_filtered_count} 只低分股票 (< {min_score_threshold:.1f}分)")
+            self.show_progress(f"\n🎯 最终候选: {total_count} 只股票")
+            
+            # 保存筛选后的股票列表
+            print(f">>> 保存筛选结果")
+            self._quick_score_filtered_codes = list(filtered_stocks.keys())
+            self._is_quick_scoring_mode = True
+            
+            # 在主线程中调用批量评分（与快速评分相同的逻辑）
+            print(f">>> 准备调用批量评分")
+            self.show_progress("\n开始批量评分...")
+            self.root.after(0, lambda: self.start_batch_scoring_by_type("全部"))
+            print(f">>> _test_choice_wrapper 执行完成")
+            
+        except Exception as e:
+            print(f">>> 异常: {type(e).__name__}: {e}")
+            self.show_progress(f"ERROR: Choice数据处理失败: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def _score_single_stock_for_test(self, code, stock_data):
+        """为单只股票评分（测试用）- 使用与主评分系统相同的逻辑"""
+        try:
+            # Choice数据结构:
+            # 新格式: {name, kline: {...}, daily_data: [{date, close, volume, ...}, ...], fund_data: {pe_ratio, pb_ratio, ...}}
+            # 旧格式: {name, kline: {stock_code, dates, indicators, data}}
+            
+            # 优先使用新格式 daily_data（系统兼容格式）
+            daily_data = stock_data.get("daily_data")
+            
+            # 如果没有 daily_data，从旧格式 kline 转换
+            if not daily_data:
+                kline = stock_data.get("kline", {})
+                raw_data = kline.get("data", {})
+                dates = kline.get("dates", [])
+                
+                if not raw_data or len(dates) == 0:
+                    return None
+                
+                # 转换旧格式为系统兼容格式
+                daily_data = []
+                closes = raw_data.get("CLOSE", [])
+                volumes = raw_data.get("VOLUME", [])
+                opens = raw_data.get("OPEN", [])
+                highs = raw_data.get("HIGH", [])
+                lows = raw_data.get("LOW", [])
+                
+                for i, date in enumerate(dates):
+                    day_record = {'date': date}
+                    if i < len(closes): day_record['close'] = closes[i]
+                    if i < len(volumes): day_record['volume'] = volumes[i]
+                    if i < len(opens): day_record['open'] = opens[i]
+                    if i < len(highs): day_record['high'] = highs[i]
+                    if i < len(lows): day_record['low'] = lows[i]
+                    daily_data.append(day_record)
+            
+            if not daily_data:
+                return None
+            
+            # 使用系统标准函数计算技术指标
+            tech_data = self._calculate_tech_data_from_kline(daily_data)
+            
+            if not tech_data:
+                return None
+            
+            # 获取基本面数据
+            fund_data = stock_data.get("fund_data", {})
+            
+            # 临时存储数据以便调用现有评分函数
+            if not hasattr(self, 'comprehensive_stock_data'):
+                self.comprehensive_stock_data = {}
+            
+            # 同时保存技术数据和基本面数据
+            self.comprehensive_stock_data[code] = {
+                'tech_data': tech_data,
+                'fund_data': fund_data  # 使用Choice获取的基本面数据（包含PE、PB）
+            }
+            
+            # 调用系统的标准评分函数
+            score = self.get_stock_score_for_batch(code)
+            
+            # 计算5日涨跌幅用于显示
+            price_change_5d = None
+            if len(daily_data) >= 5:
+                recent_closes = [d.get('close') for d in daily_data[-5:] if d.get('close') is not None]
+                if len(recent_closes) >= 2:
+                    price_change_5d = (recent_closes[-1] - recent_closes[0]) / recent_closes[0] * 100
+            
+            return {
+                "overall_score": score,
+                "price_change_5d": round(price_change_5d, 2) if price_change_5d else None,
+                "pe_ratio": fund_data.get('pe_ratio'),
+                "pb_ratio": fund_data.get('pb_ratio')
+            }
+            
+        except Exception as e:
+            print(f"评分异常 {code}: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+            
+    # TODO: 以下是数据读取和验证逻辑，暂时注释用于测试BAT执行
+    # 后续可以恢复这部分代码用于完整的数据验证
+    #                 if field in cache_data:
+    #                     validation_msgs.append(f"✅ 字段 '{field}' 存在")
+    #                 else:
+    #                     format_valid = False
+    #                     validation_msgs.append(f"❌ 缺少必需字段 '{field}'")
+    #             
+    #             # 检查 stocks 结构
+    #             if "stocks" in cache_data:
+    #                 stocks = cache_data["stocks"]
+    #                 if isinstance(stocks, dict):
+    #                     validation_msgs.append(f"✅ stocks 为字典类型 (符合标准)")
+    #                     
+    #                     # 检查第一只股票的结构
+    #                     if stocks:
+    #                         first_code, first_stock = next(iter(stocks.items()))
+    #                         if isinstance(first_stock, dict):
+    #                             if "name" in first_stock and "kline" in first_stock:
+    #                                 validation_msgs.append(f"✅ 股票数据包含 'name' 和 'kline' 字段")
+    #                                 
+    #                                 # 检查 kline 结构
+    #                                 kline = first_stock.get("kline", {})
+    #                                 kline_fields = ["stock_code", "dates", "indicators", "data"]
+    #                                 kline_valid = all(f in kline for f in kline_fields)
+    #                                 if kline_valid:
+    #                                     validation_msgs.append(f"✅ kline 数据结构完整 (stock_code, dates, indicators, data)")
+    #                                 else:
+    #                                     format_valid = False
+    #                                     missing = [f for f in kline_fields if f not in kline]
+    #                                     validation_msgs.append(f"❌ kline 缺少字段: {missing}")
+    #                             else:
+    #                                 format_valid = False
+    #                                 validation_msgs.append(f"❌ 股票数据缺少 'name' 或 'kline' 字段")
+    #                         else:
+    #                             format_valid = False
+    #                             validation_msgs.append(f"❌ 股票数据应为字典类型")
+    #                 else:
+    #                     format_valid = False
+    #                     validation_msgs.append(f"❌ stocks 应为字典类型")
+    #         
+    #         # 输出验证结果
+    #         for msg in validation_msgs:
+    #             output(f"  {msg}")
+    #         output("")
+    #         
+    #         if format_valid:
+    #             output("✅✅ 数据格式验证通过！符合系统数据标准")
+    #         else:
+    #             output("⚠️  数据格式存在问题，可能影响后续使用")
+    #         output("")
+    #         
+    #         # 兼容全量格式：cache_data 是 dict，包含 stocks 映射
+    #         if isinstance(cache_data, dict) and "stocks" in cache_data:
+    #             stocks = cache_data.get("stocks", {})
+    #             if len(stocks) == 0:
+    #                 output("⚠️  结果文件无股票数据，请检查返回码/日志")
+    #             else:
+    #                 output(f"✅ 成功读取 {len(stocks)} 只股票的数据")
+    #             output("")
+    #             output("[3/3] 数据汇总")
+    #             output(f"      股票数量: {len(stocks)} 只")
+    #             output(f"      成功: {cache_data.get('success_count', '未知')}")
+    #             output(f"      失败: {cache_data.get('fail_count', '未知')}")
+    #             # 显示第一只股票
+    #             if stocks:
+    #                 first_code, first_obj = next(iter(stocks.items()))
+    #                 kline = first_obj.get("kline", {}) if isinstance(first_obj, dict) else {}
+    #                 dates = kline.get("dates", [])
+    #                 output("")
+    #                 output("="*50)
+    #                 output(f"示例数据: {first_code}")
+    #                 output(f"数据条数: {len(dates)} 条")
+    #                 if dates:
+    #                     output(f"日期范围: {dates[0]} ~ {dates[-1]}")
+    #                     output("")
+    #                     output("最新一日数据:")
+    #                     for indicator, values in kline.get("data", {}).items():
+    #                         if values:
+    #                             last_val = values[-1]
+    #                             if last_val is not None:
+    #                                 output(f"  {indicator}: {last_val}")
+    #                 output("="*50)
+    #         else:
+    #             # 兼容旧的列表格式
+    #             if isinstance(cache_data, list):
+    #                 output(f"✅ 成功读取 {len(cache_data)} 只股票的数据")
+    #                 output("")
+    #                 output("[3/3] 数据汇总")
+    #                 output(f"      股票数量: {len(cache_data)} 只")
+    #                 if cache_data:
+    #                     first_stock = cache_data[0]
+    #                     output("")
+    #                     output("="*50)
+    #                     output(f"示例数据: {first_stock.get('stock_code', '未知')}")
+    #                     dates = first_stock.get('dates', [])
+    #                     output(f"数据条数: {len(dates)} 条")
+    #                     if dates:
+    #                         output(f"日期范围: {dates[0]} ~ {dates[-1]}")
+    #                         output("")
+    #                         output("最新一日数据:")
+    #                         for indicator, values in first_stock.get('data', {}).items():
+    #                             if values:
+    #                                 last_val = values[-1]
+    #                                 if last_val is not None:
+    #                                     output(f"  {indicator}: {last_val}")
+    #                     output("="*50)
+    #         
+    #         output("")
+    #         output("✅✅✅ Choice获取A股主板50日K线数据成功！")
+    #         if is_fresh_data:
+    #             output("✅ 确认读取的是本次运行生成的新数据")
+    #         elif is_fresh_data == False:
+    #             output("⚠️ 注意：读取的是旧数据，非本次运行生成")
+    #         output(f"💾 数据已保存: {result_file}")
+    #         self.choice_connected = True
                     
         except Exception as e:
-            self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+            output(f"❌ 测试异常: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
     
