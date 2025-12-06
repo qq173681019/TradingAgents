@@ -99,6 +99,7 @@ import random
 import sys
 import tempfile
 import time
+from datetime import datetime
 from typing import Dict, List, Optional
 
 try:
@@ -1755,6 +1756,7 @@ class AShareAnalyzerGUI:
     def get_all_stock_codes(self, stock_type="全部"):
         """获取A股股票代码，根据股票类型过滤"""
         all_stocks = []
+        st_filtered_count = 0
         
         # 尝试从akshare获取股票列表
         akshare_success = False
@@ -1766,13 +1768,24 @@ class AShareAnalyzerGUI:
             if stock_list is not None and not stock_list.empty:
                 for _, row in stock_list.iterrows():
                     code = str(row['code'])
+                    name = str(row.get('name', ''))
+                    
+                    # 🔴 筛选ST股票（如果启用）
+                    if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                        if self.is_st_stock(code, name):
+                            st_filtered_count += 1
+                            continue
+                    
                     if self.is_stock_type_match(code, stock_type):
                         if code not in all_stocks:
                             all_stocks.append(code)
                 
                 if all_stocks:
                     akshare_success = True
-                    print(f"[INFO] 从 akshare 获取到 {len(all_stocks)} 只{stock_type}股票")
+                    if st_filtered_count > 0:
+                        print(f"[INFO] 从 akshare 获取到 {len(all_stocks)} 只{stock_type}股票（已排除 {st_filtered_count} 只ST股票）")
+                    else:
+                        print(f"[INFO] 从 akshare 获取到 {len(all_stocks)} 只{stock_type}股票")
             
             # 获取ETF列表（仅当类型为"全部"或"ETF"时）
             if stock_type in ["全部", "ETF"]:
@@ -5140,10 +5153,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             print(f"[进度更新失败] {e}")
     
     def is_st_stock(self, code, name=""):
-        """判断是否为ST股票"""
-        if not hasattr(self, 'filter_st_var') or not self.filter_st_var.get():
-            return False  # 如果没有启用筛选，则不是ST股票
-            
+        """判断是否为ST股票（独立判断，不检查filter_st_var）"""
         # 检查股票代码
         code_upper = code.upper() if code else ""
         name_upper = name.upper() if name else ""
@@ -12736,8 +12746,16 @@ DATA: 推荐统计:
         try:
             # 过滤符合类型要求的股票
             filtered_stocks = []
+            st_filtered_count = 0
             
             for code, data in self.batch_scores.items():
+                # 🔴 筛选ST股票（如果启用）
+                if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                    stock_name = data.get('name', '')
+                    if self.is_st_stock(code, stock_name):
+                        st_filtered_count += 1
+                        continue
+                
                 # 根据pool_type筛选
                 if pool_type == "main_board" and not (code.startswith('600') or code.startswith('000') or code.startswith('002')):
                     continue
@@ -12768,6 +12786,10 @@ DATA: 推荐统计:
             total_batch_stocks = len(self.batch_scores)
             qualified_count = len(filtered_stocks)
             recommended_count = len(recommended_stocks)
+            
+            # 打印ST筛选信息
+            if st_filtered_count > 0:
+                print(f"🚫 推荐过程中已排除 {st_filtered_count} 只ST股票")
             
             # 显示推荐结果
             self._display_batch_recommendation_report(recommended_stocks, total_batch_stocks, 
@@ -14801,15 +14823,27 @@ WARNING: 重要声明:
                 
                 # 从batch_scores中筛选符合类型的股票
                 filtered_stocks = []
+                st_filtered_count = 0
+                
                 for code, score_data in self.batch_scores.items():
                     if self.is_stock_type_match(code, stock_type):
+                        # 🔴 筛选ST股票（如果启用）
+                        stock_name = score_data.get('name', f'股票{code}')
+                        if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                            if self.is_st_stock(code, stock_name):
+                                st_filtered_count += 1
+                                continue
+                        
                         filtered_stocks.append({
                             'code': code,
-                            'name': score_data.get('name', f'股票{code}'),
+                            'name': stock_name,
                             'score': score_data.get('score', 0),  # 使用综合评分
                             'industry': score_data.get('industry', '未知'),
                             'timestamp': score_data.get('timestamp', '')
                         })
+                
+                if st_filtered_count > 0:
+                    print(f"🚫 综合推荐已排除 {st_filtered_count} 只ST股票")
             else:
                 # 优先检查批量评分数据是否包含时间段评分
                 period_map = {
@@ -14837,20 +14871,31 @@ WARNING: 重要声明:
                     print(f"已加载批量评分数据，共{len(self.batch_scores)}只股票")
                     
                     filtered_stocks = []
+                    st_filtered_count = 0
                     period_score_key = f"{period_type}_term_score"
                     
                     for code, score_data in self.batch_scores.items():
                         if self.is_stock_type_match(code, stock_type):
                             period_score = score_data.get(period_score_key, 0)
                             if period_score > 0:  # 只包含有效评分的股票
+                                # 🔴 筛选ST股票（如果启用）
+                                stock_name = score_data.get('name', f'股票{code}')
+                                if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                                    if self.is_st_stock(code, stock_name):
+                                        st_filtered_count += 1
+                                        continue
+                                
                                 filtered_stocks.append({
                                     'code': code,
-                                    'name': score_data.get('name', f'股票{code}'),
+                                    'name': stock_name,
                                     'score': period_score,  # 使用时间段特定评分
                                     'industry': score_data.get('industry', '未知'),
                                     'timestamp': score_data.get('timestamp', ''),
                                     'source': f'batch_{period_type}'
                                 })
+                    
+                    if st_filtered_count > 0:
+                        print(f"🚫 {period_name}推荐已排除 {st_filtered_count} 只ST股票")
                 else:
                     # 回退到综合推荐数据的时间段评分
                     print(f"批量评分数据中无{period_name}评分，使用综合推荐数据...")
@@ -14886,6 +14931,7 @@ WARNING: 重要声明:
                     
                     # 从comprehensive_data中筛选符合类型的股票
                     filtered_stocks = []
+                    st_filtered_count = 0
                     period_key = f"{period_type}_term"
                     print(f"🔍 正在查找键名: '{period_key}'")
                     
@@ -14895,6 +14941,13 @@ WARNING: 重要声明:
                                 period_data = stock_data[period_key]
                                 score = period_data.get('score', 0)
                                 if score > 0:
+                                    # 🔴 筛选ST股票（如果启用）
+                                    stock_name = stock_data.get('name', f'股票{code}')
+                                    if hasattr(self, 'filter_st_var') and self.filter_st_var.get():
+                                        if self.is_st_stock(code, stock_name):
+                                            st_filtered_count += 1
+                                            continue
+                                    
                                     filtered_stocks.append({
                                         'code': code,
                                         'name': stock_data.get('name', f'股票{code}'),
@@ -14904,6 +14957,9 @@ WARNING: 重要声明:
                                         'timestamp': stock_data.get('timestamp', ''),
                                         'source': f'comprehensive_{period_type}'
                                     })
+                    
+                    if st_filtered_count > 0:
+                        print(f"🚫 {period_name}推荐已排除 {st_filtered_count} 只ST股票")
             
             # 转换股票类型过滤（向后兼容）
             if stock_type == "60/00/68":
@@ -14944,10 +15000,26 @@ WARNING: 重要声明:
                     self.root.after(0, self.show_error, error_msg)
                 return
             
-            # 按评分排序，取前10名
-            filtered_stocks.sort(key=lambda x: x['score'], reverse=True)
-            top_recommendations = filtered_stocks[:10]
+            # 获取最低评分阈值
+            min_score_threshold = self.min_score_var.get() if hasattr(self, 'min_score_var') else 6.0
+            print(f"📊 最低评分阈值: {min_score_threshold:.1f} 分")
             
+            # 按评分筛选（只保留评分 >= 阈值的股票）
+            qualified_stocks = [stock for stock in filtered_stocks if stock['score'] >= min_score_threshold]
+            
+            if not qualified_stocks:
+                period_display = period_map.get(period_type, "综合") if period_type != 'overall' else "综合"
+                error_msg = f"未找到评分 ≥ {min_score_threshold:.1f} 的{stock_type}股票\n\n当前最高评分: {max([s['score'] for s in filtered_stocks]):.1f}\n建议降低推荐评分阈值"
+                print(error_msg)
+                if self.root:
+                    self.root.after(0, self.show_error, error_msg)
+                return
+            
+            # 按评分排序，取前10名
+            qualified_stocks.sort(key=lambda x: x['score'], reverse=True)
+            top_recommendations = qualified_stocks[:10]
+            
+            print(f"符合评分条件的股票数: {len(qualified_stocks)} 只 (≥{min_score_threshold:.1f}分)")
             print(f"推荐股票数: {len(top_recommendations)}")
             if top_recommendations:
                 print(f"🥇 最高评分: {top_recommendations[0]['score']:.2f} ({top_recommendations[0]['name']})")

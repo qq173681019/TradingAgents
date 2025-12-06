@@ -183,69 +183,8 @@ class ComprehensiveDataCollector:
     
     def __init__(self):
         self.tushare_token = os.environ.get('TUSHARE_TOKEN', '4a1bd8dea786a5525663fafcf729a2b081f9f66145a0671c8adf2f28')
-        self.data_sources = ['choice', 'tushare', 'baostock', 'yfinance', 'tencent', 'akshare']
+        self.data_sources = ['tushare', 'baostock', 'yfinance', 'tencent', 'akshare']  # 移除choice API
         self.current_source_index = 0
-        
-        # 初始化 Choice 金融终端 (最高优先级数据源) - 使用独立进程包装器
-        self.choice_wrapper = None
-        self.choice_available = False  # Choice可用性标志
-        self.choice_login_attempted = False  # 标记是否已尝试登录
-        if ENABLE_CHOICE:
-            try:
-                from choice_api_wrapper import ChoiceAPIWrapper
-                self.choice_wrapper = ChoiceAPIWrapper()
-                print("[INFO] Choice金融终端 已初始化 (独立进程模式)")
-                print("[INFO] 💡 使用独立进程避免调试器环境冲突")
-                print("[INFO] ⏰ Choice将在第一次使用时自动连接")
-                
-                # 不再在启动时测试连接，避免WinError 87导致SDK状态损坏
-                # 将在第一次实际使用时才尝试登录
-                if False:  # 禁用启动时的连接测试
-                    self.choice_available = True
-                    print("[SUCCESS] ✅ Choice连接测试成功，可以使用")
-                else:
-                    # Choice连接失败，直接退出程序
-                    print("\n" + "=" * 70)
-                    print("❌ FATAL ERROR: Choice金融终端连接失败，程序无法继续")
-                    print("=" * 70)
-                    print("\n常见问题和解决方法:")
-                    print("\n【问题1】WinError 87 参数错误 ⚠️")
-                    print("  这是最常见的问题！")
-                    print("  原因: Choice客户端虽然运行，但未完全就绪")
-                    print("  解决步骤:")
-                    print("    ✓ 1. 打开Choice客户端窗口（不要最小化）")
-                    print("    ✓ 2. 确认已成功登录（能看到实时行情跳动）")
-                    print("    ✓ 3. 等待30-60秒让客户端完全加载")
-                    print("    ✓ 4. 保持客户端窗口打开状态")
-                    print("    ✓ 5. 重新运行本程序")
-                    print("\n  💡 提示: 客户端登录后需要时间初始化内部服务")
-                    print("\n【问题2】setserverlistdir 错误")
-                    print("  原因: 重复初始化或客户端未就绪")
-                    print("  解决: 确保客户端已完全启动后再运行程序")
-                    print("\n【问题3】其他连接错误")
-                    print("  原因: 网络问题或账号权限问题")
-                    print("  解决:")
-                    print("    1. 检查网络连接")
-                    print("    2. 确认账号有数据访问权限")
-                    print("    3. 尝试重启Choice客户端")
-                    print("\n💡 提示: 必须先解决Choice连接问题，程序才能正常使用")
-                    print("=" * 70 + "\n")
-                    import sys
-                    sys.exit(1)  # 退出程序
-                    
-            except Exception as e:
-                # Choice初始化异常，直接退出程序
-                print("=" * 70)
-                print(f"❌ FATAL ERROR: Choice金融终端初始化异常")
-                print("=" * 70)
-                print(f"\n错误详情: {e}")
-                print("\n请检查:")
-                print("  1. Choice客户端是否已正确安装")
-                print("  2. EmQuantAPI模块是否正确安装")
-                print("  3. Choice客户端版本是否兼容")
-                print("=" * 70)
-                import sys
-                sys.exit(1)  # 退出程序
         
         # 等待期间数据源策略
         self.wait_period_strategy = {
@@ -1058,91 +997,11 @@ class ComprehensiveDataCollector:
         
         print(f"[INFO] 获取日期范围: {start_iso} 到 {end_iso} ({self.kline_days}天)")
         
-        # 优先尝试Choice金融终端(只有初始化测试成功才使用)
+        # 不使用 Choice API，直接使用其他数据源
         primary_source = None
         primary_codes = codes.copy()
-        fallback_codes = []
         
-        # 延迟登录：第一次使用时才尝试连接
-        if self.choice_wrapper and not self.choice_login_attempted:
-            print(f"[INFO] 首次使用Choice，测试连接...")
-            self.choice_login_attempted = True
-            # 测试连接
-            test_result = self.choice_wrapper.get_kline_data("000001.SZ", days=5)
-            if test_result["success"]:
-                self.choice_available = True
-                print("[SUCCESS] ✅ Choice连接成功")
-            else:
-                print("[WARN] ⚠️ Choice连接失败，将使用备用数据源")
-                print(f"[INFO] 错误: {test_result.get('error', '未知')}")
-                print("[INFO] 💡 如需使用Choice，请:")
-                print("      1. 确保Choice客户端已完全启动")
-                print("      2. 重启本程序")
-                self.choice_available = False
-        
-        if self.choice_available and self.choice_wrapper:
-            print(f"[INFO] 使用 Choice金融终端 批量处理 {total_codes} 只股票...")
-            primary_source = 'choice'
-            try:
-                choice_success = []
-                for idx, code in enumerate(codes, 1):
-                    try:
-                        # 计算日期范围
-                        import pandas as pd
-                        start_date_str = pd.Timestamp(start_date).strftime("%Y-%m-%d")
-                        end_date_str = pd.Timestamp(end_date).strftime("%Y-%m-%d")
-                        
-                        # 使用wrapper获取K线数据
-                        choice_result = self.choice_wrapper.get_kline_data(
-                            code, 
-                            start_date=start_date_str, 
-                            end_date=end_date_str,
-                            indicators="OPEN,HIGH,LOW,CLOSE,VOLUME"
-                        )
-                        
-                        if choice_result["success"] and choice_result.get("dates"):
-                            # 转换为DataFrame
-                            df_data = {
-                                'date': choice_result['dates'],
-                            }
-                            for indicator, values in choice_result['data'].items():
-                                df_data[indicator.lower()] = values
-                            
-                            df = pd.DataFrame(df_data)
-                            df = self.standardize_kline_columns(df, 'choice')
-                            
-                            if not df.empty:
-                                result[code] = df
-                                choice_success.append(code)
-                            else:
-                                fallback_codes.append(code)
-                        else:
-                            fallback_codes.append(code)
-                            
-                        time.sleep(0.1)  # Choice请求间隔
-                    except Exception as e:
-                        print(f"[WARN] Choice获取{code}失败: {e}")
-                        fallback_codes.append(code)
-                        continue
-                
-                print(f"[SUCCESS] Choice 成功: {len(choice_success)}/{total_codes} 只")
-                    
-                    # 如果Choice全部成功，直接返回
-                    if not fallback_codes:
-                        print(f"[SUMMARY] K线数据采集完成: {len(result)}/{total_codes} 只成功 (100.0%)")
-                        print(f"[DETAIL] 数据源: Choice专业金融终端")
-                        return result
-                    else:
-                        print(f"[INFO] 有 {len(fallback_codes)} 只股票需要其他数据源处理")
-                        codes = fallback_codes
-                        primary_codes = fallback_codes.copy()
-                else:
-                    primary_source = None
-            except Exception as e:
-                print(f"[ERROR] Choice 批量处理异常: {e}")
-                primary_source = None
-        
-        # 如果Choice不可用或部分失败，使用其他数据源
+        # 使用其他数据源
         if primary_source is None:
             # 检查上次TUSHARE调用时间，决定使用哪个数据源
             current_time = time.time()

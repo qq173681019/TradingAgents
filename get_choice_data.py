@@ -1,0 +1,536 @@
+"""测试Choice SDK - 获取A股主板股票50日K线数据"""
+import json
+import os
+import sys
+from datetime import datetime, timedelta
+
+from config import CHOICE_PASSWORD, CHOICE_USERNAME
+
+
+# 修复 WinError 87: 预加载依赖 DLL 并设置正确的加载模式
+def setup_choice_dll_path():
+    """设置 Choice DLL 路径以避免 WinError 87"""
+    import ctypes
+
+    # Choice DLL 在项目的 libs/windows 目录
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    dll_dir = os.path.join(script_dir, "libs", "windows")
+    
+    if not os.path.exists(dll_dir):
+        print(f"警告: Choice DLL 目录不存在: {dll_dir}")
+        return False
+    
+    print(f"找到 Choice DLL 目录: {dll_dir}")
+    
+    # 方法1: 添加到 PATH（适用于所有 Python 版本）
+    if dll_dir not in os.environ.get('PATH', ''):
+        os.environ['PATH'] = dll_dir + os.pathsep + os.environ.get('PATH', '')
+        print(f"✓ 已添加到 PATH: {dll_dir}")
+    
+    # 方法2: Python 3.8+ 的 DLL 目录（推荐）
+    if sys.version_info >= (3, 8):
+        try:
+            os.add_dll_directory(dll_dir)
+            print(f"✓ 已添加 DLL 搜索目录 (Python 3.8+): {dll_dir}")
+        except (OSError, AttributeError) as e:
+            print(f"! 添加 DLL 搜索目录失败: {e}")
+    
+    # 方法3: 预加载 Choice DLL 及其依赖项（最可靠）
+    try:
+        # 确定 DLL 文件名（32位或64位）
+        import platform
+        is_64bit = platform.architecture()[0] == '64bit'
+        dll_name = "EmQuantAPI_x64.dll" if is_64bit else "EmQuantAPI.dll"
+        dll_path = os.path.join(dll_dir, dll_name)
+        
+        if not os.path.exists(dll_path):
+            print(f"! DLL 文件不存在: {dll_path}")
+            return False
+        
+        print(f"准备加载: {dll_name}")
+        
+        # 使用 LOAD_WITH_ALTERED_SEARCH_PATH 模式加载 DLL
+        # 这会让系统从 DLL 所在目录搜索依赖项
+        if sys.version_info >= (3, 8):
+            # Python 3.8+ 使用 winmode 参数
+            import ctypes.wintypes
+            LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008
+            ctypes.CDLL(dll_path, winmode=LOAD_WITH_ALTERED_SEARCH_PATH)
+            print(f"✓ 已预加载 DLL (winmode): {dll_name}")
+        else:
+            # Python 3.7 及以下
+            ctypes.CDLL(dll_path)
+            print(f"✓ 已预加载 DLL: {dll_name}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"! 预加载 DLL 失败: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+print("="*60)
+print("正在初始化 Choice SDK 环境...")
+print("="*60)
+
+if not setup_choice_dll_path():
+    print("\n❌ Choice DLL 环境设置失败")
+    print("请确保:")
+    print("  1. libs/windows 目录存在")
+    print("  2. EmQuantAPI_x64.dll (或 EmQuantAPI.dll) 文件存在")
+    print("  3. 所有依赖的 DLL 文件都在 libs/windows 目录中")
+    sys.exit(1)
+
+print("\n✓ Choice SDK 环境设置完成，开始导入 EmQuantAPI...")
+
+from EmQuantAPI import c
+
+print("✓ EmQuantAPI 导入成功\n")
+
+
+def login_callback(msg):
+    """捕获Choice登录回调信息"""
+    decoded_msg = msg.decode('utf-8', errors='ignore')
+    print(f"[登录回调] {decoded_msg}")
+    return 1
+
+def main():
+    print("="*60)
+    print("Choice SDK - A股主板50日K线数据测试")
+    print("="*60)
+    
+    # 1. 初始化Choice SDK
+    print("\n[1/5] 初始化Choice SDK...")
+    print("使用已保存的Token登录（该账号有K线数据权限）")
+    print(f"注意：config.py中的账号 {CHOICE_USERNAME} 没有K线权限，不使用")
+    result = c.start("", logcallback=login_callback)
+    if result.ErrorCode != 0:
+        print(f"❌ Choice连接失败: {result.ErrorMsg}")
+        return
+    print("✅ Choice连接成功")
+    
+    # 计算日期范围（50个交易日约等于70个自然日）
+    end_date = datetime.now().strftime("%Y-%m-%d")
+    start_date = (datetime.now() - timedelta(days=70)).strftime("%Y-%m-%d")
+    
+    # 2. 获取A股全部主板股票代码列表（排除ST和创业板）
+    print("\n[2/5] 获取主板股票列表...")
+    
+    mainboard_stocks = []
+    
+    # 方法1：尝试使用板块API获取
+    print("  方法1: 尝试从板块API获取...")
+    try:
+        sector_data = c.sector("001004", end_date)
+        print(f"  sector() 返回: ErrorCode={sector_data.ErrorCode}")
+        
+        if sector_data.ErrorCode == 0 and hasattr(sector_data, 'Data') and sector_data.Data:
+            raw_data = sector_data.Data
+            print(f"  获取到 {len(raw_data)} 个数据项")
+            print(f"  示例数据: {raw_data[:5]}")
+            
+            # sector()返回的是 [代码1, 名称1, 代码2, 名称2, ...] 的格式
+            # 需要提取偶数索引的股票代码
+            all_codes = []
+            stock_names = {}  # 同时建立代码到名称的映射
+            
+            for i in range(0, len(raw_data), 2):
+                if i + 1 < len(raw_data):
+                    code = raw_data[i]
+                    name = raw_data[i + 1]
+                    # 验证是股票代码（包含.SH或.SZ）
+                    if '.' in code and (code.endswith('.SH') or code.endswith('.SZ')):
+                        all_codes.append(code)
+                        stock_names[code] = name
+            
+            print(f"  解析出 {len(all_codes)} 只股票代码")
+            print(f"  股票代码示例: {all_codes[:3]}")
+            
+            mainboard_stocks = []
+            mainboard_stock_names = {}  # 保存主板股票的名称映射
+            filtered_st = 0
+            filtered_board = 0
+            invalid_format = 0
+            
+            for stock_code in all_codes:
+                # 验证股票代码格式（已经在解析时验证过了，这里再次确认）
+                if '.' not in stock_code or len(stock_code.split('.')) != 2:
+                    invalid_format += 1
+                    continue
+                
+                code_part, exchange = stock_code.split('.')
+                if exchange not in ['SH', 'SZ'] or len(code_part) != 6:
+                    invalid_format += 1
+                    continue
+                
+                # 检查代码前缀（只保留主板）
+                code_prefix = code_part[:3]
+                
+                # 排除创业板（300）、科创板（688）、北交所（8开头、4开头）
+                if code_prefix in ['300', '688'] or code_part[0] in ['8', '4']:
+                    filtered_board += 1
+                    continue
+                
+                # 只保留主板代码
+                if code_prefix not in ['600', '601', '603', '605', '000', '001', '002']:
+                    filtered_board += 1
+                    continue
+                
+                # 检查是否ST股票（使用之前解析的名称）
+                stock_name = stock_names.get(stock_code, "")
+                if 'ST' in stock_name:
+                    filtered_st += 1
+                    continue
+                
+                mainboard_stocks.append(stock_code)
+                mainboard_stock_names[stock_code] = stock_name  # 保存名称
+            
+            print(f"✅ 方法1成功: 获取到 {len(mainboard_stocks)} 只主板股票（已排除ST）")
+            print(f"   已排除: {filtered_st} 只ST股票, {filtered_board} 只非主板股票, {invalid_format} 只格式错误")
+        else:
+            print(f"⚠️  板块数据获取失败")
+            
+    except Exception as e:
+        print(f"⚠️  方法1异常: {e}")
+    
+    # 如果方法1失败，使用方法2：边获取边过滤
+    mainboard_stock_names = {}  # 初始化名称映射
+    if not mainboard_stocks:
+        print("\n  方法2: 边获取边过滤（智能代码生成 + 实时ST过滤）...")
+        candidate_codes = []
+        
+        # 沪市主板：只生成常见的前缀段
+        # 600000-600999 (老主板)
+        for i in range(1000):
+            candidate_codes.append(f"600{i:03d}.SH")
+        # 601000-601999 (大盘蓝筹)  
+        for i in range(1000):
+            candidate_codes.append(f"601{i:03d}.SH")
+        
+        # 深市主板：000000-002999
+        for prefix in ['000', '001', '002']:
+            for i in range(1000):
+                candidate_codes.append(f"{prefix}{i:03d}.SZ")
+        
+        print(f"  生成 {len(candidate_codes)} 个候选代码")
+        print(f"  将在获取K线数据时自动过滤:")
+        print(f"    ✓ 不存在的股票代码")
+        print(f"    ✓ ST股票（通过股票名称识别）")
+        print(f"    ✓ 无交易数据的股票")
+        print(f"  预计最终有效股票: ~1800-2500 只\n")
+        mainboard_stocks = candidate_codes
+    
+    # 3. 预过滤股票（排除新股、退市股）
+    print(f"\n[3/5] 预过滤股票（排除新股、退市股）...")
+    print(f"  原始候选: {len(mainboard_stocks)} 只（ST股票已在第2步排除）")
+    
+    filtered_stocks = []
+    filter_stats = {
+        'new_stocks': 0,
+        'delisted': 0,
+        'no_data': 0,
+        'valid': 0
+    }
+    
+    # 批量获取股票基本信息（每次20只，避免频率限制）
+    batch_size = 20
+    for batch_start in range(0, len(mainboard_stocks), batch_size):
+        batch_end = min(batch_start + batch_size, len(mainboard_stocks))
+        batch_codes = mainboard_stocks[batch_start:batch_end]
+        batch_codes_str = ",".join(batch_codes)
+        
+        if (batch_start // batch_size) % 10 == 0:
+            progress = (batch_start / len(mainboard_stocks)) * 100
+            print(f"  检查进度: {batch_start}/{len(mainboard_stocks)} ({progress:.1f}%)")
+        
+        try:
+            # 只获取上市日期和退市日期（不需要SECNAME，因为第2步已过滤ST）
+            info_data = c.css(batch_codes_str, "LISTDATE,DELISTDATE", "")
+            
+            if info_data.ErrorCode == 0 and hasattr(info_data, 'Data'):
+                for stock_code in batch_codes:
+                    if stock_code not in info_data.Data:
+                        filter_stats['no_data'] += 1
+                        continue
+                    
+                    stock_info = info_data.Data[stock_code]
+                    
+                    # 检查上市日期（排除新股：上市不足70天）
+                    list_date_str = stock_info[0] if len(stock_info) > 0 and stock_info[0] else None
+                    if list_date_str:
+                        try:
+                            # 处理日期格式：可能是 "1991/4/3" 或 "1991-04-03"
+                            if '/' in list_date_str:
+                                list_date = datetime.strptime(list_date_str, "%Y/%m/%d")
+                            else:
+                                list_date = datetime.strptime(list_date_str, "%Y-%m-%d")
+                            
+                            days_listed = (datetime.now() - list_date).days
+                            if days_listed < 70:  # 不足70天（约50个交易日）
+                                filter_stats['new_stocks'] += 1
+                                continue
+                        except Exception as e:
+                            # 日期解析失败，保留该股票
+                            pass
+                    
+                    # 检查是否退市
+                    delist_date = stock_info[1] if len(stock_info) > 1 and stock_info[1] else None
+                    if delist_date:
+                        filter_stats['delisted'] += 1
+                        continue
+                    
+                    # 通过所有过滤条件
+                    filtered_stocks.append(stock_code)
+                    filter_stats['valid'] += 1
+            else:
+                # 如果批量查询失败，保留所有代码（后续K线获取时会自然过滤）
+                print(f"  ⚠️ 批次 {batch_start}-{batch_end} 查询失败 (ErrorCode: {info_data.ErrorCode})")
+                filtered_stocks.extend(batch_codes)
+                filter_stats['valid'] += len(batch_codes)
+                
+        except Exception as e:
+            # 异常时保留所有代码
+            print(f"  ⚠️ 批次 {batch_start}-{batch_end} 异常: {e}")
+            filtered_stocks.extend(batch_codes)
+            filter_stats['valid'] += len(batch_codes)
+        
+        # 添加延迟避免频率限制
+        import time
+        time.sleep(0.1)
+    
+    print(f"\n  过滤结果:")
+    print(f"    ✓ 有效股票: {filter_stats['valid']} 只")
+    print(f"    ✗ 新股(<70天): {filter_stats['new_stocks']} 只")
+    print(f"    ✗ 已退市: {filter_stats['delisted']} 只")
+    print(f"    ✗ 无数据: {filter_stats['no_data']} 只")
+    
+    # 更新主板股票列表为过滤后的列表
+    mainboard_stocks = filtered_stocks
+    
+    # 调整日期范围：30天（约20个交易日）
+    end_date = datetime.now().strftime("%Y-%m-%d")
+    start_date = (datetime.now() - timedelta(days=42)).strftime("%Y-%m-%d")  # 30个交易日约42个自然日
+    
+    print(f"\n[4/5] 逐个获取 {len(mainboard_stocks)} 只股票的30日K线数据...")
+    print("💡 使用单只股票查询，避免批量API的no data问题...")
+    print(f"日期范围: {start_date} ~ {end_date}")
+    print()
+    
+    # 4. 逐个获取K线数据（避免批量API的no data问题）
+    stocks_data = {}
+    success_count = 0
+    skip_count = 0
+    failed_stocks = []
+    total = len(mainboard_stocks)
+    
+    import time
+    
+    retry_after_error = False
+    consecutive_errors = 0
+    max_consecutive_errors = 10  # 连续错误超过10次则暂停
+    
+    for idx, stock_code in enumerate(mainboard_stocks, 1):
+        # 每50只显示一次进度
+        if idx % 50 == 0 or idx == 1:
+            progress = (idx / total) * 100
+            print(f"  进度: {idx}/{total} ({progress:.1f}%) - 成功: {success_count}, 跳过: {skip_count}")
+        
+        try:
+            # 检测权限错误后的等待
+            if retry_after_error:
+                print(f"  ⏸️  检测到权限/频率限制，等待60秒...")
+                time.sleep(60)
+                retry_after_error = False
+                consecutive_errors = 0
+            
+            # 单只股票查询
+            data = c.csd(stock_code, "OPEN,HIGH,LOW,CLOSE,VOLUME", start_date, end_date, "")
+            
+            # 检查权限错误
+            if data.ErrorCode == 10001012:  # insufficient user access
+                consecutive_errors += 1
+                skip_count += 1
+                if consecutive_errors >= max_consecutive_errors:
+                    retry_after_error = True
+                continue
+            elif data.ErrorCode != 0:
+                skip_count += 1
+                consecutive_errors = 0
+                continue
+            
+            # 重置连续错误计数
+            consecutive_errors = 0
+            
+            if data.ErrorCode == 0 and stock_code in data.Data and len(data.Dates) > 0:
+                stock_values = data.Data[stock_code]
+                has_data = any(len(values) > 0 for values in stock_values)
+                
+                if has_data:
+                    # 构建K线数据
+                    kline_raw = {
+                        "stock_code": stock_code,
+                        "dates": data.Dates,
+                        "indicators": data.Indicators,
+                        "data": {}
+                    }
+                    for i, indicator in enumerate(data.Indicators):
+                        kline_raw["data"][indicator] = stock_values[i]
+                    
+                    # 转换为系统兼容格式
+                    daily_data = []
+                    ind_map = {ind: idx for idx, ind in enumerate(data.Indicators)}
+                    
+                    for i, date in enumerate(data.Dates):
+                        day_record = {'date': date}
+                        for indicator in data.Indicators:
+                            ind_idx = ind_map[indicator]
+                            if ind_idx < len(stock_values) and i < len(stock_values[ind_idx]):
+                                day_record[indicator.lower()] = stock_values[ind_idx][i]
+                        daily_data.append(day_record)
+                    
+                    stocks_data[stock_code] = {
+                        "name": "",
+                        "kline": kline_raw,
+                        "daily_data": daily_data
+                    }
+                    success_count += 1
+                else:
+                    skip_count += 1
+            else:
+                # 无数据或错误，静默跳过（不输出错误）
+                skip_count += 1
+                
+        except Exception as e:
+            skip_count += 1
+    
+    print(f"\n\nK线数据获取完成:")
+    print(f"  成功: {success_count}")
+    print(f"  跳过: {skip_count} (不存在或无数据)")
+    print(f"  总计: {total}")
+    
+    # 只对成功获取K线的股票获取基本面数据
+    valid_stocks = list(stocks_data.keys())
+    print(f"\n[5/5] 获取 {len(valid_stocks)} 只股票的基本面数据...")
+    
+    # 4.1 获取估值数据
+    print(f"  获取估值指标 (PE, PB)...")
+    valuation_success = 0
+    
+    for idx, stock_code in enumerate(valid_stocks, 1):
+        try:
+            # 每100只显示一次进度
+            if idx % 100 == 0 or idx == 1:
+                progress = (idx / len(valid_stocks)) * 100
+                print(f"    进度: {idx}/{len(valid_stocks)} ({progress:.1f}%)")
+            
+            # 估值指标：市盈率、市净率
+            val_data = c.csd(stock_code, "PE,PB", end_date, end_date, "")
+            
+            if val_data.ErrorCode == 0 and stock_code in val_data.Data:
+                val_values = val_data.Data[stock_code]
+                fund_dict = {}
+                
+                for i, indicator in enumerate(val_data.Indicators):
+                    if i < len(val_values) and len(val_values[i]) > 0:
+                        value = val_values[i][0]
+                        if indicator == "PE":
+                            fund_dict["pe_ratio"] = value
+                        elif indicator == "PB":
+                            fund_dict["pb_ratio"] = value
+                
+                stocks_data[stock_code]["fund_data"] = fund_dict
+                valuation_success += 1
+            else:
+                stocks_data[stock_code]["fund_data"] = {}
+        except Exception as e:
+            stocks_data[stock_code]["fund_data"] = {}
+    
+    print(f"  ✅ 估值数据获取完成: {valuation_success}/{len(valid_stocks)}")
+    
+    # 跳过盈利指标（ROE等）获取，因为Choice权限问题
+    print(f"  ⚠️  跳过盈利指标获取（ROE、增长率等需要更高权限）")
+    
+    fundamental_success = valuation_success
+    fundamental_fail = len(valid_stocks) - valuation_success
+    
+    # 5. 数据获取完成汇总
+    # 统计ST股票数量
+    st_count = sum(1 for item in failed_stocks if 'ST股票' in item.get('error', ''))
+    invalid_count = len(failed_stocks) - st_count
+    
+    print(f"\n{'='*60}")
+    print(f"数据获取完成汇总:")
+    print(f"  候选股票: {total} 只")
+    print(f"  ✅ K线数据成功: {success_count} 只")
+    print(f"  ✅ 基本面数据成功: {fundamental_success} 只")
+    print(f"  ❌ 跳过: {skip_count} 只")
+    print(f"     - ST股票: {st_count} 只")
+    print(f"     - 无效/不存在: {invalid_count} 只")
+    print(f"  最终有效股票: {success_count} 只主板非ST股票")
+    print(f"{'='*60}")
+    
+    # 6. 显示第一只股票的详细数据
+    if stocks_data:
+        print("\n示例数据:")
+        first_code, first_obj = next(iter(stocks_data.items()))
+        kline = first_obj.get("kline", {})
+        fund_data = first_obj.get("fund_data", {})
+        print(f"  股票代码: {first_code}")
+        dates = kline.get("dates", [])
+        print(f"  K线数据: {len(dates)} 条")
+        if dates:
+            print(f"  日期范围: {dates[0]} ~ {dates[-1]}")
+            print(f"  最新收盘价: {kline.get('data', {}).get('CLOSE', [None])[-1]}")
+        
+        if fund_data:
+            print(f"  基本面数据:")
+            for key, value in fund_data.items():
+                print(f"    {key}: {value}")
+    
+    # 7. 保存到文件，格式与全量数据保持一致
+    output_file = "data/choice_mainboard_all.json"
+    cache_data = {
+        "last_update": datetime.now().isoformat(),
+        "total_stocks": total,
+        "success_count": success_count,
+        "skip_count": skip_count,
+        "stocks": stocks_data
+    }
+    
+    print(f"\n正在保存数据到文件...")
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(cache_data, f, ensure_ascii=False, indent=2)
+    
+    # 获取文件大小
+    file_size = os.path.getsize(output_file)
+    print(f"\n✅ 数据已保存到: {output_file}")
+    print(f"   文件大小: {file_size / 1024 / 1024:.2f} MB")
+    
+    # 保存失败记录
+    if failed_stocks:
+        failed_file = "data/choice_failed_stocks.json"
+        failed_data = {
+            "total_failed": len(failed_stocks),
+            "timestamp": datetime.now().isoformat(),
+            "failed_stocks": failed_stocks
+        }
+        
+        with open(failed_file, 'w', encoding='utf-8') as f:
+            json.dump(failed_data, f, ensure_ascii=False, indent=2)
+        
+        print(f"\n⚠️  失败记录已保存到: {failed_file}")
+        print(f"   失败数量: {len(failed_stocks)}")
+        print(f"   失败率: {len(failed_stocks)/total*100:.1f}%")
+        
+        # 显示前10个失败的例子
+        print(f"\n   失败示例 (前10个):")
+        for item in failed_stocks[:10]:
+            print(f"     {item['code']}: {item['error']}")
+    
+    # 8. 断开连接
+    c.stop()
+    print("\n✅✅✅ 全部主板数据获取完成！")
+
+if __name__ == "__main__":
+    main()
