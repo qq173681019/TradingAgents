@@ -95,16 +95,109 @@ def login_callback(msg):
     print(f"[登录回调] {decoded_msg}")
     return 1
 
+def check_csd_available():
+    """检查CSD接口是否可用（配额是否充足）"""
+    print("\n[检测] 测试CSD接口可用性...")
+    
+    # 测试一个简单的CSD调用
+    test_date = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
+    data = c.csd("000001.SZ", "CLOSE", test_date, test_date, "")
+    
+    if data.ErrorCode == 0:
+        print("  ✅ CSD接口可用 - 将使用CSD接口（序列数据）")
+        return True
+    elif data.ErrorCode == 10001012:
+        print("  ⚠️  CSD接口配额不足 (10001012) - 将切换到CSS接口")
+        print("  提示: 周配额可能已用完，将于下周一重置")
+        return False
+    else:
+        print(f"  ⚠️  CSD接口错误 ({data.ErrorCode}: {data.ErrorMsg}) - 将切换到CSS接口")
+        return False
+
+def get_kline_data_css(stock_code, start_date, end_date):
+    """使用CSS接口获取历史K线数据（CSD配额不足时的备用方案）
+    
+    CSS接口限制:
+    - 只能获取: CLOSE, PRECLOSE, PE, PB, BPS
+    - 不能获取: OPEN, HIGH, LOW, VOLUME (返回None)
+    - 需要逐日循环查询，使用 tradeDate 参数
+    
+    Args:
+        stock_code: 股票代码，如 "000001.SZ"
+        start_date: 开始日期 "YYYY-MM-DD"
+        end_date: 结束日期 "YYYY-MM-DD"
+    
+    Returns:
+        dict: 包含dates、indicators、data的字典，格式与CSD返回相同
+        None: 如果获取失败
+    """
+    import time
+
+    # 生成日期列表（跳过周末）
+    start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+    end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+    
+    date_list = []
+    current_dt = start_dt
+    while current_dt <= end_dt:
+        # 跳过周末
+        if current_dt.weekday() < 5:  # 0-4是周一到周五
+            date_list.append(current_dt.strftime("%Y-%m-%d"))
+        current_dt += timedelta(days=1)
+    
+    # 收集数据
+    dates = []
+    close_prices = []
+    preclose_prices = []
+    
+    for date_str in date_list:
+        try:
+            # CSS查询：只获取CLOSE和PRECLOSE（其他字段CSS不支持）
+            data = c.css(stock_code, "CLOSE,PRECLOSE", f"tradeDate={date_str}")
+            
+            if data.ErrorCode == 0 and stock_code in data.Data:
+                stock_data = data.Data[stock_code]
+                close = stock_data[0] if len(stock_data) > 0 else None
+                preclose = stock_data[1] if len(stock_data) > 1 else None
+                
+                # 只保存有效数据的日期
+                if close is not None:
+                    dates.append(date_str)
+                    close_prices.append(close)
+                    preclose_prices.append(preclose if preclose is not None else close)
+            
+            # 避免频率限制
+            time.sleep(0.05)
+            
+        except Exception as e:
+            continue
+    
+    # 如果没有获取到任何数据，返回None
+    if not dates:
+        return None
+    
+    # 构造与CSD相同的返回格式
+    result = {
+        "dates": dates,
+        "indicators": ["CLOSE", "PRECLOSE"],
+        "data": {
+            "CLOSE": close_prices,
+            "PRECLOSE": preclose_prices
+        }
+    }
+    
+    return result
+
 def main():
     print("="*60)
-    print("Choice SDK - A股主板50日K线数据测试")
+    print("Choice SDK - A股主板股票数据采集（智能模式）")
     print("="*60)
     
     # 1. 初始化Choice SDK
-    print("\n[1/5] 初始化Choice SDK...")
-    print("使用已保存的Token登录（该账号有K线数据权限）")
-    print(f"注意：config.py中的账号 {CHOICE_USERNAME} 没有K线权限，不使用")
-    result = c.start("", logcallback=login_callback)
+    print("\n[1/6] 初始化Choice SDK...")
+    print(f"使用账号密码登录: {CHOICE_USERNAME}")
+    login_options = f"username={CHOICE_USERNAME},password={CHOICE_PASSWORD}"
+    result = c.start(login_options, logcallback=login_callback)
     if result.ErrorCode != 0:
         print(f"❌ Choice连接失败: {result.ErrorMsg}")
         return
@@ -233,8 +326,8 @@ def main():
         'valid': 0
     }
     
-    # 批量获取股票基本信息（每次20只，避免频率限制）
-    batch_size = 20
+    # 批量获取股票基本信息（每次100只）
+    batch_size = 100
     for batch_start in range(0, len(mainboard_stocks), batch_size):
         batch_end = min(batch_start + batch_size, len(mainboard_stocks))
         batch_codes = mainboard_stocks[batch_start:batch_end]
@@ -312,12 +405,20 @@ def main():
     end_date = datetime.now().strftime("%Y-%m-%d")
     start_date = (datetime.now() - timedelta(days=42)).strftime("%Y-%m-%d")  # 30个交易日约42个自然日
     
-    print(f"\n[4/5] 逐个获取 {len(mainboard_stocks)} 只股票的30日K线数据...")
-    print("💡 使用单只股票查询，避免批量API的no data问题...")
+    # 检查CSD接口可用性，决定使用哪种数据获取方式
+    use_csd = check_csd_available()
+    
+    print(f"\n[4/6] 逐个获取 {len(mainboard_stocks)} 只股票的30日K线数据...")
+    if use_csd:
+        print("💡 使用CSD接口（序列数据）- 完整OHLCV数据")
+    else:
+        print("💡 使用CSS接口（截面数据）- 仅收盘价数据")
+        print("   提示: CSS接口限制只能获取 CLOSE, PRECLOSE")
+        print("   提示: 需要逐日查询，速度较慢但不消耗CSD配额")
     print(f"日期范围: {start_date} ~ {end_date}")
     print()
     
-    # 4. 逐个获取K线数据（避免批量API的no data问题）
+    # 4. 逐个获取K线数据
     stocks_data = {}
     success_count = 0
     skip_count = 0
@@ -344,49 +445,85 @@ def main():
                 retry_after_error = False
                 consecutive_errors = 0
             
-            # 单只股票查询
-            data = c.csd(stock_code, "OPEN,HIGH,LOW,CLOSE,VOLUME", start_date, end_date, "")
-            
-            # 检查权限错误
-            if data.ErrorCode == 10001012:  # insufficient user access
-                consecutive_errors += 1
-                skip_count += 1
-                if consecutive_errors >= max_consecutive_errors:
-                    retry_after_error = True
-                continue
-            elif data.ErrorCode != 0:
-                skip_count += 1
-                consecutive_errors = 0
-                continue
-            
-            # 重置连续错误计数
-            consecutive_errors = 0
-            
-            if data.ErrorCode == 0 and stock_code in data.Data and len(data.Dates) > 0:
-                stock_values = data.Data[stock_code]
-                has_data = any(len(values) > 0 for values in stock_values)
+            # 根据接口可用性选择不同的数据获取方式
+            if use_csd:
+                # 使用CSD接口（完整OHLCV数据）
+                data = c.csd(stock_code, "OPEN,HIGH,LOW,CLOSE,VOLUME", start_date, end_date, "")
                 
-                if has_data:
-                    # 构建K线数据
+                # 检查权限错误
+                if data.ErrorCode == 10001012:  # insufficient user access
+                    consecutive_errors += 1
+                    skip_count += 1
+                    if consecutive_errors >= max_consecutive_errors:
+                        retry_after_error = True
+                    continue
+                elif data.ErrorCode != 0:
+                    skip_count += 1
+                    consecutive_errors = 0
+                    continue
+                
+                # 重置连续错误计数
+                consecutive_errors = 0
+                
+                if data.ErrorCode == 0 and stock_code in data.Data and len(data.Dates) > 0:
+                    stock_values = data.Data[stock_code]
+                    has_data = any(len(values) > 0 for values in stock_values)
+                    
+                    if has_data:
+                        # 构建K线数据
+                        kline_raw = {
+                            "stock_code": stock_code,
+                            "dates": data.Dates,
+                            "indicators": data.Indicators,
+                            "data": {}
+                        }
+                        for i, indicator in enumerate(data.Indicators):
+                            kline_raw["data"][indicator] = stock_values[i]
+                        
+                        # 转换为系统兼容格式
+                        daily_data = []
+                        ind_map = {ind: idx for idx, ind in enumerate(data.Indicators)}
+                        
+                        for i, date in enumerate(data.Dates):
+                            day_record = {'date': date}
+                            for indicator in data.Indicators:
+                                ind_idx = ind_map[indicator]
+                                if ind_idx < len(stock_values) and i < len(stock_values[ind_idx]):
+                                    day_record[indicator.lower()] = stock_values[ind_idx][i]
+                            daily_data.append(day_record)
+                        
+                        stocks_data[stock_code] = {
+                            "name": "",
+                            "kline": kline_raw,
+                            "daily_data": daily_data
+                        }
+                        success_count += 1
+                    else:
+                        skip_count += 1
+                else:
+                    # 无数据或错误，静默跳过（不输出错误）
+                    skip_count += 1
+            else:
+                # 使用CSS接口（仅收盘价数据）
+                css_result = get_kline_data_css(stock_code, start_date, end_date)
+                
+                if css_result and len(css_result['dates']) > 0:
+                    # 构建K线数据（CSS格式）
                     kline_raw = {
                         "stock_code": stock_code,
-                        "dates": data.Dates,
-                        "indicators": data.Indicators,
-                        "data": {}
+                        "dates": css_result['dates'],
+                        "indicators": css_result['indicators'],
+                        "data": css_result['data']
                     }
-                    for i, indicator in enumerate(data.Indicators):
-                        kline_raw["data"][indicator] = stock_values[i]
                     
                     # 转换为系统兼容格式
                     daily_data = []
-                    ind_map = {ind: idx for idx, ind in enumerate(data.Indicators)}
-                    
-                    for i, date in enumerate(data.Dates):
-                        day_record = {'date': date}
-                        for indicator in data.Indicators:
-                            ind_idx = ind_map[indicator]
-                            if ind_idx < len(stock_values) and i < len(stock_values[ind_idx]):
-                                day_record[indicator.lower()] = stock_values[ind_idx][i]
+                    for i, date in enumerate(css_result['dates']):
+                        day_record = {
+                            'date': date,
+                            'close': css_result['data']['CLOSE'][i],
+                            'preclose': css_result['data']['PRECLOSE'][i]
+                        }
                         daily_data.append(day_record)
                     
                     stocks_data[stock_code] = {
@@ -397,10 +534,7 @@ def main():
                     success_count += 1
                 else:
                     skip_count += 1
-            else:
-                # 无数据或错误，静默跳过（不输出错误）
-                skip_count += 1
-                
+                    
         except Exception as e:
             skip_count += 1
     
@@ -408,53 +542,95 @@ def main():
     print(f"  成功: {success_count}")
     print(f"  跳过: {skip_count} (不存在或无数据)")
     print(f"  总计: {total}")
+    if not use_csd:
+        print(f"  💡 提示: 使用CSS接口，只有CLOSE和PRECLOSE数据")
     
     # 只对成功获取K线的股票获取基本面数据
     valid_stocks = list(stocks_data.keys())
-    print(f"\n[5/5] 获取 {len(valid_stocks)} 只股票的基本面数据...")
+    print(f"\n[5/6] 获取 {len(valid_stocks)} 只股票的基本面数据...")
     
-    # 4.1 获取估值数据
+    # 5.1 获取估值数据
     print(f"  获取估值指标 (PE, PB)...")
     valuation_success = 0
     
-    for idx, stock_code in enumerate(valid_stocks, 1):
-        try:
-            # 每100只显示一次进度
-            if idx % 100 == 0 or idx == 1:
-                progress = (idx / len(valid_stocks)) * 100
-                print(f"    进度: {idx}/{len(valid_stocks)} ({progress:.1f}%)")
-            
-            # 估值指标：市盈率、市净率
-            val_data = c.csd(stock_code, "PE,PB", end_date, end_date, "")
-            
-            if val_data.ErrorCode == 0 and stock_code in val_data.Data:
-                val_values = val_data.Data[stock_code]
-                fund_dict = {}
+    # 根据接口可用性决定使用CSD还是CSS
+    if use_csd:
+        # 使用CSD接口（逐个查询）
+        for idx, stock_code in enumerate(valid_stocks, 1):
+            try:
+                # 每100只显示一次进度
+                if idx % 100 == 0 or idx == 1:
+                    progress = (idx / len(valid_stocks)) * 100
+                    print(f"    进度: {idx}/{len(valid_stocks)} ({progress:.1f}%)")
                 
-                for i, indicator in enumerate(val_data.Indicators):
-                    if i < len(val_values) and len(val_values[i]) > 0:
-                        value = val_values[i][0]
-                        if indicator == "PE":
-                            fund_dict["pe_ratio"] = value
-                        elif indicator == "PB":
-                            fund_dict["pb_ratio"] = value
+                # 估值指标：市盈率、市净率
+                val_data = c.csd(stock_code, "PE,PB", end_date, end_date, "")
                 
-                stocks_data[stock_code]["fund_data"] = fund_dict
-                valuation_success += 1
-            else:
+                if val_data.ErrorCode == 0 and stock_code in val_data.Data:
+                    val_values = val_data.Data[stock_code]
+                    fund_dict = {}
+                    
+                    for i, indicator in enumerate(val_data.Indicators):
+                        if i < len(val_values) and len(val_values[i]) > 0:
+                            value = val_values[i][0]
+                            if indicator == "PE":
+                                fund_dict["pe_ratio"] = value
+                            elif indicator == "PB":
+                                fund_dict["pb_ratio"] = value
+                    
+                    stocks_data[stock_code]["fund_data"] = fund_dict
+                    valuation_success += 1
+                else:
+                    stocks_data[stock_code]["fund_data"] = {}
+            except Exception as e:
                 stocks_data[stock_code]["fund_data"] = {}
-        except Exception as e:
-            stocks_data[stock_code]["fund_data"] = {}
+    else:
+        # 使用CSS接口（批量查询，更高效）
+        batch_size = 50
+        for batch_start in range(0, len(valid_stocks), batch_size):
+            batch_end = min(batch_start + batch_size, len(valid_stocks))
+            batch_codes = valid_stocks[batch_start:batch_end]
+            batch_codes_str = ",".join(batch_codes)
+            
+            progress = (batch_start / len(valid_stocks)) * 100
+            print(f"    进度: {batch_start}/{len(valid_stocks)} ({progress:.1f}%)")
+            
+            try:
+                val_data = c.css(batch_codes_str, "PE,PB", "")
+                
+                if val_data.ErrorCode == 0 and hasattr(val_data, 'Data'):
+                    for stock_code in batch_codes:
+                        if stock_code in val_data.Data:
+                            val_values = val_data.Data[stock_code]
+                            fund_dict = {}
+                            
+                            # CSS返回格式: [PE值, PB值]
+                            if len(val_values) >= 2:
+                                if val_values[0] is not None:
+                                    fund_dict["pe_ratio"] = val_values[0]
+                                if val_values[1] is not None:
+                                    fund_dict["pb_ratio"] = val_values[1]
+                            
+                            stocks_data[stock_code]["fund_data"] = fund_dict
+                            valuation_success += 1
+                        else:
+                            stocks_data[stock_code]["fund_data"] = {}
+                else:
+                    for stock_code in batch_codes:
+                        stocks_data[stock_code]["fund_data"] = {}
+                        
+            except Exception as e:
+                for stock_code in batch_codes:
+                    stocks_data[stock_code]["fund_data"] = {}
+            
+            time.sleep(0.1)  # 避免频率限制
     
     print(f"  ✅ 估值数据获取完成: {valuation_success}/{len(valid_stocks)}")
-    
-    # 跳过盈利指标（ROE等）获取，因为Choice权限问题
-    print(f"  ⚠️  跳过盈利指标获取（ROE、增长率等需要更高权限）")
     
     fundamental_success = valuation_success
     fundamental_fail = len(valid_stocks) - valuation_success
     
-    # 5. 数据获取完成汇总
+    # 6. 数据获取完成汇总
     # 统计ST股票数量
     st_count = sum(1 for item in failed_stocks if 'ST股票' in item.get('error', ''))
     invalid_count = len(failed_stocks) - st_count

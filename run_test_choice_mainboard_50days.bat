@@ -2,5 +2,5 @@
 setlocal
 cd /d "%~dp0"
 set PY_EXE=C:\veighna_studio\python.exe
-"%PY_EXE%" test_choice_mainboard_50days.py
+"%PY_EXE%" get_choice_data.py
 endlocal
