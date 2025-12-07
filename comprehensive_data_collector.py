@@ -4013,14 +4013,31 @@ class ComprehensiveDataCollector:
     def update_kline_data_only(self, batch_size: int = 20, total_batches: int = None, stock_type: str = "主板", progress_callback=None):
         """只更新K线数据和技术指标（高效模式）"""
         
-        # 首先获取股票列表来确定实际数量
-        if stock_type == "全部":
-            # 全部股票：先获取全量股票列表
-            all_codes = self.get_stock_list_by_type(stock_type, limit=6000)  # 获取更多股票
-        else:
-            # 其他类型：根据预估数量获取
-            estimated_limit = (total_batches * batch_size) if total_batches else 5000
-            all_codes = self.get_stock_list_by_type(stock_type, limit=estimated_limit)
+        # 首先加载本地已有数据，只更新本地存在的股票
+        existing_data = self.load_existing_data()
+        
+        if not existing_data:
+            msg = "错误：本地没有数据！请先使用'获取全部数据'功能采集数据。"
+            print(f"[ERROR] {msg}")
+            if progress_callback:
+                progress_callback("错误", 0, msg)
+            return
+        
+        # 从本地数据中筛选符合类型的股票
+        all_codes = []
+        for code in existing_data.keys():
+            # 根据股票类型过滤
+            if stock_type == "全部":
+                all_codes.append(code)
+            elif stock_type == "主板":
+                if code.startswith(('600', '601', '603', '000', '001', '002')):
+                    all_codes.append(code)
+            elif stock_type == "科创板":
+                if code.startswith('688'):
+                    all_codes.append(code)
+            elif stock_type == "创业板":
+                if code.startswith('300'):
+                    all_codes.append(code)
         
         actual_total = len(all_codes)
         
@@ -4072,16 +4089,81 @@ class ComprehensiveDataCollector:
             print(f"股票代码: {', '.join(batch_codes)}")
             print(f"{'='*50}")
             
-            # 批量采集K线数据
+            # 批量采集K线数据（增量更新模式）
             try:
+                # 为每只股票确定需要获取的日期范围
+                codes_with_date_range = {}
+                for code in batch_codes:
+                    if code in existing_data and 'kline_data' in existing_data[code]:
+                        # 获取历史K线数据的最后日期
+                        daily_data = existing_data[code]['kline_data'].get('daily', [])
+                        if daily_data:
+                            # 找到最后一天的日期
+                            last_date_str = daily_data[-1].get('date', daily_data[-1].get('trade_date', ''))
+                            if last_date_str:
+                                try:
+                                    # 解析日期
+                                    if len(last_date_str) == 8:  # YYYYMMDD格式
+                                        last_date = datetime.strptime(last_date_str, '%Y%m%d')
+                                    else:  # YYYY-MM-DD格式
+                                        last_date = datetime.strptime(last_date_str, '%Y-%m-%d')
+                                    
+                                    # 从下一天开始获取
+                                    start_date = last_date + timedelta(days=1)
+                                    codes_with_date_range[code] = start_date
+                                    print(f"    {code}: 历史数据到{last_date_str}，将获取{start_date.strftime('%Y-%m-%d')}之后的数据")
+                                except:
+                                    # 解析失败，获取全部数据
+                                    codes_with_date_range[code] = None
+                        else:
+                            codes_with_date_range[code] = None
+                    else:
+                        # 新股票，获取全部数据
+                        codes_with_date_range[code] = None
+                
+                # 批量采集新数据
                 batch_kline_data = self.collect_batch_kline_data(batch_codes, 'auto')
                 print(f"[INFO] 本批K线数据采集完成，获得 {len(batch_kline_data)} 只股票")
                 
-                # 更新每只股票的K线数据
+                # 更新每只股票的K线数据（合并历史数据）
                 for code in batch_codes:
                     if code in batch_kline_data:
-                        kline_df = batch_kline_data[code]
-                        if kline_df is not None and not kline_df.empty:
+                        new_kline_df = batch_kline_data[code]
+                        if new_kline_df is not None and not new_kline_df.empty:
+                            # 合并历史数据
+                            if code in existing_data and 'kline_data' in existing_data[code]:
+                                old_daily = existing_data[code]['kline_data'].get('daily', [])
+                                if old_daily:
+                                    # 将历史数据转换为DataFrame
+                                    old_df = pd.DataFrame(old_daily)
+                                    
+                                    # 统一日期列名
+                                    date_col = None
+                                    for col in ['date', 'trade_date', '日期']:
+                                        if col in old_df.columns:
+                                            date_col = col
+                                            break
+                                    
+                                    if date_col:
+                                        # 合并新旧数据，去重并排序
+                                        combined_df = pd.concat([old_df, new_kline_df], ignore_index=True)
+                                        combined_df = combined_df.drop_duplicates(subset=[date_col], keep='last')
+                                        combined_df = combined_df.sort_values(by=date_col)
+                                        kline_df = combined_df
+                                        added_count = len(new_kline_df)
+                                        total_count = len(kline_df)
+                                        print(f"    ✓ {code}: 新增{added_count}天，总计{total_count}天K线")
+                                    else:
+                                        # 无法合并，使用新数据
+                                        kline_df = new_kline_df
+                                        print(f"    ✓ {code}: 更新K线 {len(kline_df)}天（无法合并）")
+                                else:
+                                    kline_df = new_kline_df
+                                    print(f"    ✓ {code}: 更新K线 {len(kline_df)}天")
+                            else:
+                                kline_df = new_kline_df
+                                print(f"    + {code}: 新增K线 {len(kline_df)}天")
+                            
                             # 计算技术指标
                             tech_indicators = self.collect_technical_indicators(kline_df)
                             
@@ -4095,19 +4177,18 @@ class ComprehensiveDataCollector:
                                     except:
                                         continue
                             
-                            # 更新K线数据
+                            # 保存合并后的数据
                             if code in existing_data:
                                 # 保留原有数据，只更新K线和技术指标
                                 existing_data[code]['kline_data'] = {
                                     'daily': kline_df.to_dict('records'),
                                     'latest_price': latest_price,
                                     'data_points': len(kline_df),
-                                    'source': 'updated',
+                                    'source': 'incremental_update',
                                     'update_time': datetime.now().isoformat()
                                 }
                                 existing_data[code]['technical_indicators'] = tech_indicators
                                 existing_data[code]['last_kline_update'] = datetime.now().isoformat()
-                                print(f"    ✓ {code}: 更新K线 {len(kline_df)}天")
                             else:
                                 # 如果是新股票，创建基本结构
                                 existing_data[code] = {
@@ -4124,7 +4205,6 @@ class ComprehensiveDataCollector:
                                     'last_kline_update': datetime.now().isoformat(),
                                     'timestamp': datetime.now().isoformat()
                                 }
-                                print(f"    + {code}: 新增K线 {len(kline_df)}天")
                 
                 # 批次保存
                 self.save_data(existing_data)

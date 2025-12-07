@@ -1,0 +1,4780 @@
+{
+  "stocks": {
+    "000001": {
+      "code": "000001",
+      "timestamp": "2025-12-07T22:43:39.133176",
+      "collection_time": "2025-12-07 22:43:39",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000001",
+        "name": "平安银行",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1991-04-03",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000001",
+        "source": "baostock",
+        "revenue": 0.356052,
+        "net_profit": null,
+        "eps": 39729000000.0,
+        "roe": 2.398701,
+        "total_profit": null,
+        "roa": 11.771021,
+        "gross_profit_rate": 0.019691,
+        "net_profit_rate": 1.0,
+        "debt_ratio": 0.356052
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000001",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000001",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:39.135739",
+        "success_rate": 0.8
+      }
+    },
+    "000002": {
+      "code": "000002",
+      "timestamp": "2025-12-07T22:43:39.436282",
+      "collection_time": "2025-12-07 22:43:39",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000002",
+        "name": "万科A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1991-01-29",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000002",
+        "source": "baostock",
+        "revenue": -0.074573,
+        "net_profit": 0.095021,
+        "eps": -16398110547.69,
+        "roe": -1.626231,
+        "total_profit": null,
+        "roa": 5.902254,
+        "gross_profit_rate": 0.153664,
+        "net_profit_rate": 1.09423,
+        "debt_ratio": -0.074573
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000002",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000002",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:39.437123",
+        "success_rate": 0.8
+      }
+    },
+    "000004": {
+      "code": "000004",
+      "timestamp": "2025-12-06T20:55:41.862662",
+      "collection_time": "2025-12-06 20:55:41",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000004",
+        "name": "*ST国华",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1991-01-14",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000004",
+        "source": "baostock",
+        "revenue": -0.492485,
+        "net_profit": 0.729569,
+        "eps": -37376813.23,
+        "roe": -1.19066,
+        "total_profit": null,
+        "roa": 2.245831,
+        "gross_profit_rate": 0.190213,
+        "net_profit_rate": 0.958529,
+        "debt_ratio": -0.492485
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000004",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000004",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-06T20:55:41.865390",
+        "success_rate": 0.8
+      }
+    },
+    "000006": {
+      "code": "000006",
+      "timestamp": "2025-12-07T22:43:39.737851",
+      "collection_time": "2025-12-07 22:43:39",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000006",
+        "name": "深振业A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-04-27",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000006",
+        "source": "baostock",
+        "revenue": -0.130995,
+        "net_profit": 0.076584,
+        "eps": -632396861.85,
+        "roe": -0.981459,
+        "total_profit": null,
+        "roa": 3.487764,
+        "gross_profit_rate": 0.206272,
+        "net_profit_rate": 0.827862,
+        "debt_ratio": -0.130995
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000006",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000006",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:39.738623",
+        "success_rate": 0.8
+      }
+    },
+    "000007": {
+      "code": "000007",
+      "timestamp": "2025-12-07T22:43:40.038931",
+      "collection_time": "2025-12-07 22:43:40",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000007",
+        "name": "全新好",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-04-13",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000007",
+        "source": "baostock",
+        "revenue": 0.01063,
+        "net_profit": 0.189727,
+        "eps": 1639435.32,
+        "roe": 0.081681,
+        "total_profit": null,
+        "roa": 2.867931,
+        "gross_profit_rate": 0.422275,
+        "net_profit_rate": 1.937308,
+        "debt_ratio": 0.01063
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000007",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000007",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:40.039734",
+        "success_rate": 0.8
+      }
+    },
+    "000008": {
+      "code": "000008",
+      "timestamp": "2025-12-07T22:43:40.340626",
+      "collection_time": "2025-12-07 22:43:40",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000008",
+        "name": "神州高铁",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-05-07",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000008",
+        "source": "baostock",
+        "revenue": -0.184533,
+        "net_profit": 0.288195,
+        "eps": -201073768.59,
+        "roe": -0.3176,
+        "total_profit": null,
+        "roa": 3.041859,
+        "gross_profit_rate": 0.103405,
+        "net_profit_rate": 0.894479,
+        "debt_ratio": -0.184533
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000008",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000008",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:40.341982",
+        "success_rate": 0.8
+      }
+    },
+    "000009": {
+      "code": "000009",
+      "timestamp": "2025-12-07T22:43:40.642530",
+      "collection_time": "2025-12-07 22:43:40",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000009",
+        "name": "中国宝安",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1991-06-25",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000009",
+        "source": "baostock",
+        "revenue": 0.062632,
+        "net_profit": 0.272939,
+        "eps": 916672323.79,
+        "roe": 0.179635,
+        "total_profit": null,
+        "roa": 5.11172,
+        "gross_profit_rate": 0.285196,
+        "net_profit_rate": 0.420412,
+        "debt_ratio": 0.062629
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000009",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000009",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:40.643587",
+        "success_rate": 0.8
+      }
+    },
+    "000010": {
+      "code": "000010",
+      "timestamp": "2025-12-07T22:43:40.944494",
+      "collection_time": "2025-12-07 22:43:40",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000010",
+        "name": "美丽生态",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1995-10-27",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000010",
+        "source": "baostock",
+        "revenue": -0.252613,
+        "net_profit": 0.1657,
+        "eps": -89375627.81,
+        "roe": -0.345288,
+        "total_profit": null,
+        "roa": 13.645731,
+        "gross_profit_rate": 0.114279,
+        "net_profit_rate": 0.664955,
+        "debt_ratio": -0.252613
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000010",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000010",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:40.946495",
+        "success_rate": 0.8
+      }
+    },
+    "000011": {
+      "code": "000011",
+      "timestamp": "2025-12-07T22:43:41.247206",
+      "collection_time": "2025-12-07 22:43:41",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000011",
+        "name": "深物业A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-03-30",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000011",
+        "source": "baostock",
+        "revenue": -0.004336,
+        "net_profit": 0.202441,
+        "eps": -5714273.57,
+        "roe": 0.396396,
+        "total_profit": null,
+        "roa": 3.621659,
+        "gross_profit_rate": 0.079614,
+        "net_profit_rate": -0.626679,
+        "debt_ratio": -0.004336
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000011",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000011",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:41.248043",
+        "success_rate": 0.8
+      }
+    },
+    "000012": {
+      "code": "000012",
+      "timestamp": "2025-12-07T22:43:41.548519",
+      "collection_time": "2025-12-07 22:43:41",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000012",
+        "name": "南玻A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-02-28",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000012",
+        "source": "baostock",
+        "revenue": 0.065294,
+        "net_profit": 0.190729,
+        "eps": 772877614.0,
+        "roe": 0.317646,
+        "total_profit": null,
+        "roa": 2.214355,
+        "gross_profit_rate": 0.380169,
+        "net_profit_rate": 1.017561,
+        "debt_ratio": 0.065294
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000012",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000012",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:41.549231",
+        "success_rate": 0.8
+      }
+    },
+    "000014": {
+      "code": "000014",
+      "timestamp": "2025-12-07T22:43:41.849692",
+      "collection_time": "2025-12-07 22:43:41",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000014",
+        "name": "沙河股份",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-06-02",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000014",
+        "source": "baostock",
+        "revenue": 0.14391,
+        "net_profit": 0.494237,
+        "eps": 46788518.76,
+        "roe": 0.303811,
+        "total_profit": null,
+        "roa": 1.433196,
+        "gross_profit_rate": 0.136931,
+        "net_profit_rate": 1.001959,
+        "debt_ratio": 0.14391
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000014",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000014",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:41.851054",
+        "success_rate": 0.8
+      }
+    },
+    "000016": {
+      "code": "000016",
+      "timestamp": "2025-12-07T22:43:42.151377",
+      "collection_time": "2025-12-07 22:43:42",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000016",
+        "name": "深康佳A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-03-27",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000016",
+        "source": "baostock",
+        "revenue": -0.229738,
+        "net_profit": 0.06266,
+        "eps": -1865467289.79,
+        "roe": -1.268716,
+        "total_profit": null,
+        "roa": 7.056498,
+        "gross_profit_rate": 0.237579,
+        "net_profit_rate": 0.860953,
+        "debt_ratio": -0.229738
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000016",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000016",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:42.151978",
+        "success_rate": 0.8
+      }
+    },
+    "000017": {
+      "code": "000017",
+      "timestamp": "2025-12-07T22:43:42.452251",
+      "collection_time": "2025-12-07 22:43:42",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000017",
+        "name": "深中华A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-03-31",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000017",
+        "source": "baostock",
+        "revenue": 0.024844,
+        "net_profit": 0.066382,
+        "eps": 6943065.21,
+        "roe": 0.029412,
+        "total_profit": null,
+        "roa": 1.18737,
+        "gross_profit_rate": 0.753226,
+        "net_profit_rate": 1.069,
+        "debt_ratio": 0.024844
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000017",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000017",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:42.452770",
+        "success_rate": 0.8
+      }
+    },
+    "000019": {
+      "code": "000019",
+      "timestamp": "2025-12-07T22:43:42.753362",
+      "collection_time": "2025-12-07 22:43:42",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000019",
+        "name": "深粮控股",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-10-12",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000019",
+        "source": "baostock",
+        "revenue": 0.063997,
+        "net_profit": 0.174534,
+        "eps": 243323924.33,
+        "roe": 0.276057,
+        "total_profit": null,
+        "roa": 1.512858,
+        "gross_profit_rate": 0.520149,
+        "net_profit_rate": 1.005089,
+        "debt_ratio": 0.063997
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000019",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000019",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:42.754135",
+        "success_rate": 0.8
+      }
+    },
+    "000020": {
+      "code": "000020",
+      "timestamp": "2025-12-07T22:43:43.055377",
+      "collection_time": "2025-12-07 22:43:43",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000020",
+        "name": "深华发A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1992-04-28",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000020",
+        "source": "baostock",
+        "revenue": 0.023493,
+        "net_profit": 0.119922,
+        "eps": 14243050.41,
+        "roe": 0.053471,
+        "total_profit": null,
+        "roa": 1.643512,
+        "gross_profit_rate": 0.986214,
+        "net_profit_rate": 1.0,
+        "debt_ratio": 0.023493
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000020",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000020",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:43.056574",
+        "success_rate": 0.8
+      }
+    },
+    "000021": {
+      "code": "000021",
+      "timestamp": "2025-12-07T22:43:43.357989",
+      "collection_time": "2025-12-07 22:43:43",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000021",
+        "name": "深科技",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-02-02",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000021",
+        "source": "baostock",
+        "revenue": 0.074838,
+        "net_profit": 0.166014,
+        "eps": 812119811.67,
+        "roe": 0.550727,
+        "total_profit": null,
+        "roa": 2.509853,
+        "gross_profit_rate": 0.383879,
+        "net_profit_rate": 0.814385,
+        "debt_ratio": 0.074838
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000021",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000021",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:43.360259",
+        "success_rate": 0.8
+      }
+    },
+    "000025": {
+      "code": "000025",
+      "timestamp": "2025-12-07T22:43:58.657886",
+      "collection_time": "2025-12-07 22:43:58",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000025",
+        "name": "特力A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-06-21",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000025",
+        "source": "baostock",
+        "revenue": 0.053854,
+        "net_profit": 0.088654,
+        "eps": 111337604.95,
+        "roe": 0.354093,
+        "total_profit": null,
+        "roa": 1.488083,
+        "gross_profit_rate": 0.84135,
+        "net_profit_rate": 0.970779,
+        "debt_ratio": 0.053854
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000025",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000025",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:58.658314",
+        "success_rate": 0.8
+      }
+    },
+    "000026": {
+      "code": "000026",
+      "timestamp": "2025-12-07T22:43:58.959014",
+      "collection_time": "2025-12-07 22:43:58",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000026",
+        "name": "飞亚达",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-06-03",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000026",
+        "source": "baostock",
+        "revenue": 0.065013,
+        "net_profit": 0.371634,
+        "eps": 197622948.56,
+        "roe": 0.653543,
+        "total_profit": null,
+        "roa": 1.251864,
+        "gross_profit_rate": 0.724351,
+        "net_profit_rate": 1.0,
+        "debt_ratio": 0.065013
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000026",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000026",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:58.961536",
+        "success_rate": 0.8
+      }
+    },
+    "000027": {
+      "code": "000027",
+      "timestamp": "2025-12-07T22:43:59.262411",
+      "collection_time": "2025-12-07 22:43:59",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000027",
+        "name": "深圳能源",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-09-03",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000027",
+        "source": "baostock",
+        "revenue": 0.09013,
+        "net_profit": 0.220349,
+        "eps": 2741251723.69,
+        "roe": 0.240485,
+        "total_profit": null,
+        "roa": 3.360329,
+        "gross_profit_rate": 0.191874,
+        "net_profit_rate": 0.775372,
+        "debt_ratio": 0.09013
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000027",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000027",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:59.264345",
+        "success_rate": 0.8
+      }
+    },
+    "000028": {
+      "code": "000028",
+      "timestamp": "2025-12-07T22:43:59.564975",
+      "collection_time": "2025-12-07 22:43:59",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000028",
+        "name": "国药一致",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-08-09",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000028",
+        "source": "baostock",
+        "revenue": 0.019404,
+        "net_profit": 0.108738,
+        "eps": 1095669310.29,
+        "roe": 2.650425,
+        "total_profit": null,
+        "roa": 2.802963,
+        "gross_profit_rate": 1.13441,
+        "net_profit_rate": 0.972503,
+        "debt_ratio": 0.019404
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000028",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000028",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:59.566097",
+        "success_rate": 0.8
+      }
+    },
+    "000029": {
+      "code": "000029",
+      "timestamp": "2025-12-07T22:43:59.867145",
+      "collection_time": "2025-12-07 22:43:59",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000029",
+        "name": "深深房A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-09-15",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000029",
+        "source": "baostock",
+        "revenue": 0.020096,
+        "net_profit": 0.194271,
+        "eps": 4184669.34,
+        "roe": -0.206976,
+        "total_profit": null,
+        "roa": 1.751177,
+        "gross_profit_rate": 0.032171,
+        "net_profit_rate": 1.199293,
+        "debt_ratio": 0.020096
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000029",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000029",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:43:59.869259",
+        "success_rate": 0.8
+      }
+    },
+    "000030": {
+      "code": "000030",
+      "timestamp": "2025-12-07T22:44:00.169981",
+      "collection_time": "2025-12-07 22:44:00",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000030",
+        "name": "富奥股份",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-09-29",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000030",
+        "source": "baostock",
+        "revenue": 0.052433,
+        "net_profit": 0.118278,
+        "eps": 603481860.66,
+        "roe": 0.38233,
+        "total_profit": null,
+        "roa": 2.200768,
+        "gross_profit_rate": 0.680178,
+        "net_profit_rate": 0.735615,
+        "debt_ratio": 0.052433
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000030",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000030",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:00.172612",
+        "success_rate": 0.8
+      }
+    },
+    "000031": {
+      "code": "000031",
+      "timestamp": "2025-12-07T22:44:00.473605",
+      "collection_time": "2025-12-07 22:44:00",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000031",
+        "name": "大悦城",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-10-08",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000031",
+        "source": "baostock",
+        "revenue": 0.014409,
+        "net_profit": 0.243772,
+        "eps": 295059514.1,
+        "roe": -0.361485,
+        "total_profit": null,
+        "roa": 14.410833,
+        "gross_profit_rate": 0.105303,
+        "net_profit_rate": -1.988651,
+        "debt_ratio": 0.014409
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000031",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000031",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:00.476416",
+        "success_rate": 0.8
+      }
+    },
+    "000032": {
+      "code": "000032",
+      "timestamp": "2025-12-07T22:44:00.777087",
+      "collection_time": "2025-12-07 22:44:00",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000032",
+        "name": "深桑达A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1993-10-28",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000032",
+        "source": "baostock",
+        "revenue": 0.000672,
+        "net_profit": 0.091311,
+        "eps": 32540886.77,
+        "roe": 0.415502,
+        "total_profit": null,
+        "roa": 9.749775,
+        "gross_profit_rate": 0.791701,
+        "net_profit_rate": -3.890936,
+        "debt_ratio": 0.000672
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000032",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000032",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:00.777649",
+        "success_rate": 0.8
+      }
+    },
+    "000034": {
+      "code": "000034",
+      "timestamp": "2025-12-07T22:44:01.078198",
+      "collection_time": "2025-12-07 22:44:01",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000034",
+        "name": "神州数码",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-05-09",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000034",
+        "source": "baostock",
+        "revenue": 0.010004,
+        "net_profit": 0.044928,
+        "eps": 916053334.41,
+        "roe": 1.814043,
+        "total_profit": null,
+        "roa": 5.023703,
+        "gross_profit_rate": 2.038243,
+        "net_profit_rate": 0.975419,
+        "debt_ratio": 0.010004
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000034",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000034",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:01.080172",
+        "success_rate": 0.8
+      }
+    },
+    "000035": {
+      "code": "000035",
+      "timestamp": "2025-12-07T22:44:01.381576",
+      "collection_time": "2025-12-07 22:44:01",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000035",
+        "name": "中国天楹",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-04-08",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000035",
+        "source": "baostock",
+        "revenue": 0.089771,
+        "net_profit": 0.330061,
+        "eps": 383276455.97,
+        "roe": 0.148659,
+        "total_profit": null,
+        "roa": 2.661505,
+        "gross_profit_rate": 0.148561,
+        "net_profit_rate": 0.948291,
+        "debt_ratio": 0.089771
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000035",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000035",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:01.383649",
+        "success_rate": 0.8
+      }
+    },
+    "000036": {
+      "code": "000036",
+      "timestamp": "2025-12-07T22:44:01.684092",
+      "collection_time": "2025-12-07 22:44:01",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000036",
+        "name": "华联控股",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-06-17",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000036",
+        "source": "baostock",
+        "revenue": 0.136756,
+        "net_profit": 0.432908,
+        "eps": 45429300.75,
+        "roe": 0.04627,
+        "total_profit": null,
+        "roa": 1.54457,
+        "gross_profit_rate": 0.041286,
+        "net_profit_rate": 0.824498,
+        "debt_ratio": 0.136756
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000036",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000036",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:01.684456",
+        "success_rate": 0.8
+      }
+    },
+    "000037": {
+      "code": "000037",
+      "timestamp": "2025-12-07T22:44:01.985296",
+      "collection_time": "2025-12-07 22:44:01",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000037",
+        "name": "深南电A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-07-01",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000037",
+        "source": "baostock",
+        "revenue": -0.134979,
+        "net_profit": 0.0644,
+        "eps": -50078429.98,
+        "roe": -0.021088,
+        "total_profit": null,
+        "roa": 1.420358,
+        "gross_profit_rate": 0.181704,
+        "net_profit_rate": 0.911135,
+        "debt_ratio": -0.134979
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000037",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000037",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:01.987149",
+        "success_rate": 0.8
+      }
+    },
+    "000039": {
+      "code": "000039",
+      "timestamp": "2025-12-07T22:44:02.287546",
+      "collection_time": "2025-12-07 22:44:02",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000039",
+        "name": "中集集团",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-04-08",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000039",
+        "source": "baostock",
+        "revenue": 0.021138,
+        "net_profit": 0.118391,
+        "eps": 2726205000.0,
+        "roe": 0.325208,
+        "total_profit": null,
+        "roa": 3.471413,
+        "gross_profit_rate": 0.752855,
+        "net_profit_rate": 0.670537,
+        "debt_ratio": 0.021138
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000039",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000039",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:02.288867",
+        "success_rate": 0.8
+      }
+    },
+    "000042": {
+      "code": "000042",
+      "timestamp": "2025-12-07T22:44:02.589134",
+      "collection_time": "2025-12-07 22:44:02",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000042",
+        "name": "中洲控股",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-09-21",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000042",
+        "source": "baostock",
+        "revenue": -0.139513,
+        "net_profit": 0.318446,
+        "eps": -538873852.99,
+        "roe": -3.395463,
+        "total_profit": null,
+        "roa": 5.639036,
+        "gross_profit_rate": 0.125071,
+        "net_profit_rate": 0.962467,
+        "debt_ratio": -0.139513
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000042",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000042",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:02.590081",
+        "success_rate": 0.8
+      }
+    },
+    "000045": {
+      "code": "000045",
+      "timestamp": "2025-12-07T22:44:02.890703",
+      "collection_time": "2025-12-07 22:44:02",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000045",
+        "name": "深纺织A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-08-15",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000045",
+        "source": "baostock",
+        "revenue": 0.048444,
+        "net_profit": 0.163178,
+        "eps": 122179752.89,
+        "roe": 0.180812,
+        "total_profit": null,
+        "roa": 1.923713,
+        "gross_profit_rate": 0.451297,
+        "net_profit_rate": 0.645783,
+        "debt_ratio": 0.048444
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000045",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000045",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:02.891516",
+        "success_rate": 0.8
+      }
+    },
+    "000048": {
+      "code": "000048",
+      "timestamp": "2025-12-07T22:44:20.809565",
+      "collection_time": "2025-12-07 22:44:20",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000048",
+        "name": "京基智农",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1994-11-01",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000048",
+        "source": "baostock",
+        "revenue": 0.134416,
+        "net_profit": 0.294301,
+        "eps": 617645943.71,
+        "roe": 2.054685,
+        "total_profit": null,
+        "roa": 2.907929,
+        "gross_profit_rate": 0.395392,
+        "net_profit_rate": 0.974342,
+        "debt_ratio": 0.134416
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000048",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000048",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:20.812276",
+        "success_rate": 0.8
+      }
+    },
+    "000049": {
+      "code": "000049",
+      "timestamp": "2025-12-07T22:44:21.113111",
+      "collection_time": "2025-12-07 22:44:21",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000049",
+        "name": "德赛电池",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1995-03-20",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000049",
+        "source": "baostock",
+        "revenue": 0.00965,
+        "net_profit": 0.095733,
+        "eps": 144336372.33,
+        "roe": 1.093237,
+        "total_profit": null,
+        "roa": 2.636852,
+        "gross_profit_rate": 0.894038,
+        "net_profit_rate": 1.532215,
+        "debt_ratio": 0.00965
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000049",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000049",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:21.114515",
+        "success_rate": 0.8
+      }
+    },
+    "000050": {
+      "code": "000050",
+      "timestamp": "2025-12-07T22:44:21.415411",
+      "collection_time": "2025-12-07 22:44:21",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000050",
+        "name": "深天马A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1995-03-15",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000050",
+        "source": "baostock",
+        "revenue": -0.019817,
+        "net_profit": 0.133492,
+        "eps": -475887770.9,
+        "roe": -0.317371,
+        "total_profit": null,
+        "roa": 2.926817,
+        "gross_profit_rate": 0.296033,
+        "net_profit_rate": 0.99313,
+        "debt_ratio": -0.019817
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000050",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000050",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:21.417047",
+        "success_rate": 0.8
+      }
+    },
+    "000055": {
+      "code": "000055",
+      "timestamp": "2025-12-07T22:44:21.717879",
+      "collection_time": "2025-12-07 22:44:21",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000055",
+        "name": "方大集团",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1996-04-15",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000055",
+        "source": "baostock",
+        "revenue": 0.047106,
+        "net_profit": 0.180481,
+        "eps": 151049112.36,
+        "roe": 0.145298,
+        "total_profit": null,
+        "roa": 2.243049,
+        "gross_profit_rate": 0.238157,
+        "net_profit_rate": 0.991142,
+        "debt_ratio": 0.047106
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000055",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000055",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:21.719657",
+        "success_rate": 0.8
+      }
+    },
+    "000056": {
+      "code": "000056",
+      "timestamp": "2025-12-07T22:44:22.019967",
+      "collection_time": "2025-12-07 22:44:22",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000056",
+        "name": "皇庭国际",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1996-07-08",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000056",
+        "source": "baostock",
+        "revenue": -0.511899,
+        "net_profit": 0.5988,
+        "eps": -267587643.19,
+        "roe": -0.724792,
+        "total_profit": null,
+        "roa": 10.088042,
+        "gross_profit_rate": 0.060003,
+        "net_profit_rate": 0.977532,
+        "debt_ratio": -0.511899
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000056",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000056",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:22.020610",
+        "success_rate": 0.8
+      }
+    },
+    "000058": {
+      "code": "000058",
+      "timestamp": "2025-12-07T22:44:22.321753",
+      "collection_time": "2025-12-07 22:44:22",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000058",
+        "name": "深赛格",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1996-12-26",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000058",
+        "source": "baostock",
+        "revenue": 0.03816,
+        "net_profit": 0.250238,
+        "eps": 47457089.9,
+        "roe": -0.00988,
+        "total_profit": null,
+        "roa": 2.603836,
+        "gross_profit_rate": 0.237992,
+        "net_profit_rate": 0.803388,
+        "debt_ratio": 0.03816
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000058",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000058",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:22.324046",
+        "success_rate": 0.8
+      }
+    },
+    "000059": {
+      "code": "000059",
+      "timestamp": "2025-12-07T22:44:22.624427",
+      "collection_time": "2025-12-07 22:44:22",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000059",
+        "name": "华锦股份",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-01-30",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000059",
+        "source": "baostock",
+        "revenue": -0.079051,
+        "net_profit": 0.091326,
+        "eps": -1936756897.71,
+        "roe": -0.892154,
+        "total_profit": null,
+        "roa": 2.21518,
+        "gross_profit_rate": 0.828511,
+        "net_profit_rate": 0.975476,
+        "debt_ratio": -0.079051
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000059",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000059",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:22.625219",
+        "success_rate": 0.8
+      }
+    },
+    "000060": {
+      "code": "000060",
+      "timestamp": "2025-12-07T22:44:22.925538",
+      "collection_time": "2025-12-07 22:44:22",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000060",
+        "name": "中金岭南",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-01-23",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000060",
+        "source": "baostock",
+        "revenue": 0.021582,
+        "net_profit": 0.058935,
+        "eps": 986031038.0,
+        "roe": 0.206355,
+        "total_profit": null,
+        "roa": 3.242342,
+        "gross_profit_rate": 1.037049,
+        "net_profit_rate": 0.810824,
+        "debt_ratio": 0.021566
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000060",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000060",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:22.926145",
+        "success_rate": 0.8
+      }
+    },
+    "000061": {
+      "code": "000061",
+      "timestamp": "2025-12-07T22:44:23.227263",
+      "collection_time": "2025-12-07 22:44:23",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000061",
+        "name": "农产品",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-01-10",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000061",
+        "source": "baostock",
+        "revenue": 0.121494,
+        "net_profit": 0.298798,
+        "eps": 453216059.78,
+        "roe": 0.27713,
+        "total_profit": null,
+        "roa": 3.387075,
+        "gross_profit_rate": 0.178332,
+        "net_profit_rate": 0.691245,
+        "debt_ratio": 0.121494
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000061",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000061",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:23.229645",
+        "success_rate": 0.8
+      }
+    },
+    "000062": {
+      "code": "000062",
+      "timestamp": "2025-12-07T22:44:23.530243",
+      "collection_time": "2025-12-07 22:44:23",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000062",
+        "name": "深圳华强",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-01-30",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000062",
+        "source": "baostock",
+        "revenue": 0.019475,
+        "net_profit": 0.082487,
+        "eps": 317056183.94,
+        "roe": 0.308915,
+        "total_profit": null,
+        "roa": 2.389344,
+        "gross_profit_rate": 0.949009,
+        "net_profit_rate": 0.839752,
+        "debt_ratio": 0.019475
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000062",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000062",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:23.532493",
+        "success_rate": 0.8
+      }
+    },
+    "000063": {
+      "code": "000063",
+      "timestamp": "2025-12-07T22:44:23.833419",
+      "collection_time": "2025-12-07 22:44:23",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000063",
+        "name": "中兴通讯",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-11-18",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000063",
+        "source": "baostock",
+        "revenue": 0.087146,
+        "net_profit": 0.40434,
+        "eps": 7847061000.0,
+        "roe": 1.963307,
+        "total_profit": null,
+        "roa": 2.855194,
+        "gross_profit_rate": 0.449489,
+        "net_profit_rate": 1.007562,
+        "debt_ratio": 0.087146
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000063",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000063",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:23.835556",
+        "success_rate": 0.8
+      }
+    },
+    "000065": {
+      "code": "000065",
+      "timestamp": "2025-12-07T22:44:24.136582",
+      "collection_time": "2025-12-07 22:44:24",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000065",
+        "name": "北方国际",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1998-06-05",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000065",
+        "source": "baostock",
+        "revenue": 0.055911,
+        "net_profit": 0.117003,
+        "eps": 789556779.38,
+        "roe": 0.982807,
+        "total_profit": null,
+        "roa": 2.731516,
+        "gross_profit_rate": 0.590773,
+        "net_profit_rate": 0.959416,
+        "debt_ratio": 0.055911
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000065",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000065",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:24.139192",
+        "success_rate": 0.8
+      }
+    },
+    "000066": {
+      "code": "000066",
+      "timestamp": "2025-12-07T22:44:24.439779",
+      "collection_time": "2025-12-07 22:44:24",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000066",
+        "name": "中国长城",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-06-26",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000066",
+        "source": "baostock",
+        "revenue": -0.068235,
+        "net_profit": 0.1638,
+        "eps": -655454878.53,
+        "roe": -0.258533,
+        "total_profit": null,
+        "roa": 2.756577,
+        "gross_profit_rate": 0.282237,
+        "net_profit_rate": 1.049103,
+        "debt_ratio": -0.068235
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000066",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000066",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:24.440641",
+        "success_rate": 0.8
+      }
+    },
+    "000068": {
+      "code": "000068",
+      "timestamp": "2025-12-07T22:44:24.741427",
+      "collection_time": "2025-12-07 22:44:24",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000068",
+        "name": "华控赛格",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-06-11",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000068",
+        "source": "baostock",
+        "revenue": -0.150162,
+        "net_profit": 0.026336,
+        "eps": -80768933.36,
+        "roe": 0.194784,
+        "total_profit": null,
+        "roa": 6.095255,
+        "gross_profit_rate": 0.133329,
+        "net_profit_rate": 0.929854,
+        "debt_ratio": -0.150162
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000068",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000068",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:24.742922",
+        "success_rate": 0.8
+      }
+    },
+    "000069": {
+      "code": "000069",
+      "timestamp": "2025-12-07T22:44:25.043832",
+      "collection_time": "2025-12-07 22:44:25",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000069",
+        "name": "华侨城A",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-09-10",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000069",
+        "source": "baostock",
+        "revenue": -0.103633,
+        "net_profit": 0.128776,
+        "eps": -3039533278.98,
+        "roe": -0.683837,
+        "total_profit": null,
+        "roa": 5.8898,
+        "gross_profit_rate": 0.081845,
+        "net_profit_rate": 0.773412,
+        "debt_ratio": -0.103633
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000069",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000069",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:25.045610",
+        "success_rate": 0.8
+      }
+    },
+    "000070": {
+      "code": "000070",
+      "timestamp": "2025-12-07T22:44:45.852071",
+      "collection_time": "2025-12-07 22:44:45",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000070",
+        "name": "特发信息",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-05-11",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000070",
+        "source": "baostock",
+        "revenue": 0.01328,
+        "net_profit": 0.141143,
+        "eps": 46997182.03,
+        "roe": -0.27632,
+        "total_profit": null,
+        "roa": 4.312862,
+        "gross_profit_rate": 0.429963,
+        "net_profit_rate": 0.094132,
+        "debt_ratio": 0.01328
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000070",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000070",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:45.852822",
+        "success_rate": 0.8
+      }
+    },
+    "000078": {
+      "code": "000078",
+      "timestamp": "2025-12-07T22:44:46.153396",
+      "collection_time": "2025-12-07 22:44:46",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000078",
+        "name": "海王生物",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1998-12-18",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000078",
+        "source": "baostock",
+        "revenue": 0.005126,
+        "net_profit": 0.099001,
+        "eps": 125845355.52,
+        "roe": -0.658354,
+        "total_profit": null,
+        "roa": 10.535756,
+        "gross_profit_rate": 0.771812,
+        "net_profit_rate": 0.367255,
+        "debt_ratio": 0.005126
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000078",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000078",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:46.153870",
+        "success_rate": 0.8
+      }
+    },
+    "000088": {
+      "code": "000088",
+      "timestamp": "2025-12-07T22:44:46.454343",
+      "collection_time": "2025-12-07 22:44:46",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000088",
+        "name": "盐田港",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1997-07-28",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000088",
+        "source": "baostock",
+        "revenue": 1.680957,
+        "net_profit": 0.249278,
+        "eps": 1030680817.99,
+        "roe": 0.271247,
+        "total_profit": null,
+        "roa": 1.670939,
+        "gross_profit_rate": 0.027392,
+        "net_profit_rate": 0.97429,
+        "debt_ratio": 1.680957
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000088",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000088",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:46.455830",
+        "success_rate": 0.8
+      }
+    },
+    "000089": {
+      "code": "000089",
+      "timestamp": "2025-12-07T22:44:46.756314",
+      "collection_time": "2025-12-07 22:44:46",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000089",
+        "name": "深圳机场",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1998-04-20",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000089",
+        "source": "baostock",
+        "revenue": 0.094287,
+        "net_profit": 0.210246,
+        "eps": 326735056.37,
+        "roe": 0.272883,
+        "total_profit": null,
+        "roa": 2.176925,
+        "gross_profit_rate": 0.142441,
+        "net_profit_rate": 1.000413,
+        "debt_ratio": 0.094287
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000089",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000089",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:46.757797",
+        "success_rate": 0.8
+      }
+    },
+    "000090": {
+      "code": "000090",
+      "timestamp": "2025-12-07T22:44:47.058153",
+      "collection_time": "2025-12-07 22:44:47",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000090",
+        "name": "天健集团",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "1999-07-21",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000090",
+        "source": "baostock",
+        "revenue": 0.030074,
+        "net_profit": 0.162272,
+        "eps": 277859185.84,
+        "roe": 0.438153,
+        "total_profit": null,
+        "roa": 4.772645,
+        "gross_profit_rate": 0.133632,
+        "net_profit_rate": 1.182219,
+        "debt_ratio": 0.030074
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000090",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000090",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:47.059051",
+        "success_rate": 0.8
+      }
+    },
+    "000096": {
+      "code": "000096",
+      "timestamp": "2025-12-07T22:44:47.360215",
+      "collection_time": "2025-12-07 22:44:47",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000096",
+        "name": "广聚能源",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-07-24",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000096",
+        "source": "baostock",
+        "revenue": 0.044905,
+        "net_profit": 0.086481,
+        "eps": 68921669.62,
+        "roe": 0.179647,
+        "total_profit": null,
+        "roa": 1.074855,
+        "gross_profit_rate": 0.522294,
+        "net_profit_rate": 0.970857,
+        "debt_ratio": 0.044905
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000096",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000096",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:47.362290",
+        "success_rate": 0.8
+      }
+    },
+    "000099": {
+      "code": "000099",
+      "timestamp": "2025-12-07T22:44:47.663214",
+      "collection_time": "2025-12-07 22:44:47",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000099",
+        "name": "中信海直",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-07-31",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000099",
+        "source": "baostock",
+        "revenue": 0.127353,
+        "net_profit": 0.215877,
+        "eps": 190669870.8,
+        "roe": 0.308895,
+        "total_profit": null,
+        "roa": 1.244664,
+        "gross_profit_rate": 0.232773,
+        "net_profit_rate": 1.022146,
+        "debt_ratio": 0.127353
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000099",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000099",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:47.664951",
+        "success_rate": 0.8
+      }
+    },
+    "000100": {
+      "code": "000100",
+      "timestamp": "2025-12-07T22:44:47.965453",
+      "collection_time": "2025-12-07 22:44:47",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000100",
+        "name": "TCL科技",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2004-01-30",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000100",
+        "source": "baostock",
+        "revenue": -0.014867,
+        "net_profit": 0.119824,
+        "eps": -1829006223.0,
+        "roe": 0.113362,
+        "total_profit": null,
+        "roa": 7.331304,
+        "gross_profit_rate": 0.317083,
+        "net_profit_rate": -0.833961,
+        "debt_ratio": -0.014854
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000100",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000100",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:47.965993",
+        "success_rate": 0.8
+      }
+    },
+    "000151": {
+      "code": "000151",
+      "timestamp": "2025-12-07T22:44:48.266323",
+      "collection_time": "2025-12-07 22:44:48",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000151",
+        "name": "中成股份",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-09-06",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000151",
+        "source": "baostock",
+        "revenue": -0.266707,
+        "net_profit": -0.004482,
+        "eps": -244011879.53,
+        "roe": -1.166546,
+        "total_profit": null,
+        "roa": 5.028911,
+        "gross_profit_rate": 0.304078,
+        "net_profit_rate": 0.585407,
+        "debt_ratio": -0.266707
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000151",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000151",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:48.266659",
+        "success_rate": 0.8
+      }
+    },
+    "000153": {
+      "code": "000153",
+      "timestamp": "2025-12-07T22:44:48.567432",
+      "collection_time": "2025-12-07 22:44:48",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000153",
+        "name": "丰原药业",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-09-20",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000153",
+        "source": "baostock",
+        "revenue": 0.044487,
+        "net_profit": 0.225533,
+        "eps": 145091092.54,
+        "roe": 0.353079,
+        "total_profit": null,
+        "roa": 2.33016,
+        "gross_profit_rate": 0.720299,
+        "net_profit_rate": 1.015244,
+        "debt_ratio": 0.044487
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000153",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000153",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:48.568305",
+        "success_rate": 0.8
+      }
+    },
+    "000155": {
+      "code": "000155",
+      "timestamp": "2025-12-07T22:44:48.868765",
+      "collection_time": "2025-12-07 22:44:48",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000155",
+        "name": "川能动力",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-09-26",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000155",
+        "source": "baostock",
+        "revenue": 0.28357,
+        "net_profit": 0.539378,
+        "eps": 645710994.94,
+        "roe": 0.46765,
+        "total_profit": null,
+        "roa": 2.668847,
+        "gross_profit_rate": 0.097115,
+        "net_profit_rate": 0.975361,
+        "debt_ratio": 0.28357
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000155",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000155",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:48.869506",
+        "success_rate": 0.8
+      }
+    },
+    "000156": {
+      "code": "000156",
+      "timestamp": "2025-12-07T22:44:49.169942",
+      "collection_time": "2025-12-07 22:44:49",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000156",
+        "name": "华数传媒",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-09-06",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000156",
+        "source": "baostock",
+        "revenue": 0.055397,
+        "net_profit": 0.318215,
+        "eps": 351673496.85,
+        "roe": 0.275102,
+        "total_profit": null,
+        "roa": 1.948973,
+        "gross_profit_rate": 0.220247,
+        "net_profit_rate": 1.000204,
+        "debt_ratio": 0.055397
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000156",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000156",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:49.171160",
+        "success_rate": 0.8
+      }
+    },
+    "000157": {
+      "code": "000157",
+      "timestamp": "2025-12-07T22:44:49.471675",
+      "collection_time": "2025-12-07 22:44:49",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000157",
+        "name": "中联重科",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-10-12",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000157",
+        "source": "baostock",
+        "revenue": 0.101564,
+        "net_profit": 0.283715,
+        "eps": 3492352149.85,
+        "roe": 0.436734,
+        "total_profit": null,
+        "roa": 2.286192,
+        "gross_profit_rate": 0.264987,
+        "net_profit_rate": 0.898826,
+        "debt_ratio": 0.101564
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000157",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000157",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:49.472688",
+        "success_rate": 0.8
+      }
+    },
+    "000158": {
+      "code": "000158",
+      "timestamp": "2025-12-07T22:44:49.773204",
+      "collection_time": "2025-12-07 22:44:49",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000158",
+        "name": "常山北明",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-07-24",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000158",
+        "source": "baostock",
+        "revenue": -0.061963,
+        "net_profit": 0.101364,
+        "eps": -304256207.65,
+        "roe": -0.15669,
+        "total_profit": null,
+        "roa": 2.961752,
+        "gross_profit_rate": 0.290263,
+        "net_profit_rate": 0.935172,
+        "debt_ratio": -0.061963
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000158",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000158",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:49.774899",
+        "success_rate": 0.8
+      }
+    },
+    "000159": {
+      "code": "000159",
+      "timestamp": "2025-12-07T22:44:50.076129",
+      "collection_time": "2025-12-07 22:44:50",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000159",
+        "name": "国际实业",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2000-09-26",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000159",
+        "source": "baostock",
+        "revenue": -0.185877,
+        "net_profit": 0.068005,
+        "eps": -452156778.9,
+        "roe": -0.892397,
+        "total_profit": null,
+        "roa": 1.633479,
+        "gross_profit_rate": 0.669418,
+        "net_profit_rate": 0.99982,
+        "debt_ratio": -0.185877
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000159",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000159",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:44:50.078195",
+        "success_rate": 0.8
+      }
+    },
+    "000166": {
+      "code": "000166",
+      "timestamp": "2025-12-07T22:45:04.719973",
+      "collection_time": "2025-12-07 22:45:04",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000166",
+        "name": "申万宏源",
+        "type": "1",
+        "status": "1",
+        "industry": "未知",
+        "listing_date": "2015-01-26",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000166",
+        "source": "baostock",
+        "revenue": 0.269876,
+        "net_profit": null,
+        "eps": 4711039906.37,
+        "roe": 0.16409,
+        "total_profit": null,
+        "roa": 6.433866,
+        "gross_profit_rate": 0.0267,
+        "net_profit_rate": 0.817202,
+        "debt_ratio": 0.269876
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000166",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000166",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "baostock",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2025-12-07T22:45:04.720440",
+        "success_rate": 0.8
+      }
+    }
+  },
+  "last_updated": "2025-12-07T22:45:09.283168",
+  "total_stocks": 62
+}

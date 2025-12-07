@@ -667,7 +667,10 @@ def main():
     # 7. 保存到文件，格式与全量数据保持一致
     output_file = "data/choice_mainboard_all.json"
     cache_data = {
-        "last_update": datetime.now().isoformat(),
+        "last_update": datetime.now().isoformat(),  # 整体更新时间
+        "kline_start_date": start_date,             # K线数据开始日期
+        "kline_end_date": end_date,                 # K线数据结束日期
+        "fundamental_update": datetime.now().isoformat(),  # 基本面数据更新时间
         "total_stocks": total,
         "success_count": success_count,
         "skip_count": skip_count,

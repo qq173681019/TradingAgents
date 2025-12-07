@@ -12,5 +12,5 @@
         "*.env*": "dotenv"
     },
     "python.envFile": "${workspaceFolder}/.env.local",
-    "CodeGPT.apiKey": "Gemini CLI"
+    "CodeGPT.apiKey": "OpenRouter"
 }

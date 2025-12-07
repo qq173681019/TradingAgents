@@ -24,10 +24,10 @@ GEMINI_API_KEY = "AIzaSyAkNFSx_OiKA9VVdUcXFU64GCPc1seXxvQ"
 
 # OpenRouter API Key
 # 获取地址: https://openrouter.ai/keys
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 
 # Choice金融终端账号密码
-# 东方财富Choice专业金融数据终端
+# 东方财富Choice专业金融数据终端你
 # 获取地址: https://choice.eastmoney.com/
 CHOICE_USERNAME = "hczq2048"
 CHOICE_PASSWORD = "yo336999"

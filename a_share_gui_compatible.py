@@ -2550,9 +2550,30 @@ class AShareAnalyzerGUI:
                 else:
                     self.show_progress(f"START: 开始获取{stock_type}股票评分...")
                 
-                # 获取符合类型要求的股票代码
+                # 只对本地已有数据的股票进行评分，而不是从API重新获取
                 try:
-                    all_codes = self.get_all_stock_codes(stock_type)
+                    # 从本地数据文件获取股票列表
+                    local_codes = list(self.stock_data.keys()) if self.stock_data else []
+                    
+                    if not local_codes:
+                        self.show_progress(f"ERROR: 本地没有数据！请先使用'获取全部数据'")
+                        return
+                    
+                    # 根据股票类型过滤本地数据
+                    all_codes = []
+                    for code in local_codes:
+                        if stock_type == "全部":
+                            all_codes.append(code)
+                        elif stock_type == "主板":
+                            if code.startswith(('600', '601', '603', '000', '001', '002')):
+                                all_codes.append(code)
+                        elif stock_type == "科创板":
+                            if code.startswith('688'):
+                                all_codes.append(code)
+                        elif stock_type == "创业板":
+                            if code.startswith('300'):
+                                all_codes.append(code)
+                    
                     total_stocks = len(all_codes)
                     
                     # 应用断点续传逻辑
@@ -11065,7 +11086,7 @@ WARNING:  风险提示:
     def format_investment_advice(self, short_term_prediction, medium_term_prediction, long_term_prediction, ticker, overview_final_score=None):
         """格式化三时间段投资预测显示"""
         import time
-        
+
         # 防守性检查：确保输入不为None
         if short_term_prediction is None:
             short_term_prediction = {'technical_score': 0, 'score': 5.0, 'trend': '未知', 'confidence': 0, 'target_range': '无法预测', 'risk_level': '未知', 'key_signals': ['数据获取失败'], 'algorithm': '技术指标'}
@@ -16805,7 +16826,7 @@ WARNING: 重要声明:
         try:
             import json
             import os
-            
+
             # 首先检查是否已经建立了索引，否则加载索引
             if not self.stock_file_index:
                 self._load_stock_file_index()
@@ -16861,7 +16882,7 @@ WARNING: 重要声明:
         try:
             import json
             import os
-            
+
             # 首先检查是否已经建立了索引，否则加载索引
             if not self.stock_file_index:
                 self._load_stock_file_index()
@@ -17003,7 +17024,7 @@ WARNING: 重要声明:
     def _generate_smart_mock_fundamental_data(self, code: str) -> dict:
         """生成智能模拟基本面数据（当真实数据不可用时）"""
         import random
-        
+
         # 从stock_info获取行业信息
         stock_info = self.stock_info.get(code, {})
         industry = stock_info.get('industry', '未知行业')
