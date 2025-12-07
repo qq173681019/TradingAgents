@@ -10,7 +10,6 @@ eval_data/
 *.egg-info/
 .env
 .env.local
-config.py
 
 # 备份文件
 *.backup
