@@ -314,11 +314,13 @@ def main():
         print(f"  预计最终有效股票: ~1800-2500 只\n")
         mainboard_stocks = candidate_codes
     
-    # 3. 预过滤股票（排除新股、退市股）
-    print(f"\n[3/5] 预过滤股票（排除新股、退市股）...")
+    # 3. 预过滤股票（排除新股、退市股）并获取基础信息（上市日期、行业）
+    print(f"\n[3/5] 预过滤股票并获取基础信息...")
     print(f"  原始候选: {len(mainboard_stocks)} 只（ST股票已在第2步排除）")
     
     filtered_stocks = []
+    stock_basic_infos = {}  # 存储基础信息：上市日期、行业
+    
     filter_stats = {
         'new_stocks': 0,
         'delisted': 0,
@@ -338,8 +340,9 @@ def main():
             print(f"  检查进度: {batch_start}/{len(mainboard_stocks)} ({progress:.1f}%)")
         
         try:
-            # 只获取上市日期和退市日期（不需要SECNAME，因为第2步已过滤ST）
-            info_data = c.css(batch_codes_str, "LISTDATE,DELISTDATE", "")
+            # 获取上市日期、退市日期、申万一级行业
+            # SW1: 申万一级行业名称
+            info_data = c.css(batch_codes_str, "LISTDATE,DELISTDATE,SW1", "")
             
             if info_data.ErrorCode == 0 and hasattr(info_data, 'Data'):
                 for stock_code in batch_codes:
@@ -351,13 +354,17 @@ def main():
                     
                     # 检查上市日期（排除新股：上市不足70天）
                     list_date_str = stock_info[0] if len(stock_info) > 0 and stock_info[0] else None
+                    formatted_list_date = None
+                    
                     if list_date_str:
                         try:
                             # 处理日期格式：可能是 "1991/4/3" 或 "1991-04-03"
                             if '/' in list_date_str:
                                 list_date = datetime.strptime(list_date_str, "%Y/%m/%d")
+                                formatted_list_date = list_date.strftime("%Y-%m-%d")
                             else:
                                 list_date = datetime.strptime(list_date_str, "%Y-%m-%d")
+                                formatted_list_date = list_date_str
                             
                             days_listed = (datetime.now() - list_date).days
                             if days_listed < 70:  # 不足70天（约50个交易日）
@@ -372,6 +379,15 @@ def main():
                     if delist_date:
                         filter_stats['delisted'] += 1
                         continue
+                    
+                    # 获取行业信息
+                    industry = stock_info[2] if len(stock_info) > 2 and stock_info[2] else "未知"
+                    
+                    # 保存基础信息
+                    stock_basic_infos[stock_code] = {
+                        "listing_date": formatted_list_date,
+                        "industry": industry
+                    }
                     
                     # 通过所有过滤条件
                     filtered_stocks.append(stock_code)
@@ -550,8 +566,19 @@ def main():
     print(f"\n[5/6] 获取 {len(valid_stocks)} 只股票的基本面数据...")
     
     # 5.1 获取估值数据
-    print(f"  获取估值指标 (PE, PB)...")
+    print(f"  获取估值指标 (PE, PB, ROE, EPS, 市值, 营收增长, 净利增长, 负债率)...")
     valuation_success = 0
+    
+    # 扩展的指标列表
+    # PE: 市盈率(TTM)
+    # PB: 市净率(MRQ)
+    # ROE: 净资产收益率(加权)
+    # EPS: 每股收益
+    # TotalMV: 总市值
+    # YOYOperatingIncome: 营业收入同比增长率
+    # YOYNetProfit: 净利润同比增长率
+    # DebtAssetsRatio: 资产负债率
+    indicators_str = "PE,PB,ROE,EPS,TotalMV,YOYOperatingIncome,YOYNetProfit,DebtAssetsRatio"
     
     # 根据接口可用性决定使用CSD还是CSS
     if use_csd:
@@ -563,20 +590,32 @@ def main():
                     progress = (idx / len(valid_stocks)) * 100
                     print(f"    进度: {idx}/{len(valid_stocks)} ({progress:.1f}%)")
                 
-                # 估值指标：市盈率、市净率
-                val_data = c.csd(stock_code, "PE,PB", end_date, end_date, "")
+                # 估值指标
+                val_data = c.csd(stock_code, indicators_str, end_date, end_date, "")
                 
                 if val_data.ErrorCode == 0 and stock_code in val_data.Data:
                     val_values = val_data.Data[stock_code]
                     fund_dict = {}
                     
-                    for i, indicator in enumerate(val_data.Indicators):
-                        if i < len(val_values) and len(val_values[i]) > 0:
-                            value = val_values[i][0]
-                            if indicator == "PE":
-                                fund_dict["pe_ratio"] = value
-                            elif indicator == "PB":
-                                fund_dict["pb_ratio"] = value
+                    # 映射指标
+                    ind_map = {ind: i for i, ind in enumerate(val_data.Indicators)}
+                    
+                    # 辅助函数：安全获取值
+                    def get_val(name):
+                        if name in ind_map:
+                            idx = ind_map[name]
+                            if idx < len(val_values) and len(val_values[idx]) > 0:
+                                return val_values[idx][0]
+                        return None
+
+                    fund_dict["pe_ratio"] = get_val("PE")
+                    fund_dict["pb_ratio"] = get_val("PB")
+                    fund_dict["roe"] = get_val("ROE")
+                    fund_dict["eps"] = get_val("EPS")
+                    fund_dict["market_cap"] = get_val("TotalMV")
+                    fund_dict["revenue_growth"] = get_val("YOYOperatingIncome")
+                    fund_dict["net_profit_growth"] = get_val("YOYNetProfit")
+                    fund_dict["debt_ratio"] = get_val("DebtAssetsRatio")
                     
                     stocks_data[stock_code]["fund_data"] = fund_dict
                     valuation_success += 1
@@ -596,7 +635,7 @@ def main():
             print(f"    进度: {batch_start}/{len(valid_stocks)} ({progress:.1f}%)")
             
             try:
-                val_data = c.css(batch_codes_str, "PE,PB", "")
+                val_data = c.css(batch_codes_str, indicators_str, "")
                 
                 if val_data.ErrorCode == 0 and hasattr(val_data, 'Data'):
                     for stock_code in batch_codes:
@@ -604,12 +643,17 @@ def main():
                             val_values = val_data.Data[stock_code]
                             fund_dict = {}
                             
-                            # CSS返回格式: [PE值, PB值]
-                            if len(val_values) >= 2:
-                                if val_values[0] is not None:
-                                    fund_dict["pe_ratio"] = val_values[0]
-                                if val_values[1] is not None:
-                                    fund_dict["pb_ratio"] = val_values[1]
+                            # CSS返回格式: 按照请求字符串顺序 [PE, PB, ROE, EPS, TotalMV, YOYOperatingIncome, YOYNetProfit, DebtAssetsRatio]
+                            # 注意：CSS返回的是列表，顺序对应请求的指标
+                            if len(val_values) >= 8:
+                                fund_dict["pe_ratio"] = val_values[0]
+                                fund_dict["pb_ratio"] = val_values[1]
+                                fund_dict["roe"] = val_values[2]
+                                fund_dict["eps"] = val_values[3]
+                                fund_dict["market_cap"] = val_values[4]
+                                fund_dict["revenue_growth"] = val_values[5]
+                                fund_dict["net_profit_growth"] = val_values[6]
+                                fund_dict["debt_ratio"] = val_values[7]
                             
                             stocks_data[stock_code]["fund_data"] = fund_dict
                             valuation_success += 1
@@ -665,7 +709,36 @@ def main():
                 print(f"    {key}: {value}")
     
     # 7. 保存到文件，格式与全量数据保持一致
-    output_file = "data/choice_mainboard_all.json"
+    output_file = "data/comprehensive_stock_data.json"
+    
+    # 转换数据格式为系统兼容格式
+    compatible_stocks_data = {}
+    for stock_code, data in stocks_data.items():
+        # 去除后缀 (000001.SZ -> 000001)
+        simple_code = stock_code.split('.')[0]
+        
+        # 获取股票名称
+        stock_name = mainboard_stock_names.get(stock_code, "")
+        
+        # 获取基础信息
+        basic_info = stock_basic_infos.get(stock_code, {})
+        industry = basic_info.get("industry", "未知")
+        listing_date = basic_info.get("listing_date", "")
+        
+        # 重构数据结构
+        compatible_stocks_data[simple_code] = {
+            "code": simple_code,
+            "basic_info": {
+                "code": simple_code,
+                "name": stock_name,
+                "industry": industry,
+                "listing_date": listing_date,
+                "source": "choice"
+            },
+            "kline_data": data.get("daily_data", []),
+            "financial_data": data.get("fund_data", {})
+        }
+    
     cache_data = {
         "last_update": datetime.now().isoformat(),  # 整体更新时间
         "kline_start_date": start_date,             # K线数据开始日期
@@ -674,7 +747,7 @@ def main():
         "total_stocks": total,
         "success_count": success_count,
         "skip_count": skip_count,
-        "stocks": stocks_data
+        "stocks": compatible_stocks_data
     }
     
     print(f"\n正在保存数据到文件...")

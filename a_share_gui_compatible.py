@@ -2631,13 +2631,21 @@ class AShareAnalyzerGUI:
                                 self.comprehensive_data[code] = comprehensive_data
                                 
                                 # 保存简化评分数据用于兼容性
-                                score = comprehensive_data['overall_score']
-                                stock_name = comprehensive_data['name']
-                                industry = comprehensive_data['fund_data'].get('industry', '未知')
-                                
+                                weighted_score = comprehensive_data.get('overall_score', 0)
+                                # 归一化为显示用的1-10分制（与单票计算一致）
+                                try:
+                                    normalized_score = max(1.0, min(10.0, 5.0 + float(weighted_score) * 0.5))
+                                except Exception:
+                                    normalized_score = float(weighted_score or 5.0)
+
+                                stock_name = comprehensive_data.get('name')
+                                industry = comprehensive_data.get('fund_data', {}).get('industry', '未知')
+
+                                # 同时保存原始加权分和用于展示的归一化分，保持兼容性
                                 self.batch_scores[code] = {
                                     'name': stock_name,
-                                    'score': float(score),
+                                    'overall_score': float(weighted_score),
+                                    'score': float(normalized_score),
                                     'industry': industry,
                                     'timestamp': datetime.now().strftime('%H:%M:%S')
                                 }
@@ -3352,11 +3360,19 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                 short_score = comprehensive_data.get('short_term', {}).get('score', 0)
                                 medium_score = comprehensive_data.get('medium_term', {}).get('score', 0) 
                                 long_score = comprehensive_data.get('long_term', {}).get('score', 0)
-                                
-                                # 存储包含三个时间段评分的批量评分结果
+
+                                # 以原始加权分为基础，计算用于显示的归一化分数（与单票计算一致）
+                                weighted = comprehensive_data.get('overall_score', 0)
+                                try:
+                                    normalized = max(1.0, min(10.0, 5.0 + float(weighted) * 0.5))
+                                except Exception:
+                                    normalized = float(weighted or 5.0)
+
+                                # 存储包含三个时间段评分的批量评分结果，保留原始加权和归一化分
                                 self.batch_scores[code] = {
                                     'name': stock_name,
-                                    'score': float(score),  # 综合评分（保持兼容性）
+                                    'overall_score': float(weighted),
+                                    'score': float(normalized),  # 展示用的1-10分制
                                     'short_term_score': float(short_score),    # 短期评分
                                     'medium_term_score': float(medium_score),  # 中期评分 
                                     'long_term_score': float(long_score),      # 长期评分
@@ -3518,27 +3534,27 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             # ========== 生成投资建议 ==========
             short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(stock_code)
-            
-            # 使用与"开始分析"相同的加权平均算法
-            short_score = short_prediction.get('technical_score', 0)
+
+            # 提取三时间段的归一化分数（1-10分制），与单票算法保持一致
+            short_score = short_prediction.get('score', short_prediction.get('technical_score', 0))
             if short_score is None: short_score = 0
-            
-            medium_score = medium_prediction.get('total_score', 0)
+
+            medium_score = medium_prediction.get('score', medium_prediction.get('total_score', 0))
             if medium_score is None: medium_score = 0
-            
-            long_score = long_prediction.get('fundamental_score', 0)
+
+            long_score = long_prediction.get('score', long_prediction.get('fundamental_score', 0))
             if long_score is None: long_score = 0
-            
+
             # 调试：如果是000001，输出详细信息
             if stock_code == '000001':
                 print(f"\n[DEBUG-000001] 批量评分详细过程:")
                 print(f"  短期预测返回: {short_prediction}")
                 print(f"  中期预测返回: {medium_prediction}")
                 print(f"  长期预测返回: {long_prediction}")
-                print(f"  提取的原始分: 短期={short_score}, 中期={medium_score}, 长期={long_score}")
-            
-            # 使用统一的综合评分计算函数
-            final_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type='raw')
+                print(f"  提取的归一化分: 短期={short_score}, 中期={medium_score}, 长期={long_score}")
+
+            # 使用统一的综合评分计算函数（输入为已归一化的1-10分制）
+            final_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type='normalized')
             
             # 调试：如果是000001，输出最终分数
             if stock_code == '000001':
@@ -3547,11 +3563,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             # 缓存计算结果以便后续复用
             try:
-                self.scores_cache[stock_code] = round(final_score, 1)
+                # 使用两位小数以保持与单票返回的精度一致
+                self.scores_cache[stock_code] = round(final_score, 2)
             except Exception:
                 pass
-            
-            return round(final_score, 1)
+
+            return round(final_score, 2)
             
         except Exception as e:
             # 如果正常评分失败，最后检查一次是否为退市股票
@@ -3959,8 +3976,13 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     'risk_level': long_score_data.get('risk_level', '中等')
                 },
                 
-                # 综合评分 (使用加权平均: 短期30% + 中期40% + 长期30%)
-                'overall_score': (short_score_data.get('score', 0) * 0.3 + medium_score_data.get('score', 0) * 0.4 + long_score_data.get('score', 0) * 0.3),
+                # 综合评分 (使用统一函数计算，保持一致性)
+                'overall_score': float(self.calculate_comprehensive_score(
+                    short_score_data.get('score', 0),
+                    medium_score_data.get('score', 0),
+                    long_score_data.get('score', 0),
+                    input_type='normalized'
+                )),
                 
                 # 时间戳
                 'timestamp': datetime.now().isoformat(),
@@ -4003,7 +4025,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         'short_term': {'score': short_score_data.get('score', 0)},
                         'medium_term': {'score': medium_score_data.get('score', 0)},
                         'long_term': {'score': long_score_data.get('score', 0)},
-                        'overall_score': (short_score_data.get('score', 0) * 0.3 + medium_score_data.get('score', 0) * 0.4 + long_score_data.get('score', 0) * 0.3),
+                        'overall_score': float(self.calculate_comprehensive_score(
+                            short_score_data.get('score', 0),
+                            medium_score_data.get('score', 0),
+                            long_score_data.get('score', 0),
+                            input_type='normalized'
+                        )),
                         'timestamp': datetime.now().isoformat(),
                         'data_source': 'fallback_simulation'
                     }
@@ -4772,7 +4799,20 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         except Exception:
             # 如果 ttk 不可用，回退为普通 OptionMenu
             tk.OptionMenu(recommend_frame, self.stock_type_var, "主板", "创业板", "科创板", "全部").pack(side="left", padx=(0, 15))
-        
+
+        # 显示当前选中股票的评分组成（综合/技术/基础）
+        # 创建一个专用的标签供 update_scoring_rule_display 使用
+        try:
+            self.scoring_rule_label = tk.Label(recommend_frame,
+                                              text="综合: - | 技术: - | 基础: -",
+                                              font=("微软雅黑", 10),
+                                              fg="#7f8c8d",
+                                              bg="#f0f0f0")
+            self.scoring_rule_label.pack(side="left", padx=(0, 15))
+        except Exception:
+            # 如果创建失败，确保属性存在以避免后续调用崩溃
+            self.scoring_rule_label = None
+
         # 推荐股票按钮
         main_recommend_btn = tk.Button(recommend_frame, 
                                      text="生成推荐", 
@@ -5711,10 +5751,39 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             self._quick_score_filtered_codes = list(filtered_stocks.keys())
             self._is_quick_scoring_mode = True
             
-            # 在主线程中调用批量评分（与快速评分相同的逻辑）
-            print(f">>> 准备调用批量评分")
-            self.show_progress("\n开始批量评分...")
-            self.root.after(0, lambda: self.start_batch_scoring_by_type("全部"))
+            # 直接计算并显示结果，不保存到文件
+            print(f">>> 开始计算评分（仅显示）")
+            self.show_progress("\n开始计算评分（仅显示结果，不覆盖存档）...\n")
+            self.show_progress(f"{'代码':<8} {'名称':<8} {'总分':<6} {'短期':<6} {'中期':<6} {'长期':<6} {'建议'}")
+            self.show_progress("-" * 60)
+            
+            count = 0
+            for code in filtered_stocks.keys():
+                try:
+                    # 计算评分
+                    score_result = self._calculate_stock_score_algorithmic(code)
+                    
+                    if score_result:
+                        score = score_result.get('score', score_result.get('overall_score', 0))
+                        short = score_result.get('short_term_score', 0)
+                        medium = score_result.get('medium_term_score', 0)
+                        long = score_result.get('long_term_score', 0)
+                        rec = score_result.get('recommendation', '')
+                        name = filtered_stocks[code].get('basic_info', {}).get('name', '')
+                        
+                        # 显示结果
+                        self.show_progress(f"{code:<8} {name:<8} {score:<6.1f} {short:<6.1f} {medium:<6.1f} {long:<6.1f} {rec}")
+                        count += 1
+                        
+                        # 每10个刷新一次界面
+                        if count % 10 == 0:
+                            self.root.update()
+                            
+                except Exception as e:
+                    print(f"计算 {code} 评分失败: {e}")
+            
+            self.show_progress("-" * 60)
+            self.show_progress(f"✅ 计算完成，共 {count} 只股票")
             print(f">>> _test_choice_wrapper 执行完成")
             
         except Exception as e:
@@ -7680,15 +7749,33 @@ K线更新后快速评分完成！
             
             print(f"💯 {ticker} 原始评分: 短期={short_score}, 中期={medium_score}, 长期={long_score}")
             
-            # 加权平均：短期30%，中期40%，长期30% (与单独分析相同算法)
-            final_score = (short_score * 0.3 + medium_score * 0.4 + long_score * 0.3)
-            # 转换为1-10评分 (与单独分析相同算法)
-            total_score = max(1.0, min(10.0, 5.0 + final_score * 0.5))
-            
-            print(f"🎯 {ticker} 最终评分: 加权={final_score:.2f}, 标准化={total_score:.1f}")
+            # 使用统一综合评分函数：保留加权（raw）值并使用统一归一化逻辑
+            try:
+                # 先计算原始加权值（可能为原始尺度）用于日志/显示
+                raw_weighted = (short_score * 0.3 + medium_score * 0.4 + long_score * 0.3)
+            except Exception:
+                raw_weighted = 0.0
+
+            # 使用统一函数获得标准化 1-10 分制
+            try:
+                total_score = float(self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type='raw'))
+            except Exception:
+                total_score = max(1.0, min(10.0, 5.0 + (raw_weighted or 0.0) * 0.5))
+
+            print(f"🎯 {ticker} 最终评分: 加权={raw_weighted:.2f}, 标准化={total_score:.1f}")
             
             # 生成推荐指数显示
-            index_display = self.format_recommendation_index(total_score, ticker)
+            # 将技术面与基本面评分转换为1-10分制以便显示
+            try:
+                tech_1_10 = max(1.0, min(10.0, 5.0 + short_score * 0.5))
+            except Exception:
+                tech_1_10 = None
+            try:
+                fund_1_10 = max(1.0, min(10.0, 5.0 + long_score * 0.5))
+            except Exception:
+                fund_1_10 = None
+
+            index_display = self.format_recommendation_index(total_score, ticker, technical_score=tech_1_10, fundamental_score=fund_1_10)
             
             return index_display
             
@@ -7701,8 +7788,12 @@ K线更新后快速评分完成！
             index_display = self.format_recommendation_index(total_score, ticker)
             return index_display
     
-    def format_recommendation_index(self, score, ticker):
-        """格式化推荐指数显示（10分制）"""
+    def format_recommendation_index(self, score, ticker, technical_score=None, fundamental_score=None):
+        """格式化推荐指数显示（10分制）
+
+        如果提供了 `technical_score` 和 `fundamental_score`（均为1-10分制），
+        会在输出中一并显示技术面和基本面分数。
+        """
         stock_info = self.get_stock_info_generic(ticker)
         
         # 确定评级（基于10分制）
@@ -7751,8 +7842,20 @@ K线更新后快速评分完成！
             self.get_investor_type(score),
             self.get_risk_level(score)
         )
-        
-        return index_info
+        # 如果提供了技术面/基本面分数，附加显示
+        extra_lines = ""
+        try:
+            if technical_score is not None:
+                extra_lines += "\n技术面评分: {:.1f}/10\n".format(float(technical_score))
+        except Exception:
+            pass
+        try:
+            if fundamental_score is not None:
+                extra_lines += "基本面评分: {:.1f}/10\n".format(float(fundamental_score))
+        except Exception:
+            pass
+
+        return index_info + extra_lines
     
     def get_investor_type(self, score):
         """根据评分获取适合的投资者类型（10分制）"""
@@ -9401,8 +9504,16 @@ K线更新后快速评分完成！
                 
                 print(f"[CALC-NEW] {ticker} 计算新的评分: 短期={short_score:.1f}, 中期={medium_score:.1f}, 长期={long_score:.1f}")
             
+            # 如果使用的是 batch_scores 缓存，缓存内的三时间段分数通常已经是 1-10 分制
+            # 因此在命中缓存时强制把 input_type 视为 'normalized'，以避免重复转换
+            effective_input_type = input_type
+            if use_cache and input_type == 'raw':
+                effective_input_type = 'normalized'
+
             # 第三步：使用统一函数计算综合评分
-            comprehensive_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type=input_type)
+            comprehensive_score = self.calculate_comprehensive_score(
+                short_score, medium_score, long_score, input_type=effective_input_type
+            )
             
             # 第四步：返回结果
             return {
@@ -10611,6 +10722,20 @@ WARNING:  风险提示:
         
         for i, stock in enumerate(recommendations, 1):
             score = stock['score']
+            # 尝试获取各个方面的分数（短期/中期/长期 或 技术/基础）以在括号中显示
+            short_score = stock.get('short_score') or stock.get('short_term_score')
+            medium_score = stock.get('medium_score') or stock.get('medium_term_score')
+            long_score = stock.get('long_score') or stock.get('long_term_score')
+            # 如果当前列表中没有分项评分，尝试从 batch_scores 中查询
+            if (short_score is None or medium_score is None or long_score is None) and hasattr(self, 'batch_scores'):
+                code = stock.get('code')
+                bs = self.batch_scores.get(code, {}) if getattr(self, 'batch_scores', None) else {}
+                if short_score is None:
+                    short_score = bs.get('short_term_score') or bs.get('short_score')
+                if medium_score is None:
+                    medium_score = bs.get('medium_term_score') or bs.get('medium_score')
+                if long_score is None:
+                    long_score = bs.get('long_term_score') or bs.get('long_score')
             
             # 根据评分生成评级
             if score >= 9.0:
@@ -10624,11 +10749,49 @@ WARNING:  风险提示:
             else:
                 rating = "观望 ⭐"
             
-            report += f"""第{i}名: {stock['name']} ({stock['code']})
-   评分: {score:.2f}/10.0
-   评级: {rating}
-   行业: {stock['industry']}
-   评分时间: {stock.get('timestamp', '未知')}
+            # 构建括号内的分项显示
+            parts = []
+            # 短期/技术
+            if short_score is not None:
+                try:
+                    parts.append(f"短:{float(short_score):.1f}")
+                except:
+                    pass
+            # 中期
+            if medium_score is not None:
+                try:
+                    parts.append(f"中:{float(medium_score):.1f}")
+                except:
+                    pass
+            # 长期/基本面
+            if long_score is not None:
+                try:
+                    parts.append(f"长:{float(long_score):.1f}")
+                except:
+                    pass
+            # 综合
+            try:
+                parts.append(f"综:{float(score):.1f}")
+            except:
+                pass
+            
+            # 别名显示 (技术=短期, 基本面=长期)
+            if short_score is not None:
+                try:
+                    parts.append(f"技:{float(short_score):.1f}")
+                except:
+                    pass
+            if long_score is not None:
+                try:
+                    parts.append(f"基:{float(long_score):.1f}")
+                except:
+                    pass
+
+            extra = f" ({', '.join(parts)})" if parts else ""
+
+            report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}
+    📊 长期评分：{score:.2f}/10.0{extra}  📊 {rating.split(' ')[0]}
+    📈 趋势判断：{stock.get('trend', '未知')}
 
 """
         
@@ -11970,7 +12133,9 @@ CSV批量分析使用方法:
                     print(f"期间评分 - 短期: {short_score}, 中期: {medium_score}, 长期: {long_score}")
                 
                 # 使用统一的综合评分计算函数
-                final_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type='raw')
+                # 如果使用了缓存，说明分数已经是归一化的(1-10)，否则是原始分数
+                calc_input_type = 'normalized' if use_cache else 'raw'
+                final_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type=calc_input_type)
                 
                 print(f"开始分析算法调试 - {ticker}:")
                 print(f"   [DATA] 数据来源: {'缓存数据' if use_cache else '实时计算'}")
@@ -13624,6 +13789,10 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             final_score = 0
             score_source = "未知"
             recommendation_reason = ""
+            # 三个分项评分（短期/中期/长期）
+            short_term_score = None
+            medium_term_score = None
+            long_term_score = None
             
             if current_model == "none":
                 # None模式：使用算法计算，不读取缓存
@@ -13632,6 +13801,10 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 # 使用算法计算评分
                 calc_result = self._calculate_stock_score_algorithmic(ticker)
                 if calc_result:
+                    # 提取分项评分
+                    short_term_score = calc_result.get('short_term_score')
+                    medium_term_score = calc_result.get('medium_term_score')
+                    long_term_score = calc_result.get('long_term_score')
                     # 根据期间获取对应评分
                     period_map = {"短期": "short_term_score", "中期": "medium_term_score", "长期": "long_term_score"}
                     score_key = period_map.get(period, "overall_score")
@@ -13646,6 +13819,10 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 # 使用LLM进行分析
                 llm_result = self._analyze_stock_with_llm(ticker, stock_info, current_model)
                 if llm_result:
+                    # 提取分项评分
+                    short_term_score = llm_result.get('short_term_score')
+                    medium_term_score = llm_result.get('medium_term_score')
+                    long_term_score = llm_result.get('long_term_score')
                     # 根据期间获取对应评分
                     period_map = {"短期": "short_term_score", "中期": "medium_term_score", "长期": "long_term_score"}
                     score_key = period_map.get(period, "overall_score")
@@ -13658,6 +13835,10 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 print(f"[WARN] 股票{ticker} - 主要方式失败，使用备用算法")
                 calc_result = self._calculate_stock_score_algorithmic(ticker)
                 if calc_result:
+                    # 提取分项评分（备用算法）
+                    short_term_score = calc_result.get('short_term_score')
+                    medium_term_score = calc_result.get('medium_term_score')
+                    long_term_score = calc_result.get('long_term_score')
                     period_map = {"短期": "short_term_score", "中期": "medium_term_score", "长期": "long_term_score"}
                     score_key = period_map.get(period, "overall_score")
                     final_score = calc_result.get(score_key, calc_result.get('overall_score', 0))
@@ -13680,6 +13861,10 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 'concept': stock_info.get('concept', '未知'),
                 'price': stock_info.get('price', 0),
                 'score': final_score,
+                'short_term_score': short_term_score,
+                'medium_term_score': medium_term_score,
+                'long_term_score': long_term_score,
+                'score_source': score_source,
                 'recommendation_reason': recommendation_reason
             }
             
@@ -15802,6 +15987,60 @@ WARNING: 重要声明:
             name = stock.get('name', f'股票{code}')
             trend = stock.get('trend', '未知')
             strategy = stock.get('strategy', '')
+            # 尝试获取分项评分用于在括号中显示
+            short_score = stock.get('short_score') or stock.get('short_term_score')
+            medium_score = stock.get('medium_score') or stock.get('medium_term_score')
+            long_score = stock.get('long_score') or stock.get('long_term_score')
+            # 如果没有，从 batch_scores 或 comprehensive_data 中查找
+            if (short_score is None or medium_score is None or long_score is None):
+                # 优先从 batch_scores
+                if hasattr(self, 'batch_scores'):
+                    bs = self.batch_scores.get(code, {})
+                    short_score = short_score or bs.get('short_term_score') or bs.get('short_score')
+                    medium_score = medium_score or bs.get('medium_term_score') or bs.get('medium_score')
+                    long_score = long_score or bs.get('long_term_score') or bs.get('long_score')
+                # 再尝试从 comprehensive_data
+                if (short_score is None or medium_score is None or long_score is None) and hasattr(self, 'comprehensive_data'):
+                    cd = self.comprehensive_data.get(code, {})
+                    short_score = short_score or cd.get('short_term', {}).get('score')
+                    medium_score = medium_score or cd.get('medium_term', {}).get('score')
+                    long_score = long_score or cd.get('long_term', {}).get('score')
+            parts = []
+            # 短期/技术
+            try:
+                if short_score is not None:
+                    parts.append(f"短:{float(short_score):.1f}")
+            except:
+                pass
+            # 中期
+            try:
+                if medium_score is not None:
+                    parts.append(f"中:{float(medium_score):.1f}")
+            except:
+                pass
+            # 长期/基本面
+            try:
+                if long_score is not None:
+                    parts.append(f"长:{float(long_score):.1f}")
+            except:
+                pass
+            # 综合
+            try:
+                parts.append(f"综:{float(score):.1f}")
+            except:
+                pass
+            # 别名显示 (技术=短期, 基本面=长期)
+            try:
+                if short_score is not None:
+                    parts.append(f"技:{float(short_score):.1f}")
+            except:
+                pass
+            try:
+                if long_score is not None:
+                    parts.append(f"基:{float(long_score):.1f}")
+            except:
+                pass
+            extra = f" ({', '.join(parts)})" if parts else ""
             
             # 评分等级
             if score >= 9.0:
@@ -15817,10 +16056,10 @@ WARNING: 重要声明:
                 score_level = "📊 观察"
                 score_color = "📈"
             
-            stock_info = f"""
+                stock_info = f"""
 {score_color} 第 {i} 名：{code} {name}
-   📊 {period_name}评分：{score:.2f}/10.0  {score_level}
-   📈 趋势判断：{trend}
+    📊 {period_name}评分：{score:.2f}/10.0{extra}  {score_level}
+    📈 趋势判断：{trend}
 """
             
             if strategy:
@@ -16397,18 +16636,27 @@ WARNING: 重要声明:
         
         for stock_code, data in async_results.items():
             if isinstance(data, dict):
-                # 转换为系统期望的格式
+                # 转换为系统期望的格式 —— 使用统一的综合评分计算函数
+                short_t = data.get('short_term_score', 0)
+                medium_t = data.get('medium_term_score', 0)
+                long_t = data.get('long_term_score', 0)
+                try:
+                    overall = float(self.calculate_comprehensive_score(short_t, medium_t, long_t, input_type='normalized'))
+                except Exception:
+                    overall = data.get('short_term_score', 0)
+
                 converted_results[stock_code] = {
-                    'overall_score': data.get('short_term_score', 0),  # 使用短期评分作为总体评分
-                    'short_term_score': data.get('short_term_score', 0),
-                    'medium_term_score': data.get('medium_term_score', 0), 
-                    'long_term_score': data.get('long_term_score', 0),
+                    'overall_score': overall,
+                    'short_term_score': short_t,
+                    'medium_term_score': medium_t,
+                    'long_term_score': long_t,
                     'timestamp': data.get('timestamp', datetime.now().isoformat()),
                     'processing_time': data.get('processing_time', 0),
                     'price': data.get('price', 0),
                     'rsi': data.get('rsi', 50),
                     'macd': data.get('macd', 0),
                     'volume_ratio': data.get('volume_ratio', 1.0),
+                    'trend': data.get('trend', '未知'),  # 传递趋势信息
                     'optimization_processed': True  # 标记为优化处理
                 }
         
@@ -16657,12 +16905,12 @@ WARNING: 重要声明:
             medium_score = medium_prediction.get('score', 5.0)
             long_score = long_prediction.get('score', 5.0)
             
-            # 直接计算加权平均（已经是1-10分制）
-            if medium_score != 5.0:
-                overall_score = (short_score * 0.3 + medium_score * 0.4 + long_score * 0.3)
-            else:
-                overall_score = (short_score * 0.5 + long_score * 0.5)
+            # 使用统一的综合评分计算函数（输入为已转换的1-10分制）
+            overall_score = float(self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type='normalized'))
             
+            # 提取趋势信息 (优先使用中期趋势，其次长期，最后短期)
+            trend = medium_prediction.get('trend') or long_prediction.get('trend') or short_prediction.get('trend') or '未知'
+
             print(f"[CALC] {code} 评分计算 - 短期:{short_score:.1f}, 中期:{medium_score:.1f}, 长期:{long_score:.1f}, 综合:{overall_score:.1f}")
             
             return {
@@ -16676,7 +16924,8 @@ WARNING: 重要声明:
                 'recommendation': self._generate_algorithmic_recommendation(overall_score),
                 'timestamp': datetime.now().isoformat(),
                 'analysis_type': 'algorithmic_with_real_data',
-                'data_source': 'local_cache'
+                'data_source': 'local_cache',
+                'trend': trend  # 添加趋势信息
             }
             
         except Exception as e:
