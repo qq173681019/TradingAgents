@@ -11,5 +11,6 @@
     "files.associations": {
         "*.env*": "dotenv"
     },
-    "python.envFile": "${workspaceFolder}/.env.local"
+    "python.envFile": "${workspaceFolder}/.env.local",
+    "CodeGPT.apiKey": "Gemini CLI"
 }
