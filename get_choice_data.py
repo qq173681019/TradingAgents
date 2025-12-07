@@ -340,9 +340,9 @@ def main():
             print(f"  检查进度: {batch_start}/{len(mainboard_stocks)} ({progress:.1f}%)")
         
         try:
-            # 获取上市日期、退市日期、申万一级行业
-            # SW1: 申万一级行业名称
-            info_data = c.css(batch_codes_str, "LISTDATE,DELISTDATE,SW1", "")
+            # 获取上市日期、退市日期
+            # 注意：SW1等行业指标可能需要额外权限或不同接口，暂时移除以避免10000013错误
+            info_data = c.css(batch_codes_str, "LISTDATE,DELISTDATE", "")
             
             if info_data.ErrorCode == 0 and hasattr(info_data, 'Data'):
                 for stock_code in batch_codes:
@@ -380,8 +380,8 @@ def main():
                         filter_stats['delisted'] += 1
                         continue
                     
-                    # 获取行业信息
-                    industry = stock_info[2] if len(stock_info) > 2 and stock_info[2] else "未知"
+                    # 获取行业信息 (暂时设为未知)
+                    industry = "未知"
                     
                     # 保存基础信息
                     stock_basic_infos[stock_code] = {
@@ -566,19 +566,12 @@ def main():
     print(f"\n[5/6] 获取 {len(valid_stocks)} 只股票的基本面数据...")
     
     # 5.1 获取估值数据
-    print(f"  获取估值指标 (PE, PB, ROE, EPS, 市值, 营收增长, 净利增长, 负债率)...")
+    print(f"  获取估值指标 (PE, PB)...")
     valuation_success = 0
     
-    # 扩展的指标列表
-    # PE: 市盈率(TTM)
-    # PB: 市净率(MRQ)
-    # ROE: 净资产收益率(加权)
-    # EPS: 每股收益
-    # TotalMV: 总市值
-    # YOYOperatingIncome: 营业收入同比增长率
-    # YOYNetProfit: 净利润同比增长率
-    # DebtAssetsRatio: 资产负债率
-    indicators_str = "PE,PB,ROE,EPS,TotalMV,YOYOperatingIncome,YOYNetProfit,DebtAssetsRatio"
+    # 扩展的指标列表 - 仅使用最基础的PE/PB以确保稳定性
+    # 注意：其他指标如ROE, EPS等可能需要特定的Choice代码，使用错误代码会导致10000013错误
+    indicators_str = "PE,PB"
     
     # 根据接口可用性决定使用CSD还是CSS
     if use_csd:
@@ -610,12 +603,13 @@ def main():
 
                     fund_dict["pe_ratio"] = get_val("PE")
                     fund_dict["pb_ratio"] = get_val("PB")
-                    fund_dict["roe"] = get_val("ROE")
-                    fund_dict["eps"] = get_val("EPS")
-                    fund_dict["market_cap"] = get_val("TotalMV")
-                    fund_dict["revenue_growth"] = get_val("YOYOperatingIncome")
-                    fund_dict["net_profit_growth"] = get_val("YOYNetProfit")
-                    fund_dict["debt_ratio"] = get_val("DebtAssetsRatio")
+                    # 其他字段设为None，避免错误
+                    fund_dict["roe"] = None
+                    fund_dict["eps"] = None
+                    fund_dict["market_cap"] = None
+                    fund_dict["revenue_growth"] = None
+                    fund_dict["net_profit_growth"] = None
+                    fund_dict["debt_ratio"] = None
                     
                     stocks_data[stock_code]["fund_data"] = fund_dict
                     valuation_success += 1
@@ -643,17 +637,17 @@ def main():
                             val_values = val_data.Data[stock_code]
                             fund_dict = {}
                             
-                            # CSS返回格式: 按照请求字符串顺序 [PE, PB, ROE, EPS, TotalMV, YOYOperatingIncome, YOYNetProfit, DebtAssetsRatio]
-                            # 注意：CSS返回的是列表，顺序对应请求的指标
-                            if len(val_values) >= 8:
+                            # CSS返回格式: 按照请求字符串顺序 [PE, PB]
+                            if len(val_values) >= 2:
                                 fund_dict["pe_ratio"] = val_values[0]
                                 fund_dict["pb_ratio"] = val_values[1]
-                                fund_dict["roe"] = val_values[2]
-                                fund_dict["eps"] = val_values[3]
-                                fund_dict["market_cap"] = val_values[4]
-                                fund_dict["revenue_growth"] = val_values[5]
-                                fund_dict["net_profit_growth"] = val_values[6]
-                                fund_dict["debt_ratio"] = val_values[7]
+                                # 其他字段设为None
+                                fund_dict["roe"] = None
+                                fund_dict["eps"] = None
+                                fund_dict["market_cap"] = None
+                                fund_dict["revenue_growth"] = None
+                                fund_dict["net_profit_growth"] = None
+                                fund_dict["debt_ratio"] = None
                             
                             stocks_data[stock_code]["fund_data"] = fund_dict
                             valuation_success += 1

@@ -5596,16 +5596,23 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             import json
             import os
 
-            # 检查Choice数据文件（优先使用choice_mainboard_all.json，如果不存在则使用choice_mainboard_50days.json）
-            result_file = os.path.join("data", "choice_mainboard_all.json")
-            if not os.path.exists(result_file):
-                result_file = os.path.join("data", "choice_mainboard_50days.json")
+            # 检查Choice数据文件（优先使用 comprehensive_stock_data.json，其次 choice_mainboard_all.json...）
+            result_file = os.path.join("data", "comprehensive_stock_data.json")
+            using_new_format = False
+            
+            if os.path.exists(result_file):
+                using_new_format = True
+                print(f">>> 发现新格式数据文件: {result_file}")
+            else:
+                result_file = os.path.join("data", "choice_mainboard_all.json")
+                if not os.path.exists(result_file):
+                    result_file = os.path.join("data", "choice_mainboard_50days.json")
             
             print(f">>> 检查文件: {result_file}")
             
             if not os.path.exists(result_file):
                 print(f">>> 文件不存在: {result_file}")
-                self.show_progress("ERROR: Choice数据文件不存在，请先运行 run_test_choice_mainboard_50days.bat")
+                self.show_progress("ERROR: Choice数据文件不存在，请先运行 get_choice_data.py")
                 return
             
             print(f">>> 文件存在，开始读取")
@@ -5613,7 +5620,6 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             self.show_progress("正在读取Choice数据...")
             with open(result_file, 'r', encoding='utf-8') as f:
                 cache_data = json.load(f)
-            print(f">>> JSON加载完成")
             print(f">>> JSON加载完成")
             
             stocks = cache_data.get("stocks", {})
@@ -5632,54 +5638,74 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             for code, stock_data in stocks.items():
                 try:
-                    # 优先使用新格式 daily_data
-                    daily_data = stock_data.get("daily_data")
-                    
-                    # 如果没有 daily_data，从旧格式 kline 转换
-                    if not daily_data:
-                        kline = stock_data.get("kline", {})
-                        raw_data = kline.get("data", {})
-                        dates = kline.get("dates", [])
+                    if using_new_format:
+                        # 新格式直接适配 (comprehensive_stock_data.json)
+                        # 结构: { code, basic_info, kline_data, financial_data }
                         
-                        if not raw_data or len(dates) == 0:
+                        # 确保有必要的数据
+                        kline_data = stock_data.get('kline_data', [])
+                        if not kline_data:
+                            continue
+                            
+                        # 计算技术指标
+                        tech_data = self._calculate_tech_data_from_kline(kline_data)
+                        if not tech_data:
+                            continue
+                            
+                        converted_data[code] = {
+                            'tech_data': tech_data,
+                            'fund_data': stock_data.get('financial_data', {}),
+                            'basic_info': stock_data.get('basic_info', {})
+                        }
+                    else:
+                        # 优先使用新格式 daily_data
+                        daily_data = stock_data.get("daily_data")
+                        
+                        # 如果没有 daily_data，从旧格式 kline 转换
+                        if not daily_data:
+                            kline = stock_data.get("kline", {})
+                            raw_data = kline.get("data", {})
+                            dates = kline.get("dates", [])
+                            
+                            if not raw_data or len(dates) == 0:
+                                continue
+                            
+                            # 转换为系统兼容格式
+                            daily_data = []
+                            closes = raw_data.get("CLOSE", [])
+                            volumes = raw_data.get("VOLUME", [])
+                            opens = raw_data.get("OPEN", [])
+                            highs = raw_data.get("HIGH", [])
+                            lows = raw_data.get("LOW", [])
+                            
+                            for i, date in enumerate(dates):
+                                day_record = {'date': date}
+                                if i < len(closes): day_record['close'] = closes[i]
+                                if i < len(volumes): day_record['volume'] = volumes[i]
+                                if i < len(opens): day_record['open'] = opens[i]
+                                if i < len(highs): day_record['high'] = highs[i]
+                                if i < len(lows): day_record['low'] = lows[i]
+                                daily_data.append(day_record)
+                        
+                        if not daily_data:
                             continue
                         
-                        # 转换为系统兼容格式
-                        daily_data = []
-                        closes = raw_data.get("CLOSE", [])
-                        volumes = raw_data.get("VOLUME", [])
-                        opens = raw_data.get("OPEN", [])
-                        highs = raw_data.get("HIGH", [])
-                        lows = raw_data.get("LOW", [])
+                        # 计算技术指标
+                        tech_data = self._calculate_tech_data_from_kline(daily_data)
+                        if not tech_data:
+                            continue
                         
-                        for i, date in enumerate(dates):
-                            day_record = {'date': date}
-                            if i < len(closes): day_record['close'] = closes[i]
-                            if i < len(volumes): day_record['volume'] = volumes[i]
-                            if i < len(opens): day_record['open'] = opens[i]
-                            if i < len(highs): day_record['high'] = highs[i]
-                            if i < len(lows): day_record['low'] = lows[i]
-                            daily_data.append(day_record)
-                    
-                    if not daily_data:
-                        continue
-                    
-                    # 计算技术指标
-                    tech_data = self._calculate_tech_data_from_kline(daily_data)
-                    if not tech_data:
-                        continue
-                    
-                    # 获取基本面数据
-                    fund_data = stock_data.get("fund_data", {})
-                    
-                    # 转换为系统标准格式
-                    converted_data[code] = {
-                        'tech_data': tech_data,
-                        'fund_data': fund_data,
-                        'basic_info': {
-                            'name': stock_data.get('name', '')
+                        # 获取基本面数据
+                        fund_data = stock_data.get("fund_data", {})
+                        
+                        # 转换为系统标准格式
+                        converted_data[code] = {
+                            'tech_data': tech_data,
+                            'fund_data': fund_data,
+                            'basic_info': {
+                                'name': stock_data.get('name', '')
+                            }
                         }
-                    }
                     
                 except Exception as e:
                     print(f"转换股票 {code} 数据失败: {e}")
