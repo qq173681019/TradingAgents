@@ -4094,31 +4094,47 @@ class ComprehensiveDataCollector:
                 # 为每只股票确定需要获取的日期范围
                 codes_with_date_range = {}
                 for code in batch_codes:
-                    if code in existing_data and 'kline_data' in existing_data[code]:
-                        # 获取历史K线数据的最后日期
-                        daily_data = existing_data[code]['kline_data'].get('daily', [])
-                        if daily_data:
-                            # 找到最后一天的日期
-                            last_date_str = daily_data[-1].get('date', daily_data[-1].get('trade_date', ''))
-                            if last_date_str:
-                                try:
-                                    # 解析日期
-                                    if len(last_date_str) == 8:  # YYYYMMDD格式
-                                        last_date = datetime.strptime(last_date_str, '%Y%m%d')
-                                    else:  # YYYY-MM-DD格式
-                                        last_date = datetime.strptime(last_date_str, '%Y-%m-%d')
-                                    
-                                    # 从下一天开始获取
-                                    start_date = last_date + timedelta(days=1)
-                                    codes_with_date_range[code] = start_date
-                                    print(f"    {code}: 历史数据到{last_date_str}，将获取{start_date.strftime('%Y-%m-%d')}之后的数据")
-                                except:
-                                    # 解析失败，获取全部数据
+                    try:
+                        if code in existing_data and 'kline_data' in existing_data[code]:
+                            # 获取历史K线数据的最后日期
+                            kline_data_obj = existing_data[code].get('kline_data')
+                            if kline_data_obj is None:
+                                codes_with_date_range[code] = None
+                                continue
+                            
+                            daily_data = kline_data_obj.get('daily', []) if isinstance(kline_data_obj, dict) else []
+                            if daily_data and isinstance(daily_data, list) and len(daily_data) > 0:
+                                # 找到最后一天的日期，确保最后一个元素不是None
+                                last_item = daily_data[-1]
+                                if last_item and isinstance(last_item, dict):
+                                    last_date_str = last_item.get('date', last_item.get('trade_date', ''))
+                                else:
+                                    last_date_str = ''
+                                if last_date_str:
+                                    try:
+                                        # 解析日期
+                                        if len(last_date_str) == 8:  # YYYYMMDD格式
+                                            last_date = datetime.strptime(last_date_str, '%Y%m%d')
+                                        else:  # YYYY-MM-DD格式
+                                            last_date = datetime.strptime(last_date_str, '%Y-%m-%d')
+                                        
+                                        # 从下一天开始获取
+                                        start_date = last_date + timedelta(days=1)
+                                        codes_with_date_range[code] = start_date
+                                        print(f"    {code}: 历史数据到{last_date_str}，将获取{start_date.strftime('%Y-%m-%d')}之后的数据")
+                                    except Exception as date_parse_err:
+                                        # 解析失败，获取全部数据
+                                        print(f"    {code}: 日期解析失败 ({date_parse_err})，将获取全部数据")
+                                        codes_with_date_range[code] = None
+                                else:
                                     codes_with_date_range[code] = None
+                            else:
+                                codes_with_date_range[code] = None
                         else:
+                            # 新股票，获取全部数据
                             codes_with_date_range[code] = None
-                    else:
-                        # 新股票，获取全部数据
+                    except Exception as code_err:
+                        print(f"    [WARNING] {code}: 处理失败 ({code_err})，跳过")
                         codes_with_date_range[code] = None
                 
                 # 批量采集新数据
@@ -4214,8 +4230,11 @@ class ComprehensiveDataCollector:
                     progress_callback(f"K线更新中 ({progress_text})", progress_pct, detail_info)
                 
             except Exception as e:
+                import traceback
                 error_msg = f"{current_batch_info} 失败: {str(e)}"
                 print(f"[ERROR] {error_msg}")
+                print(f"[ERROR] 详细错误追踪:")
+                traceback.print_exc()
                 if progress_callback:
                     progress_callback("K线更新出错", progress_pct, error_msg)
             

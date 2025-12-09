@@ -462,9 +462,15 @@ except Exception:
 try:
     import baostock as bs
     BAOSTOCK_AVAILABLE = True
-except ImportError:
+    print("✓ baostock库加载成功")
+except ImportError as e:
     bs = None
     BAOSTOCK_AVAILABLE = False
+    print(f"⚠ baostock库导入失败: {e}")
+except Exception as e:
+    bs = None
+    BAOSTOCK_AVAILABLE = False
+    print(f"⚠ baostock库加载异常: {e}")
 
 # 导入urllib用于网络请求
 try:
@@ -4003,41 +4009,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             print(f"获取 {stock_code} 完整数据失败: 缺少关键字段 {e}")
             print(f"[DEBUG] 技术数据字段: {list(cached.get('tech_data', {}).keys()) if cached.get('tech_data') else '无'}")
             print(f"[DEBUG] 基本面数据字段: {list(cached.get('fund_data', {}).keys()) if cached.get('fund_data') else '无'}")
-            # 尝试使用模拟数据作为兜底
-            try:
-                print(f"[FALLBACK] {stock_code} 使用模拟数据作为兜底...")
-                tech_data = self._generate_smart_mock_technical_data(stock_code)
-                fund_data = self._generate_smart_mock_fundamental_data(stock_code)
-                
-                if tech_data and fund_data:
-                    # 重新构建数据
-                    stock_info = self.stock_info.get(stock_code, {})
-                    short_score_data = self._calculate_short_term_score(stock_code, tech_data, fund_data, stock_info)
-                    medium_score_data = self._calculate_medium_term_score(stock_code, tech_data, fund_data, stock_info)
-                    long_score_data = self._calculate_long_term_score(stock_code, tech_data, fund_data, stock_info)
-                    
-                    return {
-                        'code': stock_code,
-                        'name': stock_info.get('name', f'股票{stock_code}'),
-                        'current_price': tech_data['current_price'],
-                        'tech_data': tech_data,
-                        'fund_data': fund_data,
-                        'short_term': {'score': short_score_data.get('score', 0)},
-                        'medium_term': {'score': medium_score_data.get('score', 0)},
-                        'long_term': {'score': long_score_data.get('score', 0)},
-                        'overall_score': float(self.calculate_comprehensive_score(
-                            short_score_data.get('score', 0),
-                            medium_score_data.get('score', 0),
-                            long_score_data.get('score', 0),
-                            input_type='normalized'
-                        )),
-                        'timestamp': datetime.now().isoformat(),
-                        'data_source': 'fallback_simulation'
-                    }
-            except Exception as fallback_error:
-                print(f"[FALLBACK] {stock_code} 模拟数据兜底也失败: {fallback_error}")
-                import traceback
-                traceback.print_exc()
+            # 不再使用模拟数据作为兜底，直接返回失败
+            print(f"[ERROR] {stock_code} 数据获取失败且已禁用模拟数据兜底")
             return None
         except Exception as e:
             print(f"分析股票 {stock_code} 失败: {e}")
@@ -7581,11 +7554,12 @@ K线更新后快速评分完成！
             
             self.last_request_time = time.time()
             
-            # 解析腾讯财经数据格式: v_sz000001="51~平安银行~000001~11.32~11.38~11.32~..."
+            # 解析腾讯财经数据格式: v_sz000001="51~平安银行~000001~当前价~昨收~今开~..."
+            # parts[3] = 当前价(实时), parts[4] = 昨收, parts[5] = 今开
             if f'v_{code}=' in data:
                 parts = data.split('="')[1].split('"')[0].split('~')
                 if len(parts) > 3 and parts[3]:
-                    price = float(parts[3])
+                    price = float(parts[3])  # parts[3]就是当前实时价格
                     if price > 0:
                         return price
             
@@ -8168,6 +8142,7 @@ K线更新后快速评分完成！
     
     def _try_get_real_technical_data(self, ticker):
         """尝试获取真实技术数据 - Choice优先，多数据源备用"""
+        global BAOSTOCK_AVAILABLE, AKSHARE_AVAILABLE, TUSHARE_AVAILABLE
         import os
         import socket
         import urllib.request
@@ -8466,8 +8441,42 @@ K线更新后快速评分完成！
             
             if stock_hist is not None and not stock_hist.empty:
                 print(f"\033[92m✓ {ticker} 实时数据获取成功\033[0m")
-                # 获取最新价格
-                current_price = float(stock_hist['收盘'].iloc[-1])
+                
+                # 首先尝试获取实时价格（不使用K线数据的收盘价）
+                real_time_price = None
+                try:
+                    real_time_price = self.try_get_real_price_tencent(ticker)
+                    if real_time_price and real_time_price > 0:
+                        print(f"✓ 腾讯实时价格: ¥{real_time_price:.2f}")
+                except Exception as e:
+                    print(f"腾讯实时价格失败: {e}")
+                
+                if not real_time_price:
+                    try:
+                        real_time_price = self.try_get_real_price_sina(ticker)
+                        if real_time_price and real_time_price > 0:
+                            print(f"✓ 新浪实时价格: ¥{real_time_price:.2f}")
+                    except Exception as e:
+                        print(f"新浪实时价格失败: {e}")
+                
+                if not real_time_price:
+                    try:
+                        real_time_price = self.try_get_real_price_netease(ticker)
+                        if real_time_price and real_time_price > 0:
+                            print(f"✓ 网易实时价格: ¥{real_time_price:.2f}")
+                    except Exception as e:
+                        print(f"网易实时价格失败: {e}")
+                
+                # 获取最新价格：优先使用实时API，否则用K线收盘价
+                kline_close_price = float(stock_hist['收盘'].iloc[-1])
+                print(f"[DEBUG] K线收盘价: ¥{kline_close_price:.2f}, 实时API价格: ¥{real_time_price if real_time_price else 'None'}")
+                
+                if real_time_price and real_time_price > 0:
+                    current_price = real_time_price
+                    print(f"✓✓✓ 最终使用实时API价格: ¥{current_price:.2f} ✓✓✓")
+                else:
+                    current_price = kline_close_price
+                    print(f"⚠⚠⚠ 最终使用K线收盘价: ¥{current_price:.2f} ⚠⚠⚠")
                 
                 # 计算移动平均线
                 ma5 = float(stock_hist['收盘'].tail(5).mean()) if len(stock_hist) >= 5 else current_price
@@ -8475,16 +8484,18 @@ K线更新后快速评分完成！
                 ma20 = float(stock_hist['收盘'].tail(20).mean()) if len(stock_hist) >= 20 else current_price
                 ma60 = float(stock_hist['收盘'].tail(60).mean()) if len(stock_hist) >= 60 else current_price
                 
-                # 计算RSI (简化版本)
+                # 计算RSI (标准Wilder公式 - 14周期)
                 if len(stock_hist) >= 14:
                     close_prices = stock_hist['收盘'].astype(float)
                     delta = close_prices.diff()
-                    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-                    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                    rs = gain / loss
+                    gain = (delta.where(delta > 0, 0)).rolling(window=14, min_periods=14).mean()
+                    loss = (-delta.where(delta < 0, 0)).rolling(window=14, min_periods=14).mean()
+                    # 避免除零错误
+                    loss_safe = loss.replace(0, 1e-10)
+                    rs = gain / loss_safe
                     rsi = 100 - (100 / (1 + rs.iloc[-1]))
                 else:
-                    rsi = 50  # 默认中性值
+                    rsi = 50  # 数据不足，默认中性值
                 
                 # 计算成交量比率
                 if len(stock_hist) >= 5:
@@ -8494,15 +8505,41 @@ K线更新后快速评分完成！
                 else:
                     volume_ratio = 1.0
                 
-                # 简化的MACD计算 (使用价格差异)
+                # 标准MACD计算 (DIF快线和DEA信号线)
                 if len(stock_hist) >= 26:
-                    ema12 = stock_hist['收盘'].ewm(span=12).mean().iloc[-1]
-                    ema26 = stock_hist['收盘'].ewm(span=26).mean().iloc[-1]
-                    macd = float(ema12 - ema26)
-                    signal = float(stock_hist['收盘'].ewm(span=9).mean().iloc[-1])
+                    ema12 = stock_hist['收盘'].ewm(span=12, adjust=False).mean()
+                    ema26 = stock_hist['收盘'].ewm(span=26, adjust=False).mean()
+                    macd_line = ema12 - ema26  # DIF快线
+                    signal_line = macd_line.ewm(span=9, adjust=False).mean()  # DEA信号线（9日EMA）
+                    macd = float(macd_line.iloc[-1])
+                    signal = float(signal_line.iloc[-1])
                 else:
                     macd = 0
                     signal = 0
+                
+                # 计算RSI状态
+                rsi_value = float(rsi) if not pd.isna(rsi) else 50
+                if rsi_value > 70:
+                    rsi_status = "超买"
+                elif rsi_value > 60:
+                    rsi_status = "偏强"
+                elif rsi_value > 40:
+                    rsi_status = "中性"
+                elif rsi_value > 30:
+                    rsi_status = "偏弱"
+                else:
+                    rsi_status = "超卖"
+                
+                # 计算趋势动量
+                if current_price > ma5 > ma20:
+                    momentum = "上升"
+                elif current_price < ma5 < ma20:
+                    momentum = "下降"
+                else:
+                    momentum = "震荡"
+                
+                # 添加ma120用于长期趋势判断
+                ma120 = float(stock_hist['收盘'].tail(120).mean()) if len(stock_hist) >= 120 else current_price
                 
                 print(f"成功获取{ticker}的真实技术指标")
                 return {
@@ -8511,10 +8548,13 @@ K线更新后快速评分完成！
                     'ma10': ma10,
                     'ma20': ma20,
                     'ma60': ma60,
-                    'rsi': float(rsi) if not pd.isna(rsi) else 50,
+                    'ma120': ma120,
+                    'rsi': rsi_value,
+                    'rsi_status': rsi_status,
                     'macd': macd,
                     'signal': signal,
                     'volume_ratio': volume_ratio,
+                    'momentum': momentum,
                     'data_source': 'real'
                 }
             else:
@@ -9717,86 +9757,107 @@ K线更新后快速评分完成！
             prediction_score = 0
             signals = []
             
-            # RSI分析 (权重35% - 短期更重视超买超卖)
-            if rsi < 15:
+            # RSI分析 (权重25% - A股市场优化阈值)
+            if rsi < 20:
                 prediction_score += 6
-                signals.append("RSI极度超卖，强反弹概率高")
-            elif rsi < 25:
-                prediction_score += 4
-                signals.append("RSI严重超卖，反弹信号明确")
+                signals.append("RSI极度超卖(<20)，强反弹概率高")
             elif rsi < 30:
+                prediction_score += 4
+                signals.append("RSI严重超卖(<30)，反弹信号明确")
+            elif rsi < 35:
                 prediction_score += 3
-                signals.append("RSI超卖，反弹信号明确")
-            elif 45 <= rsi <= 55:
+                signals.append("RSI超卖(<35)，反弹概率大")
+            elif 35 <= rsi <= 65:
                 prediction_score += 0
-                signals.append("RSI中性区间")
-            elif rsi > 85:
+                signals.append("RSI中性区间(35-65)，震荡整理")
+            elif rsi <= 70:
+                prediction_score -= 1
+                signals.append("RSI轻微超买(65-70)，偏空信号")
+            elif rsi < 75:
+                prediction_score -= 3
+                signals.append("RSI超买(70-75)，短期见顶风险")
+            elif rsi < 80:
+                prediction_score -= 4
+                signals.append("RSI严重超买(75-80)，回调风险大")
+            else:  # rsi >= 80
                 prediction_score -= 6
-                signals.append("RSI极度超买，急跌风险大")
-            elif rsi > 75:
-                prediction_score -= 4
-                signals.append("RSI严重超买，回调风险大")
-            elif rsi > 70:
-                prediction_score -= 3
-                signals.append("RSI超买，短期见顶风险")
+                signals.append("RSI极度超买(≥80)，急跌风险大")
             
-            # MACD分析 (权重30% - 短期更关注金叉死叉)
+            # MACD分析 (权重25% - A股市场优化阈值)
             macd_diff = macd - signal
-            if macd > 0 and macd_diff > 0.1:
-                prediction_score += 4
-                signals.append("MACD强势金叉，多头爆发")
-            elif macd > 0 and macd_diff > 0.05:
+            if macd > 0 and macd_diff > 0.06:
                 prediction_score += 3
-                signals.append("MACD金叉向上，多头趋势强")
-            elif macd > 0 and macd_diff > 0:
+                signals.append("MACD强势金叉(>0.06)，多头爆发")
+            elif macd > 0 and macd_diff > 0.03:
                 prediction_score += 2
+                signals.append("MACD金叉向上(>0.03)，多头趋势强")
+            elif macd > 0 and macd_diff > 0:
+                prediction_score += 1
                 signals.append("MACD零轴上方，趋势向好")
-            elif macd < 0 and macd_diff < -0.1:
-                prediction_score -= 4
-                signals.append("MACD强势死叉，空头爆发")
-            elif macd < 0 and macd_diff < -0.05:
+            elif macd < 0 and macd_diff < -0.06:
                 prediction_score -= 3
-                signals.append("MACD死叉向下，空头趋势强")
-            elif macd < 0 and macd_diff < 0:
+                signals.append("MACD强势死叉(<-0.06)，空头爆发")
+            elif macd < 0 and macd_diff < -0.03:
                 prediction_score -= 2
+                signals.append("MACD死叉向下(<-0.03)，空头趋势强")
+            elif macd < 0 and macd_diff < 0:
+                prediction_score -= 1
                 signals.append("MACD零轴下方，趋势偏弱")
+            else:
+                signals.append("MACD零轴附近，方向不明")
             
-            # 均线分析 (权重20% - 短期关注快速均线)
+            # 均线分析 (权重30% - A股增加震荡状态识别)
             if current_price > ma5 > ma10 > ma20:
-                prediction_score += 4
-                signals.append("均线多头排列，上升趋势明确")
+                prediction_score += 5
+                signals.append("完全多头排列，强势上升趋势")
             elif current_price > ma5 > ma10:
                 prediction_score += 3
                 signals.append("短期均线向上，有向上动能")
             elif current_price > ma5:
-                prediction_score += 1
+                prediction_score += 1.5
                 signals.append("站上5日线，短线偏多")
+            elif ma5 > ma10 > ma20 and current_price < ma5:
+                prediction_score -= 0.5
+                signals.append("均线向上但价格回调，多头震荡")
             elif current_price < ma5 < ma10 < ma20:
-                prediction_score -= 4
-                signals.append("均线空头排列，下降趋势明确")
+                prediction_score -= 5
+                signals.append("完全空头排列，弱势下跌趋势")
             elif current_price < ma5 < ma10:
                 prediction_score -= 3
                 signals.append("短期均线向下，有下跌压力")
             elif current_price < ma5:
-                prediction_score -= 1
+                prediction_score -= 1.5
                 signals.append("跌破5日线，短线偏空")
+            elif ma5 < ma10 < ma20 and current_price > ma5:
+                prediction_score += 0.5
+                signals.append("均线向下但价格反弹，空头震荡")
+            else:
+                signals.append("均线粘合，方向待定")
             
-            # 成交量分析 (权重15% - 短期重视放量突破)
-            if volume_ratio > 3.0:
+            # 成交量分析 (权重20% - A股资金推动市，量价关系核心)
+            if volume_ratio > 5.0:
+                prediction_score += 4
+                signals.append("异常放量(>5倍)，主力强势介入")
+            elif volume_ratio > 3.0:
                 prediction_score += 3
-                signals.append("巨量涨停，资金疯狂抢筹")
+                signals.append("巨量放大(>3倍)，资金疯狂抢筹")
             elif volume_ratio > 2.0:
                 prediction_score += 2
-                signals.append("成交量大幅放大，资金关注度高")
+                signals.append("大幅放量(>2倍)，资金关注度高")
             elif volume_ratio > 1.5:
                 prediction_score += 1
-                signals.append("成交量温和放大，有资金参与")
+                signals.append("温和放量(>1.5倍)，有资金参与")
+            elif volume_ratio < 0.2:
+                prediction_score -= 3
+                signals.append("极度萎缩(<0.2倍)，市场极度冷清")
             elif volume_ratio < 0.3:
                 prediction_score -= 2
-                signals.append("成交量极度萎缩，市场冷清")
+                signals.append("大幅萎缩(<0.3倍)，缺乏资金关注")
             elif volume_ratio < 0.5:
                 prediction_score -= 1
-                signals.append("成交量萎缩，缺乏资金推动")
+                signals.append("成交萎缩(<0.5倍)，缺乏资金推动")
+            else:
+                signals.append("成交量正常，维持现状")
             
             # 生成预测结果 - 短期更激进的评分
             if prediction_score >= 12:
@@ -11317,6 +11378,10 @@ WARNING:  风险提示:
         else:
             price_display = "当前价格: 网络获取失败，无法显示实时价格"
         
+        # 提取技术面和基本面评分
+        technical_score = short_term_prediction.get('technical_score', short_term_prediction.get('score', 5.0))
+        fundamental_score = long_term_prediction.get('fundamental_score', long_term_prediction.get('score', 5.0))
+        
         recommendation = """
 =========================================================
           AI智能股票预测分析报告 (三时间段预测)
@@ -11329,6 +11394,12 @@ WARNING:  风险提示:
 所属行业: {}
 投资概念: {}
 {}
+
+RATING: 评分总览
+---------------------------------------------------------
+📈 技术面评分: {:.2f}/10  {}
+📊 基本面评分: {:.2f}/10  {}
+🎯 综合评分: {:.1f}/10  {}
 
 {}
 
@@ -11428,6 +11499,15 @@ WARNING:  风险管控:
             stock_info.get('industry', '未知'),
             stock_info.get('concept', '未知'),
             price_display,
+            
+            # 评分总览
+            technical_score,
+            "🟢 技术强势" if technical_score >= 7.0 else "⚖️ 技术中性" if technical_score >= 5.0 else "🔴 技术偏弱",
+            fundamental_score,
+            "🟢 基本面良好" if fundamental_score >= 7.0 else "⚖️ 基本面一般" if fundamental_score >= 5.0 else "🔴 基本面偏弱",
+            final_score,
+            "⭐ 优秀投资标的" if final_score >= 8 else "✅ 良好投资选择" if final_score >= 7 else "⚖️ 中性评价" if final_score >= 6 else "⚠️ 需谨慎考虑" if final_score >= 5 else "🔴 高风险标的",
+            
             comprehensive_index,
             
             # 短期预测
@@ -12031,31 +12111,37 @@ CSV批量分析使用方法:
                 print(f"步骤1出错: {e}")
                 stock_info = {"name": f"股票{ticker}", "industry": "未知行业", "concept": "A股", "price": 0}
             
-            # 步骤2: 生成智能模拟技术数据
-            self.update_progress(f"步骤2/6: 生成 {ticker} 技术分析数据...")
+            # 步骤2: 获取真实技术数据
+            self.update_progress(f"步骤2/6: 获取 {ticker} 技术分析数据...")
             time.sleep(0.1)
             try:
-                tech_data = self._generate_smart_mock_technical_data(ticker)
-                # 强制使用实时价格，确保显示的价格是最新的
-                real_time_price = self.get_stock_price(ticker)
-                if real_time_price is not None:
-                    tech_data['current_price'] = real_time_price
-                    print(f"步骤2完成: 技术数据生成成功 - 实时价格¥{real_time_price:.2f}")
-                else:
-                    print(f"步骤2完成: 技术数据生成成功 - 价格¥{tech_data['current_price']:.2f} (使用缓存)")
+                tech_data = self._try_get_real_technical_data(ticker)
+                if tech_data is None:
+                    print(f"步骤2失败: 无法获取 {ticker} 的真实技术数据")
+                    error_msg = f"ERROR: 无法获取技术数据\n\n股票代码: {ticker}\n所有数据源均失败\n\n请检查网络连接或稍后重试"
+                    timeout_timer.cancel()
+                    self.root.after(0, self.show_error, error_msg)
+                    return
+                print(f"步骤2完成: 技术数据获取成功 - 价格¥{tech_data.get('current_price', 0):.2f}")
             except Exception as e:
                 print(f"步骤2出错: {e}")
-                error_msg = f"ERROR: 技术数据生成失败\n\n{str(e)}\n请稍后重试"
+                error_msg = f"ERROR: 技术数据获取失败\n\n{str(e)}\n请稍后重试"
                 timeout_timer.cancel()
                 self.root.after(0, self.show_error, error_msg)
                 return
             
-            # 步骤3: 生成智能模拟基本面数据
-            self.update_progress(f"步骤3/6: 生成 {ticker} 基本面数据...")
+            # 步骤3: 获取真实基本面数据
+            self.update_progress(f"步骤3/6: 获取 {ticker} 基本面数据...")
             time.sleep(0.1)
             try:
-                fund_data = self._generate_smart_mock_fundamental_data(ticker)
-                print(f"步骤3完成: 基本面数据生成成功 - PE{fund_data['pe_ratio']:.1f}")
+                fund_data = self._try_get_real_fundamental_data(ticker)
+                if fund_data is None:
+                    print(f"步骤3失败: 无法获取 {ticker} 的真实基本面数据")
+                    error_msg = f"ERROR: 无法获取基本面数据\n\n股票代码: {ticker}\n所有数据源均失败\n\n请检查网络连接或稍后重试"
+                    timeout_timer.cancel()
+                    self.root.after(0, self.show_error, error_msg)
+                    return
+                print(f"步骤3完成: 基本面数据获取成功 - PE{fund_data.get('pe_ratio', 0):.1f}")
             except Exception as e:
                 print(f"步骤3出错: {e}")
                 error_msg = f"ERROR: 基本面数据生成失败\n\n{str(e)}\n请稍后重试"
@@ -12172,18 +12258,6 @@ CSV批量分析使用方法:
                 print(f"   [DATA] 数据来源: {'缓存数据' if use_cache else '实时计算'}")
                 print(f"   原始评分(代表趋势): 短期={short_score:.1f}, 中期={medium_score:.1f}, 长期={long_score:.1f}")
                 print(f"   最终综合评分: {final_score:.1f}/10 (使用统一函数计算)")
-
-                
-                # 检查数据来源
-                tech_data = self._generate_smart_mock_technical_data(ticker)
-                print(f"   📡 数据来源检查: {tech_data.get('data_source', '未知')}")
-                real_tech = self.get_real_technical_indicators(ticker)
-                if real_tech:
-                    print(f"   🌐 实际数据来源: {real_tech.get('data_source', '未知')}")
-                    print(f"   MONEY: 实际价格: ¥{real_tech.get('current_price', 0):.2f}")
-                else:
-                    print(f"   ERROR: 无法获取实时数据，确认使用模拟数据")
-                
                 print("="*50)
                 
                 print(f"步骤6完成: 三时间段预测完成 - 综合评分{final_score:.1f}/10")
@@ -12247,8 +12321,8 @@ CSV批量分析使用方法:
                 if 'long_score' not in locals():
                     long_score = 0
                 
-                # 更新股票信息包含模拟价格
-                stock_info['price'] = tech_data['current_price']
+                # tech_data已经在步骤2中获取，包含正确的实时价格，不要覆盖
+                print(f"[DEBUG] 最终报告使用的价格: ¥{tech_data.get('current_price', 0):.2f}")
                 
                 # 确保概览和投资建议使用相同的评分，并传递三个时间段评分
                 overview = self.generate_overview_from_data_with_periods(ticker, stock_info, tech_data, fund_data, final_score, short_score, medium_score, long_score)
@@ -15352,8 +15426,8 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
         # 安全获取字段值
         stock_name = stock_info.get('name', '未知股票') if isinstance(stock_info, dict) else '未知股票'
         industry = fund_data.get('industry', stock_info.get('industry', '未知行业')) if isinstance(fund_data, dict) else stock_info.get('industry', '未知行业') if isinstance(stock_info, dict) else '未知行业'
-        # 优先使用stock_info中的price（这是从真实数据获取的），如果没有则使用tech_data中的current_price
-        current_price = stock_info.get('price', tech_data.get('current_price', 0) if isinstance(tech_data, dict) else 0) if isinstance(stock_info, dict) else tech_data.get('current_price', 0) if isinstance(tech_data, dict) else 0
+        # 优先使用tech_data中的current_price（这是刚从API获取的实时价格），只在tech_data为空时才使用stock_info中的price
+        current_price = tech_data.get('current_price', 0) if isinstance(tech_data, dict) and tech_data.get('current_price') else stock_info.get('price', 0) if isinstance(stock_info, dict) else 0
         concept = stock_info.get('concept', 'A股') if isinstance(stock_info, dict) else 'A股'
         rsi = tech_data.get('rsi', 50) if isinstance(tech_data, dict) else 50
         rsi_status = tech_data.get('rsi_status', '正常') if isinstance(tech_data, dict) else '正常'
@@ -15382,6 +15456,11 @@ RATING: 分时段评分详情:
    
    🎯 综合评分: {final_score:.1f}/10
    {"⭐ 优秀投资标的" if final_score >= 8 else "✅ 良好投资选择" if final_score >= 7 else "⚖️ 中性评价" if final_score >= 6 else "⚠️ 需谨慎考虑" if final_score >= 5 else "🔴 高风险标的"}
+   
+RATING: 技术面与基本面评分:
+   📈 技术面评分: {short_score:.2f}/10  {"🟢 技术强势" if short_score >= 7.0 else "⚖️ 技术中性" if short_score >= 5.0 else "🔴 技术偏弱"}
+   📊 基本面评分: {long_score:.2f}/10  {"🟢 基本面良好" if long_score >= 7.0 else "⚖️ 基本面一般" if long_score >= 5.0 else "🔴 基本面偏弱"}
+   🔄 综合面评分: {medium_score:.2f}/10  {"🟢 多维向好" if medium_score >= 7.0 else "⚖️ 多维中性" if medium_score >= 5.0 else "🔴 多维偏弱"}
 
 DATA: 关键指标概览:
    
@@ -16232,8 +16311,7 @@ WARNING: 重要声明:
                 batch_size=20,  # K线更新可以用更大批次
                 total_batches=None,  # 自动计算批次数量以覆盖所有股票
                 stock_type="主板",
-                progress_callback=update_status,
-                stock_codes=all_codes  # 传入筛选后的股票列表
+                progress_callback=update_status
             )
             
             # 更新完成
