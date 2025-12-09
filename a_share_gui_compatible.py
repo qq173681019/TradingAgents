@@ -8298,6 +8298,7 @@ K线更新后快速评分完成！
 
             # 2. Baostock次之 (免费且稳定)
             if (stock_hist is None or stock_hist.empty):
+                print(f"[DEBUG] BAOSTOCK_AVAILABLE = {BAOSTOCK_AVAILABLE}")
                 if BAOSTOCK_AVAILABLE:
                     try:
                         print(f"{ticker} 尝试Baostock数据源...")
@@ -9756,108 +9757,135 @@ K线更新后快速评分完成！
             # 简化的技术分析，避免复杂计算导致异常
             prediction_score = 0
             signals = []
+            rsi_score = 0
+            macd_score = 0
+            ma_score = 0
+            volume_score = 0
             
             # RSI分析 (权重25% - A股市场优化阈值)
             if rsi < 20:
-                prediction_score += 6
+                rsi_score = 6
                 signals.append("RSI极度超卖(<20)，强反弹概率高")
             elif rsi < 30:
-                prediction_score += 4
+                rsi_score = 4
                 signals.append("RSI严重超卖(<30)，反弹信号明确")
             elif rsi < 35:
-                prediction_score += 3
+                rsi_score = 3
                 signals.append("RSI超卖(<35)，反弹概率大")
             elif 35 <= rsi <= 65:
-                prediction_score += 0
+                rsi_score = 0
                 signals.append("RSI中性区间(35-65)，震荡整理")
             elif rsi <= 70:
-                prediction_score -= 1
+                rsi_score = -1
                 signals.append("RSI轻微超买(65-70)，偏空信号")
             elif rsi < 75:
-                prediction_score -= 3
+                rsi_score = -3
                 signals.append("RSI超买(70-75)，短期见顶风险")
             elif rsi < 80:
-                prediction_score -= 4
+                rsi_score = -4
                 signals.append("RSI严重超买(75-80)，回调风险大")
             else:  # rsi >= 80
-                prediction_score -= 6
+                rsi_score = -6
                 signals.append("RSI极度超买(≥80)，急跌风险大")
+            
+            prediction_score += rsi_score
             
             # MACD分析 (权重25% - A股市场优化阈值)
             macd_diff = macd - signal
             if macd > 0 and macd_diff > 0.06:
-                prediction_score += 3
+                macd_score = 3
                 signals.append("MACD强势金叉(>0.06)，多头爆发")
             elif macd > 0 and macd_diff > 0.03:
-                prediction_score += 2
+                macd_score = 2
                 signals.append("MACD金叉向上(>0.03)，多头趋势强")
             elif macd > 0 and macd_diff > 0:
-                prediction_score += 1
+                macd_score = 1
                 signals.append("MACD零轴上方，趋势向好")
             elif macd < 0 and macd_diff < -0.06:
-                prediction_score -= 3
+                macd_score = -3
                 signals.append("MACD强势死叉(<-0.06)，空头爆发")
             elif macd < 0 and macd_diff < -0.03:
-                prediction_score -= 2
+                macd_score = -2
                 signals.append("MACD死叉向下(<-0.03)，空头趋势强")
             elif macd < 0 and macd_diff < 0:
-                prediction_score -= 1
+                macd_score = -1
                 signals.append("MACD零轴下方，趋势偏弱")
             else:
+                macd_score = 0
                 signals.append("MACD零轴附近，方向不明")
+            
+            prediction_score += macd_score
             
             # 均线分析 (权重30% - A股增加震荡状态识别)
             if current_price > ma5 > ma10 > ma20:
-                prediction_score += 5
+                ma_score = 5
                 signals.append("完全多头排列，强势上升趋势")
             elif current_price > ma5 > ma10:
-                prediction_score += 3
+                ma_score = 3
                 signals.append("短期均线向上，有向上动能")
             elif current_price > ma5:
-                prediction_score += 1.5
+                ma_score = 1.5
                 signals.append("站上5日线，短线偏多")
             elif ma5 > ma10 > ma20 and current_price < ma5:
-                prediction_score -= 0.5
+                ma_score = -0.5
                 signals.append("均线向上但价格回调，多头震荡")
             elif current_price < ma5 < ma10 < ma20:
-                prediction_score -= 5
+                ma_score = -5
                 signals.append("完全空头排列，弱势下跌趋势")
             elif current_price < ma5 < ma10:
-                prediction_score -= 3
+                ma_score = -3
                 signals.append("短期均线向下，有下跌压力")
             elif current_price < ma5:
-                prediction_score -= 1.5
+                ma_score = -1.5
                 signals.append("跌破5日线，短线偏空")
             elif ma5 < ma10 < ma20 and current_price > ma5:
-                prediction_score += 0.5
+                ma_score = 0.5
                 signals.append("均线向下但价格反弹，空头震荡")
             else:
+                ma_score = 0
                 signals.append("均线粘合，方向待定")
+            
+            prediction_score += ma_score
             
             # 成交量分析 (权重20% - A股资金推动市，量价关系核心)
             if volume_ratio > 5.0:
-                prediction_score += 4
+                volume_score = 4
                 signals.append("异常放量(>5倍)，主力强势介入")
             elif volume_ratio > 3.0:
-                prediction_score += 3
+                volume_score = 3
                 signals.append("巨量放大(>3倍)，资金疯狂抢筹")
             elif volume_ratio > 2.0:
-                prediction_score += 2
+                volume_score = 2
                 signals.append("大幅放量(>2倍)，资金关注度高")
             elif volume_ratio > 1.5:
-                prediction_score += 1
+                volume_score = 1
                 signals.append("温和放量(>1.5倍)，有资金参与")
             elif volume_ratio < 0.2:
-                prediction_score -= 3
+                volume_score = -3
                 signals.append("极度萎缩(<0.2倍)，市场极度冷清")
             elif volume_ratio < 0.3:
-                prediction_score -= 2
+                volume_score = -2
                 signals.append("大幅萎缩(<0.3倍)，缺乏资金关注")
             elif volume_ratio < 0.5:
-                prediction_score -= 1
+                volume_score = -1
                 signals.append("成交萎缩(<0.5倍)，缺乏资金推动")
             else:
+                volume_score = 0
                 signals.append("成交量正常，维持现状")
+            
+            prediction_score += volume_score
+            
+            # 输出详细评分日志
+            print(f"\n{'='*60}")
+            print(f"短期评分详情 (1-7天)")
+            print(f"{'='*60}")
+            print(f"RSI评分:    {rsi_score:+.1f}  (RSI={rsi:.1f})")
+            print(f"MACD评分:   {macd_score:+.1f}  (MACD={macd:.3f}, Signal={signal:.3f}, Diff={macd-signal:.3f})")
+            print(f"均线评分:   {ma_score:+.1f}  (价格={current_price:.2f}, MA5={ma5:.2f}, MA10={ma10:.2f}, MA20={ma20:.2f})")
+            print(f"成交量评分: {volume_score:+.1f}  (量比={volume_ratio:.2f})")
+            print(f"{'-'*60}")
+            print(f"总评分:     {prediction_score:+.1f}")
+            print(f"{'='*60}\n")
             
             # 生成预测结果 - 短期更激进的评分
             if prediction_score >= 12:
@@ -12203,22 +12231,9 @@ CSV批量分析使用方法:
                 long_score = 0
                 use_cache = False
                 
-                # 检查是否有缓存的快速评分
-                if hasattr(self, 'batch_scores') and ticker in self.batch_scores:
-                    batch_score = self.batch_scores[ticker]
-                    # 尝试从快速评分提取三时间段信息
-                    if isinstance(batch_score, dict):
-                        short_score = batch_score.get('short_term_score', 0)
-                        medium_score = batch_score.get('medium_term_score', 0)
-                        long_score = batch_score.get('long_term_score', 0)
-                        
-                        if short_score > 0 or medium_score > 0 or long_score > 0:
-                            print(f"[CACHE] 使用批量评分缓存来保持一致性")
-                            print(f"[SCORES] 缓存评分 - 短期:{short_score:.1f}, 中期:{medium_score:.1f}, 长期:{long_score:.1f}")
-                            use_cache = True
-                
-                # 如果没有缓存，则生成新的三时间段预测
-                if not use_cache:
+                # 始终生成新的三时间段预测（不使用缓存，确保实时计算）
+                print(f"[INFO] 生成实时三时间段预测系统")
+                if True:  # 强制实时计算
                     print(f"[INFO] 生成新的三时间段预测系统")
                     try:
                         short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
@@ -12249,13 +12264,12 @@ CSV批量分析使用方法:
                     # 调试输出原始评分
                     print(f"期间评分 - 短期: {short_score}, 中期: {medium_score}, 长期: {long_score}")
                 
-                # 使用统一的综合评分计算函数
-                # 如果使用了缓存，说明分数已经是归一化的(1-10)，否则是原始分数
-                calc_input_type = 'normalized' if use_cache else 'raw'
+                # 使用统一的综合评分计算函数（原始分数）
+                calc_input_type = 'raw'
                 final_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type=calc_input_type)
                 
                 print(f"开始分析算法调试 - {ticker}:")
-                print(f"   [DATA] 数据来源: {'缓存数据' if use_cache else '实时计算'}")
+                print(f"   [DATA] 数据来源: 实时计算")
                 print(f"   原始评分(代表趋势): 短期={short_score:.1f}, 中期={medium_score:.1f}, 长期={long_score:.1f}")
                 print(f"   最终综合评分: {final_score:.1f}/10 (使用统一函数计算)")
                 print("="*50)
