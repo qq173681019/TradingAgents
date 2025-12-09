@@ -8652,18 +8652,17 @@ K线更新后快速评分完成！
         seed = int(hashlib.md5(ticker.encode()).hexdigest()[:8], 16)
         random.seed(seed)
         
-        # 优先从缓存获取价格，避免不必要的网络请求
-        current_price = None
-        if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
-            cached = self.comprehensive_stock_data.get(ticker, {})
-            tech_data = cached.get('tech_data', {})
-            if tech_data and 'current_price' in tech_data:
-                current_price = tech_data['current_price']
-                print(f"[PRICE-CACHE] 使用缓存价格: {ticker} = ¥{current_price:.2f}")
+        # 优先获取实时价格，确保显示的价格是最新的
+        current_price = self.get_stock_price(ticker)
         
-        # 如果缓存没有价格，尝试获取实时价格
+        # 如果实时价格获取失败，尝试从缓存获取
         if current_price is None:
-            current_price = self.get_stock_price(ticker)
+            if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
+                cached = self.comprehensive_stock_data.get(ticker, {})
+                tech_data = cached.get('tech_data', {})
+                if tech_data and 'current_price' in tech_data:
+                    current_price = tech_data['current_price']
+                    print(f"[PRICE-CACHE] 实时获取失败，使用缓存价格: {ticker} = ¥{current_price:.2f}")
         if current_price is None:
             # 根据股票代码特征设置基础价格
             if ticker.startswith('688'):  # 科创板
@@ -12037,7 +12036,13 @@ CSV批量分析使用方法:
             time.sleep(0.1)
             try:
                 tech_data = self._generate_smart_mock_technical_data(ticker)
-                print(f"步骤2完成: 技术数据生成成功 - 价格¥{tech_data['current_price']:.2f}")
+                # 强制使用实时价格，确保显示的价格是最新的
+                real_time_price = self.get_stock_price(ticker)
+                if real_time_price is not None:
+                    tech_data['current_price'] = real_time_price
+                    print(f"步骤2完成: 技术数据生成成功 - 实时价格¥{real_time_price:.2f}")
+                else:
+                    print(f"步骤2完成: 技术数据生成成功 - 价格¥{tech_data['current_price']:.2f} (使用缓存)")
             except Exception as e:
                 print(f"步骤2出错: {e}")
                 error_msg = f"ERROR: 技术数据生成失败\n\n{str(e)}\n请稍后重试"
@@ -15347,7 +15352,8 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
         # 安全获取字段值
         stock_name = stock_info.get('name', '未知股票') if isinstance(stock_info, dict) else '未知股票'
         industry = fund_data.get('industry', stock_info.get('industry', '未知行业')) if isinstance(fund_data, dict) else stock_info.get('industry', '未知行业') if isinstance(stock_info, dict) else '未知行业'
-        current_price = tech_data.get('current_price', 0) if isinstance(tech_data, dict) else 0
+        # 优先使用stock_info中的price（这是从真实数据获取的），如果没有则使用tech_data中的current_price
+        current_price = stock_info.get('price', tech_data.get('current_price', 0) if isinstance(tech_data, dict) else 0) if isinstance(stock_info, dict) else tech_data.get('current_price', 0) if isinstance(tech_data, dict) else 0
         concept = stock_info.get('concept', 'A股') if isinstance(stock_info, dict) else 'A股'
         rsi = tech_data.get('rsi', 50) if isinstance(tech_data, dict) else 50
         rsi_status = tech_data.get('rsi_status', '正常') if isinstance(tech_data, dict) else '正常'
