@@ -4239,15 +4239,23 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                 except Exception as e:
                                     print(f"[CSV-CHIP] {code} 筹码分析失败: {e}")
                             
+                            # 使用新版综合评分算法（技术面+基本面+筹码健康度）
+                            comprehensive_score_v2 = self.calculate_comprehensive_score_v2(
+                                tech_score, 
+                                fund_score, 
+                                chip_score
+                            )
+                            print(f"[CSV-SCORE] {code} 综合评分V2: {comprehensive_score_v2:.1f}/10 (技术:{tech_score:.1f} 基本:{fund_score:.1f} 筹码:{chip_score if chip_score else 'N/A'})")
+                            
                             # 判断趋势
                             trend = self.get_trend_signal(tech_data)
                             
                             # 判断RSI状态
                             rsi_status = self.get_rsi_status(tech_data['rsi'])
                             
-                            # 确保所有分数都是数字类型
+                            # 确保所有分数都是数字类型，使用新版综合评分
                             try:
-                                final_score = float(score) if score is not None else None
+                                final_score = float(comprehensive_score_v2) if comprehensive_score_v2 is not None else None
                                 tech_score_final = float(tech_score) if tech_score is not None else None
                                 fund_score_final = float(fund_score) if fund_score is not None else None
                             except (ValueError, TypeError):
@@ -5412,8 +5420,20 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             else:
                 # 没有数据，显示占位符
-                self.scoring_rule_label.config(text="综合: - | 技术: - | 基础: -", fg="#7f8c8d")
+                self.scoring_rule_label.config(text="综合: - | 技术: - | 基础: - | 筹码: -", fg="#7f8c8d")
                 return
+            
+            # 获取筹码健康度评分
+            chip_score = 0
+            chip_display = "-"
+            if self.chip_analyzer:
+                try:
+                    chip_result = self.chip_analyzer.analyze_stock(ticker)
+                    if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                        chip_score = chip_result.get('health_score', 0)
+                        chip_display = f"{chip_score:.1f}"
+                except:
+                    pass
             
             # 计算技术面和基本面的替代值
             # 如果三者都为0，用综合评分作为替代
@@ -5427,15 +5447,27 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 fund_display = f"{long_term:.1f}" if long_term != 0 else "-"
                 color = "#3498db"  # 蓝色表示正常值
             
+            # 获取筹码健康度评分
+            chip_score = 0
+            chip_display = "-"
+            if self.chip_analyzer:
+                try:
+                    chip_result = self.chip_analyzer.analyze_stock(ticker)
+                    if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                        chip_score = chip_result.get('health_score', 0)
+                        chip_display = f"{chip_score:.1f}"
+                except:
+                    pass
+            
             # 格式化显示
-            display_text = f"综合: {comprehensive:.1f} | 技术: {tech_display} | 基础: {fund_display}"
+            display_text = f"综合: {comprehensive:.1f} | 技术: {tech_display} | 基础: {fund_display} | 筹码: {chip_display}"
             self.scoring_rule_label.config(text=display_text, fg=color)
             
         except Exception as e:
             print(f"[错误] 更新评分规则显示失败: {e}")
             import traceback
             traceback.print_exc()
-            self.scoring_rule_label.config(text="综合: - | 技术: - | 基础: -", fg="#e74c3c")
+            self.scoring_rule_label.config(text="综合: - | 技术: - | 基础: - | 筹码: -", fg="#e74c3c")
     
     def calculate_period_weighted_score(self, short_score, medium_score, long_score, period_type='overall'):
         """根据选择的时间段计算加权评分
@@ -9695,9 +9727,57 @@ K线更新后快速评分完成！
                 'long_score': 0
             }
     
+    def calculate_comprehensive_score_v2(self, tech_score, fund_score, chip_score=None):
+        """
+        新版综合评分计算（基于技术面、基本面、筹码健康度三维度）
+        
+        Args:
+            tech_score: 技术面评分 (1-10分)
+            fund_score: 基本面评分 (1-10分)
+            chip_score: 筹码健康度评分 (1-10分)，可选
+        
+        Returns:
+            综合评分 (1-10分制)
+        
+        权重分配策略：
+        - 如果有筹码评分: 技术面45% + 基本面35% + 筹码20%
+        - 如果没有筹码评分: 技术面56% + 基本面44% (保持45:35比例)
+        """
+        try:
+            tech_score = float(tech_score) if tech_score is not None else 5.0
+            fund_score = float(fund_score) if fund_score is not None else 5.0
+            
+            # 确保分数在1-10范围内
+            tech_score = max(1.0, min(10.0, tech_score))
+            fund_score = max(1.0, min(10.0, fund_score))
+            
+            if chip_score is not None and chip_score > 0:
+                # 有筹码评分：三维度加权
+                chip_score = max(1.0, min(10.0, float(chip_score)))
+                comprehensive_score = (
+                    tech_score * 0.45 +   # 技术面 45%
+                    fund_score * 0.35 +   # 基本面 35%
+                    chip_score * 0.20     # 筹码健康度 20%
+                )
+            else:
+                # 无筹码评分：二维度加权 (保持45:35的相对比例)
+                comprehensive_score = (
+                    tech_score * 0.5625 +   # 技术面 56.25% (45/80)
+                    fund_score * 0.4375     # 基本面 43.75% (35/80)
+                )
+            
+            # 确保结果在1-10范围内
+            comprehensive_score = max(1.0, min(10.0, comprehensive_score))
+            
+            return comprehensive_score
+            
+        except Exception as e:
+            print(f"[ERROR] 综合评分V2计算失败: {e}")
+            return 5.0
+    
     def calculate_comprehensive_score(self, short_score, medium_score, long_score, input_type='raw'):
         """
-        统一的综合评分计算函数
+        统一的综合评分计算函数（旧版，基于短中长期）
         
         Args:
             short_score: 短期评分
@@ -11850,73 +11930,161 @@ WARNING:  风险管控:
 
     def calculate_fundamental_index_value(self, pe_ratio, pb_ratio, roe, revenue_growth, profit_growth, ticker):
         """计算基本面推荐指数的数值表示（返回 1-10 的数值）
-        与 `calculate_fundamental_index` 逻辑一致，但仅返回数值，便于程序化使用。
+        
+        优化版v2.0 - 基于专业A股交易者反馈优化
+        新增指标：现金流、负债率、毛利率
+        权重调整：PE(18) + ROE(18) + 营收(12) + 利润(12) + 现金流(8) + 负债率(5) + 行业(7)
         """
-        score = 50
-        # PE估值评分
+        score = 50  # 基础分
+        
+        # 获取股票完整信息（用于多维度评估）
+        try:
+            stock_info = self.get_stock_info_generic(ticker)
+            industry = stock_info.get("industry", "")
+        except Exception:
+            stock_info = {}
+            industry = ""
+        
+        # 1. PE估值评分 (权重18分，从20→18)
         try:
             if pe_ratio is None:
                 pe_ratio = 20
             if pe_ratio < 20:
-                score += 20
+                score += 18  # 估值合理偏低
             elif pe_ratio < 35:
-                score += 10
+                score += 9   # 估值中等
             else:
-                score -= 15
+                score -= 14  # 估值过高
         except Exception:
             pass
 
-        # ROE评分
+        # 2. ROE净资产收益率评分 (权重18分，从20→18)
         try:
             if roe is None:
                 roe = 10
             if roe > 15:
-                score += 20
+                score += 18  # 盈利能力强
             elif roe > 10:
-                score += 10
+                score += 9   # 盈利能力中等
             else:
-                score -= 10
+                score -= 9   # 盈利能力弱
         except Exception:
             pass
 
-        # 营收增长评分
+        # 3. 营收增长评分 (权重12分，从15→12)
         try:
             if revenue_growth is None:
                 revenue_growth = 0
             if revenue_growth > 15:
-                score += 15
+                score += 12  # 高增长
             elif revenue_growth > 5:
-                score += 8
+                score += 6   # 中速增长
             elif revenue_growth > 0:
-                score += 3
+                score += 2   # 低速增长
             else:
-                score -= 15
+                score -= 12  # 负增长
         except Exception:
             pass
 
-        # 净利润增长评分
+        # 4. 净利润增长评分 (权重12分，从15→12)
         try:
             if profit_growth is None:
                 profit_growth = 0
             if profit_growth > 20:
-                score += 15
+                score += 12  # 高增长
             elif profit_growth > 10:
-                score += 8
+                score += 6   # 中速增长
             elif profit_growth > 0:
-                score += 3
+                score += 2   # 低速增长
             else:
-                score -= 15
+                score -= 12  # 负增长
         except Exception:
             pass
 
-        # 行业特殊加成
+        # 5. 现金流评分 (新增，权重8分) ⭐新增
         try:
-            stock_info = self.get_stock_info_generic(ticker)
-            industry = stock_info.get("industry", "")
-            if "半导体" in industry or "新能源" in industry:
-                score += 5
-            elif "银行" in industry or "白酒" in industry:
-                score += 3
+            operating_cash_flow = stock_info.get('operating_cash_flow', None)
+            net_profit = stock_info.get('net_profit', None)
+            
+            if operating_cash_flow and net_profit and net_profit > 0:
+                cash_flow_ratio = operating_cash_flow / net_profit
+                if cash_flow_ratio > 0.8:
+                    score += 8   # 现金流充裕，盈利质量高
+                elif cash_flow_ratio > 0.5:
+                    score += 4   # 现金流中等
+                else:
+                    score -= 4   # 现金流不足，警惕财务造假
+        except Exception:
+            pass
+
+        # 6. 资产负债率评分 (新增，权重5分) ⭐新增 + 行业差异化处理
+        try:
+            debt_ratio = stock_info.get('debt_to_asset_ratio', None)
+            
+            if debt_ratio is not None:
+                # 行业差异化处理：金融行业负债率阈值调整
+                is_financial = any(keyword in industry for keyword in ['银行', '保险', '券商', '信托', '金融'])
+                
+                if is_financial:
+                    # 金融行业：70-90%负债率属于正常范围
+                    if debt_ratio < 0.7:
+                        score += 5   # 低负债金融股（极少见，优质）
+                    elif debt_ratio < 0.9:
+                        score += 2   # 正常范围（大部分金融股）
+                    else:
+                        score -= 3   # 负债率过高（风险警示）
+                else:
+                    # 非金融行业：传统标准
+                    if debt_ratio < 0.3:
+                        score += 5   # 财务风险低
+                    elif debt_ratio < 0.6:
+                        score += 0   # 财务风险中等
+                    else:
+                        score -= 5   # 财务风险高
+        except Exception:
+            pass
+
+        # 7. 毛利率评分 (新增，隐含在行业加成中) ⭐新增
+        try:
+            gross_margin = stock_info.get('gross_profit_margin', None)
+            if gross_margin:
+                if gross_margin > 0.3:
+                    score += 3   # 竞争优势强
+                elif gross_margin > 0.2:
+                    score += 1   # 竞争优势中等
+        except Exception:
+            pass
+
+        # 8. 行业加成优化 (权重7分，从5→7) ⭐优化
+        try:
+            # 政策红利行业 (+5~7分)
+            if "人工智能" in industry or "AI" in industry or "ChatGPT" in industry:
+                score += 7  # 国家战略+技术革命
+            elif "半导体" in industry or "芯片" in industry:
+                score += 6  # 国产化替代+政策扶持
+            elif "新能源" in industry or "锂电" in industry or "光伏" in industry:
+                score += 6  # 碳中和战略
+            elif "医药" in industry or "生物" in industry or "制药" in industry:
+                score += 5  # 人口老龄化+创新药政策
+            
+            # 价值蓝筹行业 (+3~4分)
+            elif "白酒" in industry:
+                score += 4  # 消费升级+品牌护城河
+            elif "银行" in industry:
+                score += 3  # 低估值+高股息
+            elif "保险" in industry:
+                score += 3  # 稳健增长
+            
+            # 周期性行业 (中性/减分)
+            elif "钢铁" in industry or "有色" in industry or "煤炭" in industry:
+                score += 0  # 周期性强，中性评分
+            elif "房地产" in industry:
+                score -= 2  # 政策调控期
+            
+            # 其他行业
+            else:
+                score += 0  # 无特殊加成
+                
         except Exception:
             pass
 
@@ -15649,6 +15817,29 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
 """
         return analysis
     
+    def _get_chip_score_display(self, ticker):
+        """获取筹码健康度评分显示文本"""
+        if not self.chip_analyzer:
+            return "未安装 (模块不可用)"
+        
+        try:
+            chip_result = self.chip_analyzer.analyze_stock(ticker)
+            if chip_result.get('error'):
+                return "数据获取失败"
+            
+            chip_score = chip_result.get('health_score', 0)
+            chip_level = chip_result.get('health_level', '未知')
+            scr_value = chip_result.get('scr', 0)
+            
+            if chip_score > 0:
+                emoji = "🟢" if chip_score >= 7.0 else "⚖️" if chip_score >= 5.0 else "🔴"
+                status = "优秀" if chip_score >= 7.0 else "一般" if chip_score >= 5.0 else "偏弱"
+                return f"{chip_score:.1f}/10 {emoji} {status} (SCR: {scr_value:.2f}%, {chip_level})"
+            else:
+                return "未分析"
+        except Exception as e:
+            return f"分析失败: {str(e)[:20]}"
+    
     def generate_overview_from_data_with_periods(self, ticker, stock_info, tech_data, fund_data, final_score, short_score, medium_score, long_score):
         """从数据生成包含三个时间段评分的概览"""
         
@@ -15696,6 +15887,8 @@ RATING: 技术面与基本面评分:
    📈 技术面评分: {short_score:.2f}/10  {"🟢 技术强势" if short_score >= 7.0 else "⚖️ 技术中性" if short_score >= 5.0 else "🔴 技术偏弱"}
    📊 基本面评分: {long_score:.2f}/10  {"🟢 基本面良好" if long_score >= 7.0 else "⚖️ 基本面一般" if long_score >= 5.0 else "🔴 基本面偏弱"}
    🔄 综合面评分: {medium_score:.2f}/10  {"🟢 多维向好" if medium_score >= 7.0 else "⚖️ 多维中性" if medium_score >= 5.0 else "🔴 多维偏弱"}
+   💎 筹码健康度: {self._get_chip_score_display(ticker)}
+   💎 筹码健康度: {self._get_chip_score_display(ticker)}
 
 DATA: 关键指标概览:
    
