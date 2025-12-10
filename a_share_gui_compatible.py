@@ -116,6 +116,15 @@ except ImportError:
     PERFORMANCE_OPTIMIZATION_AVAILABLE = False
     print("性能优化模块不可用，将使用标准处理")
 
+# 导入筹码分析模块
+try:
+    from chip_health_analyzer import ChipHealthAnalyzer
+    CHIP_ANALYZER_AVAILABLE = True
+    print("✓ 筹码分析模块加载成功")
+except ImportError:
+    CHIP_ANALYZER_AVAILABLE = False
+    print("⚠ 筹码分析模块不可用")
+
 
 def call_llm(prompt, model="deepseek"):
     """
@@ -629,6 +638,16 @@ class AShareAnalyzerGUI:
                 self.async_processor = None
         else:
             print("使用标准性能处理模式")
+
+        # 筹码分析器初始化
+        self.chip_analyzer = None
+        if CHIP_ANALYZER_AVAILABLE:
+            try:
+                self.chip_analyzer = ChipHealthAnalyzer()
+                print("✓ 筹码健康度分析器已启用")
+            except Exception as e:
+                print(f"⚠ 筹码分析器初始化失败: {e}")
+                self.chip_analyzer = None
 
         # Choice金融终端配置
         self.choice_enabled = False
@@ -4205,6 +4224,21 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                             tech_score = self.calculate_technical_score(tech_data)
                             fund_score = self.calculate_fundamental_score(fund_data)
                             
+                            # 计算筹码健康度评分
+                            chip_score = None
+                            chip_health_level = "未分析"
+                            scr_value = None
+                            if self.chip_analyzer:
+                                try:
+                                    chip_result = self.chip_analyzer.analyze_stock(code)
+                                    if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                                        chip_score = chip_result.get('health_score', 0)
+                                        chip_health_level = chip_result.get('health_level', '未知')
+                                        scr_value = chip_result.get('scr', 0)
+                                        print(f"[CSV-CHIP] {code} 筹码评分: {chip_score:.1f}/10, SCR: {scr_value:.2f}%")
+                                except Exception as e:
+                                    print(f"[CSV-CHIP] {code} 筹码分析失败: {e}")
+                            
                             # 判断趋势
                             trend = self.get_trend_signal(tech_data)
                             
@@ -4227,6 +4261,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                 '综合评分': round(final_score, 1) if final_score is not None else None,
                                 '技术面评分': round(tech_score_final, 1) if tech_score_final is not None else None,
                                 '基本面评分': round(fund_score_final, 1) if fund_score_final is not None else None,
+                                '筹码健康度': round(chip_score, 1) if chip_score is not None else None,
+                                '筹码等级': chip_health_level,
+                                'SCR集中度': f"{scr_value:.2f}%" if scr_value is not None else None,
                                 'RSI状态': rsi_status,
                                 '趋势': trend,
                                 '所属行业': fund_data.get('industry', '未知'),
@@ -4353,6 +4390,19 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 avg_score = max_score = min_score = 0
                 high_quality = medium_quality = low_quality = 0
             
+            # 筹码健康度统计
+            chip_analyzed = [r for r in results if r.get('筹码健康度') is not None and r.get('筹码健康度') > 0]
+            if chip_analyzed:
+                chip_scores = [float(r['筹码健康度']) for r in chip_analyzed]
+                avg_chip_score = sum(chip_scores) / len(chip_scores)
+                chip_excellent = len([s for s in chip_scores if s >= 8.5])
+                chip_good = len([s for s in chip_scores if 7.0 <= s < 8.5])
+                chip_medium = len([s for s in chip_scores if 5.5 <= s < 7.0])
+                chip_weak = len([s for s in chip_scores if s < 5.5])
+            else:
+                avg_chip_score = 0
+                chip_excellent = chip_good = chip_medium = chip_weak = 0
+            
             # RSI状态统计
             oversold = len([r for r in results if r['RSI状态'] == '超卖'])
             normal = len([r for r in results if r['RSI状态'] == '正常'])
@@ -4371,7 +4421,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             report += "=" * 100 + "\n\n"
             
             # 显示每只股票的评分
-            report += f"{'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'RSI':<6} {'趋势':<10} {'行业':<12}\n"
+            report += f"{'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'筹码':<6} {'RSI':<6} {'趋势':<10} {'行业':<12}\n"
             report += "=" * 100 + "\n"
             for stock in results:
                 code = stock['股票代码']
@@ -4379,10 +4429,11 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 综合 = f"{stock['综合评分']:.1f}" if stock['综合评分'] else "N/A"
                 技术 = f"{stock['技术面评分']:.1f}" if stock['技术面评分'] else "N/A"
                 基本 = f"{stock['基本面评分']:.1f}" if stock['基本面评分'] else "N/A"
+                筹码 = f"{stock.get('筹码健康度', 0):.1f}" if stock.get('筹码健康度') else "-"
                 rsi = stock['RSI状态'][:4]
                 trend = stock['趋势'][:8]
                 industry = stock['所属行业'][:10]
-                report += f"{code:<8} {name:<12} {综合:<6} {技术:<6} {基本:<6} {rsi:<6} {trend:<10} {industry:<12}\n"
+                report += f"{code:<8} {name:<12} {综合:<6} {技术:<6} {基本:<6} {筹码:<6} {rsi:<6} {trend:<10} {industry:<12}\n"
             
             report += "=" * 100 + "\n\n"
             report += "TREND: 评分统计:\n"
@@ -4394,6 +4445,17 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             report += f"高质量股票 (8.0分以上): {high_quality} 只 ({high_quality/total_valid*100:.1f}%)\n"
             report += f"中等质量股票 (6.0-8.0分): {medium_quality} 只 ({medium_quality/total_valid*100:.1f}%)\n"
             report += f"低质量股票 (6.0分以下): {low_quality} 只 ({low_quality/total_valid*100:.1f}%)\n\n"
+            
+            # 筹码健康度统计显示
+            if chip_analyzed:
+                report += "🔥 筹码健康度分析:\n"
+                report += f"平均筹码评分: {avg_chip_score:.1f}/10.0\n"
+                report += f"已分析股票数: {len(chip_analyzed)} 只\n"
+                total_chip = len(chip_analyzed) if len(chip_analyzed) > 0 else 1
+                report += f"极度健康 (8.5分以上): {chip_excellent} 只 ({chip_excellent/total_chip*100:.1f}%) ⭐⭐⭐⭐⭐\n"
+                report += f"健康 (7.0-8.5分): {chip_good} 只 ({chip_good/total_chip*100:.1f}%) ⭐⭐⭐⭐\n"
+                report += f"一般 (5.5-7.0分): {chip_medium} 只 ({chip_medium/total_chip*100:.1f}%) ⭐⭐⭐\n"
+                report += f"偏弱 (5.5分以下): {chip_weak} 只 ({chip_weak/total_chip*100:.1f}%) ⭐⭐\n\n"
             
             report += "TREND: RSI状态分布:\n"
             report += f"超卖状态: {oversold} 只 - 潜在买入机会\n"
@@ -4475,6 +4537,22 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 medium_quality = 0
                 low_quality = 0
             
+            # 筹码健康度统计
+            chip_analyzed = [r for r in results if r.get('筹码健康度') is not None and r.get('筹码健康度') > 0]
+            if chip_analyzed:
+                chip_scores = [float(r['筹码健康度']) for r in chip_analyzed]
+                avg_chip_score = sum(chip_scores) / len(chip_scores)
+                chip_excellent = len([s for s in chip_scores if s >= 8.5])
+                chip_good = len([s for s in chip_scores if 7.0 <= s < 8.5])
+                chip_medium = len([s for s in chip_scores if 5.5 <= s < 7.0])
+                chip_weak = len([s for s in chip_scores if s < 5.5])
+            else:
+                avg_chip_score = 0
+                chip_excellent = 0
+                chip_good = 0
+                chip_medium = 0
+                chip_weak = 0
+            
             # RSI状态统计
             oversold = len([r for r in results if r['RSI状态'] == '超卖'])
             normal = len([r for r in results if r['RSI状态'] == '正常'])
@@ -4500,6 +4578,17 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             report += f"高质量股票 (8.0分以上): {high_quality} 只 ({high_quality/total_valid*100:.1f}%)\n"
             report += f"中等质量股票 (6.0-8.0分): {medium_quality} 只 ({medium_quality/total_valid*100:.1f}%)\n"
             report += f"低质量股票 (6.0分以下): {low_quality} 只 ({low_quality/total_valid*100:.1f}%)\n\n"
+            
+            # 筹码健康度统计显示
+            if chip_analyzed:
+                report += "🔥 筹码健康度分析:\n"
+                report += f"平均筹码评分: {avg_chip_score:.1f}/10.0\n"
+                report += f"已分析股票数: {len(chip_analyzed)} 只\n"
+                total_chip = len(chip_analyzed) if len(chip_analyzed) > 0 else 1
+                report += f"极度健康 (8.5分以上): {chip_excellent} 只 ({chip_excellent/total_chip*100:.1f}%) ⭐⭐⭐⭐⭐\n"
+                report += f"健康 (7.0-8.5分): {chip_good} 只 ({chip_good/total_chip*100:.1f}%) ⭐⭐⭐⭐\n"
+                report += f"一般 (5.5-7.0分): {chip_medium} 只 ({chip_medium/total_chip*100:.1f}%) ⭐⭐⭐\n"
+                report += f"偏弱 (5.5分以下): {chip_weak} 只 ({chip_weak/total_chip*100:.1f}%) ⭐⭐\n\n"
             
             report += "TREND: RSI状态分布:\n"
             report += f"超卖状态: {oversold} 只 ({oversold/len(results)*100:.1f}%) - 潜在买入机会\n"
@@ -4705,6 +4794,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         # 开始分析按钮
         self.analyze_btn = tk.Button(input_frame, text="开始分析", font=("微软雅黑", 11), bg="#27ae60", fg="white", command=self.start_analysis, cursor="hand2", width=12)
         self.analyze_btn.pack(side="left", padx=5)
+        
+        # 筹码分析按钮
+        self.chip_btn = tk.Button(input_frame, text="筹码分析", font=("微软雅黑", 11), bg="#3498db", fg="white", command=self.analyze_chip_health, cursor="hand2", width=12)
+        self.chip_btn.pack(side="left", padx=5)
         
         # AI模型选择
         tk.Label(input_frame, text="AI模型:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(20, 0))
@@ -12080,6 +12173,134 @@ CSV批量分析使用方法:
         self.overview_text.insert('1.0', welcome_msg)
     
     # 移除网络模式切换函数，系统永远保持在线
+    
+    def analyze_chip_health(self):
+        """筹码健康度分析"""
+        ticker = self.ticker_var.get().strip()
+        if not ticker:
+            messagebox.showwarning("警告", "请输入股票代码！")
+            return
+        
+        if not self.is_valid_a_share_code(ticker):
+            messagebox.showwarning("警告", "请输入正确的6位代码！\n\n支持的格式：\n• 沪市主板：60XXXX\n• 科创板：688XXX\n• 深市主板：000XXX\n• 深市中小板：002XXX\n• 创业板：300XXX\n• 沪市ETF：51XXXX\n• 深市ETF：159XXX\n• LOF基金：161XXX")
+            return
+        
+        # 检查筹码分析器是否可用
+        if not self.chip_analyzer:
+            messagebox.showerror("错误", "筹码分析模块未加载，请检查chip_health_analyzer.py是否存在")
+            return
+        
+        # 禁用按钮
+        self.chip_btn.config(state="disabled")
+        self.analyze_btn.config(state="disabled")
+        
+        # 显示进度条
+        self.show_progress(f"正在分析 {ticker} 筹码健康度，请稍候...")
+        
+        # 在后台线程中执行分析
+        analysis_thread = threading.Thread(target=self._run_chip_analysis, args=(ticker,))
+        analysis_thread.daemon = True
+        analysis_thread.start()
+    
+    def _run_chip_analysis(self, ticker):
+        """在后台线程执行筹码分析"""
+        try:
+            import time
+            print(f"开始筹码分析: {ticker}")
+            
+            # 调用筹码分析器
+            self.update_progress(f"获取 {ticker} 筹码数据...")
+            time.sleep(0.1)
+            
+            result = self.chip_analyzer.analyze_stock(ticker)
+            
+            # 检查是否有错误
+            if result.get('error'):
+                error_msg = result['error']
+                self.root.after(0, self.show_error, f"筹码分析失败：{error_msg}")
+                print(f"❌ 筹码分析失败: {ticker} - {error_msg}")
+                return
+            
+            # 检查关键数据是否有效
+            if result.get('current_price', 0) == 0:
+                self.root.after(0, self.show_error, "无法获取股票数据，请检查网络连接或稍后重试")
+                print(f"❌ 筹码分析失败: {ticker} - 无有效数据")
+                return
+            
+            # 格式化输出结果
+            output = self._format_chip_result(ticker, result)
+            
+            # 在主线程显示结果
+            self.root.after(0, self._display_chip_result, output)
+            print(f"✓ 筹码分析完成: {ticker}")
+            
+        except Exception as e:
+            print(f"❌ 筹码分析异常: {e}")
+            import traceback
+            traceback.print_exc()
+            self.root.after(0, self.show_error, f"筹码分析出错：{str(e)}")
+        finally:
+            # 恢复按钮状态
+            self.root.after(0, self.chip_btn.config, {"state": "normal"})
+            self.root.after(0, self.analyze_btn.config, {"state": "normal"})
+            self.root.after(0, self.hide_progress)
+    
+    def _format_chip_result(self, ticker, result):
+        """格式化筹码分析结果"""
+        stock_name = result.get('stock_name', ticker)
+        chip_concentration = result.get('chip_concentration', 0)
+        chip_cost = result.get('chip_cost', 0)
+        profit_ratio = result.get('profit_ratio', 0)
+        loss_ratio = 100 - profit_ratio
+        turnover_rate = result.get('turnover_rate', 0)
+        health_score = result.get('health_score', 0)
+        signals = result.get('signals', [])
+        
+        # 数据时间范围
+        data_start = result.get('data_start_date', '')
+        data_end = result.get('data_end_date', '')
+        data_days = result.get('data_days', 0)
+        
+        # 健康度星级
+        stars = '⭐' * min(int(health_score), 10)
+        
+        # 格式化数据时间信息
+        if data_start and data_end:
+            data_time_info = f"数据时间: {data_start} ~ {data_end} (共{data_days}天)"
+        elif data_days > 0:
+            data_time_info = f"数据天数: {data_days}天"
+        else:
+            data_time_info = ""
+        
+        output = f"""
+{'='*60}
+  筹码健康度分析 - {ticker} ({stock_name})
+{'='*60}
+{data_time_info}
+
+筹码集中度: {chip_concentration:.1f}%
+筹码成本: ¥{chip_cost:.2f}
+获利盘比例: {profit_ratio:.1f}%
+套牢盘比例: {loss_ratio:.1f}%
+换手率: {turnover_rate:.2f}%
+健康度评分: {health_score:.1f}/10 {stars}
+
+关键信号:
+"""
+        for signal in signals:
+            output += f"  {'✓' if '主力' in signal or '获利' in signal or '集中' in signal else '⚠'} {signal}\n"
+        
+        output += f"{'='*60}\n"
+        return output
+    
+    def _display_chip_result(self, output):
+        """显示筹码分析结果"""
+        # 清空概览文本框
+        self.overview_text.delete('1.0', tk.END)
+        # 插入结果
+        self.overview_text.insert(tk.END, output)
+        # 自动滚动到顶部
+        self.overview_text.see("1.0")
     
     def start_analysis(self):
         """开始分析"""
