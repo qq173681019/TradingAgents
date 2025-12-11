@@ -4428,20 +4428,77 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             report += f"📊 CSV批量分析结果 (共 {len(results)} 只股票)\n"
             report += "=" * 100 + "\n\n"
             
-            # 显示每只股票的评分
-            report += f"{'代码':<8} {'名称':<12} {'综合':<6} {'技术':<6} {'基本':<6} {'筹码':<6} {'RSI':<6} {'趋势':<10} {'行业':<12}\n"
+            # 显示每只股票的评分 - 使用中文字符宽度计算对齐
+            def get_display_width(text):
+                """计算字符串的显示宽度（中文=2，英文=1）"""
+                width = 0
+                for char in str(text):
+                    if ord(char) > 127:  # 中文字符
+                        width += 2
+                    else:  # 英文字符
+                        width += 1
+                return width
+            
+            def pad_string(text, target_width):
+                """根据显示宽度填充字符串"""
+                current_width = get_display_width(text)
+                padding = target_width - current_width
+                return text + ' ' * max(0, padding)
+            
+            # 配置颜色标签
+            self.overview_text.tag_config("强势下跌", foreground="green")
+            self.overview_text.tag_config("强势上涨", foreground="red")
+            self.overview_text.tag_config("下跌", foreground="blue")
+            self.overview_text.tag_config("上涨", foreground="orange")
+            self.overview_text.tag_config("震荡", foreground="black")
+            
+            report += pad_string("代码", 10) + pad_string("名称", 16) + pad_string("综合", 8) + \
+                      pad_string("技术", 8) + pad_string("基本", 8) + pad_string("筹码", 8) + \
+                      pad_string("RSI", 10) + pad_string("趋势", 14) + pad_string("行业", 14) + "\n"
             report += "=" * 100 + "\n"
+            
+            # 先插入表头部分
+            self.overview_text.insert(tk.END, report)
+            
+            # 逐行插入股票数据并应用颜色
             for stock in results:
                 code = stock['股票代码']
-                name = stock['股票名称'][:10]
+                name = stock['股票名称'][:7]
                 综合 = f"{stock['综合评分']:.1f}" if stock['综合评分'] else "N/A"
                 技术 = f"{stock['技术面评分']:.1f}" if stock['技术面评分'] else "N/A"
                 基本 = f"{stock['基本面评分']:.1f}" if stock['基本面评分'] else "N/A"
                 筹码 = f"{stock.get('筹码健康度', 0):.1f}" if stock.get('筹码健康度') else "-"
                 rsi = stock['RSI状态'][:4]
-                trend = stock['趋势'][:8]
-                industry = stock['所属行业'][:10]
-                report += f"{code:<8} {name:<12} {综合:<6} {技术:<6} {基本:<6} {筹码:<6} {rsi:<6} {trend:<10} {industry:<12}\n"
+                trend_raw = stock['趋势']
+                industry = stock['所属行业'][:6]
+                
+                # 确定颜色标签
+                if '强势下跌' in trend_raw:
+                    color_tag = "强势下跌"
+                elif '强势上涨' in trend_raw:
+                    color_tag = "强势上涨"
+                elif '下跌' in trend_raw or '偏空' in trend_raw:
+                    color_tag = "下跌"
+                elif '上涨' in trend_raw or '偏多' in trend_raw:
+                    color_tag = "上涨"
+                elif '震荡' in trend_raw:
+                    color_tag = "震荡"
+                else:
+                    color_tag = ""
+                
+                # 构建行文本
+                line_text = pad_string(code, 10) + pad_string(name, 16) + pad_string(综合, 8) + \
+                           pad_string(技术, 8) + pad_string(基本, 8) + pad_string(筹码, 8) + \
+                           pad_string(rsi, 10) + pad_string(trend_raw[:6], 14) + pad_string(industry, 14) + "\n"
+                
+                # 插入带颜色的行
+                if color_tag:
+                    self.overview_text.insert(tk.END, line_text, color_tag)
+                else:
+                    self.overview_text.insert(tk.END, line_text)
+            
+            # 继续构建统计报告
+            report = ""
             
             report += "=" * 100 + "\n\n"
             report += "TREND: 评分统计:\n"
@@ -4499,8 +4556,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             report += "\nWARNING: 风险提示: 以上分析仅供参考，投资有风险，决策需谨慎！"
             
-            # 在UI中显示
-            self.overview_text.insert('1.0', report)
+            # 在UI中显示剩余统计信息
+            self.overview_text.insert(tk.END, report)
             
             # 切换到概览页面
             self.notebook.select(0)

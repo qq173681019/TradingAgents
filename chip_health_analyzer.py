@@ -77,9 +77,19 @@ class ChipHealthAnalyzer:
             'turnover_rate': 0,  # 换手率
             'chip_bias': 0,  # 筹码乖离率
             'peak_type': '未知',  # 筹码峰型：单峰/双峰/多峰
+            'peak_confidence': 0,  # 形态置信度
             'bottom_locked': False,  # 底部筹码是否锁定
             'health_score': 0,  # 健康度评分
             'health_level': '未知',  # 健康度等级
+            'hhi': 0,  # 赫芬达尔指数
+            'gini_coefficient': 0,  # 基尼系数
+            'concentration_score': 0,  # 集中度评分
+            'turnover_score': 0,  # 换手率评分
+            'profit_loss_score': 0,  # 盈亏比评分
+            'bias_score': 0,  # 乖离率评分
+            'pattern_score': 0,  # 形态评分
+            'trading_suggestion': '',  # 交易建议
+            'signal_strength': '弱',  # 信号强度
             'signals': [],  # 信号列表
             'top10_holders': None,  # 十大股东
             'holder_count_change': 0,  # 股东户数变化
@@ -179,20 +189,28 @@ class ChipHealthAnalyzer:
             result['chip_bias'] = chip_bias
             print(f"✓ 筹码乖离率: {chip_bias:+.2f}% {'(健康区间)' if 5 <= chip_bias <= 15 else ''}")
         
-        # 8. 识别筹码峰型
-        print("\n[8/9] 识别筹码峰型...")
+        # 8. 计算HHI和基尼系数
+        print("\n[8/11] 计算HHI和基尼系数...")
+        hhi, gini = self._calculate_hhi_and_gini(hist_data)
+        result['hhi'] = hhi
+        result['gini_coefficient'] = gini
+        print(f"✓ 赫芬达尔指数(HHI): {hhi:.4f} {'(高度集中)' if hhi > 0.25 else '(相对分散)' if hhi < 0.15 else '(适中)'}")
+        print(f"✓ 基尼系数: {gini:.4f} {'(分布均匀)' if gini < 0.4 else '(分布不均)' if gini > 0.6 else '(适中)'}")
+        
+        # 9. 识别筹码峰型
+        print("\n[9/11] 识别筹码峰型...")
         peak_type = self._identify_peak_type(hist_data)
         result['peak_type'] = peak_type
         print(f"✓ 筹码峰型: {peak_type}")
         
-        # 9. 检测底部筹码锁定
-        print("\n[9/9] 检测底部筹码锁定...")
+        # 10. 检测底部筹码锁定
+        print("\n[10/11] 检测底部筹码锁定...")
         bottom_locked = self._check_bottom_locked(hist_data, current_price)
         result['bottom_locked'] = bottom_locked
         print(f"✓ 底部筹码: {'锁定 🔒' if bottom_locked else '未锁定'}")
         
-        # 10. 综合评分
-        print("\n[评分] 计算筹码健康度...")
+        # 11. 综合评分（新版严格算法）
+        print("\n[11/11] 计算筹码健康度...")
         health_score, signals = self._calculate_health_score(result)
         result['health_score'] = health_score
         result['signals'] = signals
@@ -602,120 +620,283 @@ class ChipHealthAnalyzer:
             print(f"检测底部锁定失败: {e}")
             return False
     
-    def _calculate_health_score(self, result):
-        """计算筹码健康度评分（融合专业理论）"""
-        score = 5.0  # 基准分
-        signals = []
+    def _calculate_hhi_and_gini(self, hist_data):
+        """计算HHI（赫芬达尔指数）和基尼系数"""
+        if hist_data is None or hist_data.empty:
+            return 0, 0
         
-        # 1. SCR筹码集中度评分（权重40%） - 最核心指标
+        try:
+            recent_data = hist_data.tail(60)
+            prices = recent_data['收盘'].astype(float).values
+            volumes = recent_data['成交量'].astype(float).values
+            
+            # 计算每个价格区间的筹码份额
+            price_ranges = np.linspace(prices.min(), prices.max(), 20)
+            chip_shares = []
+            
+            for i in range(len(price_ranges) - 1):
+                mask = (prices >= price_ranges[i]) & (prices < price_ranges[i+1])
+                chip_shares.append(volumes[mask].sum())
+            
+            total_chips = sum(chip_shares)
+            if total_chips == 0:
+                return 0, 0
+            
+            # 归一化
+            chip_shares = [s / total_chips for s in chip_shares if s > 0]
+            
+            # 计算HHI（赫芬达尔指数）
+            hhi = sum(s**2 for s in chip_shares)
+            
+            # 计算基尼系数
+            chip_shares_sorted = sorted(chip_shares)
+            n = len(chip_shares_sorted)
+            gini = 0
+            if n > 0:
+                cumsum = np.cumsum(chip_shares_sorted)
+                gini = (2 * sum((i+1) * chip_shares_sorted[i] for i in range(n))) / (n * sum(chip_shares_sorted)) - (n + 1) / n
+            
+            return float(hhi), float(gini)
+            
+        except Exception as e:
+            print(f"计算HHI和基尼系数失败: {e}")
+            return 0, 0
+    
+    def _calculate_five_dimensions_score(self, result):
+        """计算五维度独立评分（每项0-2分）"""
+        
+        # 1. 集中度评分（0-2分） - 基于SCR
         scr = result['scr']
         if scr < 10:
-            score += 2.5
-            signals.append("✓✓ SCR高度集中(<10%)，变盘在即 ⭐⭐⭐⭐⭐")
-        elif scr < 20:
-            score += 1.5
-            signals.append("✓ SCR相对集中(<20%)，筹码合力强 ⭐⭐⭐⭐")
-        elif scr < 30:
-            score += 0.5
-            signals.append("→ SCR适中(20-30%)，正常波动")
+            concentration_score = 2.0
+        elif scr < 15:
+            concentration_score = 1.5
+        elif scr < 25:
+            concentration_score = 1.0
+        elif scr < 35:
+            concentration_score = 0.5
         else:
-            score -= 1.0
-            signals.append("⚠ SCR发散(>30%)，多空分歧大，剧烈震荡 ⚠️")
+            concentration_score = 0.0
         
-        # 2. 获利盘比例评分（权重30%）
-        profit_ratio = result['profit_ratio']
-        if profit_ratio > 70:
-            score += 1.5
-            signals.append("✓ 获利盘充足(>70%)，上涨压力小")
-        elif profit_ratio > 50:
-            score += 0.5
-            signals.append("→ 获利盘适中(50-70%)")
-        elif profit_ratio < 30:
-            score += 1.0
-            signals.append("✓ 套牢盘多(<30%)，反弹动力强")
-        else:
-            score -= 0.5
-            signals.append("⚠ 获利盘偏多，注意获利回吐")
-        
-        # 3. 筹码乖离率（权重20%） - 判断安全边际
-        chip_bias = result['chip_bias']
-        if 5 <= chip_bias <= 15:
-            score += 1.5
-            signals.append("✓ 筹码乖离率在最佳持股区(5-15%)，安全边际好 ⭐⭐⭐⭐")
-        elif -5 <= chip_bias < 5:
-            score += 0.8
-            signals.append("✓ 价格接近成本区(±5%)，支撑强")
-        elif chip_bias > 30:
-            score -= 1.0
-            signals.append("⚠ 乖离率过高(>30%)，获利回吐压力大 ⚠️")
-        elif chip_bias < -15:
-            score += 0.5
-            signals.append("→ 价格低于成本(-15%)，反弹潜力")
-        else:
-            score += 0.2
-            signals.append("→ 乖离率正常范围")
-        
-        # 4. 换手率评分（权重10%）
+        # 2. 换手率评分（0-2分）
         turnover = result['turnover_rate']
         if 2 < turnover < 5:
-            score += 0.5
-            signals.append("✓ 换手率适中(2-5%)，活跃度好")
-        elif turnover > 10:
-            score -= 0.5
-            signals.append("⚠ 换手率过高(>10%)，警惕炒作")
-        elif turnover < 1:
-            score -= 0.3
-            signals.append("⚠ 换手率过低(<1%)，缺乏关注")
+            turnover_score = 2.0
+        elif 1 < turnover <= 2 or 5 <= turnover < 8:
+            turnover_score = 1.5
+        elif 0.5 < turnover <= 1 or 8 <= turnover < 12:
+            turnover_score = 1.0
+        elif turnover > 15:
+            turnover_score = 0.0
+        else:
+            turnover_score = 0.5
         
-        # 5. 股东户数变化
-        holder_change = result['holder_count_change']
-        if holder_change < -10:
-            score += 1.0
-            signals.append("✓ 股东户数大减(<-10%)，筹码集中")
-        elif holder_change < -5:
-            score += 0.5
-            signals.append("✓ 股东户数减少(-5~-10%)，筹码收集")
-        elif holder_change > 10:
-            score -= 0.5
-            signals.append("⚠ 股东户数大增(>10%)，筹码分散")
+        # 3. 盈亏比评分（0-2分） - 基于获利盘和乖离率综合
+        profit_ratio = result['profit_ratio']
+        chip_bias = result['chip_bias']
         
-        # 6. 筹码峰型判断（形态直观）
+        # 最理想：低获利盘(套牢盘多) + 小正乖离
+        if profit_ratio < 30 and 0 < chip_bias < 10:
+            profit_loss_score = 2.0
+        elif profit_ratio < 40 and -5 < chip_bias < 15:
+            profit_loss_score = 1.5
+        elif profit_ratio < 60:
+            profit_loss_score = 1.0
+        elif profit_ratio > 80:
+            profit_loss_score = 0.0
+        else:
+            profit_loss_score = 0.5
+        
+        # 4. 乖离率评分（0-2分）
+        if 3 <= chip_bias <= 12:
+            bias_score = 2.0
+        elif -5 <= chip_bias < 3 or 12 < chip_bias <= 20:
+            bias_score = 1.5
+        elif -15 <= chip_bias < -5 or 20 < chip_bias <= 30:
+            bias_score = 1.0
+        elif chip_bias > 40 or chip_bias < -25:
+            bias_score = 0.0
+        else:
+            bias_score = 0.5
+        
+        # 5. 形态评分（0-2分） - 基于峰型和底部锁定
+        peak_type = result['peak_type']
+        bottom_locked = result['bottom_locked']
+        
+        if '底部单峰' in peak_type:
+            pattern_score = 2.0
+        elif bottom_locked:
+            pattern_score = 1.8
+        elif '双峰' in peak_type:
+            pattern_score = 1.2
+        elif '高位单峰' in peak_type:
+            pattern_score = 0.0
+        elif '多峰林立' in peak_type:
+            pattern_score = 0.3
+        else:
+            pattern_score = 1.0
+        
+        return {
+            'concentration_score': concentration_score,
+            'turnover_score': turnover_score,
+            'profit_loss_score': profit_loss_score,
+            'bias_score': bias_score,
+            'pattern_score': pattern_score
+        }
+    
+    def _generate_trading_suggestion(self, result, total_score):
+        """生成交易建议和信号强度"""
+        peak_type = result['peak_type']
+        scr = result['scr']
+        chip_bias = result['chip_bias']
+        bottom_locked = result['bottom_locked']
+        
+        # 判断信号强度
+        if total_score >= 8.5:
+            signal_strength = '强'
+        elif total_score >= 7.0:
+            signal_strength = '中'
+        else:
+            signal_strength = '弱'
+        
+        # 生成具体建议
+        if '底部单峰' in peak_type and scr < 12:
+            suggestion = "🟢 强烈看涨信号！股价在低位横盘，筹码高度集中在当前价位，上方套牢盘已消化，这是经典的吸筹完成信号。建议：积极关注，等待主力点火拉升。"
+            signal_strength = '强'
+        elif bottom_locked and scr < 15:
+            suggestion = "🔵 主力锁仓信号！股价已有一定涨幅，但底部低位筹码基本不动，说明主力志在长远，当前可能是半山腰。建议：持有待涨，关注是否有新高突破。"
+            signal_strength = '强'
+        elif '双峰' in peak_type and 10 < scr < 25:
+            suggestion = "🟡 健康洗盘！股价上涨后震荡洗盘，形成高低两个筹码峰，中间谷底区域逐渐被填满，这是健康的换手接力。建议：关注底部主峰是否稳定，等待洗盘结束。"
+            signal_strength = '中'
+        elif '高位单峰' in peak_type:
+            suggestion = "🔴 危险信号！股价在高位震荡，筹码完全集中在高位，说明主力已将低位筹码全部倒给散户接盘，这是崩盘前兆。建议：立即减仓或清仓！"
+            signal_strength = '强'
+        elif '多峰林立' in peak_type:
+            suggestion = "🟠 散户博弈！筹码图上多个峰峦，说明没有主导资金，全是散户在博弈，每涨一点都遇解套抛压。建议：观望为主，等待主力资金介入。"
+            signal_strength = '弱'
+        elif scr < 15 and 5 <= chip_bias <= 15:
+            suggestion = "✓ 筹码集中且处于健康持股区，具备上涨潜力。建议：适度关注，结合技术面判断入场时机。"
+            signal_strength = '中'
+        elif scr > 30:
+            suggestion = "⚠ 筹码发散严重，多空分歧大，股价可能剧烈震荡。建议：谨慎操作，等待筹码重新收敛。"
+            signal_strength = '弱'
+        else:
+            suggestion = "⚪ 筹码形态不明确，缺乏明显的主力迹象。建议：观望为主，等待更清晰的信号。"
+            signal_strength = '弱'
+        
+        return suggestion, signal_strength
+    
+    def _calculate_pattern_confidence(self, peak_type, scr, chip_bias):
+        """计算形态识别置信度（0-100%）"""
+        base_confidence = 50
+        
+        if '底部单峰' in peak_type:
+            base_confidence = 85
+            if scr < 10:
+                base_confidence += 10
+            if 5 <= chip_bias <= 15:
+                base_confidence += 5
+        elif '底部筹码锁定' in peak_type or '底部锁定' in peak_type:
+            base_confidence = 75
+            if scr < 15:
+                base_confidence += 10
+        elif '双峰' in peak_type:
+            base_confidence = 70
+            if 15 < scr < 25:
+                base_confidence += 10
+        elif '高位单峰' in peak_type:
+            base_confidence = 80
+            if scr < 12:
+                base_confidence += 15
+        elif '多峰林立' in peak_type:
+            base_confidence = 70
+        
+        return min(100, base_confidence)
+    
+    def _calculate_health_score(self, result):
+        """计算筹码健康度评分（严格版本，参考专业算法）"""
+        signals = []
+        
+        # 计算五维度独立评分
+        five_scores = self._calculate_five_dimensions_score(result)
+        result['concentration_score'] = five_scores['concentration_score']
+        result['turnover_score'] = five_scores['turnover_score']
+        result['profit_loss_score'] = five_scores['profit_loss_score']
+        result['bias_score'] = five_scores['bias_score']
+        result['pattern_score'] = five_scores['pattern_score']
+        
+        # 计算总分（五维度相加，满分10分）
+        score = (five_scores['concentration_score'] + 
+                 five_scores['turnover_score'] + 
+                 five_scores['profit_loss_score'] + 
+                 five_scores['bias_score'] + 
+                 five_scores['pattern_score'])
+        
+        # 生成详细信号
+        scr = result['scr']
+        if scr < 10:
+            signals.append("✓✓ SCR高度集中(<10%)，变盘在即 ⭐⭐⭐⭐⭐")
+        elif scr < 15:
+            signals.append("✓ SCR相对集中(<15%)，筹码合力强 ⭐⭐⭐⭐")
+        elif scr < 25:
+            signals.append("→ SCR适中(15-25%)，正常波动")
+        else:
+            signals.append("⚠ SCR发散(>25%)，多空分歧大 ⚠️")
+        
+        profit_ratio = result['profit_ratio']
+        if profit_ratio < 30:
+            signals.append("✓ 套牢盘多(<30%)，反弹动力强")
+        elif profit_ratio > 80:
+            signals.append("⚠ 获利盘过多(>80%)，警惕获利回吐")
+        
+        chip_bias = result['chip_bias']
+        if 3 <= chip_bias <= 12:
+            signals.append("✓ 筹码乖离率在最佳持股区(3-12%) ⭐⭐⭐⭐")
+        elif chip_bias > 40:
+            signals.append("⚠ 乖离率过高(>40%)，极度危险 ⚠️⚠️")
+        
         peak_type = result['peak_type']
         if '底部单峰' in peak_type:
-            score += 2.0
             signals.append(f"✓✓ {peak_type} - 吸筹完成，经典起涨信号 🚀")
         elif '高位单峰' in peak_type:
-            score -= 2.0
             signals.append(f"⚠⚠ {peak_type} - 出货完毕，散户接盘 ⚠️⚠️")
         elif '多峰林立' in peak_type:
-            score -= 1.0
             signals.append(f"⚠ {peak_type} - 最磨人，每涨一点遇抛压")
         elif '双峰' in peak_type:
-            score += 0.3
             signals.append(f"→ {peak_type} - 健康换手接力")
         
-        # 7. 底部筹码锁定（主力意图）
         if result['bottom_locked']:
-            score += 1.5
-            signals.append("✓✓ 底部筹码锁定 🔒 - 主力志在长远，半山腰位置 ⭐⭐⭐⭐⭐")
+            signals.append("✓✓ 底部筹码锁定 🔒 - 主力志在长远 ⭐⭐⭐⭐⭐")
         
-        # 限制评分在1-10范围内
-        score = max(1.0, min(10.0, score))
+        # 限制评分在0-10范围内
+        score = max(0.0, min(10.0, score))
+        
+        # 生成交易建议和信号强度
+        trading_suggestion, signal_strength = self._generate_trading_suggestion(result, score)
+        result['trading_suggestion'] = trading_suggestion
+        result['signal_strength'] = signal_strength
+        
+        # 计算形态置信度
+        peak_confidence = self._calculate_pattern_confidence(peak_type, scr, chip_bias)
+        result['peak_confidence'] = peak_confidence
         
         return score, signals
     
     def _get_health_level(self, score):
-        """根据评分获取健康度等级"""
-        if score >= 8.5:
-            return "极度健康 ⭐⭐⭐⭐⭐"
+        """根据评分获取健康度等级（严格标准）"""
+        if score >= 9.0:
+            return "A+ 极度健康 ⭐⭐⭐⭐⭐"
+        elif score >= 8.0:
+            return "A 优秀 ⭐⭐⭐⭐"
         elif score >= 7.0:
-            return "健康 ⭐⭐⭐⭐"
-        elif score >= 5.5:
-            return "一般 ⭐⭐⭐"
+            return "B 良好 ⭐⭐⭐"
+        elif score >= 6.0:
+            return "C 一般 ⭐⭐"
         elif score >= 4.0:
-            return "偏弱 ⭐⭐"
+            return "D 偏弱 ⭐"
         else:
-            return "不健康 ⭐"
+            return "E 不健康 ⚠️"
     
     def _print_result(self, result):
         """打印分析结果"""
@@ -732,23 +913,36 @@ class ChipHealthAnalyzer:
         elif result.get('data_days', 0) > 0:
             print(f"数据天数: {result['data_days']}天")
         print(f"\n【筹码指标】")
-        print(f"  SCR筹码集中度: {result['scr']:.2f}% {'⭐⭐⭐⭐⭐' if result['scr'] < 10 else '⭐⭐⭐⭐' if result['scr'] < 20 else ''}")
+        print(f"  SCR筹码集中度: {result['scr']:.2f}% {'⭐⭐⭐⭐⭐' if result['scr'] < 10 else '⭐⭐⭐⭐' if result['scr'] < 15 else ''}")
+        print(f"  HHI赫芬达尔指数: {result['hhi']:.4f} {'(高度集中)' if result['hhi'] > 0.25 else '(相对分散)' if result['hhi'] < 0.15 else '(适中)'}")
+        print(f"  基尼系数: {result['gini_coefficient']:.4f} {'(分布均匀)' if result['gini_coefficient'] < 0.4 else '(分布不均)' if result['gini_coefficient'] > 0.6 else '(适中)'}")
         print(f"  筹码成本分布: P10=¥{result['chip_cost_p10']:.2f}, P50=¥{result['chip_cost']:.2f}, P90=¥{result['chip_cost_p90']:.2f}")
-        print(f"  筹码乖离率:   {result['chip_bias']:+.2f}% {'(最佳区间)' if 5 <= result['chip_bias'] <= 15 else ''}")
+        print(f"  筹码乖离率:   {result['chip_bias']:+.2f}% {'(最佳区间)' if 3 <= result['chip_bias'] <= 12 else ''}")
         print(f"  获利盘比例:   {result['profit_ratio']:.1f}%")
         print(f"  套牢盘比例:   {result['loss_ratio']:.1f}%")
         print(f"  换手率:       {result['turnover_rate']:.2f}%")
-        print(f"  筹码峰型:     {result['peak_type']}")
+        print(f"  筹码峰型:     {result['peak_type']} (置信度: {result['peak_confidence']:.0f}%)")
         print(f"  底部锁定:     {'是 🔒' if result['bottom_locked'] else '否'}")
         
         if result['holder_count_change'] != 0:
             print(f"  股东户数变化: {result['holder_count_change']:+.2f}%")
         
-        print(f"\n【健康度评分】")
+        print(f"\n【五维度评分】")
+        print(f"  集中度评分:   {result['concentration_score']:.1f}/2.0")
+        print(f"  换手率评分:   {result['turnover_score']:.1f}/2.0")
+        print(f"  盈亏比评分:   {result['profit_loss_score']:.1f}/2.0")
+        print(f"  乖离率评分:   {result['bias_score']:.1f}/2.0")
+        print(f"  形态评分:     {result['pattern_score']:.1f}/2.0")
+        
+        print(f"\n【综合评分】")
         score = result['health_score']
         level = result['health_level']
-        print(f"  评分: {score:.1f}/10.0")
+        print(f"  总分: {score:.1f}/10.0")
         print(f"  等级: {level}")
+        print(f"  信号强度: {result['signal_strength']}")
+        
+        print(f"\n【交易建议】")
+        print(f"  {result['trading_suggestion']}")
         
         print(f"\n【关键信号】")
         for signal in result['signals']:
