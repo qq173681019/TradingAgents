@@ -3467,6 +3467,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 if hasattr(self, '_current_batch_cache_miss') and self._current_batch_cache_miss:
                     self.show_cache_miss_summary(self._current_batch_cache_miss, stock_type)
                 
+                # 显示失败汇总（数据获取失败 + 评分失败）
+                self.show_failed_real_data_summary()  # 显示网络问题导致的数据获取失败
+                self.show_failed_scoring_summary()     # 显示数据不完整导致的评分失败
+                
                 # 更新排行榜
                 try:
                     self.update_ranking_display()
@@ -3499,8 +3503,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             self.show_progress(f"ERROR: 启动{stock_type}评分失败: {e}")
             self._batch_running = False
     
-    def get_stock_score_for_batch(self, stock_code):
-        """为批量评分获取单只股票的评分 - 优化计算效率并优先使用缓存数据"""
+    def get_stock_score_for_batch(self, stock_code, use_cache=True):
+        """为批量评分获取单只股票的评分
+        
+        Args:
+            stock_code: 股票代码
+            use_cache: 是否允许使用缓存数据
+                      True - 允许使用缓存（用于全主板重新计算和快速评分）
+                      False - 强制重新获取数据（用于单独评分和批量CSV评分）
+        """
         try:
             # 优先检查评分缓存（包括退市股票的-10分缓存）
             if stock_code in getattr(self, 'scores_cache', {}):
@@ -3520,45 +3531,64 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 self.scores_cache[stock_code] = -10.0
                 return -10.0
             
-            # ========== 【关键修复】优先从综合缓存中获取技术和基本面数据 ==========
-            # 这样可以避免数据获取失败导致返回0分的问题
+            # ========== 数据获取策略：根据use_cache参数决定 ==========
             tech_data = None
             fund_data = None
             data_source = "实时获取"
             
-            # 尝试从综合缓存获取数据
-            if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
-                cached = self.comprehensive_stock_data.get(stock_code, {})
-                if 'tech_data' in cached and cached['tech_data']:
-                    tech_data = cached['tech_data']
-                    data_source = "缓存数据"
-                if 'fund_data' in cached and cached['fund_data']:
-                    fund_data = cached['fund_data']
-                    if data_source == "缓存数据":
-                        pass  # 两个都来自缓存
-                    elif data_source == "实时获取":
-                        data_source = "混合数据"  # 基本面来自缓存，技术来自实时
-            
-            # 如果缓存中没有，或缓存不完整，则从comprehensive_data尝试获取
-            if tech_data is None or fund_data is None:
-                if hasattr(self, 'comprehensive_data') and stock_code in self.comprehensive_data:
-                    cached = self.comprehensive_data.get(stock_code, {})
-                    if tech_data is None and 'tech_data' in cached and cached['tech_data']:
+            # 只有在use_cache=True时才尝试从缓存获取
+            if use_cache:
+                # 尝试从综合缓存获取数据
+                if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
+                    cached = self.comprehensive_stock_data.get(stock_code, {})
+                    if 'tech_data' in cached and cached['tech_data']:
                         tech_data = cached['tech_data']
-                        data_source = "分析缓存"
-                    if fund_data is None and 'fund_data' in cached and cached['fund_data']:
+                        data_source = "缓存数据"
+                    if 'fund_data' in cached and cached['fund_data']:
                         fund_data = cached['fund_data']
-                        if data_source == "分析缓存":
-                            pass
+                        if data_source == "缓存数据":
+                            pass  # 两个都来自缓存
                         elif data_source == "实时获取":
-                            data_source = "混合缓存"
+                            data_source = "混合数据"  # 基本面来自缓存，技术来自实时
+                
+                # 如果缓存中没有，或缓存不完整，则从comprehensive_data尝试获取
+                if tech_data is None or fund_data is None:
+                    if hasattr(self, 'comprehensive_data') and stock_code in self.comprehensive_data:
+                        cached = self.comprehensive_data.get(stock_code, {})
+                        if tech_data is None and 'tech_data' in cached and cached['tech_data']:
+                            tech_data = cached['tech_data']
+                            data_source = "分析缓存"
+                        if fund_data is None and 'fund_data' in cached and cached['fund_data']:
+                            fund_data = cached['fund_data']
+                            if data_source == "分析缓存":
+                                pass
+                            elif data_source == "实时获取":
+                                data_source = "混合缓存"
+            else:
+                print(f"[FRESH-DATA] {stock_code} 强制重新获取最新数据（不使用缓存）")
             
             # 记录数据来源
             if stock_code == '000001':
                 print(f"[DEBUG-000001] 数据来源检查: tech_data={'✓有' if tech_data else '✗无'}, fund_data={'✓有' if fund_data else '✗无'}, 来源={data_source}")
             
-            # ========== 生成投资建议 ==========
-            short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(stock_code)
+            # ========== 生成投资建议（可能返回失败原因） ==========
+            # 传递use_cache参数，确保批量评分遵循缓存策略
+            short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(stock_code, use_cache=use_cache)
+            
+            # 检查是否有失败原因
+            if short_prediction.get('failure_reason'):
+                failure_reason = short_prediction.get('failure_reason')
+                print(f"[FAIL] {stock_code} 评分失败: {failure_reason}")
+                # 记录失败股票和原因
+                if not hasattr(self, 'failed_scoring_stocks'):
+                    self.failed_scoring_stocks = []
+                stock_name = self.get_stock_name(stock_code) or stock_code
+                self.failed_scoring_stocks.append({
+                    'code': stock_code,
+                    'name': stock_name,
+                    'reason': failure_reason
+                })
+                return None  # 返回None表示评分失败
 
             # 提取三时间段的归一化分数（1-10分制），与单票算法保持一致
             short_score = short_prediction.get('score', short_prediction.get('technical_score', 0))
@@ -3570,6 +3600,19 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             long_score = long_prediction.get('score', long_prediction.get('fundamental_score', 0))
             if long_score is None: long_score = 0
 
+            # ========== 添加筹码健康度分析 ==========
+            chip_score = None
+            if self.chip_analyzer:
+                try:
+                    chip_result = self.chip_analyzer.analyze_stock(stock_code)
+                    if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                        chip_score = chip_result.get('health_score', 0)
+                        if stock_code == '000001':
+                            print(f"[CHIP] {stock_code} 筹码评分: {chip_score:.1f}/10, 等级: {chip_result.get('health_level', '未知')}")
+                except Exception as e:
+                    if stock_code == '000001':
+                        print(f"[CHIP] {stock_code} 筹码分析失败: {e}")
+
             # 调试：如果是000001，输出详细信息
             if stock_code == '000001':
                 print(f"\n[DEBUG-000001] 批量评分详细过程:")
@@ -3577,13 +3620,22 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 print(f"  中期预测返回: {medium_prediction}")
                 print(f"  长期预测返回: {long_prediction}")
                 print(f"  提取的归一化分: 短期={short_score}, 中期={medium_score}, 长期={long_score}")
+                print(f"  筹码健康度分: {chip_score if chip_score else 'N/A'}")
 
-            # 使用统一的综合评分计算函数（输入为已归一化的1-10分制）
-            final_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type='normalized')
+            # 使用新版综合评分算法（包含筹码健康度）
+            # 技术面+基本面+筹码健康度三维度评分
+            final_score = self.calculate_comprehensive_score_v2(
+                tech_score=short_score,
+                fund_score=long_score, 
+                chip_score=chip_score
+            )
             
             # 调试：如果是000001，输出最终分数
             if stock_code == '000001':
-                print(f"  最终综合评分: {final_score}")
+                if chip_score:
+                    print(f"  最终综合评分V2: {final_score:.2f} (技术45% + 基本35% + 筹码20%)")
+                else:
+                    print(f"  最终综合评分V2: {final_score:.2f} (技术56.25% + 基本43.75%)")
                 print()
             
             # 缓存计算结果以便后续复用
@@ -3888,43 +3940,19 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                  print(f"{stock_code} 无法获取技术数据，跳过分析")
                  return None
             
-            # 验证技术数据完整性，补全缺失字段
+            # 验证数据完整性（此函数总是用于需要缓存的场景）
             required_tech_fields = ['current_price', 'ma5', 'ma10', 'ma20', 'ma60', 'rsi', 'macd', 'signal', 'volume_ratio']
             missing_fields = [field for field in required_tech_fields if field not in tech_data or tech_data[field] is None]
-            
             if missing_fields:
-                print(f"\033[1;33m[CACHE] {stock_code} 技术数据缺失字段: {missing_fields}，正在补全...\033[0m")
-                # 使用智能模拟数据补全缺失字段
-                simulated_data = self._generate_smart_mock_technical_data(stock_code)
-                for field in missing_fields:
-                    if field in simulated_data:
-                        tech_data[field] = simulated_data[field]
-                        print(f"  - 已补全字段: {field}")
-                
-                # 更新缓存
-                if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
-                    self.comprehensive_stock_data[stock_code]['tech_data'] = tech_data
+                print(f"\033[1;33m[CACHE] {stock_code} 技术数据缺失字段: {missing_fields}，数据不完整，跳过\033[0m")
+                return None
             
-            if not fund_data:
-                 print(f"{stock_code} 无法获取基本面数据，跳过分析")
-                 return None
-            
-            # 验证基本面数据完整性，补全缺失字段
-            required_fund_fields = ['pe_ratio', 'pb_ratio', 'roe']
-            missing_fund_fields = [field for field in required_fund_fields if field not in fund_data or fund_data[field] is None]
-            
-            if missing_fund_fields:
-                print(f"\033[1;33m[CACHE] {stock_code} 基本面数据缺失字段: {missing_fund_fields}，正在补全...\033[0m")
-                # 使用智能模拟数据补全缺失字段
-                simulated_data = self._generate_smart_mock_fundamental_data(stock_code)
-                for field in missing_fund_fields:
-                    if field in simulated_data:
-                        fund_data[field] = simulated_data[field]
-                        print(f"  - 已补全字段: {field}")
-                
-                # 更新缓存
-                if getattr(self, 'comprehensive_data_loaded', False) and stock_code in self.comprehensive_stock_data:
-                    self.comprehensive_stock_data[stock_code]['fund_data'] = fund_data
+            if fund_data:
+                required_fund_fields = ['pe_ratio', 'pb_ratio', 'roe']
+                missing_fund_fields = [field for field in required_fund_fields if field not in fund_data or fund_data[field] is None]
+                if missing_fund_fields:
+                    print(f"\033[1;33m[CACHE] {stock_code} 基本面数据缺失字段: {missing_fund_fields}，数据不完整，跳过\033[0m")
+                    return None
             
             fund_data['is_etf'] = self.is_etf_code(stock_code)
                 
@@ -4122,112 +4150,42 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         # 获取股票名称
                         stock_name = self.get_stock_name(code)
                         
-                        # 【数据优先级】与批量评分系统保持一致
-                        # 优先级1: batch_scores（最新评分数据）
-                        # 优先级2: comprehensive_stock_data（完整缓存数据）
-                        # 优先级3: 实时获取数据
+                        # ========== CSV批量分析：永不使用缓存数据，强制实时获取 ==========
+                        print(f"[CSV-FRESH] {code} CSV批量分析 - 强制实时获取最新数据")
                         
-                        score = None
-                        tech_data = None
-                        fund_data = None
+                        # 调用评分函数，强制use_cache=False，完全不使用缓存
+                        # 这会触发 generate_investment_advice()，返回评分或 None（失败）
+                        score = self.get_stock_score_for_batch(code, use_cache=False)
                         
-                        # 【优先级1】检查batch_scores缓存
-                        if code in self.batch_scores:
-                            score = self.batch_scores[code]['score']
-                            print(f"[CSV-BATCH] 使用batch_scores评分: {code} = {score}")
-                        
-                        # 【优先级2】检查comprehensive_stock_data缓存
-                        if getattr(self, 'comprehensive_data_loaded', False) and code in self.comprehensive_stock_data:
-                            cached_item = self.comprehensive_stock_data.get(code, {})
-                            tech_data = cached_item.get('tech_data')
-                            fund_data = cached_item.get('fund_data')
+                        if score is not None and score > 0:
+                            # 评分成功，获取原始技术数据和股票信息用于CSV输出
+                            # 直接获取技术指标数据（包含rsi_status和momentum）
+                            tech_data = self.get_real_technical_indicators(code)
+                            fund_data = self.get_real_fundamental_indicators(code)
+                            stock_info = self.get_stock_info_generic(code)
                             
-                            # [修复] 尝试从K线计算技术指标 (如果缺失)
-                            if not tech_data and 'kline_data' in cached_item and cached_item['kline_data'] and 'daily' in cached_item['kline_data']:
-                                # print(f"[CSV-CACHE] {code} 从缓存K线计算技术指标...")
-                                tech_data = self._calculate_tech_data_from_kline(cached_item['kline_data']['daily'])
+                            # 提取各项评分（从预测结果）
+                            short_pred, medium_pred, long_pred = self.generate_investment_advice(code, use_cache=False)
+                            tech_score = short_pred.get('score', short_pred.get('technical_score', 0))
+                            total_score = medium_pred.get('score', medium_pred.get('total_score', 0))
+                            fund_score = long_pred.get('score', long_pred.get('fundamental_score', 0))
                             
-                            # [修复] 兼容旧版基本面数据 (如果缺失)
-                            if not fund_data and 'financial_data' in cached_item:
-                                # print(f"[CSV-CACHE] {code} 转换旧版基本面数据...")
-                                fin_data = cached_item['financial_data']
-                                fund_data = {
-                                    'pe_ratio': fin_data.get('pe_ratio'),
-                                    'pb_ratio': fin_data.get('pb_ratio'),
-                                    'roe': fin_data.get('roe'),
-                                    'revenue_growth': fin_data.get('revenue_growth', fin_data.get('revenue')),
-                                    'debt_ratio': fin_data.get('debt_ratio'),
-                                    'net_profit': fin_data.get('net_profit'),
-                                    'market_cap': fin_data.get('market_cap')
-                                }
-
-                            # 如果batch_scores没有评分，从缓存数据计算
-                            if score is None and cached_item.get('overall_score'):
-                                score = cached_item.get('overall_score')
-                                print(f"[CSV-CACHE] 使用缓存数据和评分: {code}")
+                            # 提取详细信息用于CSV（使用原始技术数据，与单独分析完全一致）
+                            if tech_data:
+                                rsi_status = tech_data.get('rsi_status', '未知')
+                                trend = tech_data.get('momentum', '震荡')
                             else:
-                                if tech_data and fund_data:
-                                    print(f"[CSV-CACHE] 使用完整缓存数据: {code}")
-                                else:
-                                    print(f"[CSV-CACHE] 缓存数据不完整 (Tech:{bool(tech_data)}, Fund:{bool(fund_data)}): {code}")
-                        
-                        # 【优先级3】实时获取数据（最后选择）
-                        if tech_data is None or fund_data is None:
-                            # 尝试获取技术面和基本面数据 - 只使用真实数据
-                            if tech_data is None:
-                                tech_data = self.get_real_technical_indicators(code)
-                            if fund_data is None:
-                                fund_data = self.get_real_fundamental_indicators(code)
-                            print(f"[CSV-REALTIME] 使用实时获取数据: {code}")
-                        
-                        # 如果还没有评分，调用评分函数计算
-                        if score is None:
-                            score = self.get_stock_score_for_batch(code)
-                        
-                        if score is not None:
+                                rsi_status = "数据获取失败"
+                                trend = "无法分析"
                             
-                            if tech_data is None:
-                                print(f"{code} 无法获取真实技术数据，标记为失败")
-                                results.append({
-                                    '股票代码': code,
-                                    '股票名称': stock_name,
-                                    '综合评分': 0.0,
-                                    '技术面评分': 0.0,
-                                    '基本面评分': 0.0,
-                                    'RSI状态': "数据获取失败",
-                                    '趋势': "无法分析",
-                                    '所属行业': "未知",
-                                    '分析时间': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                })
-                                continue
-                                
-                            # 如果没有基础数据，根据是否为ETF使用不同默认值
-                            if fund_data is None:
-                                if self.is_etf_code(code):
-                                    fund_data = {
-                                        'pe_ratio': 12.0,  # ETF专用默认值
-                                        'pb_ratio': 1.5,
-                                        'roe': 0.1,
-                                        'is_etf': True
-                                    }
-                                else:
-                                    fund_data = {
-                                        'pe_ratio': tech_data.get('pe_ratio', 15.0),
-                                        'pb_ratio': tech_data.get('pb_ratio', 2.0),
-                                        'roe': tech_data.get('roe', 0.1),
-                                        'is_etf': False
-                                    }
-                            else:
-                                fund_data['is_etf'] = self.is_etf_code(code)
+                            # 行业：从股票信息中获取
+                            industry = stock_info.get('industry', '未知行业') if stock_info else '未知行业'
                             
-                            # 计算单独评分
-                            tech_score = self.calculate_technical_score(tech_data)
-                            fund_score = self.calculate_fundamental_score(fund_data)
-                            
-                            # 计算筹码健康度评分
+                            # ========== 添加筹码健康度分析（与单只分析完全相同）==========
                             chip_score = None
                             chip_health_level = "未分析"
                             scr_value = None
+                            
                             if self.chip_analyzer:
                                 try:
                                     chip_result = self.chip_analyzer.analyze_stock(code)
@@ -4235,46 +4193,38 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                         chip_score = chip_result.get('health_score', 0)
                                         chip_health_level = chip_result.get('health_level', '未知')
                                         scr_value = chip_result.get('scr', 0)
-                                        print(f"[CSV-CHIP] {code} 筹码评分: {chip_score:.1f}/10, SCR: {scr_value:.2f}%")
+                                        print(f"[CSV-CHIP] {code} 筹码评分: {chip_score:.1f}/10, 等级: {chip_health_level}, SCR: {scr_value:.2f}%")
                                 except Exception as e:
                                     print(f"[CSV-CHIP] {code} 筹码分析失败: {e}")
                             
-                            # 使用新版综合评分算法（技术面+基本面+筹码健康度）
-                            comprehensive_score_v2 = self.calculate_comprehensive_score_v2(
-                                tech_score, 
-                                fund_score, 
-                                chip_score
-                            )
-                            print(f"[CSV-SCORE] {code} 综合评分V2: {comprehensive_score_v2:.1f}/10 (技术:{tech_score:.1f} 基本:{fund_score:.1f} 筹码:{chip_score if chip_score else 'N/A'})")
-                            
-                            # 判断趋势
-                            trend = self.get_trend_signal(tech_data)
-                            
-                            # 判断RSI状态
-                            rsi_status = self.get_rsi_status(tech_data['rsi'])
-                            
-                            # 确保所有分数都是数字类型，使用新版综合评分
-                            try:
-                                final_score = float(comprehensive_score_v2) if comprehensive_score_v2 is not None else None
-                                tech_score_final = float(tech_score) if tech_score is not None else None
-                                fund_score_final = float(fund_score) if fund_score is not None else None
-                            except (ValueError, TypeError):
-                                final_score = None
-                                tech_score_final = None
-                                fund_score_final = None
+                            print(f"[CSV-SUCCESS] {code} 评分={score:.1f} (技术:{tech_score:.1f} 基本:{fund_score:.1f} 筹码:{chip_score if chip_score else 'N/A'})")
                             
                             results.append({
                                 '股票代码': code,
                                 '股票名称': stock_name,
-                                '综合评分': round(final_score, 1) if final_score is not None else None,
-                                '技术面评分': round(tech_score_final, 1) if tech_score_final is not None else None,
-                                '基本面评分': round(fund_score_final, 1) if fund_score_final is not None else None,
+                                '综合评分': round(score, 1),
+                                '技术面评分': round(tech_score, 1) if tech_score else 0,
+                                '基本面评分': round(fund_score, 1) if fund_score else 0,
                                 '筹码健康度': round(chip_score, 1) if chip_score is not None else None,
                                 '筹码等级': chip_health_level,
                                 'SCR集中度': f"{scr_value:.2f}%" if scr_value is not None else None,
                                 'RSI状态': rsi_status,
                                 '趋势': trend,
-                                '所属行业': fund_data.get('industry', '未知'),
+                                '所属行业': industry,
+                                '分析时间': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            })
+                        else:
+                            # 评分失败
+                            print(f"[CSV-FAIL] {code} 评分失败")
+                            results.append({
+                                '股票代码': code,
+                                '股票名称': stock_name,
+                                '综合评分': 0.0,
+                                '技术面评分': 0.0,
+                                '基本面评分': 0.0,
+                                'RSI状态': "数据获取失败",
+                                '趋势': "无法分析",
+                                '所属行业': "未知",
                                 '分析时间': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             })
                         
@@ -4336,6 +4286,42 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             failed_count = len(self.failed_real_data_stocks)
             if failed_count > 0:
                 self.show_progress(f"WARNING: 已快速跳过 {failed_count} 只网络问题股票，详见控制台")
+    
+    def show_failed_scoring_summary(self):
+        """显示评分失败的股票清单及详细原因"""
+        if not hasattr(self, 'failed_scoring_stocks') or not self.failed_scoring_stocks:
+            if not getattr(self, 'suppress_console_details', False):
+                print("所有股票均成功完成评分")
+            return
+        
+        # 在静默模式下不打印详细清单
+        if getattr(self, 'suppress_console_details', False):
+            return
+
+        print(f"\n{'='*80}")
+        print(f"评分失败的股票清单 (共 {len(self.failed_scoring_stocks)} 只)")
+        print(f"{'='*80}")
+        print(f"{'序号':<4} {'股票代码':<10} {'股票名称':<20} {'失败原因':<45}")
+        print(f"{'-'*80}")
+        
+        for i, stock in enumerate(self.failed_scoring_stocks, 1):
+            code = stock['code']
+            name = stock['name'][:18] + '..' if len(stock['name']) > 18 else stock['name']
+            reason = stock['reason'][:43] + '..' if len(stock['reason']) > 43 else stock['reason']
+            print(f"{i:<4} {code:<10} {name:<20} {reason:<45}")
+        
+        print(f"{'='*80}")
+        print("说明：")
+        print("1. 所有数据源（Tushare/Baostock/akshare/yfinance）均已尝试")
+        print("2. 数据不完整：缺少必需字段（如RSI、MACD、PE等）")
+        print("3. 系统不使用模拟数据和默认值，确保评分基于真实市场数据")
+        print("建议：稍后重试或检查这些股票是否已停牌/退市")
+        
+        # 在界面显示简要信息
+        if hasattr(self, 'show_progress'):
+            failed_count = len(self.failed_scoring_stocks)
+            if failed_count > 0:
+                self.show_progress(f"WARNING: {failed_count} 只股票评分失败，详见控制台")
     
     def save_csv_analysis_results(self, results):
         """保存CSV分析结果"""
@@ -5335,6 +5321,21 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             self.recommendation_text = tk.Text(self.recommendation_frame, font=("Consolas", 11), wrap=tk.WORD, bg="white")
             self.recommendation_text.pack(fill="both", expand=True, padx=10, pady=10)
 
+        # 筹码分析页面
+        self.chip_frame = tk.Frame(self.notebook, bg="white")
+        self.notebook.add(self.chip_frame, text="筹码分析")
+        # 筹码分析文本区
+        try:
+            self.chip_text = scrolledtext.ScrolledText(self.chip_frame,
+                                                       font=("Consolas", 10),
+                                                       wrap=tk.WORD,
+                                                       bg="white")
+            self.chip_text.pack(fill="both", expand=True, padx=10, pady=10)
+        except Exception:
+            # 如果scrolledtext不可用，退回为普通Text
+            self.chip_text = tk.Text(self.chip_frame, font=("Consolas", 10), wrap=tk.WORD, bg="white")
+            self.chip_text.pack(fill="both", expand=True, padx=10, pady=10)
+        
         # 排行榜页面
         self.ranking_frame = tk.Frame(self.notebook, bg="white")
         self.notebook.add(self.ranking_frame, text="排行榜")
@@ -6031,8 +6032,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 'fund_data': fund_data  # 使用Choice获取的基本面数据（包含PE、PB）
             }
             
-            # 调用系统的标准评分函数
-            score = self.get_stock_score_for_batch(code)
+            # 调用系统的标准评分函数（测试：使用最新数据）
+            score = self.get_stock_score_for_batch(code, use_cache=False)
             
             # 计算5日涨跌幅用于显示
             price_change_5d = None
@@ -8450,35 +8451,8 @@ K线更新后快速评分完成！
             
             print(f"📡 尝试备用数据源获取 {ticker} 数据...")
             
-            # 1. Tushare (稳定)
-            try:
-                print(f"{ticker} 尝试Tushare数据源...")
-                import tushare as ts
-                if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
-                    ts.set_token(TUSHARE_TOKEN)
-                    pro = ts.pro_api()
-                    if ticker.startswith('6'):
-                        ts_code = f"{ticker}.SH"
-                    else:
-                        ts_code = f"{ticker}.SZ"
-                    import pandas as pd
-                    df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
-                    if not df.empty:
-                        df = df.sort_values('trade_date')
-                        stock_hist = pd.DataFrame({
-                            '收盘': df['close'].values,
-                            '成交量': df['vol'].values
-                        })
-                        print(f"\033[92m✓ {ticker} tushare数据获取成功\033[0m")
-                    else:
-                        print(f"⚠ {ticker} Tushare返回数据为空")
-                else:
-                    print(f"⚠ {ticker} Tushare Token未配置，跳过")
-            except Exception as e4:
-                print(f"{ticker} tushare数据源失败: {e4}")
-                stock_hist = None
-
-            # 2. Baostock次之 (免费且稳定)
+            # 1. Baostock优先 (免费、稳定、数据完整) ⭐⭐⭐⭐⭐
+            print(f"[DEBUG] BAOSTOCK_AVAILABLE = {BAOSTOCK_AVAILABLE}")
             if (stock_hist is None or stock_hist.empty):
                 print(f"[DEBUG] BAOSTOCK_AVAILABLE = {BAOSTOCK_AVAILABLE}")
                 if BAOSTOCK_AVAILABLE:
@@ -8537,25 +8511,34 @@ K线更新后快速评分完成！
                 else:
                     print(f"⚠ {ticker} yfinance库未安装，跳过")
 
-            # 4. 腾讯数据源 (实时性好)
+            # 2. 腾讯K线API (稳定、完整K线数据) ⭐⭐⭐⭐
             if (stock_hist is None or stock_hist.empty):
                 try:
-                    print(f"{ticker} 尝试腾讯数据源...")
-                    current_price = self.get_stock_price(ticker)
-                    if current_price:
+                    print(f"{ticker} 尝试腾讯K线API...")
+                    from datetime import datetime, timedelta
+
+                    from tencent_kline_api import TencentKlineAPI
+                    
+                    tencent_kline = TencentKlineAPI()
+                    end_date_str = datetime.now().strftime('%Y-%m-%d')
+                    start_date_str = (datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')
+                    
+                    df = tencent_kline.get_stock_kline(ticker, start_date_str, end_date_str, period='day')
+                    if df is not None and not df.empty:
+                        # 转换为统一格式
                         import pandas as pd
                         stock_hist = pd.DataFrame({
-                            '收盘': [current_price] * 30,
-                            '成交量': [1000000] * 30
+                            '收盘': df['close'].values if 'close' in df.columns else df['收盘'].values,
+                            '成交量': df['volume'].values if 'volume' in df.columns else df['成交量'].values
                         })
-                        print(f"\033[92m✓ {ticker} 使用腾讯数据源成功\033[0m")
+                        print(f"\033[92m✓ {ticker} 腾讯K线API获取成功，{len(stock_hist)}条记录\033[0m")
                     else:
-                        print(f"⚠ {ticker} 腾讯数据源返回为空")
-                except Exception as e3:
-                    print(f"{ticker} 腾讯数据源失败: {e3}")
+                        print(f"⚠ {ticker} 腾讯K线API返回数据为空")
+                except Exception as e_tencent_kline:
+                    print(f"{ticker} 腾讯K线API失败: {e_tencent_kline}")
                     stock_hist = None
 
-            # 5. 网易财经数据源
+            # 3. 网易财经数据源
             if (stock_hist is None or stock_hist.empty):
                 try:
                     print(f"{ticker} 尝试网易财经数据源...")
@@ -8568,7 +8551,7 @@ K线更新后快速评分完成！
                     print(f"{ticker} 网易财经数据源失败: {e_netease}")
                     stock_hist = None
 
-            # 6. 新浪财经数据源
+            # 4. 新浪财经数据源
             if (stock_hist is None or stock_hist.empty):
                 try:
                     print(f"{ticker} 尝试新浪财经数据源...")
@@ -8581,7 +8564,7 @@ K线更新后快速评分完成！
                     print(f"{ticker} 新浪财经数据源失败: {e_sina}")
                     stock_hist = None
 
-            # 7. QQ/腾讯财经数据源 (备用)
+            # 5. QQ/腾讯财经数据源
             if (stock_hist is None or stock_hist.empty):
                 try:
                     print(f"{ticker} 尝试QQ/腾讯数据源...")
@@ -8594,7 +8577,7 @@ K线更新后快速评分完成！
                     print(f"{ticker} QQ/腾讯数据源失败: {e_qq}")
                     stock_hist = None
 
-            # 8. akshare最后兜底 (容易超时)
+            # 6. akshare数据源 (容易超时，备用)
             if (stock_hist is None or stock_hist.empty):
                 if AKSHARE_AVAILABLE:
                     try:
@@ -8617,6 +8600,27 @@ K线更新后快速评分完成！
                             stock_hist = None
                 else:
                     print(f"⚠ {ticker} akshare库未安装，跳过")
+            
+            # 7. 腾讯实时价格兜底 (最后备选，生成简化K线)
+            if (stock_hist is None or stock_hist.empty):
+                try:
+                    print(f"{ticker} 尝试腾讯实时价格兜底方案...")
+                    current_price = self.get_stock_price(ticker)
+                    if current_price:
+                        import pandas as pd
+
+                        # 使用实时价格生成简化的30天K线（用于计算均线）
+                        stock_hist = pd.DataFrame({
+                            '收盘': [current_price] * 30,
+                            '成交量': [1000000] * 30
+                        })
+                        print(f"\033[93m⚠ {ticker} 使用腾讯实时价格兜底: ¥{current_price:.2f}\033[0m")
+                    else:
+                        print(f"⚠ {ticker} 腾讯实时价格获取失败")
+                except Exception as e_price:
+                    print(f"{ticker} 腾讯实时价格兜底失败: {e_price}")
+                    stock_hist = None
+            
             # 全部数据源失败
             if stock_hist is None or stock_hist.empty:
                 print(f"❌ {ticker} 未获取到任何有效历史数据，且已禁用模拟数据")
@@ -8866,108 +8870,7 @@ K线更新后快速评分完成！
             print(f"yfinance获取 {ticker} 基础数据失败: {str(e)}")
             return None
 
-    def _generate_smart_mock_technical_data(self, ticker):
-        """生成智能模拟技术数据（基于实时价格和股票特征）"""
-        import hashlib
-        import random
-
-        # 使用股票代码作为随机种子，确保每个股票的数据是稳定但不同的
-        seed = int(hashlib.md5(ticker.encode()).hexdigest()[:8], 16)
-        random.seed(seed)
-        
-        # 优先获取实时价格，确保显示的价格是最新的
-        current_price = self.get_stock_price(ticker)
-        
-        # 如果实时价格获取失败，尝试从缓存获取
-        if current_price is None:
-            if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
-                cached = self.comprehensive_stock_data.get(ticker, {})
-                tech_data = cached.get('tech_data', {})
-                if tech_data and 'current_price' in tech_data:
-                    current_price = tech_data['current_price']
-                    print(f"[PRICE-CACHE] 实时获取失败，使用缓存价格: {ticker} = ¥{current_price:.2f}")
-        if current_price is None:
-            # 根据股票代码特征设置基础价格
-            if ticker.startswith('688'):  # 科创板
-                current_price = random.uniform(30, 80)
-            elif ticker.startswith('300'):  # 创业板
-                current_price = random.uniform(15, 45)
-            elif ticker.startswith('60'):  # 沪市主板
-                current_price = random.uniform(8, 60)
-            elif ticker.startswith(('510', '511', '512', '513', '515', '516', '517', '518', '159', '161', '163', '165')):  # ETF基金
-                current_price = random.uniform(0.8, 8.0)  # ETF价格通常较低
-            else:  # 深市主板
-                current_price = random.uniform(6, 35)
-        
-        # 根据股票代码生成不同的市场特征
-        stock_hash = hash(ticker) % 100
-        
-        # 生成差异化的技术指标
-        # 移动平均线 (基于股票特征的趋势)
-        if stock_hash < 20:  # 20%股票呈上升趋势
-            trend_factor = random.uniform(1.02, 1.08)
-            momentum = "上升"
-        elif stock_hash < 40:  # 20%股票呈下降趋势  
-            trend_factor = random.uniform(0.92, 0.98)
-            momentum = "下降"
-        else:  # 60%股票横盘整理
-            trend_factor = random.uniform(0.98, 1.02)
-            momentum = "横盘"
-        
-        ma5 = current_price * trend_factor * random.uniform(0.98, 1.02)
-        ma10 = current_price * trend_factor * random.uniform(0.96, 1.04)
-        ma20 = current_price * trend_factor * random.uniform(0.94, 1.06)
-        ma60 = current_price * trend_factor * random.uniform(0.90, 1.10)
-        ma120 = current_price * trend_factor * random.uniform(0.85, 1.15)
-        
-        # RSI (相对强弱指标) - 基于股票特征分布
-        if stock_hash < 15:  # 15%超卖
-            rsi = random.uniform(20, 35)
-            rsi_status = "超卖"
-        elif stock_hash < 30:  # 15%偏弱
-            rsi = random.uniform(35, 45)
-            rsi_status = "偏弱"
-        elif stock_hash < 70:  # 40%中性
-            rsi = random.uniform(45, 55)
-            rsi_status = "中性"
-        elif stock_hash < 85:  # 15%偏强
-            rsi = random.uniform(55, 65)
-            rsi_status = "偏强"
-        else:  # 15%超买
-            rsi = random.uniform(65, 80)
-            rsi_status = "超买"
-        
-        # 成交量比率 (基于股票活跃度)
-        if ticker.startswith('688') or ticker.startswith('300'):  # 成长股活跃
-            volume_ratio = random.uniform(1.2, 2.5)
-        else:  # 主板相对稳定
-            volume_ratio = random.uniform(0.6, 1.8)
-        
-        # MACD (基于趋势)
-        if momentum == "上升":
-            macd = random.uniform(0.1, 0.5)
-            signal = random.uniform(0, 0.3)
-        elif momentum == "下降":
-            macd = random.uniform(-0.5, -0.1)
-            signal = random.uniform(-0.3, 0)
-        else:
-            macd = random.uniform(-0.1, 0.1)
-            signal = random.uniform(-0.1, 0.1)
-            
-        return {
-            'current_price': current_price,
-            'ma5': ma5,
-            'ma10': ma10,
-            'ma20': ma20,
-            'ma60': ma60,
-            'ma120': ma120,
-            'rsi': rsi,
-            'rsi_status': rsi_status,
-            'macd': macd,
-            'signal': signal,
-            'volume_ratio': volume_ratio,
-            'momentum': momentum
-        }
+    # REMOVED: _generate_smart_mock_technical_data - 不再使用模拟数据
     def _try_get_netease_data(self, ticker):
         """NetEase data fallback: prefer yfinance if available, else None"""
         try:
@@ -9006,93 +8909,11 @@ K线更新后快速评分完成！
             return None
         return None
 
-    def _generate_smart_mock_kline_data(self, ticker, days=60):
-        """生成用于计算技术指标的模拟K线数据（收盘和成交量）"""
-        try:
-            import datetime
-            import random
+    # REMOVED: _generate_smart_mock_kline_data - 不再使用模拟数据
 
-            import pandas as pd
-
-            base_price = self.get_stock_price(ticker) or random.uniform(5, 50)
-            prices = []
-            vol = []
-            price = float(base_price)
-            for i in range(days):
-                # 随机微调价格，模拟波动
-                price = price * (1 + random.uniform(-0.02, 0.02))
-                prices.append(round(price, 2))
-                vol.append(int(max(1000, abs(random.gauss(50000, 20000)))))
-
-            return pd.DataFrame({'收盘': prices, '成交量': vol})
-        except Exception:
-            return None
-
-    def _generate_smart_fallback_technical_data(self, ticker):
-        """当无法获取真实技术数据时，从模拟K线生成技术指标并返回与真实接口相同格式"""
-        try:
-            df = self._generate_smart_mock_kline_data(ticker, days=90)
-            if df is None or df.empty:
-                return None
-
-            current_price = float(df['收盘'].iloc[-1])
-            ma5 = float(df['收盘'].tail(5).mean()) if len(df) >= 5 else current_price
-            ma10 = float(df['收盘'].tail(10).mean()) if len(df) >= 10 else current_price
-            ma20 = float(df['收盘'].tail(20).mean()) if len(df) >= 20 else current_price
-            ma60 = float(df['收盘'].tail(60).mean()) if len(df) >= 60 else current_price
-
-            if len(df) >= 14:
-                close_prices = df['收盘'].astype(float)
-                delta = close_prices.diff()
-                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                rs = gain / loss
-                rsi = 100 - (100 / (1 + rs.iloc[-1]))
-            else:
-                rsi = 50
-
-            if len(df) >= 5:
-                avg_volume = df['成交量'].tail(5).mean()
-                current_volume = df['成交量'].iloc[-1]
-                volume_ratio = float(current_volume / avg_volume) if avg_volume > 0 else 1.0
-            else:
-                volume_ratio = 1.0
-
-            if len(df) >= 26:
-                ema12 = df['收盘'].ewm(span=12).mean().iloc[-1]
-                ema26 = df['收盘'].ewm(span=26).mean().iloc[-1]
-                macd = float(ema12 - ema26)
-                signal = float(df['收盘'].ewm(span=9).mean().iloc[-1])
-            else:
-                macd = 0
-                signal = 0
-
-            return {
-                'current_price': current_price,
-                'ma5': ma5,
-                'ma10': ma10,
-                'ma20': ma20,
-                'ma60': ma60,
-                'rsi': float(rsi) if rsi is not None else 50,
-                'macd': macd,
-                'signal': signal,
-                'volume_ratio': volume_ratio,
-                'data_source': 'fallback-mock'
-            }
-        except Exception:
-            return None
-        else:  # 横盘
-            macd = random.uniform(-0.2, 0.2)
-            signal = random.uniform(-0.15, 0.15)
-        
-        print(f"🎭 {ticker} 智能模拟数据 (价格:¥{current_price:.2f}, 趋势:{momentum}, RSI:{rsi_status})")
-        
-        # 重置随机种子
-        random.seed()
+    # REMOVED: _generate_smart_fallback_technical_data - 不再使用模拟数据
         
         return {
-            'current_price': current_price,
-            'ma5': ma5,
             'ma10': ma10,
             'ma20': ma20,
             'ma60': ma60,
@@ -9157,107 +8978,7 @@ K线更新后快速评分完成！
         else:
             return '综合行业'
     
-    def _generate_smart_mock_fundamental_data(self, ticker):
-        """生成智能模拟基本面数据"""
-        import hashlib
-        import random
-
-        # 使用股票代码作为种子，确保一致性但股票间有差异
-        seed_value = int(hashlib.md5(ticker.encode()).hexdigest()[:8], 16)
-        random.seed(seed_value)
-        
-        # 检查是否是ETF
-        etf_prefixes = ['510', '511', '512', '513', '515', '516', '517', '518', '159', '161', '163', '165']
-        is_etf = any(ticker.startswith(prefix) for prefix in etf_prefixes)
-        
-        if is_etf:
-            # ETF基金的特殊处理
-            # ETF的"基本面"实际上是其跟踪指数或行业的基本面
-            pe_ratio = random.uniform(12, 25)  # ETF跟踪指数的平均PE
-            pb_ratio = random.uniform(1.2, 2.5)  # ETF跟踪指数的平均PB
-            roe = random.uniform(8, 15)  # ETF持仓股票的平均ROE
-            revenue_growth = random.uniform(5, 20)  # ETF跟踪行业的增长率
-            profit_growth = revenue_growth * random.uniform(0.8, 1.2)
-            debt_ratio = random.uniform(30, 50)  # ETF持仓股票的平均负债率
-            current_ratio = random.uniform(1.5, 2.5)
-            gross_margin = random.uniform(20, 40)
-            
-            # 重置随机种子
-            random.seed()
-            
-            return {
-                'pe_ratio': round(pe_ratio, 2),
-                'pb_ratio': round(pb_ratio, 2),
-                'roe': round(roe, 2),
-                'revenue_growth': round(revenue_growth, 2),
-                'profit_growth': round(profit_growth, 2),
-                'debt_ratio': round(debt_ratio, 2),
-                'current_ratio': round(current_ratio, 2),
-                'gross_margin': round(gross_margin, 2),
-                'industry': 'ETF基金',
-                'data_source': 'mock_etf'
-            }
-        
-        # 普通股票的处理逻辑
-        # 获取股票基本信息
-        stock_info = self.stock_info.get(ticker, {})
-        industry = stock_info.get('industry', '未知行业')
-        
-        # 如果行业信息缺失，尝试根据股票代码智能推断
-        if industry == '未知行业':
-            industry = self._infer_industry_from_ticker(ticker)
-        
-        # 根据行业设置基本参数
-        industry_factors = {
-            '银行': {'pe_base': 6, 'pe_range': 8, 'roe_base': 8, 'roe_range': 12, 'growth_base': 5, 'growth_range': 15},
-            '证券': {'pe_base': 15, 'pe_range': 25, 'roe_base': 6, 'roe_range': 15, 'growth_base': -5, 'growth_range': 40},
-            '白酒': {'pe_base': 25, 'pe_range': 35, 'roe_base': 15, 'roe_range': 25, 'growth_base': 10, 'growth_range': 20},
-            '医药制造': {'pe_base': 20, 'pe_range': 40, 'roe_base': 8, 'roe_range': 18, 'growth_base': 5, 'growth_range': 25},
-            '半导体': {'pe_base': 30, 'pe_range': 60, 'roe_base': 5, 'roe_range': 20, 'growth_base': 0, 'growth_range': 50},
-            '房地产': {'pe_base': 8, 'pe_range': 15, 'roe_base': 8, 'roe_range': 15, 'growth_base': -10, 'growth_range': 15},
-            '新能源': {'pe_base': 25, 'pe_range': 50, 'roe_base': 5, 'roe_range': 18, 'growth_base': 10, 'growth_range': 40}
-        }
-        
-        # 默认行业参数
-        default_factors = {'pe_base': 15, 'pe_range': 25, 'roe_base': 8, 'roe_range': 15, 'growth_base': 0, 'growth_range': 25}
-        factors = industry_factors.get(industry, default_factors)
-        
-        # 生成PE比率
-        pe_ratio = factors['pe_base'] + random.uniform(0, factors['pe_range'])
-        
-        # 生成PB比率 (通常与PE相关)
-        pb_base = pe_ratio * 0.3
-        pb_ratio = max(0.5, pb_base + random.uniform(-0.5, 1.0))
-        
-        # 生成ROE (%)
-        roe = factors['roe_base'] + random.uniform(0, factors['roe_range'])
-        
-        # 生成营收增长率 (%)
-        revenue_growth = factors['growth_base'] + random.uniform(0, factors['growth_range'])
-        
-        # 生成利润增长率 (通常与营收增长相关)
-        profit_growth = revenue_growth * random.uniform(0.8, 1.5) + random.uniform(-10, 10)
-        
-        # 生成其他指标
-        debt_ratio = random.uniform(20, 70)  # 负债率 (%)
-        current_ratio = random.uniform(1.0, 3.0)  # 流动比率
-        gross_margin = random.uniform(15, 50)  # 毛利率 (%)
-        
-        # 重置随机种子
-        random.seed()
-        
-        return {
-            'pe_ratio': round(pe_ratio, 2),
-            'pb_ratio': round(pb_ratio, 2),
-            'roe': round(roe, 2),
-            'revenue_growth': round(revenue_growth, 2),
-            'profit_growth': round(profit_growth, 2),
-            'debt_ratio': round(debt_ratio, 2),
-            'current_ratio': round(current_ratio, 2),
-            'gross_margin': round(gross_margin, 2),
-            'industry': industry,
-            'data_source': 'mock'
-        }
+    # REMOVED: _generate_smart_mock_fundamental_data - 不再使用模拟数据
     
     def get_real_financial_data(self, ticker):
         """获取真实的财务数据 - 统一调用增强版基础数据接口"""
@@ -9449,8 +9170,13 @@ K线更新后快速评分完成！
             print(f"ATR计算错误: {e}")
             return 1.0
 
-    def generate_investment_advice(self, ticker):
-        """生成短期、中期、长期投资预测，支持大模型AI生成"""
+    def generate_investment_advice(self, ticker, use_cache=True):
+        """生成短期、中期、长期投资预测，支持大模型AI生成
+        
+        Args:
+            ticker: 股票代码
+            use_cache: 是否使用缓存数据，False则强制实时获取
+        """
         # 快速退市检查，优化计算性能
         try:
             # 先检查缓存，如果已知是退市股票则快速跳过
@@ -9472,41 +9198,67 @@ K线更新后快速评分完成！
         technical_data = None
         financial_data = None
         
-        # 1. 尝试从原始缓存获取 (支持新旧字段名称)
-        if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
+        # 1. 尝试从原始缓存获取 (仅当use_cache=True时)
+        if use_cache and getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
             cached = self.comprehensive_stock_data.get(ticker, {})
             
             # 优先尝试新字段名称
             if 'tech_data' in cached and cached['tech_data']:
-                technical_data = cached['tech_data']
-                print(f"[DATA-CACHE] 使用缓存技术数据(tech_data): {ticker}")
+                # 检查数据有效性：必须包含必需字段，不能是错误状态标记
+                tech = cached['tech_data']
+                if isinstance(tech, dict) and 'current_price' in tech and tech.get('status') != 'no_kline_data':
+                    technical_data = tech
+                    print(f"[DATA-CACHE] 使用缓存技术数据(tech_data): {ticker}")
+                else:
+                    print(f"[DATA-CACHE] {ticker} 缓存技术数据无效，状态: {tech.get('status', 'unknown')}")
             elif 'technical_indicators' in cached and cached['technical_indicators']:
-                # 字段名转换
-                technical_data = cached['technical_indicators']
-                print(f"[DATA-CACHE] 使用缓存技术数据(technical_indicators): {ticker}")
+                # 字段名转换 + 有效性检查
+                tech = cached['technical_indicators']
+                if isinstance(tech, dict) and 'current_price' in tech and tech.get('status') != 'no_kline_data':
+                    technical_data = tech
+                    print(f"[DATA-CACHE] 使用缓存技术数据(technical_indicators): {ticker}")
+                else:
+                    print(f"[DATA-CACHE] {ticker} 缓存技术数据无效，状态: {tech.get('status', 'unknown')}")
             
             if 'fund_data' in cached and cached['fund_data']:
-                financial_data = cached['fund_data']
-                print(f"[DATA-CACHE] 使用缓存基本面数据(fund_data): {ticker}")
+                # 检查数据有效性：必须包含必需字段
+                fund = cached['fund_data']
+                if isinstance(fund, dict) and ('pe_ratio' in fund or 'pb_ratio' in fund):
+                    financial_data = fund
+                    print(f"[DATA-CACHE] 使用缓存基本面数据(fund_data): {ticker}")
+                else:
+                    print(f"[DATA-CACHE] {ticker} 缓存基本面数据无效")
             elif 'financial_data' in cached and cached['financial_data']:
-                # 字段名转换
-                financial_data = cached['financial_data']
-                print(f"[DATA-CACHE] 使用缓存基本面数据(financial_data): {ticker}")
+                # 字段名转换 + 有效性检查
+                fund = cached['financial_data']
+                if isinstance(fund, dict) and ('pe_ratio' in fund or 'pb_ratio' in fund):
+                    financial_data = fund
+                    print(f"[DATA-CACHE] 使用缓存基本面数据(financial_data): {ticker}")
+                else:
+                    print(f"[DATA-CACHE] {ticker} 缓存基本面数据无效")
         
-        # 2. 尝试从最新分析结果获取 (修复评分时找不到刚获取数据的问题)
-        if technical_data is None and hasattr(self, 'comprehensive_data') and ticker in self.comprehensive_data:
+        # 2. 尝试从最新分析结果获取 (仅当use_cache=True时)
+        if use_cache and technical_data is None and hasattr(self, 'comprehensive_data') and ticker in self.comprehensive_data:
             cached = self.comprehensive_data.get(ticker, {})
             if 'tech_data' in cached and cached['tech_data']:
-                technical_data = cached['tech_data']
-                # print(f"[DATA-NEW] 使用最新分析数据(Tech): {ticker}")
+                tech = cached['tech_data']
+                if isinstance(tech, dict) and 'current_price' in tech and tech.get('status') != 'no_kline_data':
+                    technical_data = tech
+                    # print(f"[DATA-NEW] 使用最新分析数据(Tech): {ticker}")
             elif 'technical_indicators' in cached and cached['technical_indicators']:
-                technical_data = cached['technical_indicators']
+                tech = cached['technical_indicators']
+                if isinstance(tech, dict) and 'current_price' in tech and tech.get('status') != 'no_kline_data':
+                    technical_data = tech
             
-            if 'fund_data' in cached and cached['fund_data']:
-                financial_data = cached['fund_data']
-                # print(f"[DATA-NEW] 使用最新分析数据(Fund): {ticker}")
-            elif 'financial_data' in cached and cached['financial_data']:
-                financial_data = cached['financial_data']
+            if financial_data is None and 'fund_data' in cached and cached['fund_data']:
+                fund = cached['fund_data']
+                if isinstance(fund, dict) and ('pe_ratio' in fund or 'pb_ratio' in fund):
+                    financial_data = fund
+                    # print(f"[DATA-NEW] 使用最新分析数据(Fund): {ticker}")
+            elif financial_data is None and 'financial_data' in cached and cached['financial_data']:
+                fund = cached['financial_data']
+                if isinstance(fund, dict) and ('pe_ratio' in fund or 'pb_ratio' in fund):
+                    financial_data = fund
         
         # 3. 尝试实时获取缺失数据 (补全逻辑)
         if technical_data is None:
@@ -9527,72 +9279,89 @@ K线更新后快速评分完成！
                     self.comprehensive_stock_data[ticker] = {}
                 self.comprehensive_stock_data[ticker]['fund_data'] = financial_data
 
-        # ========== 【关键修复】数据获取失败时使用智能模拟数据作为备选 ==========
-        # 如果无法获取真实数据，使用智能模拟数据而不是返回0分
+        # ========== 数据获取失败则返回失败 - 不使用模拟数据和默认值 ==========
         if technical_data is None:
-            print(f"[FALLBACK] {ticker} 无法获取真实技术数据，自动使用智能模拟数据")
-            technical_data = self._generate_smart_mock_technical_data(ticker)
-            if technical_data:
-                print(f"[SUCCESS] {ticker} 使用智能模拟技术数据")
-            else:
-                print(f"❌ {ticker} 无法生成智能模拟技术数据，无法生成投资建议")
-                return ({'technical_score': 0}, {'total_score': 0}, {'fundamental_score': 0})
+            failure_reason = f"所有数据源（Tushare/Baostock/akshare/yfinance）均无法获取技术数据"
+            print(f"❌ {ticker} {failure_reason}")
+            return ({
+                'technical_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'total_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'fundamental_score': 0,
+                'failure_reason': failure_reason
+            })
             
         if financial_data is None:
-            print(f"[FALLBACK] {ticker} 无法获取真实基本面数据，自动使用智能模拟数据")
-            financial_data = self._generate_smart_mock_fundamental_data(ticker)
-            if not financial_data:
-                # 如果也无法生成模拟数据，使用默认基本面数据（影响较小）
-                print(f"[WARN] 使用默认基本面数据")
-                financial_data = {
-                    'pe_ratio': 20,
-                    'pb_ratio': 2.0,
-                    'roe': 10
-                }
+            failure_reason = f"所有数据源（Tushare/Baostock/akshare/yfinance）均无法获取基本面数据"
+            print(f"❌ {ticker} {failure_reason}")
+            return ({
+                'technical_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'total_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'fundamental_score': 0,
+                'failure_reason': failure_reason
+            })
         
-        # 确保数据不为None，提供默认值
-        if technical_data is None:
-             # This block is now unreachable but kept for structure if logic changes
-             pass
+        # 验证技术数据完整性 - 不允许缺失关键字段
+        required_tech_fields = ['current_price', 'rsi', 'macd', 'signal', 'volume_ratio', 'ma5', 'ma10', 'ma20', 'ma60']
+        missing_tech_fields = [f for f in required_tech_fields if f not in technical_data or technical_data[f] is None]
+        if missing_tech_fields:
+            failure_reason = f"技术数据不完整，缺少必需字段: {', '.join(missing_tech_fields)}"
+            print(f"❌ {ticker} {failure_reason}")
+            return ({
+                'technical_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'total_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'fundamental_score': 0,
+                'failure_reason': failure_reason
+            })
         
-        if financial_data is None:
-            print(f"[WARN] 无法获取基本面数据: {ticker}，使用默认值")
-            financial_data = {
-                'pe_ratio': 20,
-                'pb_ratio': 2.0,
-                'roe': 10
-            }
+        # 验证基本面数据完整性 - 不允许缺失关键字段
+        required_fund_fields = ['pe_ratio', 'pb_ratio', 'roe']
+        missing_fund_fields = [f for f in required_fund_fields if f not in financial_data or financial_data[f] is None]
+        if missing_fund_fields:
+            failure_reason = f"基本面数据不完整，缺少必需字段: {', '.join(missing_fund_fields)}"
+            print(f"❌ {ticker} {failure_reason}")
+            return ({
+                'technical_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'total_score': 0,
+                'failure_reason': failure_reason
+            }, {
+                'fundamental_score': 0,
+                'failure_reason': failure_reason
+            })
         
-        current_price = technical_data.get('current_price', stock_info.get('price', 10.0))
-        if current_price is None:
-            current_price = 10.0
+        # 提取真实数据（不使用任何默认值）
+        current_price = technical_data['current_price']
+        ma5 = technical_data['ma5']
+        ma10 = technical_data['ma10']
+        ma20 = technical_data['ma20']
+        ma60 = technical_data['ma60']
+        ma120 = technical_data.get('ma120', ma60)  # ma120可选
+        rsi = technical_data['rsi']
+        macd = technical_data['macd']
+        signal = technical_data['signal']
+        volume_ratio = technical_data['volume_ratio']
+        pe_ratio = financial_data['pe_ratio']
+        pb_ratio = financial_data['pb_ratio']
+        roe = financial_data['roe']
         
-        ma5 = technical_data.get('ma5', current_price * 0.98) or current_price * 0.98
-        ma10 = technical_data.get('ma10', current_price * 0.97) or current_price * 0.97
-        ma20 = technical_data.get('ma20', current_price * 0.96) or current_price * 0.96
-        ma60 = technical_data.get('ma60', current_price * 0.95) or current_price * 0.95
-        ma120 = technical_data.get('ma120', current_price * 0.94) or current_price * 0.94
-        rsi = technical_data.get('rsi', 50) or 50
-        macd = technical_data.get('macd', 0) or 0
-        signal = technical_data.get('signal', 0) or 0
-        volume_ratio = technical_data.get('volume_ratio', 1.0) or 1.0
-        pe_ratio = financial_data.get('pe_ratio', 20) or 20
-        pb_ratio = financial_data.get('pb_ratio', 2.0) or 2.0
-        roe = financial_data.get('roe', 10) or 10
-        
-        # 确定数据来源标识
-        data_source = "未知"
-        if getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
-            cached_data = self.comprehensive_stock_data.get(ticker, {})
-            if cached_data.get('tech_data') and cached_data.get('fund_data'):
-                data_source = "缓存数据"
-        elif technical_data and financial_data:
-            if technical_data.get('data_source') == 'mock' or financial_data.get('data_source') == 'mock':
-                data_source = "智能模拟"
-            else:
-                data_source = "实时获取"
+        # 确定数据来源标识（根据use_cache参数）
+        if use_cache:
+            data_source = "缓存数据"
         else:
-            data_source = "智能模拟"
+            data_source = "实时获取"
         
         print(f"📊 {ticker} 数据来源({data_source}): 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
 
@@ -9631,14 +9400,39 @@ K线更新后快速评分完成！
             print(f"[AI完成] {ticker} 分析完成, 返回内容前100字: {str(ai_reply)[:100]}")
             
             # 基于技术指标计算数值评分（用于推荐指数计算）
-            # 先计算两个基础分数
-            tech_score = self._calculate_technical_score(rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price)
-            fund_score = self._calculate_fundamental_score(pe_ratio, pb_ratio, roe, ma20, ma60, ma120, current_price)
+            # 使用与批量分析一致的评分函数，确保评分统一
+            tech_data_dict = {
+                'rsi': rsi,
+                'macd': macd,
+                'signal': signal,
+                'volume_ratio': volume_ratio,
+                'current_price': current_price,
+                'ma5': ma5,
+                'ma10': ma10,
+                'ma20': ma20,
+                'ma60': ma60
+            }
+            fund_data_dict = {
+                'pe_ratio': pe_ratio,
+                'pb_ratio': pb_ratio,
+                'roe': roe,
+                'revenue_growth': 0,
+                'profit_growth': 0,
+                'code': ticker
+            }
             
-            # 然后计算三时间段评分
-            short_score = tech_score  # 短期：主要看技术面
-            medium_score = (tech_score * 0.6 + fund_score * 0.4)  # 中期：技术+基本面平衡
-            long_score = fund_score  # 长期：主要看基本面
+            # 使用标准评分函数（1-10分制），与批量分析保持一致
+            tech_score = self.calculate_technical_score(tech_data_dict)
+            fund_score = self.calculate_fundamental_score(fund_data_dict)
+            
+            # 转换为原始分数用于三时间段评分（1-10转为-8到+8）
+            tech_raw = (tech_score - 5.0) * 2.0 if tech_score is not None else 0
+            fund_raw = (fund_score - 5.0) * 2.0 if fund_score is not None else 0
+            
+            # 然后计算三时间段评分（使用原始分数）
+            short_score = tech_raw  # 短期：主要看技术面
+            medium_score = (tech_raw * 0.6 + fund_raw * 0.4)  # 中期：技术+基本面平衡
+            long_score = fund_raw  # 长期：主要看基本面
             
             print(f"[AI评分] {ticker} {self.llm_model.upper()}评分: 短期={short_score:.1f}, 中期={medium_score:.1f}, 长期={long_score:.1f}")
             # 简单分段解析AI回复
@@ -12682,7 +12476,8 @@ CSV批量分析使用方法:
                 if True:  # 强制实时计算
                     print(f"[INFO] 生成新的三时间段预测系统")
                     try:
-                        short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
+                        # 单独分析强制使用实时数据，不使用缓存
+                        short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker, use_cache=False)
                     except Exception as e:
                         print(f"生成预测异常: {e}")
                         short_prediction = None
@@ -12702,17 +12497,32 @@ CSV批量分析使用方法:
                     print(f"中期预测对象键: {list(medium_prediction.keys()) if medium_prediction else '无'}")
                     print(f"长期预测对象键: {list(long_prediction.keys()) if long_prediction else '无'}")
                     
-                    # 计算综合评分（基于三个时间段的技术分析评分）
-                    short_score = short_prediction.get('technical_score', short_prediction.get('score', 5) - 5) if short_prediction else 0
-                    medium_score = medium_prediction.get('total_score', medium_prediction.get('score', 5) - 5) if medium_prediction else 0
-                    long_score = long_prediction.get('fundamental_score', long_prediction.get('score', 5) - 5) if long_prediction else 0
+                    # 提取归一化评分（1-10分制）
+                    short_score = short_prediction.get('score', short_prediction.get('technical_score', 0))
+                    medium_score = medium_prediction.get('score', medium_prediction.get('total_score', 0))
+                    long_score = long_prediction.get('score', long_prediction.get('fundamental_score', 0))
                     
-                    # 调试输出原始评分
-                    print(f"期间评分 - 短期: {short_score}, 中期: {medium_score}, 长期: {long_score}")
+                    # 调试输出归一化评分
+                    print(f"期间评分(1-10分制) - 短期: {short_score}, 中期: {medium_score}, 长期: {long_score}")
                 
-                # 使用统一的综合评分计算函数（原始分数）
-                calc_input_type = 'raw'
-                final_score = self.calculate_comprehensive_score(short_score, medium_score, long_score, input_type=calc_input_type)
+                # ========== 添加筹码健康度分析（与批量分析完全一致）==========
+                chip_score = None
+                if self.chip_analyzer:
+                    try:
+                        chip_result = self.chip_analyzer.analyze_stock(ticker)
+                        if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                            chip_score = chip_result.get('health_score', 0)
+                            print(f"[CHIP] {ticker} 筹码评分: {chip_score:.1f}/10, 等级: {chip_result.get('health_level', '未知')}")
+                    except Exception as e:
+                        print(f"[CHIP] {ticker} 筹码分析失败: {e}")
+                
+                # 使用V2综合评分算法（与批量分析完全一致）
+                # 技术面(短期) + 基本面(长期) + 筹码健康度
+                final_score = self.calculate_comprehensive_score_v2(
+                    tech_score=short_score,  # 短期评分代表技术面
+                    fund_score=long_score,   # 长期评分代表基本面
+                    chip_score=chip_score
+                )
                 
                 print(f"开始分析算法调试 - {ticker}:")
                 print(f"   [DATA] 数据来源: 实时计算")
@@ -12784,14 +12594,25 @@ CSV批量分析使用方法:
                 # tech_data已经在步骤2中获取，包含正确的实时价格，不要覆盖
                 print(f"[DEBUG] 最终报告使用的价格: ¥{tech_data.get('current_price', 0):.2f}")
                 
-                # 确保概览和投资建议使用相同的评分，并传递三个时间段评分
-                overview = self.generate_overview_from_data_with_periods(ticker, stock_info, tech_data, fund_data, final_score, short_score, medium_score, long_score)
+                # 使用V2算法评分（技术、基本、筹码）传递给报告生成
+                overview = self.generate_overview_from_data_with_periods(
+                    ticker, stock_info, tech_data, fund_data, 
+                    final_score,     # 综合评分
+                    short_score,     # 技术面评分（短期）
+                    long_score,      # 基本面评分（长期）
+                    chip_score if chip_score else 0  # 筹码评分
+                )
                 recommendation = self.format_investment_advice(short_prediction, medium_prediction, long_prediction, ticker, final_score)
                 
-                print(f"[DEBUG] 报告生成调试:")
-                print(f"   概览评分: {final_score:.1f}/10")
-                print(f"   三时间段评分: 短期{short_score:.1f}, 中期{medium_score:.1f}, 长期{long_score:.1f}")
-                print(f"   投资建议评分: {final_score:.1f}/10 (强制一致)")
+                # 生成筹码健康度分析报告
+                print("生成筹码健康度分析报告...")
+                chip_report = self._generate_chip_analysis_report(ticker)
+                print("筹码分析报告生成完成")
+                
+                print(f"[DEBUG] 报告生成调试 (V2算法):")
+                print(f"   综合评分: {final_score:.1f}/10")
+                print(f"   技术面: {short_score:.1f}/10, 基本面: {long_score:.1f}/10, 筹码: {chip_score:.1f}/10" if chip_score else f"   技术面: {short_score:.1f}/10, 基本面: {long_score:.1f}/10, 筹码: 未分析")
+                print(f"   权重: 技术45% + 基本35% + 筹码20%")
                 print("="*60)
                 
                 print("报告生成完成")
@@ -12821,12 +12642,13 @@ CSV批量分析使用方法:
                 print(f"报告生成出错: {e}")
                 overview = f"概览生成失败: {str(e)}"
                 recommendation = f"建议生成失败: {str(e)}"
+                chip_report = self._generate_chip_unavailable_message()
             
             # 取消超时计时器
             timeout_timer.cancel()
             
-            # 更新界面显示
-            self.root.after(0, self.update_results, overview, technical_analysis, fundamental_analysis, recommendation, ticker)
+            # 更新界面显示（包含筹码分析报告）
+            self.root.after(0, self.update_results, overview, technical_analysis, fundamental_analysis, recommendation, ticker, chip_report)
             print(f"[OK] {ticker} 分析完成！")
             
         except Exception as e:
@@ -12906,7 +12728,7 @@ CSV批量分析使用方法:
         """更新进度信息"""
         self.root.after(0, lambda: self.progress_msg_var.set(message))
     
-    def update_results(self, overview, technical, fundamental, recommendation, ticker):
+    def update_results(self, overview, technical, fundamental, recommendation, ticker, chip_report=None):
         """更新分析结果"""
         # 隐藏进度条
         self.hide_progress()
@@ -12916,12 +12738,19 @@ CSV批量分析使用方法:
         self.technical_text.delete('1.0', tk.END)
         self.fundamental_text.delete('1.0', tk.END)
         self.recommendation_text.delete('1.0', tk.END)
+        self.chip_text.delete('1.0', tk.END)
         
         # 插入分析结果
         self.overview_text.insert('1.0', overview)
         self.technical_text.insert('1.0', technical)
         self.fundamental_text.insert('1.0', fundamental)
         self.recommendation_text.insert('1.0', recommendation)
+        
+        # 插入筹码分析报告
+        if chip_report:
+            self.chip_text.insert('1.0', chip_report)
+        else:
+            self.chip_text.insert('1.0', self._generate_chip_unavailable_message())
         
         # 重新启用分析按钮
         self.analyze_btn.config(state="normal")
@@ -12960,6 +12789,7 @@ CSV批量分析使用方法:
         self.technical_text.delete('1.0', tk.END)
         self.fundamental_text.delete('1.0', tk.END)
         self.recommendation_text.delete('1.0', tk.END)
+        self.chip_text.delete('1.0', tk.END)
         
         self.ticker_var.set("")
         self.status_var.set("就绪 - 请输入股票代码开始分析")
@@ -14332,19 +14162,9 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             # 获取当前选择的LLM模型
             current_model = self.llm_var.get() if hasattr(self, 'llm_var') else "none"
             
-            # 获取股票信息（根据模式选择获取方式）
-            if current_model == "none":
-                # None模式：优先使用本地缓存
-                stock_info = self._get_stock_info_from_cache(ticker)
-                if not stock_info:
-                    # 本地没有才去获取
-                    stock_info = self.get_stock_info_generic(ticker)
-            else:
-                # LLM模式：也优先使用本地缓存（避免网络请求失败）
-                stock_info = self._get_stock_info_from_cache(ticker)
-                if not stock_info:
-                    print(f"[WARN] LLM模式：股票{ticker}本地数据缺失，将跳过分析")
-                    return None
+            # 【强制要求】单独评分永远获取最新数据，不使用缓存
+            print(f"[FRESH-DATA] {ticker} 单独评分：强制重新获取最新数据（不使用缓存）")
+            stock_info = self.get_stock_info_generic(ticker)
             
             # 确保股票信息完整
             if not stock_info or not stock_info.get('name'):
@@ -15874,6 +15694,198 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
 """
         return analysis
     
+    def _generate_chip_unavailable_message(self):
+        """生成筹码分析不可用的提示信息"""
+        return """
+╔════════════════════════════════════════════════════════════════════╗
+║                     💎 筹码健康度分析                              ║
+╚════════════════════════════════════════════════════════════════════╝
+
+⚠️  筹码分析模块未启用
+
+原因可能包括：
+  • 筹码分析模块未正确安装
+  • 依赖包缺失（如 numpy, pandas）
+  • 模块初始化失败
+
+筹码分析功能说明：
+  筹码健康度分析是基于股票持仓成本分布的高级分析工具，
+  能够评估：
+    • SCR筹码集中度 - 主力筹码聚集程度
+    • 筹码乖离率 - 当前价格与筹码峰的偏离
+    • 获利盘比例 - 持仓者获利情况
+    • 筹码峰型 - 单峰/双峰/多峰结构
+
+如需启用此功能，请确保：
+  1. chip_health_analyzer.py 文件存在
+  2. 已安装必要的依赖包
+  3. 重新启动应用程序
+
+════════════════════════════════════════════════════════════════════
+"""
+    
+    def _generate_chip_analysis_report(self, ticker):
+        """生成筹码健康度分析报告"""
+        if not self.chip_analyzer:
+            return self._generate_chip_unavailable_message()
+        
+        try:
+            # 调用筹码分析器
+            chip_result = self.chip_analyzer.analyze_stock(ticker)
+            
+            if chip_result.get('error'):
+                error_msg = chip_result.get('error')
+                return f"""
+╔════════════════════════════════════════════════════════════════════╗
+║                     💎 筹码健康度分析                              ║
+╚════════════════════════════════════════════════════════════════════╝
+
+❌ 分析失败
+
+股票代码: {ticker}
+错误信息: {error_msg}
+
+可能原因：
+  • 股票代码无效或已退市
+  • 数据源暂时不可用
+  • 网络连接问题
+
+建议：
+  • 检查股票代码是否正确
+  • 稍后重试
+  • 检查网络连接
+
+════════════════════════════════════════════════════════════════════
+"""
+            
+            # 格式化筹码分析报告
+            report = f"""
+╔════════════════════════════════════════════════════════════════════╗
+║                     💎 筹码健康度分析报告                          ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📊 股票信息
+─────────────────────────────────────────────────────────────────
+  股票代码: {ticker}
+  当前价格: ¥{chip_result.get('current_price', 0):.2f}
+  分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+🎯 健康度评估
+─────────────────────────────────────────────────────────────────
+  综合评分: {chip_result['health_score']:.1f}/10.0
+  健康等级: {chip_result['health_level']}
+  信号强度: {chip_result['signal_strength']}
+
+📈 核心指标
+─────────────────────────────────────────────────────────────────
+  SCR筹码集中度: {chip_result['scr']:.2f}%
+    └─ {'🟢 高度集中，主力明显' if chip_result['scr'] > 12 else '⚖️ 适度集中' if chip_result['scr'] > 8 else '🔴 分散，主力不明显'}
+  
+  筹码乖离率: {chip_result['chip_bias']:+.2f}%
+    └─ {'🟢 价格高于筹码峰，上涨动能强' if chip_result['chip_bias'] > 5 else '⚖️ 价格接近筹码峰' if abs(chip_result['chip_bias']) <= 5 else '🔴 价格低于筹码峰，下跌风险'}
+  
+  获利盘比例: {chip_result['profit_ratio']:.1f}%
+    └─ {'🟢 大多数持仓盈利' if chip_result['profit_ratio'] > 70 else '⚖️ 获利盘适中' if chip_result['profit_ratio'] > 40 else '🔴 大量套牢盘'}
+  
+  筹码峰型: {chip_result['peak_type']}
+    └─ {self._get_peak_type_description(chip_result['peak_type'])}
+
+💡 交易建议
+─────────────────────────────────────────────────────────────────
+  {chip_result['trading_suggestion']}
+
+🔔 关键信号
+─────────────────────────────────────────────────────────────────
+"""
+            # 添加信号列表
+            for i, signal in enumerate(chip_result['signals'], 1):
+                report += f"  {i}. {signal}\n"
+            
+            # 添加筹码分布详情
+            if 'percentiles' in chip_result:
+                p10 = chip_result['percentiles'].get('p10', 0)
+                p50 = chip_result['percentiles'].get('p50', 0)
+                p90 = chip_result['percentiles'].get('p90', 0)
+                
+                report += f"""
+📊 筹码分布详情
+─────────────────────────────────────────────────────────────────
+  P10筹码位: ¥{p10:.2f} (10%筹码低于此价格)
+  P50筹码位: ¥{p50:.2f} (50%筹码低于此价格，中位数)
+  P90筹码位: ¥{p90:.2f} (90%筹码低于此价格)
+  
+  分布范围: ¥{p10:.2f} ~ ¥{p90:.2f}
+  当前价格相对位置: {self._get_price_position(chip_result.get('current_price', 0), p10, p50, p90)}
+"""
+            
+            # 添加ML预测（如果可用）
+            if chip_result.get('ml_prediction') is not None:
+                ml_score = chip_result['ml_prediction']
+                report += f"""
+🤖 机器学习增强预测
+─────────────────────────────────────────────────────────────────
+  ML预测评分: {ml_score:.2f}/10.0
+  预测趋势: {'看涨' if ml_score > 6 else '看跌' if ml_score < 4 else '震荡'}
+  模型置信度: {'高' if abs(ml_score - 5) > 2 else '中' if abs(ml_score - 5) > 1 else '低'}
+"""
+            
+            report += """
+════════════════════════════════════════════════════════════════════
+
+⚠️  风险提示
+  • 筹码分析仅供参考，不构成投资建议
+  • 市场有风险，投资需谨慎
+  • 建议结合技术面、基本面综合判断
+  • 请根据自身风险承受能力做出投资决策
+
+════════════════════════════════════════════════════════════════════
+"""
+            
+            return report
+            
+        except Exception as e:
+            import traceback
+            error_detail = traceback.format_exc()
+            return f"""
+╔════════════════════════════════════════════════════════════════════╗
+║                     💎 筹码健康度分析                              ║
+╚════════════════════════════════════════════════════════════════════╝
+
+❌ 分析过程出错
+
+股票代码: {ticker}
+错误类型: {type(e).__name__}
+错误信息: {str(e)}
+
+详细错误信息：
+{error_detail[:500]}
+
+════════════════════════════════════════════════════════════════════
+"""
+    
+    def _get_peak_type_description(self, peak_type):
+        """获取筹码峰型的描述"""
+        descriptions = {
+            '单峰密集': '筹码高度集中在单一价位，主力控盘明显',
+            '双峰结构': '存在两个筹码峰，可能是新老主力交替',
+            '多峰分散': '筹码分散在多个价位，市场分歧较大',
+            '底部密集': '筹码集中在低位，具备上涨潜力',
+            '高位密集': '筹码集中在高位，需警惕回调风险',
+            '均匀分布': '筹码分布较为均匀，无明显主力'
+        }
+        return descriptions.get(peak_type, '结构特征不明显')
+    
+    def _get_price_position(self, current_price, p10, p50, p90):
+        """获取当前价格在筹码分布中的位置描述"""
+        if current_price < p10:
+            return "极低位（低于90%筹码）⚠️"
+        elif current_price < p50:
+            return "低位（低于50%筹码）📉"
+        elif current_price < p90:
+            return "高位（高于50%筹码）📈"
+        else:
+            return "极高位（高于90%筹码）🔥"
+    
     def _get_chip_score_display(self, ticker):
         """获取筹码健康度评分显示文本"""
         if not self.chip_analyzer:
@@ -15897,14 +15909,13 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
         except Exception as e:
             return f"分析失败: {str(e)[:20]}"
     
-    def generate_overview_from_data_with_periods(self, ticker, stock_info, tech_data, fund_data, final_score, short_score, medium_score, long_score):
-        """从数据生成包含三个时间段评分的概览"""
+    def generate_overview_from_data_with_periods(self, ticker, stock_info, tech_data, fund_data, final_score, tech_score, fund_score, chip_score):
+        """从数据生成包含技术、基本、筹码三维度评分的概览（V2算法）"""
         
-        # 首先尝试从分析结果文件获取真实的三个时间段评分和建议
-        real_short_score, real_medium_score, real_long_score = self._get_real_period_scores(ticker)
-        if real_short_score > 0:
-            short_score, medium_score, long_score = real_short_score, real_medium_score, real_long_score
-            print(f"[INFO] 使用真实分析结果: 短期{short_score:.2f}, 中期{medium_score:.2f}, 长期{long_score:.2f}")
+        # V2算法：tech_score, fund_score, chip_score 都已经是1-10分制
+        tech_score_1_10 = tech_score
+        fund_score_1_10 = fund_score
+        chip_score_1_10 = chip_score if chip_score else 0
         
         # 安全获取字段值
         stock_name = stock_info.get('name', '未知股票') if isinstance(stock_info, dict) else '未知股票'
@@ -15912,8 +15923,19 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
         # 优先使用tech_data中的current_price（这是刚从API获取的实时价格），只在tech_data为空时才使用stock_info中的price
         current_price = tech_data.get('current_price', 0) if isinstance(tech_data, dict) and tech_data.get('current_price') else stock_info.get('price', 0) if isinstance(stock_info, dict) else 0
         concept = stock_info.get('concept', 'A股') if isinstance(stock_info, dict) else 'A股'
-        rsi = tech_data.get('rsi', 50) if isinstance(tech_data, dict) else 50
-        rsi_status = tech_data.get('rsi_status', '正常') if isinstance(tech_data, dict) else '正常'
+        
+        # RSI处理：确保正确提取和显示
+        if isinstance(tech_data, dict):
+            rsi = tech_data.get('rsi')
+            if rsi is None or rsi == 0:
+                rsi = 50  # 默认中性值
+                rsi_status = '数据未获取'
+            else:
+                rsi_status = tech_data.get('rsi_status', '正常')
+        else:
+            rsi = 50
+            rsi_status = 'tech_data无效'
+            
         momentum = tech_data.get('momentum', '震荡') if isinstance(tech_data, dict) else '震荡'
         ma20 = tech_data.get('ma20', current_price) if isinstance(tech_data, dict) else current_price
         pe_ratio = fund_data.get('pe_ratio', 0) if isinstance(fund_data, dict) else 0
@@ -15932,20 +15954,15 @@ MONEY: 基本信息:
    当前价格: ¥{current_price:.2f}
    概念标签: {concept}
 
-RATING: 分时段评分详情:
-   📊 短期评分 (1-7天):   {short_score:.2f}/10  {"🟢 优秀" if short_score >= 8.5 else "✅ 良好" if short_score >= 7.5 else "⚖️ 一般" if short_score >= 6.0 else "⚠️ 谨慎" if short_score >= 4.0 else "🔴 风险"}
-   📈 中期评分 (1-4周):   {medium_score:.2f}/10  {"🟢 优秀" if medium_score >= 8.5 else "✅ 良好" if medium_score >= 7.5 else "⚖️ 一般" if medium_score >= 6.0 else "⚠️ 谨慎" if medium_score >= 4.0 else "🔴 风险"}
-   📉 长期评分 (1-3月):   {long_score:.2f}/10  {"🟢 优秀" if long_score >= 8.5 else "✅ 良好" if long_score >= 7.5 else "⚖️ 一般" if long_score >= 6.0 else "⚠️ 谨慎" if long_score >= 4.0 else "🔴 风险"}
+RATING: 三维度评分详情 (技术 + 基本 + 筹码):
+   📈 技术面评分: {tech_score_1_10:.2f}/10  {"🟢 技术强势" if tech_score_1_10 >= 7.0 else "⚖️ 技术中性" if tech_score_1_10 >= 5.0 else "🔴 技术偏弱"}
+   📊 基本面评分: {fund_score_1_10:.2f}/10  {"🟢 基本面良好" if fund_score_1_10 >= 7.0 else "⚖️ 基本面一般" if fund_score_1_10 >= 5.0 else "🔴 基本面偏弱"}
+   💎 筹码健康度: {chip_score_1_10:.2f}/10  {"🟢 筹码健康" if chip_score_1_10 >= 7.0 else "⚖️ 筹码一般" if chip_score_1_10 >= 5.0 else "🔴 筹码风险" if chip_score_1_10 > 0 else "⚪ 未分析"}
    
    🎯 综合评分: {final_score:.1f}/10
    {"⭐ 优秀投资标的" if final_score >= 8 else "✅ 良好投资选择" if final_score >= 7 else "⚖️ 中性评价" if final_score >= 6 else "⚠️ 需谨慎考虑" if final_score >= 5 else "🔴 高风险标的"}
    
-RATING: 技术面与基本面评分:
-   📈 技术面评分: {short_score:.2f}/10  {"🟢 技术强势" if short_score >= 7.0 else "⚖️ 技术中性" if short_score >= 5.0 else "🔴 技术偏弱"}
-   📊 基本面评分: {long_score:.2f}/10  {"🟢 基本面良好" if long_score >= 7.0 else "⚖️ 基本面一般" if long_score >= 5.0 else "🔴 基本面偏弱"}
-   🔄 综合面评分: {medium_score:.2f}/10  {"🟢 多维向好" if medium_score >= 7.0 else "⚖️ 多维中性" if medium_score >= 5.0 else "🔴 多维偏弱"}
-   💎 筹码健康度: {self._get_chip_score_display(ticker)}
-   💎 筹码健康度: {self._get_chip_score_display(ticker)}
+   权重说明: 技术面45% + 基本面35% + 筹码健康度20%
 
 DATA: 关键指标概览:
    
@@ -17831,58 +17848,7 @@ WARNING: 重要声明:
         except Exception as e:
             print(f"[WARN] 构建 stock_file_index 失败: {e}")
 
-    def _generate_smart_mock_technical_data(self, code: str) -> dict:
-        """生成智能模拟技术面数据（当真实数据不可用时）"""
-        import random
-        price = random.uniform(5, 100)
-        rsi = random.uniform(30, 70)
-        
-        # 生成 rsi_status
-        if rsi < 30:
-            rsi_status = "超卖"
-        elif rsi < 40:
-            rsi_status = "偏弱"
-        elif rsi < 60:
-            rsi_status = "中性"
-        elif rsi < 70:
-            rsi_status = "偏强"
-        else:
-            rsi_status = "超买"
-        
-        return {
-            'current_price': price,
-            'ma5': price * (1 + random.uniform(-0.05, 0.05)),
-            'ma10': price * (1 + random.uniform(-0.08, 0.08)),
-            'ma20': price * (1 + random.uniform(-0.1, 0.1)),
-            'ma60': price * (1 + random.uniform(-0.15, 0.15)),
-            'ma120': price * (1 + random.uniform(-0.2, 0.2)),
-            'rsi': rsi,
-            'rsi_status': rsi_status,
-            'macd': random.uniform(-1, 1),
-            'signal': random.uniform(-1, 1),
-            'volume_ratio': random.uniform(0.8, 1.5),
-            'momentum': random.choice(['上升', '下降', '横盘']),
-            'data_source': 'simulated'
-        }
-
-    def _generate_smart_mock_fundamental_data(self, code: str) -> dict:
-        """生成智能模拟基本面数据（当真实数据不可用时）"""
-        import random
-
-        # 从stock_info获取行业信息
-        stock_info = self.stock_info.get(code, {})
-        industry = stock_info.get('industry', '未知行业')
-        
-        return {
-            'pe_ratio': random.uniform(10, 40),
-            'pb_ratio': random.uniform(1.0, 5.0),
-            'roe': random.uniform(5, 20),
-            'revenue_growth': random.uniform(-10, 30),
-            'profit_growth': random.uniform(-10, 30),
-            'debt_ratio': random.uniform(20, 60),
-            'industry': industry,
-            'data_source': 'simulated'
-        }
+    # REMOVED: Duplicate _generate_smart_mock functions - 不再使用模拟数据
 
     def _generate_algorithmic_recommendation(self, score: float) -> str:
         """基于评分生成算法建议"""
