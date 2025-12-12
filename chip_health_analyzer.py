@@ -254,7 +254,7 @@ class ChipHealthAnalyzer:
         return result
     
     def _get_price_and_history(self, stock_code):
-        """获取当前价格和历史数据（带重试机制）"""
+        """获取当前价格和历史数据（带重试机制和超时控制）"""
         if not self.akshare_available:
             print("⚠ akshare库不可用")
             return 0, None
@@ -262,17 +262,49 @@ class ChipHealthAnalyzer:
         end_date = datetime.now().strftime('%Y%m%d')
         start_date = (datetime.now() - timedelta(days=90)).strftime('%Y%m%d')  # 获取90天数据（确保有足够的60个交易日）
         
-        # 方法1: 尝试使用 akshare 的 stock_zh_a_hist (东方财富源)
+        # 数据源超时控制辅助函数
+        def _fetch_with_timeout(func, timeout=8):
+            """带超时的数据获取"""
+            import threading
+            result_container = {'data': None, 'error': None}
+            
+            def worker():
+                try:
+                    result_container['data'] = func()
+                except Exception as e:
+                    result_container['error'] = e
+            
+            thread = threading.Thread(target=worker)
+            thread.daemon = True
+            thread.start()
+            thread.join(timeout=timeout)
+            
+            if thread.is_alive():
+                return None, TimeoutError(f"数据获取超时({timeout}秒)")
+            
+            if result_container['error']:
+                return None, result_container['error']
+            
+            return result_container['data'], None
+        
+        # 方法1: 尝试使用 akshare 的 stock_zh_a_hist (东方财富源) - 8秒超时
         try:
             print("  尝试数据源: akshare.stock_zh_a_hist (东方财富)")
-            df = ak.stock_zh_a_hist(
-                symbol=stock_code,
-                period="daily",
-                start_date=start_date,
-                end_date=end_date,
-                adjust="qfq"
-            )
             
+            def fetch_akshare_hist():
+                return ak.stock_zh_a_hist(
+                    symbol=stock_code,
+                    period="daily",
+                    start_date=start_date,
+                    end_date=end_date,
+                    adjust="qfq"
+                )
+            
+            df, error = _fetch_with_timeout(fetch_akshare_hist, timeout=8)
+            
+            if error:
+                raise error
+                
             if df is not None and not df.empty:
                 current_price = float(df['收盘'].iloc[-1])
                 # 确保有日期列
@@ -282,9 +314,10 @@ class ChipHealthAnalyzer:
                 return current_price, df
             
         except Exception as e:
-            print(f"  ✗ 东方财富源失败: {str(e)[:80]}")
+            error_msg = "超时" if isinstance(e, TimeoutError) else str(e)[:80]
+            print(f"  ✗ 东方财富源失败: {error_msg}")
         
-        # 方法2: 尝试使用 akshare 的 stock_zh_a_daily (新浪源)
+        # 方法2: 尝试使用 akshare 的 stock_zh_a_daily (新浪源) - 8秒超时
         try:
             print("  尝试数据源: akshare.stock_zh_a_daily (新浪源)")
             # 转换股票代码格式
@@ -293,12 +326,18 @@ class ChipHealthAnalyzer:
             else:
                 symbol = f"sz{stock_code}"
             
-            df = ak.stock_zh_a_daily(
-                symbol=symbol,
-                start_date=start_date.replace('-', ''),
-                end_date=end_date.replace('-', ''),
-                adjust="qfq"
-            )
+            def fetch_akshare_daily():
+                return ak.stock_zh_a_daily(
+                    symbol=symbol,
+                    start_date=start_date.replace('-', ''),
+                    end_date=end_date.replace('-', ''),
+                    adjust="qfq"
+                )
+            
+            df, error = _fetch_with_timeout(fetch_akshare_daily, timeout=8)
+            
+            if error:
+                raise error
             
             if df is not None and not df.empty:
                 # 统一列名
@@ -311,9 +350,10 @@ class ChipHealthAnalyzer:
                 return current_price, df
                 
         except Exception as e:
-            print(f"  ✗ 新浪源失败: {str(e)[:80]}")
+            error_msg = "超时" if isinstance(e, TimeoutError) else str(e)[:80]
+            print(f"  ✗ 新浪源失败: {error_msg}")
         
-        # 方法3: 尝试使用腾讯接口
+        # 方法3: 尝试使用腾讯接口 - 8秒超时
         try:
             print("  尝试数据源: 腾讯财经API")
             import requests
@@ -330,7 +370,7 @@ class ChipHealthAnalyzer:
                 '_var': 'kline_day'
             }
             
-            response = requests.get(url, params=params, timeout=5)
+            response = requests.get(url, params=params, timeout=8)
             if response.status_code == 200:
                 import json
                 data_text = response.text.replace('kline_day=', '')

@@ -59,14 +59,6 @@ except ImportError:
     JINA_AVAILABLE = False
     print("[WARN] JinaAPI 未加载")
 
-try:
-    from baostock_api import BaostockAPI
-    BAOSTOCK_AVAILABLE = True
-    print("[INFO] baostock 已加载")
-except ImportError:
-    BAOSTOCK_AVAILABLE = False
-    print("[WARN] baostock 未安装")
-
 # JoinQuant API 支持
 try:
     from joinquant_api import JoinQuantAPI
@@ -1025,6 +1017,7 @@ class ComprehensiveDataCollector:
         
         # 1. 主要数据源处理
         primary_success = []
+        fallback_codes = []  # 初始化失败股票列表
         if primary_source == 'tushare' and TUSHARE_AVAILABLE and self.tushare_token:
             print(f"[INFO] TUSHARE 批量处理 {len(primary_codes)} 只股票...")
             try:
@@ -4147,7 +4140,7 @@ class ComprehensiveDataCollector:
                         new_kline_df = batch_kline_data[code]
                         if new_kline_df is not None and not new_kline_df.empty:
                             # 合并历史数据
-                            if code in existing_data and 'kline_data' in existing_data[code]:
+                            if code in existing_data and 'kline_data' in existing_data[code] and existing_data[code]['kline_data'] is not None:
                                 old_daily = existing_data[code]['kline_data'].get('daily', [])
                                 if old_daily:
                                     # 将历史数据转换为DataFrame

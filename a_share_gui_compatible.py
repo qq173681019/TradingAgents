@@ -16197,12 +16197,26 @@ WARNING: 重要声明:
                                 st_filtered_count += 1
                                 continue
                         
+                        # 获取筹码健康度信息
+                        chip_score = None
+                        chip_level = None
+                        try:
+                            if self.chip_analyzer:
+                                chip_result = self.chip_analyzer.analyze_stock(code)
+                                if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                                    chip_score = chip_result.get('health_score', 0)
+                                    chip_level = chip_result.get('health_level', '未知')
+                        except Exception:
+                            pass
+                        
                         filtered_stocks.append({
                             'code': code,
                             'name': stock_name,
                             'score': score_data.get('score', 0),  # 使用综合评分
                             'industry': score_data.get('industry', '未知'),
-                            'timestamp': score_data.get('timestamp', '')
+                            'timestamp': score_data.get('timestamp', ''),
+                            'chip_score': chip_score,
+                            'chip_level': chip_level
                         })
                 
                 if st_filtered_count > 0:
@@ -16249,13 +16263,27 @@ WARNING: 重要声明:
                                     st_filtered_count += 1
                                     continue
                             
+                            # 获取筹码健康度信息
+                            chip_score = None
+                            chip_level = None
+                            try:
+                                if self.chip_analyzer:
+                                    chip_result = self.chip_analyzer.analyze_stock(code)
+                                    if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                                        chip_score = chip_result.get('health_score', 0)
+                                        chip_level = chip_result.get('health_level', '未知')
+                            except Exception:
+                                pass
+                            
                             filtered_stocks.append({
                                 'code': code,
                                 'name': stock_name,
                                 'score': score,
                                 'industry': score_data.get('industry', '未知'),
                                 'timestamp': score_data.get('timestamp', ''),
-                                'source': period_type
+                                'source': period_type,
+                                'chip_score': chip_score,
+                                'chip_level': chip_level
                             })
                 
                 if st_filtered_count > 0:
@@ -16376,15 +16404,29 @@ WARNING: 重要声明:
                                             st_filtered_count += 1
                                             continue
                                     
-                                    filtered_stocks.append({
-                                        'code': code,
-                                        'name': stock_data.get('name', f'股票{code}'),
-                                        'score': score,
-                                        'trend': period_data.get('trend', '未知'),
-                                        'strategy': period_data.get('strategy', ''),
-                                        'timestamp': stock_data.get('timestamp', ''),
-                                        'source': f'comprehensive_{period_type}'
-                                    })
+                            # 获取筹码健康度信息
+                            chip_score = None
+                            chip_level = None
+                            try:
+                                if self.chip_analyzer:
+                                    chip_result = self.chip_analyzer.analyze_stock(code)
+                                    if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                                        chip_score = chip_result.get('health_score', 0)
+                                        chip_level = chip_result.get('health_level', '未知')
+                            except Exception:
+                                pass
+                            
+                            filtered_stocks.append({
+                                'code': code,
+                                'name': stock_data.get('name', f'股票{code}'),
+                                'score': score,
+                                'trend': period_data.get('trend', '未知'),
+                                'strategy': period_data.get('strategy', ''),
+                                'timestamp': stock_data.get('timestamp', ''),
+                                'source': f'comprehensive_{period_type}',
+                                'chip_score': chip_score,
+                                'chip_level': chip_level
+                            })
                     
                     if st_filtered_count > 0:
                         print(f"🚫 {period_name}推荐已排除 {st_filtered_count} 只ST股票")
@@ -16655,6 +16697,34 @@ WARNING: 重要声明:
                 pass
             extra = f" ({', '.join(parts)})" if parts else ""
             
+            # 获取筹码健康度信息（优先从推荐数据中获取）
+            chip_info = ""
+            chip_score = stock.get('chip_score')
+            chip_level = stock.get('chip_level')
+            
+            # 如果推荐数据中没有，则尝试实时获取
+            if chip_score is None and self.chip_analyzer:
+                try:
+                    chip_result = self.chip_analyzer.analyze_stock(code)
+                    if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                        chip_score = chip_result.get('health_score', 0)
+                        chip_level = chip_result.get('health_level', '未知')
+                except Exception:
+                    pass
+            
+            # 生成筹码显示信息
+            if chip_score is not None and chip_level:
+                chip_emoji_map = {
+                    '极度健康': '🟢',
+                    '非常健康': '🟢', 
+                    '健康': '🟡',
+                    '一般': '🟠',
+                    '不健康': '🔴',
+                    '危险': '🔴'
+                }
+                chip_emoji = chip_emoji_map.get(chip_level, '⚪')
+                chip_info = f" | 筹码:{chip_emoji}{chip_score:.1f}"
+            
             # 评分等级
             if score >= 9.0:
                 score_level = "🌟 强烈推荐"
@@ -16669,11 +16739,15 @@ WARNING: 重要声明:
                 score_level = "📊 观察"
                 score_color = "📈"
             
-                stock_info = f"""
+            stock_info = f"""
 {score_color} 第 {i} 名：{code} {name}
-    📊 {period_name}评分：{score:.2f}/10.0{extra}  {score_level}
+    📊 {period_name}评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
     📈 趋势判断：{trend}
 """
+            
+            # 添加筹码健康度详细信息
+            if chip_score is not None and chip_level:
+                stock_info += f"    💎 筹码健康度：{chip_score:.2f}/10.0 ({chip_level})\n"
             
             if strategy:
                 stock_info += f"   💡 投资策略：{strategy}\n"
@@ -16846,8 +16920,9 @@ WARNING: 重要声明:
                     time.sleep(1)
                     self._run_quick_scoring_for_kline_update()
                     
-                    # 更新K线状态显示
+                    # 更新K线状态显示和全部数据状态显示
                     self.root.after(0, self._refresh_kline_status)
+                    self.root.after(0, self.check_data_status)  # 刷新所有数据状态
                     
                 else:
                     update_status("更新完成", 100, "K线已更新，但未能自动重新加载")
