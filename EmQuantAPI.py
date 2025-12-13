@@ -209,6 +209,20 @@ class UtilAccess:
 
     @staticmethod
     def __getLibraryPath_window():
+        # 优先使用相对于 EmQuantAPI.py 的路径
+        baseDir = _os.path.dirname(_os.path.abspath(__file__))
+        libsDir = _os.path.join(baseDir, "libs", "windows")
+        
+        # 如果相对路径存在，直接使用
+        if _os.path.exists(libsDir):
+            if UtilAccess.adapter.get_py_bit() == PY_Bit32:
+                apiDllPath = _os.path.join(libsDir, "EmQuantAPI.dll")
+            else:
+                apiDllPath = _os.path.join(libsDir, "EmQuantAPI_x64.dll")
+            if _os.path.exists(apiDllPath):
+                return apiDllPath
+        
+        # 回退到原有的 .pth 文件方式
         apiPackagePath = "."
         for x in _sys.path:
             xx = x.find("site-packages")
@@ -234,8 +248,21 @@ class UtilAccess:
 
     @staticmethod
     def __getLibraryPath_linux():
+        # 优先使用相对于 EmQuantAPI.py 的路径
+        baseDir = _os.path.dirname(_os.path.abspath(__file__))
+        libsDir = _os.path.join(baseDir, "libs", "linux")
+        
+        # 如果相对路径存在，直接使用
+        if _os.path.exists(libsDir):
+            if UtilAccess.adapter.get_py_bit() == PY_Bit32:
+                apiDllPath = _os.path.join(libsDir, "x86", "libEMQuantAPI.so")
+            else:
+                apiDllPath = _os.path.join(libsDir, "x64", "libEMQuantAPIx64.so")
+            if _os.path.exists(apiDllPath):
+                return apiDllPath
+        
+        # 回退到原有的 .pth 文件方式
         baseDir = ""
-
         site_pkg_names = ["site-packages", "dist-packages"]
 
         for site_pkg_name in site_pkg_names:
@@ -263,6 +290,16 @@ class UtilAccess:
 
     @staticmethod
     def __getLibraryPath_mac():
+        # 优先使用相对于 EmQuantAPI.py 的路径
+        baseDir = _os.path.dirname(_os.path.abspath(__file__))
+        libsDir = _os.path.join(baseDir, "libs", "mac")
+        apiDllPath = _os.path.join(libsDir, "libEMQuantAPIx64.dylib")
+        
+        # 如果相对路径存在，直接使用
+        if _os.path.exists(apiDllPath):
+            return apiDllPath
+        
+        # 回退到原有的 .pth 文件方式
         baseDir = ""
         site_pkg_name = "site-packages"
         for x in _sys.path:

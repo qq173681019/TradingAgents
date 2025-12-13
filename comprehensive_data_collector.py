@@ -192,7 +192,7 @@ class ComprehensiveDataCollector:
         self.batch_kline_cache = {}  # 缓存批量获取的K线数据
         self.kline_batch_size = 15   # 每次批量获取15只股票（100%成功率）
         self.kline_batch_size_max = 20  # 最大批量20只股票（75%成功率但更快）
-        self.kline_days = 50         # 获取50天的K线数据
+        self.kline_days = 150        # 获取150天的K线数据（确保有120+个交易日用于MA120等长期指标）
         self.last_tushare_call = 0   # 上次tushare调用时间
         self.adaptive_batch = True   # 启用自适应批量大小
         
@@ -1068,22 +1068,28 @@ class ComprehensiveDataCollector:
         elif primary_source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
             print(f"[INFO] AKShare 批量处理 {len(primary_codes)} 只股票...")
             try:
-                for code in primary_codes:
-                    try:
-                        df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_iso, end_date=end_iso)
-                        if not df.empty:
-                            df = self.standardize_kline_columns(df, 'akshare')
-                            result[code] = df
-                            primary_success.append(code)
-                        time.sleep(0.2)  # AKShare请求间隔
-                    except Exception as e:
-                        print(f"[WARN] AKShare获取{code}失败: {e}")
-                        fallback_codes.append(code)
-                        continue
+                # akshare.stock_zh_a_hist已禁用 - 避免py_mini_racer崩溃问题
+                # 直接跳过akshare，使用其他稳定数据源
+                print("[INFO] 跳过AKShare数据源（避免py_mini_racer崩溃），使用腾讯/其他数据源")
+                pass  # 不使用akshare
                 
-                print(f"[SUCCESS] AKShare 成功: {len(primary_success)}/{len(primary_codes)} 只")
+                # 原代码已注释：
+                # for code in primary_codes:
+                #     try:
+                #         df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_iso, end_date=end_iso)
+                #         if not df.empty:
+                #             df = self.standardize_kline_columns(df, 'akshare')
+                #             result[code] = df
+                #             primary_success.append(code)
+                #         time.sleep(0.2)
+                #     except Exception as e:
+                #         print(f"[WARN] AKShare获取{code}失败: {e}")
+                #         fallback_codes.append(code)
+                #         continue
+                
+                # print(f"[SUCCESS] AKShare 成功: {len(primary_success)}/{len(primary_codes)} 只")
             except Exception as e:
-                print(f"[ERROR] AKShare 批量处理异常: {e}")
+                print(f"[ERROR] AKShare 已禁用，跳过")
                 fallback_codes.extend(primary_codes)
         
         elif primary_source == 'tencent' and TENCENT_KLINE_AVAILABLE and self.tencent_kline:
@@ -1244,24 +1250,25 @@ class ComprehensiveDataCollector:
             secondary_success = []
             remaining_codes = fallback_codes.copy()
             
-            if secondary_source == 'akshare' and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
-                print(f"[INFO] AKShare 替代处理 {len(remaining_codes)} 只失败股票...")
-                temp_remaining = []
-                for code in remaining_codes:
-                    try:
-                        df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_iso, end_date=end_iso)
-                        if not df.empty:
-                            df = self.standardize_kline_columns(df, 'akshare')
-                            result[code] = df
-                            secondary_success.append(code)
-                        else:
-                            temp_remaining.append(code)
-                        time.sleep(0.2)
-                    except Exception as e:
-                        print(f"[WARN] AKShare替代获取{code}失败: {e}")
-                        temp_remaining.append(code)
-                remaining_codes = temp_remaining
-                print(f"[SUCCESS] AKShare 替代成功: {len(secondary_success)}/{len(fallback_codes)} 只")
+            if False:  # akshare已禁用 - 避免py_mini_racer崩溃
+                print(f"[INFO] 跳过AKShare替代处理（避免py_mini_racer崩溃）")
+                # 原代码已全部注释
+                # temp_remaining = []
+                # for code in remaining_codes:
+                #     try:
+                #         df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start_iso, end_date=end_iso)
+                #         if not df.empty:
+                #             df = self.standardize_kline_columns(df, 'akshare')
+                #             result[code] = df
+                #             secondary_success.append(code)
+                #         else:
+                #             temp_remaining.append(code)
+                #         time.sleep(0.2)
+                #     except Exception as e:
+                #         print(f"[WARN] AKShare替代获取{code}失败: {e}")
+                #         temp_remaining.append(code)
+                # remaining_codes = temp_remaining
+                # print(f"[SUCCESS] AKShare 替代成功: {len(secondary_success)}/{len(fallback_codes)} 只")
             
             elif secondary_source == 'tushare' and TUSHARE_AVAILABLE and self.tushare_token:
                 # 检查是否需要等待，如果需要等待则跳过TUSHARE，直接进入下一级
@@ -1304,10 +1311,10 @@ class ComprehensiveDataCollector:
         if not 'yfinance_success' in locals():
             yfinance_success = []
         
-        # 3. AKShare兜底处理（优先于Alpha Vantage）
+        # 3. AKShare兜底处理 - 已禁用（避免py_mini_racer崩溃）
         akshare_fallback_success = []
-        if final_failed_codes and AKSHARE_AVAILABLE and AKSHARE_CONNECTED:
-            print(f"[INFO] AKShare 兜底处理 {len(final_failed_codes)} 只失败股票...")
+        if False:  # akshare已禁用
+            print(f"[INFO] 跳过AKShare兜底处理（避免py_mini_racer崩溃）")
             try:
                 temp_remaining = []
                 for code in final_failed_codes:

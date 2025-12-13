@@ -778,7 +778,30 @@ class AShareAnalyzerGUI:
             
             if latest_time:
                 latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
-                return f"本地数据: {latest_date} ({len(part_files)}个文件)"
+                
+                # 检查是否有Choice数据
+                data_source_info = ""
+                choice_data_file = os.path.join('data', 'comprehensive_stock_data.json')
+                if os.path.exists(choice_data_file):
+                    try:
+                        import json
+                        with open(choice_data_file, 'r', encoding='utf-8') as f:
+                            choice_data = json.load(f)
+                            # 检查是否有Choice数据
+                            if 'stocks' in choice_data and len(choice_data['stocks']) > 0:
+                                # 获取第一个股票的data_source字段
+                                first_stock = next(iter(choice_data['stocks'].values()))
+                                if first_stock.get('data_source') == 'choice_api':
+                                    # 获取Choice数据的时间戳
+                                    choice_time = first_stock.get('collection_time', '')
+                                    if choice_time:
+                                        data_source_info = f" | Choice数据: {choice_time.split()[0]}"
+                                    else:
+                                        data_source_info = " | Choice数据"
+                    except:
+                        pass
+                
+                return f"本地数据: {latest_date} ({len(part_files)}个文件){data_source_info}"
             else:
                 return "📂 无本地数据"
                 
@@ -819,7 +842,31 @@ class AShareAnalyzerGUI:
                     
                     if latest_time:
                         latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
-                        return f"K线数据: {latest_date} (来自全部数据)"
+                        
+                        # 构建数据源信息，同时显示常规数据和Choice数据
+                        regular_data_info = f"常规数据 {latest_date}"
+                        choice_data_info = ""
+                        
+                        choice_data_file = os.path.join('data', 'comprehensive_stock_data.json')
+                        if os.path.exists(choice_data_file):
+                            try:
+                                import json
+                                with open(choice_data_file, 'r', encoding='utf-8') as f:
+                                    choice_data = json.load(f)
+                                    if 'stocks' in choice_data and len(choice_data['stocks']) > 0:
+                                        first_stock = next(iter(choice_data['stocks'].values()))
+                                        if first_stock.get('data_source') == 'choice_api':
+                                            choice_time = first_stock.get('collection_time', '')
+                                            if choice_time:
+                                                choice_date = choice_time.split()[0]
+                                                choice_data_info = f" | Choice数据 {choice_date}"
+                                            else:
+                                                choice_data_info = " | Choice数据"
+                            except:
+                                pass
+                        
+                        # 如果两种数据都有，就都显示；如果只有常规数据，就只显示常规数据
+                        return f"K线数据: {latest_date} ({regular_data_info}{choice_data_info})"
             
             # 如果没有任何数据，返回空字符串（不显示提示）
             return ""
@@ -875,7 +922,26 @@ class AShareAnalyzerGUI:
                 latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
                 # 添加时间信息以区分同日不同时间的评分
                 latest_time_str = datetime.fromtimestamp(latest_time).strftime("%H:%M")
-                return f"{latest_date} {latest_time_str} | {latest_model}"
+                
+                # 检查评分文件中是否有Choice数据源标识
+                data_source_info = ""
+                try:
+                    import json
+                    with open(latest_file, 'r', encoding='utf-8') as f:
+                        score_data = json.load(f)
+                        # 检查顶层是否有data_source标识
+                        if 'data_source' in score_data:
+                            if score_data['data_source'] == 'choice':
+                                data_source_info = " | Choice数据"
+                        # 或者检查第一个评分项的data_source
+                        elif 'scores' in score_data and len(score_data['scores']) > 0:
+                            first_score = next(iter(score_data['scores'].values()))
+                            if first_score.get('data_source') == 'choice':
+                                data_source_info = " | Choice数据"
+                except:
+                    pass
+                
+                return f"{latest_date} {latest_time_str} | {latest_model}{data_source_info}"
             else:
                 return "暂无评分数据"
                 
@@ -2983,7 +3049,20 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         import gc
         import threading
         
-        print(f"[DEBUG] 🚀 启动优化批量评分: {stock_type}")
+        # 检查数据源
+        if self.use_choice_data.get():
+            # 使用Choice数据
+            if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
+                self.show_progress("📂 正在加载Choice数据...")
+                self._preload_choice_data()
+                if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
+                    self.show_progress("ERROR: 无法加载Choice数据")
+                    return
+            data_source_label = "Choice数据"
+        else:
+            data_source_label = "常规数据"
+        
+        print(f"[DEBUG] 🚀 启动优化批量评分: {stock_type} ({data_source_label})")
         
         # 检查是否启用断点续传
         start_from_index = 0
@@ -3017,8 +3096,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 else:
                     filter_type = stock_type
                 
-                print(f"[DEBUG] 🚀 启动优化批量评分线程，类型: {filter_type}")
-                self.show_progress(f"🚀 开始获取{stock_type}股票评分（MiniMax优化模式）...")
+                data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
+                print(f"[DEBUG] 🚀 启动优化批量评分线程，类型: {filter_type} ({data_source_label})")
+                self.show_progress(f"🚀 开始获取{stock_type}股票评分（MiniMax优化模式 - {data_source_label}）...")
                 
                 # 检查缓存状态，如果未加载则尝试加载
                 if not getattr(self, 'comprehensive_data_loaded', False):
@@ -3213,7 +3293,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     
                     try:
                         # 异步批量处理
-                        batch_size = min(100, max(50, total_stocks // 10))  # 动态批次大小
+                        batch_size = min(200, max(100, total_stocks // 10))  # 动态批次大小，默认100
                         results = loop.run_until_complete(
                             self.async_processor.process_batch_async(all_codes, batch_size)
                         )
@@ -4801,6 +4881,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         # 初始化推荐评分滚动条变量（供快速评分和推荐功能使用）
         self.min_score_var = tk.DoubleVar(value=6.0)
         
+        # 初始化Choice数据源选择变量
+        self.use_choice_data = tk.BooleanVar(value=False)
+        
         # 进度条相关属性初始化（必须在所有分析操作前定义）
         self.progress_msg_var = tk.StringVar()
         self.progress_val_var = tk.DoubleVar()
@@ -5021,6 +5104,17 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                    cursor="hand2",
                                    width=12)
         quick_score_btn.pack(side="left", padx=5)
+        
+        # Choice数据源复选框
+        choice_data_checkbox = tk.Checkbutton(data_score_frame,
+                                             text="使用Choice数据",
+                                             variable=self.use_choice_data,
+                                             font=("微软雅黑", 10),
+                                             bg="#f0f0f0",
+                                             activebackground="#f0f0f0",
+                                             cursor="hand2",
+                                             command=self._on_choice_data_toggle)
+        choice_data_checkbox.pack(side="left", padx=5)
         
         # 漫长分析按钮（数据收集 + 主板评分）
         long_analysis_btn = tk.Button(data_score_frame, 
@@ -5686,6 +5780,73 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
         return filtered_stocks
     
+    def _on_choice_data_toggle(self):
+        """处理Choice数据复选框切换事件"""
+        if self.use_choice_data.get():
+            self.show_progress("✅ 已切换到Choice数据源")
+            # 预加载Choice数据
+            self._preload_choice_data()
+        else:
+            self.show_progress("✅ 已切换到常规数据源")
+    
+    def _preload_choice_data(self):
+        """预加载Choice数据到内存"""
+        try:
+            import json
+            import os
+            
+            choice_file = os.path.join("data", "comprehensive_stock_data.json")
+            if not os.path.exists(choice_file):
+                self.show_progress("⚠️  Choice数据文件不存在，请先运行 get_choice_data.py")
+                self.use_choice_data.set(False)
+                return
+            
+            self.show_progress("📂 正在加载Choice数据...")
+            with open(choice_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+            
+            stocks = cache_data.get("stocks", {})
+            if not stocks:
+                self.show_progress("⚠️  Choice数据为空")
+                self.use_choice_data.set(False)
+                return
+            
+            # 转换为系统格式
+            converted_data = {}
+            for code, stock_data in stocks.items():
+                try:
+                    # 获取K线数据
+                    kline_container = stock_data.get('kline_data', {})
+                    if isinstance(kline_container, dict):
+                        kline_data = kline_container.get('daily', [])
+                    elif isinstance(kline_container, list):
+                        kline_data = kline_container
+                    else:
+                        continue
+                    
+                    if not kline_data:
+                        continue
+                    
+                    # 计算技术指标
+                    tech_data = self._calculate_tech_data_from_kline(kline_data)
+                    if not tech_data:
+                        continue
+                    
+                    converted_data[code] = {
+                        'tech_data': tech_data,
+                        'fund_data': stock_data.get('financial_data', {}),
+                        'basic_info': stock_data.get('basic_info', {})
+                    }
+                except Exception:
+                    continue
+            
+            self.comprehensive_stock_data = converted_data
+            self.show_progress(f"✅ Choice数据加载完成：{len(converted_data)} 只股票")
+            
+        except Exception as e:
+            self.show_progress(f"❌ 加载Choice数据失败: {e}")
+            self.use_choice_data.set(False)
+    
     def test_choice_connection(self):
         """测试Choice数据 - 读取Choice数据文件并进行完整评分"""
         def test_thread():
@@ -5799,7 +5960,18 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         # 结构: { code, basic_info, kline_data, financial_data }
                         
                         # 确保有必要的数据
-                        kline_data = stock_data.get('kline_data', [])
+                        kline_container = stock_data.get('kline_data', {})
+                        
+                        # 兼容两种格式：
+                        # 1. {daily: [...]} - 标准格式
+                        # 2. [...] - 直接数组格式
+                        if isinstance(kline_container, dict):
+                            kline_data = kline_container.get('daily', [])
+                        elif isinstance(kline_container, list):
+                            kline_data = kline_container
+                        else:
+                            kline_data = []
+                        
                         if not kline_data:
                             continue
                             
@@ -6419,7 +6591,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             time.sleep(3)
             
             # 第二步：获取主板评分
-            self.show_progress("🎯 第二步：开始获取主板评分...")
+            data_source = "Choice" if self.use_choice_data.get() else "常规"
+            self.show_progress(f"🎯 第二步：开始获取主板评分（{data_source}数据源）...")
             
             # 调用现有的获取主板评分功能
             self.root.after(0, lambda: self.start_batch_scoring_by_type("主板"))
@@ -6438,10 +6611,22 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     def start_quick_scoring(self):
         """开始快速评分：先筛选股票，然后使用完整评分逻辑（与常规评分完全相同）"""
         try:
-            # 检查是否有数据
-            if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
-                self.show_progress("ERROR: 请先获取全部数据")
-                return
+            # 检查数据源
+            if self.use_choice_data.get():
+                # 使用Choice数据
+                if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
+                    self.show_progress("📂 正在加载Choice数据...")
+                    self._preload_choice_data()
+                    if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
+                        self.show_progress("ERROR: 无法加载Choice数据")
+                        return
+                self.show_progress("🔍 使用Choice数据进行快速评分...")
+            else:
+                # 使用常规数据
+                if not hasattr(self, 'comprehensive_stock_data') or not self.comprehensive_stock_data:
+                    self.show_progress("ERROR: 请先获取全部数据")
+                    return
+                self.show_progress("🔍 使用常规数据进行快速评分...")
             
             # 第一步：应用ST筛选
             print(f"=" * 60)
@@ -6523,7 +6708,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 print(f"   batch_scores 内容: {getattr(self, 'batch_scores', 'None')}")
             
             total_count = len(filtered_stocks)
-            self.show_progress(f"🎯 快速评分：筛选出 {total_count} 只候选股票 (ST筛选: {st_filtered_count} → 低分筛选: {total_count})")
+            data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
+            self.show_progress(f"🎯 快速评分：筛选出 {total_count} 只候选股票 (ST筛选: {st_filtered_count} → 低分筛选: {total_count}) - {data_source_label}")
             
             # 保存筛选后的股票列表，供批量评分使用
             self._quick_score_filtered_codes = list(filtered_stocks.keys())
@@ -8577,29 +8763,12 @@ K线更新后快速评分完成！
                     print(f"{ticker} QQ/腾讯数据源失败: {e_qq}")
                     stock_hist = None
 
-            # 6. akshare数据源 (容易超时，备用)
-            if (stock_hist is None or stock_hist.empty):
-                if AKSHARE_AVAILABLE:
-                    try:
-                        print(f"{ticker} 尝试akshare标准接口...")
-                        stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
-                                                    start_date=start_date, end_date=end_date,
-                                                    adjust="qfq", timeout=8)
-                        if stock_hist is None or stock_hist.empty:
-                             print(f"⚠ {ticker} akshare标准接口返回为空")
-                    except Exception as e1:
-                        print(f"{ticker} akshare标准接口失败: {e1}")
-                        try:
-                            print(f"{ticker} 尝试akshare简化接口...")
-                            stock_hist = ak.stock_zh_a_hist(symbol=ticker, period="daily", 
-                                                        start_date="20241001", end_date="20241107")
-                            if stock_hist is None or stock_hist.empty:
-                                print(f"⚠ {ticker} akshare简化接口返回为空")
-                        except Exception as e2:
-                            print(f"{ticker} akshare简化接口失败: {e2}")
-                            stock_hist = None
-                else:
-                    print(f"⚠ {ticker} akshare库未安装，跳过")
+            # 6. akshare数据源 - 已禁用，避免py_mini_racer崩溃
+            # 原因：ak.stock_zh_a_hist依赖py_mini_racer (V8 JavaScript引擎)
+            # 在某些环境下会导致Fatal error崩溃，特别是用户名包含中文字符时
+            # 解决方案：使用其他不依赖JavaScript引擎的稳定数据源
+            # if False:  # 永久禁用akshare的stock_zh_a_hist接口
+            #     pass
             
             # 7. 腾讯实时价格兜底 (最后备选，生成简化K线)
             if (stock_hist is None or stock_hist.empty):
@@ -9198,8 +9367,18 @@ K线更新后快速评分完成！
         technical_data = None
         financial_data = None
         
-        # 1. 尝试从原始缓存获取 (仅当use_cache=True时)
-        if use_cache and getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
+        # 0. 如果勾选了Choice数据，优先从Choice数据获取
+        if self.use_choice_data.get() and ticker in getattr(self, 'comprehensive_stock_data', {}):
+            cached = self.comprehensive_stock_data.get(ticker, {})
+            if cached.get('tech_data'):
+                technical_data = cached['tech_data']
+                print(f"[CHOICE-DATA] 使用Choice技术数据: {ticker}")
+            if cached.get('fund_data'):
+                financial_data = cached['fund_data']
+                print(f"[CHOICE-DATA] 使用Choice基本面数据: {ticker}")
+        
+        # 1. 尝试从原始缓存获取 (仅当use_cache=True时且未使用Choice数据)
+        if technical_data is None and use_cache and getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
             cached = self.comprehensive_stock_data.get(ticker, {})
             
             # 优先尝试新字段名称
@@ -9260,24 +9439,30 @@ K线更新后快速评分完成！
                 if isinstance(fund, dict) and ('pe_ratio' in fund or 'pb_ratio' in fund):
                     financial_data = fund
         
-        # 3. 尝试实时获取缺失数据 (补全逻辑)
+        # 3. 尝试实时获取缺失数据 (补全逻辑) - 如果使用Choice数据则跳过实时获取
         if technical_data is None:
-            print(f"[ADVICE] {ticker} 缺少技术数据，尝试实时获取...")
-            technical_data = self.get_real_technical_indicators(ticker)
-            # 更新缓存
-            if technical_data and getattr(self, 'comprehensive_data_loaded', False):
-                if ticker not in self.comprehensive_stock_data:
-                    self.comprehensive_stock_data[ticker] = {}
-                self.comprehensive_stock_data[ticker]['tech_data'] = technical_data
+            if self.use_choice_data.get():
+                print(f"[CHOICE-DATA] {ticker} Choice数据中无技术数据，跳过该股票")
+            else:
+                print(f"[ADVICE] {ticker} 缺少技术数据，尝试实时获取...")
+                technical_data = self.get_real_technical_indicators(ticker)
+                # 更新缓存
+                if technical_data and getattr(self, 'comprehensive_data_loaded', False):
+                    if ticker not in self.comprehensive_stock_data:
+                        self.comprehensive_stock_data[ticker] = {}
+                    self.comprehensive_stock_data[ticker]['tech_data'] = technical_data
 
         if financial_data is None:
-            print(f"[ADVICE] {ticker} 缺少基本面数据，尝试实时获取...")
-            financial_data = self.get_real_fundamental_indicators(ticker)
-            # 更新缓存
-            if financial_data and getattr(self, 'comprehensive_data_loaded', False):
-                if ticker not in self.comprehensive_stock_data:
-                    self.comprehensive_stock_data[ticker] = {}
-                self.comprehensive_stock_data[ticker]['fund_data'] = financial_data
+            if self.use_choice_data.get():
+                print(f"[CHOICE-DATA] {ticker} Choice数据中无基本面数据，跳过该股票")
+            else:
+                print(f"[ADVICE] {ticker} 缺少基本面数据，尝试实时获取...")
+                financial_data = self.get_real_fundamental_indicators(ticker)
+                # 更新缓存
+                if financial_data and getattr(self, 'comprehensive_data_loaded', False):
+                    if ticker not in self.comprehensive_stock_data:
+                        self.comprehensive_stock_data[ticker] = {}
+                    self.comprehensive_stock_data[ticker]['fund_data'] = financial_data
 
         # ========== 数据获取失败则返回失败 - 不使用模拟数据和默认值 ==========
         if technical_data is None:
@@ -9461,7 +9646,7 @@ K线更新后快速评分完成！
 
         # 否则用本地规则
         short_term_prediction = self.get_short_term_prediction(
-            rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price
+            rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price, stock_code=ticker
         )
         medium_term_prediction = self.get_medium_term_prediction(
             rsi, macd, signal, volume_ratio, ma5, ma10, ma20, ma60, current_price, 
@@ -9775,7 +9960,7 @@ K线更新后快速评分完成！
         else:
             return "看跌"
     
-    def get_short_term_prediction(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price, kline_data=None):
+    def get_short_term_prediction(self, rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price, kline_data=None, stock_code=""):
         """短期预测 (1-7天) - 基于技术指标和量价分析（简化版）"""
         try:
             # 简化的技术分析，避免复杂计算导致异常
@@ -9785,6 +9970,15 @@ K线更新后快速评分完成！
             macd_score = 0
             ma_score = 0
             volume_score = 0
+            
+            # 检查是否所有数据都是默认值（表明数据未正确读取）
+            is_default_data = (rsi == 50.0 and macd == 0.0 and signal == 0.0 and 
+                             current_price == 10.0 and ma5 == 10.0 and ma10 == 10.0 and 
+                             ma20 == 10.0 and volume_ratio == 1.0)
+            if is_default_data:
+                stock_label = f"[{stock_code}] " if stock_code else ""
+                print(f"⚠️  {stock_label}警告：检测到所有技术指标都是默认值！")
+                print(f"    可能原因：1) K线数据不足(<120条) 2) 数据格式错误 3) 数据未正确加载")
             
             # RSI分析 (权重25% - A股市场优化阈值)
             if rsi < 20:
@@ -9908,7 +10102,9 @@ K线更新后快速评分完成！
             print(f"均线评分:   {ma_score:+.1f}  (价格={current_price:.2f}, MA5={ma5:.2f}, MA10={ma10:.2f}, MA20={ma20:.2f})")
             print(f"成交量评分: {volume_score:+.1f}  (量比={volume_ratio:.2f})")
             print(f"{'-'*60}")
-            print(f"总评分:     {prediction_score:+.1f}")
+            data_source_label = "[Choice数据]" if self.use_choice_data.get() else "[常规数据]"
+            stock_label = f"[{stock_code}] " if stock_code else ""
+            print(f"总评分:     {stock_label}{prediction_score:+.1f}  {data_source_label}")
             print(f"{'='*60}\n")
             
             # 生成预测结果 - 短期更激进的评分
@@ -10464,7 +10660,7 @@ K线更新后快速评分完成！
             
             # 使用短期预测算法
             prediction = self.get_short_term_prediction(
-                rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price
+                rsi, macd, signal, volume_ratio, ma5, ma10, ma20, current_price, stock_code=ticker
             )
             
             # 计算综合评分 - 短期重技术指标
@@ -17375,11 +17571,14 @@ WARNING: 重要声明:
             
             # 保存到文件（保存全部评分数据，不仅仅是本次评分）
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            data_source = "choice" if self.use_choice_data.get() else "regular"
             save_data = {
                 'date': datetime.now().strftime('%Y-%m-%d'),
                 'timestamp': timestamp,
                 'model': 'optimized_async',
                 'stock_type': stock_type,
+                'data_source': data_source,
+                'data_source_label': 'Choice数据' if data_source == 'choice' else '常规数据',
                 'optimization_version': 'MiniMax_CodingPlan_v1.0',
                 'count': len(self.batch_scores),  # 保存总数量，而不是本次评分数量
                 'last_update_count': len(valid_results),  # 记录本次更新的有效数量
@@ -17418,9 +17617,10 @@ WARNING: 重要声明:
         
         if current_model == "none":
             # None模式：使用基本面技术面算法计算评分（不使用LLM，不读缓存）
-            print(f"[INFO] 📈 启用算法计算模式（使用本地数据）")
-            initial_msg = f"📈 算法计算模式处理 {len(all_codes)} 只股票（本地数据）..."
-            self.update_progress_with_bar(initial_msg, 0, "准备开始算法计算...")
+            data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
+            print(f"[INFO] 📈 启用算法计算模式（使用{data_source_label}）")
+            initial_msg = f"📈 算法计算模式处理 {len(all_codes)} 只股票（{data_source_label}）..."
+            self.update_progress_with_bar(initial_msg, 0, f"准备开始算法计算（{data_source_label}）...")
             
             for i, code in enumerate(all_codes):
                 try:
@@ -17454,9 +17654,10 @@ WARNING: 重要声明:
         
         else:
             # LLM模式：必须使用LLM重新计算评分
-            print(f"[INFO] 🤖 启用LLM智能分析模式: {current_model.upper()}")
-            initial_msg = f"🤖 {current_model.upper()} 智能分析 {len(all_codes)} 只股票..."
-            self.update_progress_with_bar(initial_msg, 0, "准备开始LLM分析...")
+            data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
+            print(f"[INFO] 🤖 启用LLM智能分析模式: {current_model.upper()} ({data_source_label})")
+            initial_msg = f"🤖 {current_model.upper()} 智能分析 {len(all_codes)} 只股票（{data_source_label}）..."
+            self.update_progress_with_bar(initial_msg, 0, f"准备开始LLM分析（{data_source_label}）...")
             
             for i, code in enumerate(all_codes):
                 try:
@@ -17523,7 +17724,24 @@ WARNING: 重要声明:
                 stock_info = self.get_stock_info_generic(code)
             
             if not stock_info or not stock_info.get('name'):
-                print(f"[WARN] 无法获取股票 {code} 基本信息")
+                # 详细调试信息
+                debug_info = []
+                if not stock_info:
+                    debug_info.append("无stock_info")
+                elif not stock_info.get('name'):
+                    debug_info.append(f"name为空: {stock_info}")
+                
+                # 检查是否在comprehensive_stock_data中
+                in_comprehensive = False
+                if hasattr(self, 'comprehensive_stock_data') and self.comprehensive_stock_data:
+                    if code in self.comprehensive_stock_data:
+                        in_comprehensive = True
+                        cached = self.comprehensive_stock_data[code]
+                        debug_info.append(f"cached.keys={list(cached.keys())}")
+                        if 'basic_info' in cached:
+                            debug_info.append(f"basic_info={cached['basic_info']}")
+                
+                print(f"[WARN] 无法获取股票 {code} 基本信息: {', '.join(debug_info)}")
                 return None
             
             # 关键：从本地缓存获取真实的技术数据和基本面数据
@@ -17558,7 +17776,8 @@ WARNING: 重要声明:
                 tech_data.get('ma5', tech_data.get('current_price', 10)),
                 tech_data.get('ma10', tech_data.get('current_price', 10)),
                 tech_data.get('ma20', tech_data.get('current_price', 10)),
-                tech_data.get('current_price', 10)
+                tech_data.get('current_price', 10),
+                stock_code=code
             )
             
             medium_prediction = self.get_medium_term_prediction(
@@ -17721,7 +17940,11 @@ WARNING: 重要声明:
                 # 提取技术数据
                 if 'tech_data' in cached:
                     tech_data = cached['tech_data']
-                    tech_data['data_source'] = 'memory_cache'
+                    # 如果勾选了Choice数据，标记为choice来源
+                    if self.use_choice_data.get():
+                        tech_data['data_source'] = 'choice_data'
+                    else:
+                        tech_data['data_source'] = 'memory_cache'
                     return tech_data
             
             # 尝试从JSON文件读取
@@ -17743,7 +17966,11 @@ WARNING: 重要声明:
                 # 提取基本面数据
                 if 'fund_data' in cached:
                     fund_data = cached['fund_data']
-                    fund_data['data_source'] = 'memory_cache'
+                    # 如果勾选了Choice数据，标记为choice来源
+                    if self.use_choice_data.get():
+                        fund_data['data_source'] = 'choice_data'
+                    else:
+                        fund_data['data_source'] = 'memory_cache'
                     return fund_data
             
             # 尝试从JSON文件读取

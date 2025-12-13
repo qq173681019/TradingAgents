@@ -287,71 +287,11 @@ class ChipHealthAnalyzer:
             
             return result_container['data'], None
         
-        # 方法1: 尝试使用 akshare 的 stock_zh_a_hist (东方财富源) - 8秒超时
-        try:
-            print("  尝试数据源: akshare.stock_zh_a_hist (东方财富)")
-            
-            def fetch_akshare_hist():
-                return ak.stock_zh_a_hist(
-                    symbol=stock_code,
-                    period="daily",
-                    start_date=start_date,
-                    end_date=end_date,
-                    adjust="qfq"
-                )
-            
-            df, error = _fetch_with_timeout(fetch_akshare_hist, timeout=8)
-            
-            if error:
-                raise error
-                
-            if df is not None and not df.empty:
-                current_price = float(df['收盘'].iloc[-1])
-                # 确保有日期列
-                if '日期' not in df.columns and 'date' in df.columns:
-                    df = df.rename(columns={'date': '日期'})
-                print(f"  ✓ 成功获取数据 (东方财富源)")
-                return current_price, df
-            
-        except Exception as e:
-            error_msg = "超时" if isinstance(e, TimeoutError) else str(e)[:80]
-            print(f"  ✗ 东方财富源失败: {error_msg}")
-        
-        # 方法2: 尝试使用 akshare 的 stock_zh_a_daily (新浪源) - 8秒超时
-        try:
-            print("  尝试数据源: akshare.stock_zh_a_daily (新浪源)")
-            # 转换股票代码格式
-            if stock_code.startswith('6'):
-                symbol = f"sh{stock_code}"
-            else:
-                symbol = f"sz{stock_code}"
-            
-            def fetch_akshare_daily():
-                return ak.stock_zh_a_daily(
-                    symbol=symbol,
-                    start_date=start_date.replace('-', ''),
-                    end_date=end_date.replace('-', ''),
-                    adjust="qfq"
-                )
-            
-            df, error = _fetch_with_timeout(fetch_akshare_daily, timeout=8)
-            
-            if error:
-                raise error
-            
-            if df is not None and not df.empty:
-                # 统一列名
-                rename_dict = {'close': '收盘', 'volume': '成交量'}
-                if 'date' in df.columns:
-                    rename_dict['date'] = '日期'
-                df = df.rename(columns=rename_dict)
-                current_price = float(df['收盘'].iloc[-1])
-                print(f"  ✓ 成功获取数据 (新浪源)")
-                return current_price, df
-                
-        except Exception as e:
-            error_msg = "超时" if isinstance(e, TimeoutError) else str(e)[:80]
-            print(f"  ✗ 新浪源失败: {error_msg}")
+        # ===== 方法1和2：akshare数据源已禁用 =====
+        # 原因：akshare依赖py_mini_racer包，在某些环境下（特别是用户名包含中文字符时）
+        # 会导致V8引擎崩溃，Fatal error: Failed to deserialize the V8 snapshot blob
+        # 解决方案：直接使用不依赖JavaScript引擎的其他稳定数据源
+        print("  跳过akshare数据源（避免py_mini_racer崩溃问题）")
         
         # 方法3: 尝试使用腾讯接口 - 8秒超时
         try:
