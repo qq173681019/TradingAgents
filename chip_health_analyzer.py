@@ -124,10 +124,19 @@ class ChipHealthAnalyzer:
             'data_end_date': '',  # 数据结束日期
             'data_days': 0,  # 数据天数
         }
-
         
+        # 统一全局步骤计数（用于更清晰的进度日志）
+        total_steps = 11
+        _step_counter = {'v': 0}
+        def step_log(msg):
+            try:
+                _step_counter['v'] += 1
+                print(f"[{_step_counter['v']}/{total_steps}] {msg}")
+            except Exception:
+                print(msg)
+
         # 1. 获取当前价格和历史数据
-        print("[1/6] 获取价格和历史数据...")
+        step_log("获取价格和历史数据...")
         current_price, hist_data = self._get_price_and_history(stock_code)
         if current_price == 0 or hist_data is None:
             print("❌ 无法获取价格数据")
@@ -159,7 +168,8 @@ class ChipHealthAnalyzer:
             print(f"⚠ 未找到日期列，数据天数: {result['data_days']}天")
         
         # 2. 获取十大流通股东
-        print("\n[2/6] 获取十大流通股东数据...")
+        print("")
+        step_log("获取十大流通股东数据...")
         top10_data = self._get_top10_holders(stock_code)
         if top10_data is not None:
             result['top10_holders'] = top10_data
@@ -170,7 +180,8 @@ class ChipHealthAnalyzer:
             print("⚠ 未获取到十大股东数据")
         
         # 3. 获取股东户数变化
-        print("\n[3/6] 获取股东户数变化...")
+        print("")
+        step_log("获取股东户数变化...")
         holder_change = self._get_holder_count_change(stock_code)
         if holder_change != 0:
             result['holder_count_change'] = holder_change
@@ -179,7 +190,8 @@ class ChipHealthAnalyzer:
             print("⚠ 未获取到股东户数数据")
         
         # 4. 计算筹码成本分位数（P10/P50/P90）和SCR
-        print("\n[4/6] 计算筹码成本分位数和SCR...")
+        print("")
+        step_log("计算筹码成本分位数和SCR...")
         p10, p50, p90 = self._calculate_chip_cost_percentiles(hist_data)
         result['chip_cost_p10'] = p10
         result['chip_cost'] = p50  # P50作为平均成本
@@ -200,7 +212,8 @@ class ChipHealthAnalyzer:
             print(f"⚠ 无法计算筹码成本 (P10={p10:.2f}, P50={p50:.2f}, P90={p90:.2f})")
         
         # 5. 计算获利盘/套牢盘比例
-        print("\n[5/6] 计算获利盘/套牢盘...")
+        print("")
+        step_log("计算获利盘/套牢盘...")
         profit_ratio, loss_ratio = self._calculate_profit_loss_ratio(
             hist_data, current_price
         )
@@ -209,20 +222,23 @@ class ChipHealthAnalyzer:
         print(f"✓ 获利盘: {profit_ratio:.1f}%, 套牢盘: {loss_ratio:.1f}%")
         
         # 6. 计算换手率
-        print("\n[6/6] 计算换手率...")
+        print("")
+        step_log("计算换手率...")
         turnover = self._calculate_turnover_rate(hist_data)
         result['turnover_rate'] = turnover
         print(f"✓ 近5日平均换手率: {turnover:.2f}%")
         
         # 7. 计算筹码乖离率
-        print("\n[7/9] 计算筹码乖离率...")
+        print("")
+        step_log("计算筹码乖离率...")
         if current_price > 0 and p50 > 0:
             chip_bias = ((current_price - p50) / p50) * 100
             result['chip_bias'] = chip_bias
             print(f"✓ 筹码乖离率: {chip_bias:+.2f}% {'(健康区间)' if 5 <= chip_bias <= 15 else ''}")
         
         # 8. 计算HHI和基尼系数
-        print("\n[8/11] 计算HHI和基尼系数...")
+        print("")
+        step_log("计算HHI和基尼系数...")
         hhi, gini = self._calculate_hhi_and_gini(hist_data)
         result['hhi'] = hhi
         result['gini_coefficient'] = gini
@@ -230,19 +246,22 @@ class ChipHealthAnalyzer:
         print(f"✓ 基尼系数: {gini:.4f} {'(分布均匀)' if gini < 0.4 else '(分布不均)' if gini > 0.6 else '(适中)'}")
         
         # 9. 识别筹码峰型
-        print("\n[9/11] 识别筹码峰型...")
+        print("")
+        step_log("识别筹码峰型...")
         peak_type = self._identify_peak_type(hist_data)
         result['peak_type'] = peak_type
         print(f"✓ 筹码峰型: {peak_type}")
         
         # 10. 检测底部筹码锁定
-        print("\n[10/11] 检测底部筹码锁定...")
+        print("")
+        step_log("检测底部筹码锁定...")
         bottom_locked = self._check_bottom_locked(hist_data, current_price)
         result['bottom_locked'] = bottom_locked
         print(f"✓ 底部筹码: {'锁定 🔒' if bottom_locked else '未锁定'}")
         
         # 11. 综合评分（新版严格算法）
-        print("\n[11/11] 计算筹码健康度...")
+        print("")
+        step_log("计算筹码健康度...")
         health_score, signals = self._calculate_health_score(result)
         result['health_score'] = health_score
         result['signals'] = signals

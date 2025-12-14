@@ -192,7 +192,7 @@ class ComprehensiveDataCollector:
         self.batch_kline_cache = {}  # 缓存批量获取的K线数据
         self.kline_batch_size = 15   # 每次批量获取15只股票（100%成功率）
         self.kline_batch_size_max = 20  # 最大批量20只股票（75%成功率但更快）
-        self.kline_days = 150        # 获取150天的K线数据（确保有120+个交易日用于MA120等长期指标）
+        self.kline_days = 60         # 获取60天的K线数据（用于MA60等指标）
         self.last_tushare_call = 0   # 上次tushare调用时间
         self.adaptive_batch = True   # 启用自适应批量大小
         

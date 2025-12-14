@@ -2,8 +2,8 @@
   "stocks": {
     "000001": {
       "code": "000001",
-      "timestamp": "2025-12-07T22:52:22.518064",
-      "collection_time": "2025-12-07 22:52:22",
+      "timestamp": "2025-12-13T23:42:36.838931",
+      "collection_time": "2025-12-13 23:42:36",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -24,6 +24,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 11.37,
+            "high": 11.43,
+            "low": 11.3,
+            "close": 11.35,
+            "volume": 1191894.72
+          },
           {
             "date": "20251211",
             "open": 11.35,
@@ -311,12 +319,67 @@
             "low": 11.5,
             "close": 11.63,
             "volume": 1373111.58
+          },
+          {
+            "date": "20251022",
+            "open": 11.4,
+            "high": 11.54,
+            "low": 11.4,
+            "close": 11.52,
+            "volume": 833703.19
+          },
+          {
+            "date": "20251021",
+            "open": 11.4,
+            "high": 11.47,
+            "low": 11.39,
+            "close": 11.43,
+            "volume": 761164.62
+          },
+          {
+            "date": "20251020",
+            "open": 11.41,
+            "high": 11.45,
+            "low": 11.27,
+            "close": 11.42,
+            "volume": 952641.1
+          },
+          {
+            "date": "20251017",
+            "open": 11.5,
+            "high": 11.58,
+            "low": 11.38,
+            "close": 11.4,
+            "volume": 1039666.32
+          },
+          {
+            "date": "20251016",
+            "open": 11.38,
+            "high": 11.55,
+            "low": 11.36,
+            "close": 11.54,
+            "volume": 1261936.87
+          },
+          {
+            "date": "20251015",
+            "open": 11.34,
+            "high": 11.42,
+            "low": 11.26,
+            "close": 11.4,
+            "volume": 1271061.03
+          },
+          {
+            "date": "20251014",
+            "open": 11.39,
+            "high": 11.6,
+            "low": 11.36,
+            "close": 11.57,
+            "volume": 1843428.36
           }
         ],
-        "latest_price": 11.63,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.126488"
+        "latest_price": 11.57,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000001",
@@ -332,15 +395,15 @@
         "debt_ratio": 0.356052
       },
       "technical_indicators": {
-        "current_price": 11.37,
-        "ma5": 11.436,
-        "ma10": 11.516,
-        "ma20": 11.6155,
-        "ma60": 11.37,
-        "rsi": 35.18518518518519,
-        "macd": -0.05629030537724766,
-        "signal": -0.0181712514101869,
-        "volume_ratio": 1.0488642650896889,
+        "current_price": 11.35,
+        "ma5": 11.4,
+        "ma10": 11.489999999999998,
+        "ma20": 11.5955,
+        "ma60": 11.35,
+        "rsi": 37.62376237623764,
+        "macd": -0.0592402551153306,
+        "signal": -0.01965920653438295,
+        "volume_ratio": 1.339223055454341,
         "status": "calculated"
       },
       "industry_concept": {
@@ -373,19 +436,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:22.521543",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.126488"
+        "timestamp": "2025-12-13T23:42:36.857449",
+        "success_rate": 1.0
+      }
     },
     "000002": {
       "code": "000002",
-      "timestamp": "2025-12-07T22:52:22.822873",
-      "collection_time": "2025-12-07 22:52:22",
+      "timestamp": "2025-12-13T23:42:37.158193",
+      "collection_time": "2025-12-13 23:42:37",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -406,6 +468,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 5.13,
+            "high": 5.21,
+            "low": 5.01,
+            "close": 5.02,
+            "volume": 3356576.69
+          },
           {
             "date": "20251211",
             "open": 5.18,
@@ -693,12 +763,67 @@
             "low": 6.33,
             "close": 6.38,
             "volume": 753668.63
+          },
+          {
+            "date": "20251022",
+            "open": 6.36,
+            "high": 6.44,
+            "low": 6.35,
+            "close": 6.38,
+            "volume": 780302.49
+          },
+          {
+            "date": "20251021",
+            "open": 6.33,
+            "high": 6.41,
+            "low": 6.31,
+            "close": 6.4,
+            "volume": 1019035.23
+          },
+          {
+            "date": "20251020",
+            "open": 6.33,
+            "high": 6.35,
+            "low": 6.3,
+            "close": 6.34,
+            "volume": 868612.8
+          },
+          {
+            "date": "20251017",
+            "open": 6.39,
+            "high": 6.43,
+            "low": 6.31,
+            "close": 6.32,
+            "volume": 1429013.29
+          },
+          {
+            "date": "20251016",
+            "open": 6.47,
+            "high": 6.48,
+            "low": 6.38,
+            "close": 6.4,
+            "volume": 1434724.25
+          },
+          {
+            "date": "20251015",
+            "open": 6.52,
+            "high": 6.57,
+            "low": 6.42,
+            "close": 6.49,
+            "volume": 1766066.12
+          },
+          {
+            "date": "20251014",
+            "open": 6.57,
+            "high": 6.69,
+            "low": 6.52,
+            "close": 6.53,
+            "volume": 1913064.11
           }
         ],
-        "latest_price": 6.38,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.146486"
+        "latest_price": 6.53,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000002",
@@ -714,15 +839,15 @@
         "debt_ratio": -0.074573
       },
       "technical_indicators": {
-        "current_price": 5.07,
-        "ma5": 4.99,
-        "ma10": 5.071,
-        "ma20": 5.5565,
-        "ma60": 5.07,
-        "rsi": 24.61538461538464,
-        "macd": -0.33168672284493006,
-        "signal": -0.29658697036136983,
-        "volume_ratio": 1.6576943008713871,
+        "current_price": 5.02,
+        "ma5": 5.004,
+        "ma10": 5.034999999999999,
+        "ma20": 5.494,
+        "ma60": 5.02,
+        "rsi": 24.24242424242425,
+        "macd": -0.328933361698013,
+        "signal": -0.3097804609084978,
+        "volume_ratio": 0.8688784444898415,
         "status": "calculated"
       },
       "industry_concept": {
@@ -755,14 +880,13 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:22.825556",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.146486"
+        "timestamp": "2025-12-13T23:42:37.167733",
+        "success_rate": 1.0
+      }
     },
     "000004": {
       "code": "000004",
@@ -1148,8 +1272,8 @@
     },
     "000006": {
       "code": "000006",
-      "timestamp": "2025-12-07T22:52:23.429018",
-      "collection_time": "2025-12-07 22:52:23",
+      "timestamp": "2025-12-13T23:42:37.468461",
+      "collection_time": "2025-12-13 23:42:37",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -1170,6 +1294,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 10.1,
+            "high": 10.27,
+            "low": 9.93,
+            "close": 10.01,
+            "volume": 259931.77
+          },
           {
             "date": "20251211",
             "open": 10.33,
@@ -1457,12 +1589,67 @@
             "low": 13.53,
             "close": 14.15,
             "volume": 1682880.5
+          },
+          {
+            "date": "20251022",
+            "open": 13.75,
+            "high": 13.98,
+            "low": 13.1,
+            "close": 13.13,
+            "volume": 1313793.21
+          },
+          {
+            "date": "20251021",
+            "open": 11.97,
+            "high": 13.22,
+            "low": 11.73,
+            "close": 13.22,
+            "volume": 956926.85
+          },
+          {
+            "date": "20251020",
+            "open": 12.67,
+            "high": 12.94,
+            "low": 11.81,
+            "close": 12.02,
+            "volume": 1278647.34
+          },
+          {
+            "date": "20251017",
+            "open": 11.72,
+            "high": 12.6,
+            "low": 11.72,
+            "close": 12.24,
+            "volume": 1623856.95
+          },
+          {
+            "date": "20251016",
+            "open": 11.17,
+            "high": 11.87,
+            "low": 11.17,
+            "close": 11.45,
+            "volume": 1426090.11
+          },
+          {
+            "date": "20251015",
+            "open": 13.05,
+            "high": 13.21,
+            "low": 12.41,
+            "close": 12.41,
+            "volume": 886386.07
+          },
+          {
+            "date": "20251014",
+            "open": 14.43,
+            "high": 14.44,
+            "low": 13.17,
+            "close": 13.79,
+            "volume": 2261318.1
           }
         ],
-        "latest_price": 14.15,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.184553"
+        "latest_price": 13.79,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000006",
@@ -1478,15 +1665,15 @@
         "debt_ratio": -0.130995
       },
       "technical_indicators": {
-        "current_price": 10.0,
-        "ma5": 10.178,
-        "ma10": 10.222,
-        "ma20": 10.595500000000001,
-        "ma60": 10.0,
-        "rsi": 41.61073825503355,
-        "macd": -0.5869025403325079,
-        "signal": -0.6466304584229677,
-        "volume_ratio": 1.0372579049345863,
+        "current_price": 10.01,
+        "ma5": 10.162,
+        "ma10": 10.122,
+        "ma20": 10.517,
+        "ma60": 10.01,
+        "rsi": 42.95532646048109,
+        "macd": -0.523545944375746,
+        "signal": -0.5670445481664178,
+        "volume_ratio": 0.8039872709016864,
         "status": "calculated"
       },
       "industry_concept": {
@@ -1519,19 +1706,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:23.430388",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.184553"
+        "timestamp": "2025-12-13T23:42:37.479157",
+        "success_rate": 1.0
+      }
     },
     "000007": {
       "code": "000007",
-      "timestamp": "2025-12-07T22:52:23.731184",
-      "collection_time": "2025-12-07 22:52:23",
+      "timestamp": "2025-12-13T23:42:37.780458",
+      "collection_time": "2025-12-13 23:42:37",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -1552,6 +1738,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 9.97,
+            "high": 10.79,
+            "low": 9.78,
+            "close": 10.55,
+            "volume": 195684.13
+          },
           {
             "date": "20251211",
             "open": 10.28,
@@ -1839,12 +2033,67 @@
             "low": 7.28,
             "close": 7.39,
             "volume": 60313.51
+          },
+          {
+            "date": "20251022",
+            "open": 7.4,
+            "high": 7.44,
+            "low": 7.3,
+            "close": 7.37,
+            "volume": 41703.51
+          },
+          {
+            "date": "20251021",
+            "open": 7.23,
+            "high": 7.42,
+            "low": 7.15,
+            "close": 7.38,
+            "volume": 54405.0
+          },
+          {
+            "date": "20251020",
+            "open": 7.08,
+            "high": 7.25,
+            "low": 7.05,
+            "close": 7.19,
+            "volume": 50701.65
+          },
+          {
+            "date": "20251017",
+            "open": 7.19,
+            "high": 7.29,
+            "low": 7.02,
+            "close": 7.04,
+            "volume": 50553.0
+          },
+          {
+            "date": "20251016",
+            "open": 7.24,
+            "high": 7.32,
+            "low": 7.17,
+            "close": 7.19,
+            "volume": 47470.0
+          },
+          {
+            "date": "20251015",
+            "open": 7.29,
+            "high": 7.34,
+            "low": 7.21,
+            "close": 7.24,
+            "volume": 43705.5
+          },
+          {
+            "date": "20251014",
+            "open": 7.3,
+            "high": 7.4,
+            "low": 7.25,
+            "close": 7.28,
+            "volume": 76619.57
           }
         ],
-        "latest_price": 7.39,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.203014"
+        "latest_price": 7.28,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000007",
@@ -1860,15 +2109,15 @@
         "debt_ratio": 0.01063
       },
       "technical_indicators": {
-        "current_price": 10.09,
-        "ma5": 10.068000000000001,
-        "ma10": 10.253,
-        "ma20": 9.9725,
-        "ma60": 10.09,
-        "rsi": 59.54692556634305,
-        "macd": 0.370911635828465,
-        "signal": 0.4431604644376927,
-        "volume_ratio": 0.7285059991066454,
+        "current_price": 10.55,
+        "ma5": 10.187999999999999,
+        "ma10": 10.319999999999999,
+        "ma20": 10.0105,
+        "ma60": 10.55,
+        "rsi": 66.86046511627909,
+        "macd": 0.38863758513641855,
+        "signal": 0.4405061959749733,
+        "volume_ratio": 1.6163788620896635,
         "status": "calculated"
       },
       "industry_concept": {
@@ -1901,19 +2150,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:23.732276",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.203014"
+        "timestamp": "2025-12-13T23:42:37.788199",
+        "success_rate": 1.0
+      }
     },
     "000008": {
       "code": "000008",
-      "timestamp": "2025-12-07T22:52:24.032829",
-      "collection_time": "2025-12-07 22:52:24",
+      "timestamp": "2025-12-13T23:42:38.089058",
+      "collection_time": "2025-12-13 23:42:38",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -1934,6 +2182,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 2.91,
+            "high": 2.93,
+            "low": 2.89,
+            "close": 2.89,
+            "volume": 337368.08
+          },
           {
             "date": "20251211",
             "open": 2.97,
@@ -2221,12 +2477,67 @@
             "low": 2.87,
             "close": 2.92,
             "volume": 458361.0
+          },
+          {
+            "date": "20251022",
+            "open": 2.9,
+            "high": 2.94,
+            "low": 2.89,
+            "close": 2.92,
+            "volume": 656265.93
+          },
+          {
+            "date": "20251021",
+            "open": 2.83,
+            "high": 2.9,
+            "low": 2.82,
+            "close": 2.89,
+            "volume": 762576.17
+          },
+          {
+            "date": "20251020",
+            "open": 2.83,
+            "high": 2.84,
+            "low": 2.8,
+            "close": 2.82,
+            "volume": 369379.0
+          },
+          {
+            "date": "20251017",
+            "open": 2.86,
+            "high": 2.88,
+            "low": 2.8,
+            "close": 2.8,
+            "volume": 530177.91
+          },
+          {
+            "date": "20251016",
+            "open": 2.9,
+            "high": 2.92,
+            "low": 2.86,
+            "close": 2.86,
+            "volume": 462339.38
+          },
+          {
+            "date": "20251015",
+            "open": 2.89,
+            "high": 2.91,
+            "low": 2.87,
+            "close": 2.9,
+            "volume": 490776.66
+          },
+          {
+            "date": "20251014",
+            "open": 2.91,
+            "high": 2.92,
+            "low": 2.87,
+            "close": 2.9,
+            "volume": 538971.0
           }
         ],
-        "latest_price": 2.92,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.220018"
+        "latest_price": 2.9,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000008",
@@ -2242,15 +2553,15 @@
         "debt_ratio": -0.184533
       },
       "technical_indicators": {
-        "current_price": 2.9,
-        "ma5": 2.9859999999999998,
-        "ma10": 3.033,
-        "ma20": 3.1,
-        "ma60": 2.9,
-        "rsi": 40.32258064516128,
-        "macd": -0.02302337648341979,
-        "signal": 0.005120990854971294,
-        "volume_ratio": 0.9718022318731762,
+        "current_price": 2.89,
+        "ma5": 2.9539999999999997,
+        "ma10": 3.009,
+        "ma20": 3.0774999999999997,
+        "ma60": 2.89,
+        "rsi": 32.14285714285717,
+        "macd": -0.030178366787813715,
+        "signal": 0.00018428979392085855,
+        "volume_ratio": 0.6613129410236755,
         "status": "calculated"
       },
       "industry_concept": {
@@ -2283,19 +2594,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:24.033382",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.220018"
+        "timestamp": "2025-12-13T23:42:38.110029",
+        "success_rate": 1.0
+      }
     },
     "000009": {
       "code": "000009",
-      "timestamp": "2025-12-07T22:52:24.334211",
-      "collection_time": "2025-12-07 22:52:24",
+      "timestamp": "2025-12-13T23:42:38.411417",
+      "collection_time": "2025-12-13 23:42:38",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -2316,6 +2626,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 10.16,
+            "high": 10.35,
+            "low": 10.13,
+            "close": 10.29,
+            "volume": 310746.62
+          },
           {
             "date": "20251211",
             "open": 10.3,
@@ -2603,12 +2921,67 @@
             "low": 10.82,
             "close": 11.01,
             "volume": 730199.01
+          },
+          {
+            "date": "20251022",
+            "open": 10.88,
+            "high": 10.88,
+            "low": 10.62,
+            "close": 10.73,
+            "volume": 260773.19
+          },
+          {
+            "date": "20251021",
+            "open": 10.9,
+            "high": 11.08,
+            "low": 10.81,
+            "close": 10.94,
+            "volume": 425397.14
+          },
+          {
+            "date": "20251020",
+            "open": 10.95,
+            "high": 10.98,
+            "low": 10.75,
+            "close": 10.86,
+            "volume": 335123.55
+          },
+          {
+            "date": "20251017",
+            "open": 11.45,
+            "high": 11.5,
+            "low": 10.75,
+            "close": 10.8,
+            "volume": 536537.15
+          },
+          {
+            "date": "20251016",
+            "open": 11.57,
+            "high": 11.71,
+            "low": 11.41,
+            "close": 11.46,
+            "volume": 357156.12
+          },
+          {
+            "date": "20251015",
+            "open": 11.43,
+            "high": 11.64,
+            "low": 11.23,
+            "close": 11.6,
+            "volume": 533488.13
+          },
+          {
+            "date": "20251014",
+            "open": 11.97,
+            "high": 12.06,
+            "low": 11.32,
+            "close": 11.42,
+            "volume": 713385.42
           }
         ],
-        "latest_price": 11.01,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.232016"
+        "latest_price": 11.42,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000009",
@@ -2624,15 +2997,15 @@
         "debt_ratio": 0.062629
       },
       "technical_indicators": {
-        "current_price": 10.22,
-        "ma5": 10.282,
-        "ma10": 10.193000000000001,
-        "ma20": 10.3795,
-        "ma60": 10.22,
-        "rsi": 55.952380952380985,
-        "macd": -0.1882205095702698,
-        "signal": -0.21521706724105102,
-        "volume_ratio": 0.7272770969796377,
+        "current_price": 10.29,
+        "ma5": 10.290000000000001,
+        "ma10": 10.209999999999999,
+        "ma20": 10.3355,
+        "ma60": 10.29,
+        "rsi": 61.58536585365852,
+        "macd": -0.18784849670294612,
+        "signal": -0.2283421725009441,
+        "volume_ratio": 1.2439217499339665,
         "status": "calculated"
       },
       "industry_concept": {
@@ -2665,19 +3038,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:24.337096",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.232016"
+        "timestamp": "2025-12-13T23:42:38.423948",
+        "success_rate": 1.0
+      }
     },
     "000010": {
       "code": "000010",
-      "timestamp": "2025-12-07T22:52:24.637753",
-      "collection_time": "2025-12-07 22:52:24",
+      "timestamp": "2025-12-13T23:42:38.724978",
+      "collection_time": "2025-12-13 23:42:38",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -2698,6 +3070,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 3.58,
+            "high": 3.6,
+            "low": 3.52,
+            "close": 3.57,
+            "volume": 83087.61
+          },
           {
             "date": "20251211",
             "open": 3.67,
@@ -2985,12 +3365,67 @@
             "low": 3.86,
             "close": 3.98,
             "volume": 435415.0
+          },
+          {
+            "date": "20251022",
+            "open": 4.07,
+            "high": 4.07,
+            "low": 3.96,
+            "close": 3.98,
+            "volume": 332199.0
+          },
+          {
+            "date": "20251021",
+            "open": 4.15,
+            "high": 4.15,
+            "low": 3.98,
+            "close": 4.07,
+            "volume": 296353.01
+          },
+          {
+            "date": "20251020",
+            "open": 3.92,
+            "high": 4.2,
+            "low": 3.91,
+            "close": 4.15,
+            "volume": 529973.51
+          },
+          {
+            "date": "20251017",
+            "open": 3.94,
+            "high": 3.95,
+            "low": 3.87,
+            "close": 3.87,
+            "volume": 164616.0
+          },
+          {
+            "date": "20251016",
+            "open": 3.99,
+            "high": 4.02,
+            "low": 3.88,
+            "close": 3.91,
+            "volume": 199223.5
+          },
+          {
+            "date": "20251015",
+            "open": 3.99,
+            "high": 4.05,
+            "low": 3.89,
+            "close": 4.02,
+            "volume": 284308.0
+          },
+          {
+            "date": "20251014",
+            "open": 4.27,
+            "high": 4.35,
+            "low": 3.98,
+            "close": 4.02,
+            "volume": 493817.51
           }
         ],
-        "latest_price": 3.98,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.244021"
+        "latest_price": 4.02,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000010",
@@ -3006,15 +3441,15 @@
         "debt_ratio": -0.252613
       },
       "technical_indicators": {
-        "current_price": 3.6,
-        "ma5": 3.6759999999999997,
-        "ma10": 3.774,
-        "ma20": 3.806,
-        "ma60": 3.6,
-        "rsi": 48.648648648648646,
-        "macd": -0.061927120757108156,
-        "signal": -0.03870047543184361,
-        "volume_ratio": 0.6149739917701599,
+        "current_price": 3.57,
+        "ma5": 3.6439999999999997,
+        "ma10": 3.7340000000000004,
+        "ma20": 3.7904999999999993,
+        "ma60": 3.57,
+        "rsi": 30.508474576271198,
+        "macd": -0.07332891387293117,
+        "signal": -0.047913531535324,
+        "volume_ratio": 0.5936720555262606,
         "status": "calculated"
       },
       "industry_concept": {
@@ -3047,19 +3482,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:24.638282",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.244021"
+        "timestamp": "2025-12-13T23:42:38.738557",
+        "success_rate": 1.0
+      }
     },
     "000011": {
       "code": "000011",
-      "timestamp": "2025-12-07T22:52:24.939180",
-      "collection_time": "2025-12-07 22:52:24",
+      "timestamp": "2025-12-13T23:42:39.039904",
+      "collection_time": "2025-12-13 23:42:39",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -3080,6 +3514,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 9.15,
+            "high": 9.17,
+            "low": 8.95,
+            "close": 8.96,
+            "volume": 67140.0
+          },
           {
             "date": "20251211",
             "open": 9.42,
@@ -3367,12 +3809,67 @@
             "low": 11.3,
             "close": 11.3,
             "volume": 98270.08
+          },
+          {
+            "date": "20251022",
+            "open": 10.05,
+            "high": 10.5,
+            "low": 9.99,
+            "close": 10.27,
+            "volume": 250025.24
+          },
+          {
+            "date": "20251021",
+            "open": 9.78,
+            "high": 10.08,
+            "low": 9.66,
+            "close": 10.03,
+            "volume": 191324.4
+          },
+          {
+            "date": "20251020",
+            "open": 9.94,
+            "high": 10.0,
+            "low": 9.66,
+            "close": 9.71,
+            "volume": 145293.0
+          },
+          {
+            "date": "20251017",
+            "open": 10.05,
+            "high": 10.08,
+            "low": 9.73,
+            "close": 9.76,
+            "volume": 277012.24
+          },
+          {
+            "date": "20251016",
+            "open": 9.39,
+            "high": 10.36,
+            "low": 9.33,
+            "close": 10.05,
+            "volume": 393791.98
+          },
+          {
+            "date": "20251015",
+            "open": 9.76,
+            "high": 9.78,
+            "low": 9.36,
+            "close": 9.42,
+            "volume": 150761.01
+          },
+          {
+            "date": "20251014",
+            "open": 10.03,
+            "high": 10.29,
+            "low": 9.68,
+            "close": 9.79,
+            "volume": 228803.63
           }
         ],
-        "latest_price": 11.3,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.259019"
+        "latest_price": 9.79,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000011",
@@ -3388,15 +3885,15 @@
         "debt_ratio": -0.004336
       },
       "technical_indicators": {
-        "current_price": 9.11,
-        "ma5": 9.322,
-        "ma10": 9.468,
-        "ma20": 9.72,
-        "ma60": 9.11,
-        "rsi": 39.99999999999999,
-        "macd": -0.33035551864109003,
-        "signal": -0.3128080827549294,
-        "volume_ratio": 1.4325703303684836,
+        "current_price": 8.96,
+        "ma5": 9.228,
+        "ma10": 9.372,
+        "ma20": 9.648,
+        "ma60": 8.96,
+        "rsi": 31.958762886597967,
+        "macd": -0.2668000631714236,
+        "signal": -0.2047458653307055,
+        "volume_ratio": 1.0559264841145817,
         "status": "calculated"
       },
       "industry_concept": {
@@ -3429,19 +3926,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:24.943441",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.259019"
+        "timestamp": "2025-12-13T23:42:39.047488",
+        "success_rate": 1.0
+      }
     },
     "000012": {
       "code": "000012",
-      "timestamp": "2025-12-07T22:52:25.244295",
-      "collection_time": "2025-12-07 22:52:25",
+      "timestamp": "2025-12-13T23:42:39.348428",
+      "collection_time": "2025-12-13 23:42:39",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -3462,6 +3958,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 4.59,
+            "high": 4.6,
+            "low": 4.48,
+            "close": 4.57,
+            "volume": 531923.46
+          },
           {
             "date": "20251211",
             "open": 4.63,
@@ -3749,12 +4253,67 @@
             "low": 4.64,
             "close": 4.7,
             "volume": 145698.91
+          },
+          {
+            "date": "20251022",
+            "open": 4.66,
+            "high": 4.69,
+            "low": 4.64,
+            "close": 4.66,
+            "volume": 82891.17
+          },
+          {
+            "date": "20251021",
+            "open": 4.64,
+            "high": 4.68,
+            "low": 4.63,
+            "close": 4.66,
+            "volume": 114110.53
+          },
+          {
+            "date": "20251020",
+            "open": 4.64,
+            "high": 4.65,
+            "low": 4.61,
+            "close": 4.64,
+            "volume": 96180.31
+          },
+          {
+            "date": "20251017",
+            "open": 4.66,
+            "high": 4.69,
+            "low": 4.61,
+            "close": 4.63,
+            "volume": 128072.84
+          },
+          {
+            "date": "20251016",
+            "open": 4.74,
+            "high": 4.74,
+            "low": 4.65,
+            "close": 4.67,
+            "volume": 126467.65
+          },
+          {
+            "date": "20251015",
+            "open": 4.71,
+            "high": 4.77,
+            "low": 4.71,
+            "close": 4.73,
+            "volume": 155385.48
+          },
+          {
+            "date": "20251014",
+            "open": 4.66,
+            "high": 4.75,
+            "low": 4.65,
+            "close": 4.72,
+            "volume": 199637.86
           }
         ],
-        "latest_price": 4.7,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.265022"
+        "latest_price": 4.72,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000012",
@@ -3770,15 +4329,15 @@
         "debt_ratio": 0.065294
       },
       "technical_indicators": {
-        "current_price": 4.58,
-        "ma5": 4.67,
-        "ma10": 4.702,
-        "ma20": 4.728,
-        "ma60": 4.58,
-        "rsi": 42.30769230769233,
-        "macd": -0.03397047577157419,
-        "signal": -0.020694075700101552,
-        "volume_ratio": 2.179785008400006,
+        "current_price": 4.57,
+        "ma5": 4.638,
+        "ma10": 4.691000000000001,
+        "ma20": 4.71,
+        "ma60": 4.57,
+        "rsi": 45.833333333333336,
+        "macd": -0.041122915793145864,
+        "signal": -0.02480671246528218,
+        "volume_ratio": 3.1877367572219244,
         "status": "calculated"
       },
       "industry_concept": {
@@ -3811,19 +4370,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:25.246789",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.265022"
+        "timestamp": "2025-12-13T23:42:39.355739",
+        "success_rate": 1.0
+      }
     },
     "000014": {
       "code": "000014",
-      "timestamp": "2025-12-07T22:52:25.547409",
-      "collection_time": "2025-12-07 22:52:25",
+      "timestamp": "2025-12-13T23:42:39.656129",
+      "collection_time": "2025-12-13 23:42:39",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -3844,6 +4402,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 14.79,
+            "high": 14.86,
+            "low": 13.77,
+            "close": 13.92,
+            "volume": 192214.6
+          },
           {
             "date": "20251211",
             "open": 15.13,
@@ -4131,12 +4697,67 @@
             "low": 22.11,
             "close": 22.46,
             "volume": 333475.56
+          },
+          {
+            "date": "20251022",
+            "open": 22.7,
+            "high": 23.99,
+            "low": 22.68,
+            "close": 23.3,
+            "volume": 202754.15
+          },
+          {
+            "date": "20251021",
+            "open": 21.8,
+            "high": 22.98,
+            "low": 21.61,
+            "close": 22.41,
+            "volume": 173482.18
+          },
+          {
+            "date": "20251020",
+            "open": 22.88,
+            "high": 23.36,
+            "low": 21.97,
+            "close": 22.02,
+            "volume": 243547.13
+          },
+          {
+            "date": "20251017",
+            "open": 22.92,
+            "high": 24.56,
+            "low": 21.71,
+            "close": 23.53,
+            "volume": 358025.1
+          },
+          {
+            "date": "20251016",
+            "open": 20.52,
+            "high": 22.33,
+            "low": 20.52,
+            "close": 22.33,
+            "volume": 176224.04
+          },
+          {
+            "date": "20251015",
+            "open": 20.34,
+            "high": 20.4,
+            "low": 19.01,
+            "close": 20.3,
+            "volume": 167672.51
+          },
+          {
+            "date": "20251014",
+            "open": 21.0,
+            "high": 21.64,
+            "low": 20.19,
+            "close": 20.37,
+            "volume": 192878.6
           }
         ],
-        "latest_price": 22.46,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.271020"
+        "latest_price": 20.37,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000014",
@@ -4152,15 +4773,15 @@
         "debt_ratio": 0.14391
       },
       "technical_indicators": {
-        "current_price": 14.58,
-        "ma5": 14.728,
-        "ma10": 15.0,
-        "ma20": 15.4655,
-        "ma60": 14.58,
-        "rsi": 41.97530864197532,
-        "macd": -1.0523264187339283,
-        "signal": -1.178664633903768,
-        "volume_ratio": 2.115303045241568,
+        "current_price": 13.92,
+        "ma5": 14.575999999999999,
+        "ma10": 14.784,
+        "ma20": 15.343499999999997,
+        "ma60": 13.92,
+        "rsi": 34.4632768361582,
+        "macd": -0.9951274480350136,
+        "signal": -1.0483682863413297,
+        "volume_ratio": 1.3170844049248638,
         "status": "calculated"
       },
       "industry_concept": {
@@ -4193,19 +4814,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:25.548218",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.271020"
+        "timestamp": "2025-12-13T23:42:39.666235",
+        "success_rate": 1.0
+      }
     },
     "000016": {
       "code": "000016",
-      "timestamp": "2025-12-07T22:52:25.849039",
-      "collection_time": "2025-12-07 22:52:25",
+      "timestamp": "2025-12-13T23:42:39.967801",
+      "collection_time": "2025-12-13 23:42:39",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -4226,6 +4846,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 5.12,
+            "high": 5.2,
+            "low": 5.12,
+            "close": 5.17,
+            "volume": 171815.02
+          },
           {
             "date": "20251211",
             "open": 5.31,
@@ -4513,12 +5141,67 @@
             "low": 5.5,
             "close": 5.56,
             "volume": 1310577.25
+          },
+          {
+            "date": "20251022",
+            "open": 5.37,
+            "high": 5.6,
+            "low": 5.33,
+            "close": 5.38,
+            "volume": 1101953.36
+          },
+          {
+            "date": "20251021",
+            "open": 4.99,
+            "high": 5.5,
+            "low": 4.97,
+            "close": 5.5,
+            "volume": 648167.24
+          },
+          {
+            "date": "20251020",
+            "open": 5.04,
+            "high": 5.06,
+            "low": 4.98,
+            "close": 5.0,
+            "volume": 174071.88
+          },
+          {
+            "date": "20251017",
+            "open": 5.08,
+            "high": 5.11,
+            "low": 4.96,
+            "close": 4.97,
+            "volume": 301704.11
+          },
+          {
+            "date": "20251016",
+            "open": 5.14,
+            "high": 5.14,
+            "low": 5.07,
+            "close": 5.08,
+            "volume": 233245.02
+          },
+          {
+            "date": "20251015",
+            "open": 5.12,
+            "high": 5.15,
+            "low": 5.08,
+            "close": 5.14,
+            "volume": 223050.1
+          },
+          {
+            "date": "20251014",
+            "open": 5.25,
+            "high": 5.26,
+            "low": 5.1,
+            "close": 5.11,
+            "volume": 320528.63
           }
         ],
-        "latest_price": 5.56,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.277015"
+        "latest_price": 5.11,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000016",
@@ -4534,15 +5217,15 @@
         "debt_ratio": -0.229738
       },
       "technical_indicators": {
-        "current_price": 5.16,
-        "ma5": 5.23,
-        "ma10": 5.243,
-        "ma20": 5.2445,
-        "ma60": 5.16,
-        "rsi": 55.65217391304348,
-        "macd": -0.06187964861910089,
-        "signal": -0.0745436404903416,
-        "volume_ratio": 1.0270010330760746,
+        "current_price": 5.17,
+        "ma5": 5.2219999999999995,
+        "ma10": 5.24,
+        "ma20": 5.2265,
+        "ma60": 5.17,
+        "rsi": 50.96153846153844,
+        "macd": -0.03958623248144999,
+        "signal": -0.03925326242903073,
+        "volume_ratio": 0.43443698258097413,
         "status": "calculated"
       },
       "industry_concept": {
@@ -4575,19 +5258,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:25.852153",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.277015"
+        "timestamp": "2025-12-13T23:42:39.977592",
+        "success_rate": 1.0
+      }
     },
     "000017": {
       "code": "000017",
-      "timestamp": "2025-12-07T22:52:26.152913",
-      "collection_time": "2025-12-07 22:52:26",
+      "timestamp": "2025-12-13T23:42:40.278837",
+      "collection_time": "2025-12-13 23:42:40",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -4608,6 +5290,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 7.87,
+            "high": 7.96,
+            "low": 7.6,
+            "close": 7.67,
+            "volume": 285835.37
+          },
           {
             "date": "20251211",
             "open": 8.33,
@@ -4895,12 +5585,67 @@
             "low": 6.95,
             "close": 7.16,
             "volume": 320299.1
+          },
+          {
+            "date": "20251022",
+            "open": 6.97,
+            "high": 7.18,
+            "low": 6.9,
+            "close": 7.03,
+            "volume": 212728.62
+          },
+          {
+            "date": "20251021",
+            "open": 7.3,
+            "high": 7.3,
+            "low": 7.14,
+            "close": 7.21,
+            "volume": 201084.22
+          },
+          {
+            "date": "20251020",
+            "open": 7.13,
+            "high": 7.33,
+            "low": 7.04,
+            "close": 7.19,
+            "volume": 323649.39
+          },
+          {
+            "date": "20251017",
+            "open": 7.39,
+            "high": 7.39,
+            "low": 7.21,
+            "close": 7.22,
+            "volume": 344165.0
+          },
+          {
+            "date": "20251016",
+            "open": 7.21,
+            "high": 7.41,
+            "low": 7.16,
+            "close": 7.24,
+            "volume": 396289.62
+          },
+          {
+            "date": "20251015",
+            "open": 7.29,
+            "high": 7.3,
+            "low": 7.03,
+            "close": 7.2,
+            "volume": 311298.04
+          },
+          {
+            "date": "20251014",
+            "open": 7.49,
+            "high": 7.55,
+            "low": 7.16,
+            "close": 7.22,
+            "volume": 488284.25
           }
         ],
-        "latest_price": 7.16,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.282013"
+        "latest_price": 7.22,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000017",
@@ -4916,15 +5661,15 @@
         "debt_ratio": 0.024844
       },
       "technical_indicators": {
-        "current_price": 7.92,
-        "ma5": 8.106,
-        "ma10": 7.925,
-        "ma20": 7.843999999999999,
-        "ma60": 7.92,
-        "rsi": 35.01144164759725,
-        "macd": 0.22907354022015358,
-        "signal": 0.2234232620517716,
-        "volume_ratio": 1.055485306311781,
+        "current_price": 7.67,
+        "ma5": 8.042,
+        "ma10": 7.920999999999999,
+        "ma20": 7.8785,
+        "ma60": 7.67,
+        "rsi": 41.35135135135135,
+        "macd": 0.18909841548985185,
+        "signal": 0.21353932007651125,
+        "volume_ratio": 0.8134002832786927,
         "status": "calculated"
       },
       "industry_concept": {
@@ -4957,19 +5702,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:26.154355",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.282013"
+        "timestamp": "2025-12-13T23:42:40.290457",
+        "success_rate": 1.0
+      }
     },
     "000019": {
       "code": "000019",
-      "timestamp": "2025-12-07T22:52:26.455429",
-      "collection_time": "2025-12-07 22:52:26",
+      "timestamp": "2025-12-13T23:42:40.592392",
+      "collection_time": "2025-12-13 23:42:40",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -4990,6 +5734,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 6.97,
+            "high": 7.03,
+            "low": 6.83,
+            "close": 6.85,
+            "volume": 140519.28
+          },
           {
             "date": "20251211",
             "open": 7.25,
@@ -5277,12 +6029,67 @@
             "low": 6.99,
             "close": 7.63,
             "volume": 554691.42
+          },
+          {
+            "date": "20251022",
+            "open": 6.89,
+            "high": 6.97,
+            "low": 6.87,
+            "close": 6.94,
+            "volume": 76409.0
+          },
+          {
+            "date": "20251021",
+            "open": 6.83,
+            "high": 6.92,
+            "low": 6.8,
+            "close": 6.9,
+            "volume": 90790.02
+          },
+          {
+            "date": "20251020",
+            "open": 6.86,
+            "high": 6.88,
+            "low": 6.77,
+            "close": 6.83,
+            "volume": 66582.31
+          },
+          {
+            "date": "20251017",
+            "open": 6.78,
+            "high": 6.9,
+            "low": 6.78,
+            "close": 6.85,
+            "volume": 84186.8
+          },
+          {
+            "date": "20251016",
+            "open": 6.83,
+            "high": 6.85,
+            "low": 6.78,
+            "close": 6.81,
+            "volume": 65684.06
+          },
+          {
+            "date": "20251015",
+            "open": 6.85,
+            "high": 6.92,
+            "low": 6.77,
+            "close": 6.84,
+            "volume": 101976.02
+          },
+          {
+            "date": "20251014",
+            "open": 6.73,
+            "high": 6.88,
+            "low": 6.71,
+            "close": 6.88,
+            "volume": 143918.19
           }
         ],
-        "latest_price": 7.63,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.298015"
+        "latest_price": 6.88,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000019",
@@ -5298,15 +6105,15 @@
         "debt_ratio": 0.063997
       },
       "technical_indicators": {
-        "current_price": 7.0,
-        "ma5": 7.142,
-        "ma10": 7.165000000000001,
-        "ma20": 7.2635000000000005,
-        "ma60": 7.0,
-        "rsi": 38.61386138613862,
-        "macd": -0.05298585224013408,
-        "signal": -0.035126736206381834,
-        "volume_ratio": 1.3373631573152522,
+        "current_price": 6.85,
+        "ma5": 7.08,
+        "ma10": 7.13,
+        "ma20": 7.242999999999999,
+        "ma60": 6.85,
+        "rsi": 27.604166666666686,
+        "macd": -0.033175847369909306,
+        "signal": 0.01590315815806743,
+        "volume_ratio": 0.9697097610413671,
         "status": "calculated"
       },
       "industry_concept": {
@@ -5339,19 +6146,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:26.458712",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.298015"
+        "timestamp": "2025-12-13T23:42:40.607476",
+        "success_rate": 1.0
+      }
     },
     "000020": {
       "code": "000020",
-      "timestamp": "2025-12-07T22:52:26.759194",
-      "collection_time": "2025-12-07 22:52:26",
+      "timestamp": "2025-12-13T23:42:40.908274",
+      "collection_time": "2025-12-13 23:42:40",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -5372,6 +6178,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 16.33,
+            "high": 16.39,
+            "low": 15.31,
+            "close": 15.33,
+            "volume": 100014.01
+          },
           {
             "date": "20251211",
             "open": 16.75,
@@ -5659,12 +6473,67 @@
             "low": 14.61,
             "close": 14.75,
             "volume": 130035.0
+          },
+          {
+            "date": "20251022",
+            "open": 14.55,
+            "high": 14.83,
+            "low": 14.5,
+            "close": 14.56,
+            "volume": 90863.0
+          },
+          {
+            "date": "20251021",
+            "open": 14.3,
+            "high": 14.53,
+            "low": 14.12,
+            "close": 14.53,
+            "volume": 57260.01
+          },
+          {
+            "date": "20251020",
+            "open": 14.05,
+            "high": 14.4,
+            "low": 14.05,
+            "close": 14.28,
+            "volume": 72130.0
+          },
+          {
+            "date": "20251017",
+            "open": 14.28,
+            "high": 14.36,
+            "low": 13.87,
+            "close": 13.87,
+            "volume": 71791.05
+          },
+          {
+            "date": "20251016",
+            "open": 14.6,
+            "high": 14.87,
+            "low": 14.21,
+            "close": 14.28,
+            "volume": 69933.16
+          },
+          {
+            "date": "20251015",
+            "open": 14.75,
+            "high": 14.88,
+            "low": 14.41,
+            "close": 14.58,
+            "volume": 91247.3
+          },
+          {
+            "date": "20251014",
+            "open": 14.55,
+            "high": 15.11,
+            "low": 14.4,
+            "close": 14.9,
+            "volume": 141817.32
           }
         ],
-        "latest_price": 14.75,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.303012"
+        "latest_price": 14.9,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000020",
@@ -5680,15 +6549,15 @@
         "debt_ratio": 0.023493
       },
       "technical_indicators": {
-        "current_price": 16.09,
-        "ma5": 16.53,
-        "ma10": 16.485999999999997,
-        "ma20": 16.2035,
-        "ma60": 16.09,
-        "rsi": 50.834403080872896,
-        "macd": 0.3485527183953714,
-        "signal": 0.3692405102008648,
-        "volume_ratio": 0.7945298915908875,
+        "current_price": 15.33,
+        "ma5": 16.47,
+        "ma10": 16.364,
+        "ma20": 16.188,
+        "ma60": 15.33,
+        "rsi": 47.99999999999999,
+        "macd": 0.2409996704887103,
+        "signal": 0.34611170388735923,
+        "volume_ratio": 0.8009546586703721,
         "status": "calculated"
       },
       "industry_concept": {
@@ -5721,19 +6590,18 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:26.761022",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.303012"
+        "timestamp": "2025-12-13T23:42:40.920682",
+        "success_rate": 1.0
+      }
     },
     "000021": {
       "code": "000021",
-      "timestamp": "2025-12-07T22:52:43.988000",
-      "collection_time": "2025-12-07 22:52:43",
+      "timestamp": "2025-12-13T23:42:41.221788",
+      "collection_time": "2025-12-13 23:42:41",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -5754,6 +6622,14 @@
       },
       "kline_data": {
         "daily": [
+          {
+            "date": "20251212",
+            "open": 23.81,
+            "high": 24.64,
+            "low": 23.6,
+            "close": 24.35,
+            "volume": 537545.1
+          },
           {
             "date": "20251211",
             "open": 24.4,
@@ -6041,12 +6917,67 @@
             "low": 27.27,
             "close": 27.96,
             "volume": 1250435.43
+          },
+          {
+            "date": "20251022",
+            "open": 27.96,
+            "high": 28.24,
+            "low": 27.3,
+            "close": 27.83,
+            "volume": 877649.65
+          },
+          {
+            "date": "20251021",
+            "open": 27.44,
+            "high": 28.96,
+            "low": 27.2,
+            "close": 28.33,
+            "volume": 1527293.72
+          },
+          {
+            "date": "20251020",
+            "open": 27.98,
+            "high": 28.12,
+            "low": 26.9,
+            "close": 27.24,
+            "volume": 1433375.69
+          },
+          {
+            "date": "20251017",
+            "open": 29.45,
+            "high": 29.92,
+            "low": 27.4,
+            "close": 27.4,
+            "volume": 2016146.32
+          },
+          {
+            "date": "20251016",
+            "open": 29.48,
+            "high": 30.93,
+            "low": 28.92,
+            "close": 30.44,
+            "volume": 2160992.62
+          },
+          {
+            "date": "20251015",
+            "open": 29.5,
+            "high": 29.94,
+            "low": 28.0,
+            "close": 29.5,
+            "volume": 1820584.55
+          },
+          {
+            "date": "20251014",
+            "open": 31.5,
+            "high": 32.34,
+            "low": 28.6,
+            "close": 28.85,
+            "volume": 2718205.85
           }
         ],
-        "latest_price": 27.96,
-        "data_points": 36,
-        "source": "incremental_update",
-        "update_time": "2025-12-12T11:42:07.308013"
+        "latest_price": 28.85,
+        "data_points": 44,
+        "source": "batch_rotation"
       },
       "financial_data": {
         "code": "000021",
@@ -6062,15 +6993,15 @@
         "debt_ratio": 0.074838
       },
       "technical_indicators": {
-        "current_price": 23.78,
-        "ma5": 24.196,
-        "ma10": 24.118,
-        "ma20": 23.901500000000002,
-        "ma60": 23.78,
-        "rsi": 63.75545851528385,
-        "macd": -0.5903057104586189,
-        "signal": -0.7756236925003535,
-        "volume_ratio": 0.7574699425300934,
+        "current_price": 24.35,
+        "ma5": 24.29,
+        "ma10": 24.163999999999998,
+        "ma20": 23.881999999999998,
+        "ma60": 24.35,
+        "rsi": 64.4539614561028,
+        "macd": -0.5692060211342778,
+        "signal": -0.7831945369562443,
+        "volume_ratio": 1.118976391408358,
         "status": "calculated"
       },
       "industry_concept": {
@@ -6103,14 +7034,13 @@
         "financial_data": "baostock",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
-        "kline_data": "none"
+        "kline_data": "batch_rotation"
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-07T22:52:43.991858",
-        "success_rate": 0.8
-      },
-      "last_kline_update": "2025-12-12T11:42:07.308013"
+        "timestamp": "2025-12-13T23:42:41.231691",
+        "success_rate": 1.0
+      }
     },
     "000025": {
       "code": "000025",
@@ -76177,6 +77107,6 @@
       "last_kline_update": "2025-12-12T11:45:32.251101"
     }
   },
-  "last_updated": "2025-12-12T11:58:47.288813",
+  "last_updated": "2025-12-13T23:42:41.605587",
   "total_stocks": 200
 }

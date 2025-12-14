@@ -454,14 +454,14 @@ def main():
     # 更新主板股票列表为过滤后的列表
     mainboard_stocks = filtered_stocks
     
-    # 调整日期范围：150天（约120个交易日，用于计算MA120等长期指标）
+    # 调整日期范围：60天（约60个交易日，用于计算MA60等指标）
     end_date = datetime.now().strftime("%Y-%m-%d")
-    start_date = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")  # 150个交易日约180个自然日
+    start_date = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")  # 60个交易日约90个自然日
     
     # 检查CSD接口可用性，决定使用哪种数据获取方式
     use_csd = check_csd_available()
     
-    print(f"\n[4/6] 逐个获取 {len(mainboard_stocks)} 只股票的30日K线数据...")
+    print(f"\n[4/6] 逐个获取 {len(mainboard_stocks)} 只股票的60日K线数据...")
     if use_csd:
         print("💡 使用CSD接口（序列数据）- 完整OHLCV数据")
     else:
