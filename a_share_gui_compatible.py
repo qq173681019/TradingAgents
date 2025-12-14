@@ -4833,6 +4833,25 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     def calculate_fundamental_score(self, fund_data):
         """计算基本面评分 (5-10分)"""
         try:
+            ticker = fund_data.get('code', '未知')
+            print(f"\n{'='*70}")
+            print(f"[calculate_fundamental_score] {ticker} - 原始数据")
+            print(f"{'='*70}")
+            print(f"  🔍 数据源标记: {fund_data.get('data_source', '未标记')}")
+            print(f"  PE市盈率: {fund_data.get('pe_ratio')}")
+            print(f"  PB市净率: {fund_data.get('pb_ratio')}")
+            print(f"  ROE净资产收益率: {fund_data.get('roe')}")
+            print(f"  营收增长率: {fund_data.get('revenue_growth')}")
+            print(f"  利润增长率: {fund_data.get('profit_growth')}")
+            print(f"{'='*70}")
+            
+            # 🔧 统一ROE格式：如果是小数形式(0-1)转换为百分比形式
+            roe = fund_data.get('roe')
+            if roe is not None and roe < 1 and roe > 0:
+                fund_data = fund_data.copy()  # 创建副本避免修改原数据
+                fund_data['roe'] = roe * 100  # 0.15 → 15
+                print(f"[DEBUG] ROE格式转换: {roe:.4f} → {fund_data['roe']:.2f}%")
+            
             # 使用数值版本的基本面指数函数，避免 format 导致的字符串返回
             score = self.calculate_fundamental_index_value(
                 fund_data.get('pe_ratio'),
@@ -4842,8 +4861,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 fund_data.get('profit_growth', 0),
                 fund_data.get('code', '000000')
             )
+            
+            print(f"\n[calculate_fundamental_score] {ticker} - 最终结果: {score:.2f}/10")
+            print(f"{'='*70}\n")
+            
             return float(score) if score is not None else None
-        except Exception:
+        except Exception as e:
+            print(f"[ERROR] calculate_fundamental_score异常: {e}")
+            import traceback
+            traceback.print_exc()
             # 不再在此处隐式回退为7.0，交由调用方决定如何处理
             return None
     
@@ -5027,7 +5053,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                               font=("微软雅黑", 10),
                                               fg="#7f8c8d",
                                               bg="#f0f0f0")
-            self.scoring_rule_label.pack(side="left", padx=(0, 15))
+            # self.scoring_rule_label.pack(side="left", padx=(0, 15))  # 已隐藏评分显示
         except Exception:
             # 如果创建失败，确保属性存在以避免后续调用崩溃
             self.scoring_rule_label = None
@@ -8168,11 +8194,11 @@ K线更新后快速评分完成！
             index_display = self.format_recommendation_index(total_score, ticker)
             return index_display
     
-    def format_recommendation_index(self, score, ticker, technical_score=None, fundamental_score=None):
+    def format_recommendation_index(self, score, ticker, technical_score=None, fundamental_score=None, chip_score=None):
         """格式化推荐指数显示（10分制）
 
-        如果提供了 `technical_score` 和 `fundamental_score`（均为1-10分制），
-        会在输出中一并显示技术面和基本面分数。
+        如果提供了 `technical_score`、`fundamental_score` 和 `chip_score`（均为1-10分制），
+        会在输出中一并显示技术面、基本面和筹码健康度分数。
         """
         stock_info = self.get_stock_info_generic(ticker)
         
@@ -8222,18 +8248,25 @@ K线更新后快速评分完成！
             self.get_investor_type(score),
             self.get_risk_level(score)
         )
-        # 如果提供了技术面/基本面分数，附加显示
+        # 如果提供了技术面/基本面/筹码分数，附加显示
         extra_lines = ""
-        try:
-            if technical_score is not None:
-                extra_lines += "\n技术面评分: {:.1f}/10\n".format(float(technical_score))
-        except Exception:
-            pass
-        try:
-            if fundamental_score is not None:
-                extra_lines += "基本面评分: {:.1f}/10\n".format(float(fundamental_score))
-        except Exception:
-            pass
+        if technical_score is not None or fundamental_score is not None or chip_score is not None:
+            extra_lines += "\n三维度评分明细:\n"
+            try:
+                if technical_score is not None:
+                    extra_lines += "📈 技术面评分: {:.2f}/10\n".format(float(technical_score))
+            except Exception:
+                pass
+            try:
+                if fundamental_score is not None:
+                    extra_lines += "📊 基本面评分: {:.2f}/10\n".format(float(fundamental_score))
+            except Exception:
+                pass
+            try:
+                if chip_score is not None and chip_score > 0:
+                    extra_lines += "💎 筹码健康度: {:.2f}/10\n".format(float(chip_score))
+            except Exception:
+                pass
 
         return index_info + extra_lines
     
@@ -8373,7 +8406,8 @@ K线更新后快速评分完成！
                                 'pb_ratio': float(df.iloc[0]['pb']) if df.iloc[0]['pb'] else 2.0,
                                 'roe': roe,
                                 'market_cap': float(df.iloc[0]['total_mv']) * 10000, # Tushare单位是万
-                                'revenue_growth': 0.05
+                                'revenue_growth': 5.0,  # 百分比形式
+                                'profit_growth': 5.0    # 百分比形式，与Choice保持一致
                             }
                         else:
                             print(f"⚠ {ticker} Tushare基础数据为空")
@@ -8411,9 +8445,10 @@ K线更新后快速评分完成！
                                 return {
                                     'pe_ratio': float(row[0]) if row[0] else 15.0,
                                     'pb_ratio': float(row[1]) if row[1] else 2.0,
-                                    'roe': 0.1, # Baostock日线不含ROE，使用默认
+                                    'roe': 10.0,  # Baostock日线不含ROE，使用默认（百分比形式）
                                     'market_cap': 10000000000, # 估算
-                                    'revenue_growth': 0.05
+                                    'revenue_growth': 5.0,  # 百分比形式
+                                    'profit_growth': 5.0    # 百分比形式，与Choice保持一致
                                 }
                             else:
                                 print(f"⚠ {ticker} Baostock基础数据为空")
@@ -8467,10 +8502,76 @@ K线更新后快速评分完成！
                 else:
                     print(f"⚠ {ticker} akshare库未安装，跳过")
                 
-                # 5. 兜底方案：使用价格数据估算
+                # 5. 尝试腾讯财经接口（股票行情页面数据）
+                try:
+                    print(f"{ticker} 尝试腾讯财经接口获取PE/PB...")
+                    import requests
+                    import re
+                    # 构建股票代码
+                    if ticker.startswith('6'):
+                        tencent_code = f"sh{ticker}"
+                    else:
+                        tencent_code = f"sz{ticker}"
+                    
+                    # 腾讯股票详情页面
+                    url = f"http://qt.gtimg.cn/q={tencent_code}"
+                    resp = requests.get(url, timeout=5)
+                    if resp.status_code == 200:
+                        data = resp.text
+                        # 格式: v_sh600036="51~招商银行~..."
+                        parts = data.split('~')
+                        if len(parts) > 40:
+                            try:
+                                pe = float(parts[39]) if parts[39] and parts[39] != '' else None
+                                pb = float(parts[46]) if len(parts) > 46 and parts[46] and parts[46] != '' else None
+                                if pe and pb and pe > 0 and pb > 0:
+                                    print(f"✅ {ticker} 腾讯财经接口获取成功 - PE:{pe:.2f} PB:{pb:.2f}")
+                                    return {
+                                        'pe_ratio': pe,
+                                        'pb_ratio': pb,
+                                        'roe': 10.0,
+                                        'market_cap': float(parts[45]) * 100000000 if len(parts) > 45 and parts[45] else 10000000000,
+                                        'revenue_growth': 5.0,  # 百分比形式
+                                        'profit_growth': 5.0,   # 百分比形式，与Choice保持一致
+                                        'data_source': 'tencent'
+                                    }
+                            except (ValueError, IndexError) as e:
+                                print(f"⚠ {ticker} 腾讯数据解析失败: {e}")
+                except Exception as e_tencent:
+                    print(f"{ticker} 腾讯财经接口失败: {e_tencent}")
+                
+                # 6. 尝试东方财富接口
+                try:
+                    print(f"{ticker} 尝试东方财富接口获取PE/PB...")
+                    import requests
+                    # 东方财富个股资料接口
+                    secid = f"1.{ticker}" if ticker.startswith('6') else f"0.{ticker}"
+                    url = f"http://push2.eastmoney.com/api/qt/stock/get?secid={secid}&fields=f57,f58,f162,f167,f173"
+                    resp = requests.get(url, timeout=5)
+                    if resp.status_code == 200:
+                        json_data = resp.json()
+                        if json_data.get('data'):
+                            data = json_data['data']
+                            pe = data.get('f162')  # 市盈率（动态）
+                            pb = data.get('f173')  # 市净率
+                            if pe and pb and pe > 0 and pb > 0:
+                                print(f"✅ {ticker} 东方财富接口获取成功 - PE:{pe:.2f} PB:{pb:.2f}")
+                                return {
+                                    'pe_ratio': float(pe),
+                                    'pb_ratio': float(pb),
+                                    'roe': 10.0,
+                                    'market_cap': data.get('f116', 10000000000),
+                                    'revenue_growth': 5.0,  # 百分比形式
+                                    'profit_growth': 5.0,   # 百分比形式，与Choice保持一致
+                                    'data_source': 'eastmoney'
+                                }
+                except Exception as e_eastmoney:
+                    print(f"{ticker} 东方财富接口失败: {e_eastmoney}")
+                
+                # 7. 兜底方案：使用价格数据估算（标记为默认值）
                 if stock_individual_info is None or stock_individual_info.empty:
                     try:
-                        print(f"{ticker} 尝试价格估算基础数据...")
+                        print(f"⚠️ {ticker} 所有数据源失败，使用估算默认值...")
                         price = self.get_stock_price(ticker)
                         if price:
                             return {
@@ -8478,7 +8579,10 @@ K线更新后快速评分完成！
                                 'pb_ratio': 1.8,   # 使用市场平均PB
                                 'roe': 10.0,       # 使用市场平均ROE（统一为百分比形式）
                                 'market_cap': price * 1000000000,  # 估算市值
-                                'revenue_growth': 0.05
+                                'revenue_growth': 5.0,  # 百分比形式
+                                'profit_growth': 5.0,   # 百分比形式，与Choice保持一致
+                                'data_source': 'default',  # ⚠️ 标记为默认值
+                                'is_default_value': True   # ⚠️ 重要标记
                             }
                     except Exception as e2:
                         print(f"{ticker} 价格估算基础数据失败: {e2}")
@@ -8506,7 +8610,8 @@ K线更新后快速评分完成！
                         'pb_ratio': pb_ratio,
                         'roe': roe,
                         'market_cap': float(info_dict.get('总市值', '1000000000')),
-                        'revenue_growth': 0.05  # 默认值
+                        'revenue_growth': 5.0,  # 百分比形式
+                        'profit_growth': 5.0    # 百分比形式，与Choice保持一致
                     }
                 
             finally:
@@ -9034,9 +9139,10 @@ K线更新后快速评分完成！
                 return {
                     'pe_ratio': pe_ratio,
                     'pb_ratio': pb_ratio,
-                    'roe': roe / 100 if roe > 1 else roe,  # 转换为小数形式
+                    'roe': roe * 100 if (roe > 0 and roe < 1) else roe,  # 统一为百分比形式
                     'market_cap': market_cap,
-                    'revenue_growth': 0.05  # yfinance中较难获取，使用默认值
+                    'revenue_growth': 5.0,  # 百分比形式
+                    'profit_growth': 5.0    # 百分比形式，与Choice保持一致
                 }
             else:
                 print(f"yfinance获取 {ticker} 基础信息为空")
@@ -9625,8 +9731,12 @@ K线更新后快速评分完成！
             }
             
             # 使用标准评分函数（1-10分制），与批量分析保持一致
+            print(f"\n[SCORING-DEBUG] {ticker} 开始计算评分...")
+            print(f"[SCORING-DEBUG] 数据源标记: {fund_data_dict.get('data_source', '未知')}")
             tech_score = self.calculate_technical_score(tech_data_dict)
+            print(f"[SCORING-DEBUG] 技术面评分完成: {tech_score:.2f}/10")
             fund_score = self.calculate_fundamental_score(fund_data_dict)
+            print(f"[SCORING-DEBUG] 基本面评分完成: {fund_score:.2f}/10\n")
             
             # 转换为原始分数用于三时间段评分（1-10转为-8到+8）
             tech_raw = (tech_score - 5.0) * 2.0 if tech_score is not None else 0
@@ -9740,7 +9850,8 @@ K线更新后快速评分完成！
                     medium_score = medium_prediction.get('total_score', medium_prediction.get('score', 5) - 5)
                 
                 if long_prediction is not None and long_score is None:
-                    long_score = long_prediction.get('fundamental_score', long_prediction.get('score', 5) - 5)
+                    # 🔧 直接使用score字段（1-10分制），而不是fundamental_score（-8到+8）
+                    long_score = long_prediction.get('score', 5)
                 
                 # 确保有默认值
                 short_score = short_score if short_score is not None else 0
@@ -9781,7 +9892,7 @@ K线更新后快速评分完成！
                 'long_score': 0
             }
     
-    def calculate_comprehensive_score_v2(self, tech_score, fund_score, chip_score=None):
+    def calculate_comprehensive_score_v2(self, tech_score, fund_score, chip_score=None, fund_data_quality='normal'):
         """
         新版综合评分计算（基于技术面、基本面、筹码健康度三维度）
         
@@ -9789,13 +9900,20 @@ K线更新后快速评分完成！
             tech_score: 技术面评分 (1-10分)
             fund_score: 基本面评分 (1-10分)
             chip_score: 筹码健康度评分 (1-10分)，可选
+            fund_data_quality: 基本面数据质量标记
+                - 'normal': 真实数据（默认权重）
+                - 'default': 使用默认估算值（降低权重）
         
         Returns:
             综合评分 (1-10分制)
         
         权重分配策略：
-        - 如果有筹码评分: 技术面45% + 基本面35% + 筹码20%
-        - 如果没有筹码评分: 技术面56% + 基本面44% (保持45:35比例)
+        - 标准权重（真实数据）:
+          * 有筹码: 技术面45% + 基本面35% + 筹码20%
+          * 无筹码: 技术面56% + 基本面44%
+        - 调整权重（默认值数据）:
+          * 有筹码: 技术面55% + 基本面15% + 筹码30%
+          * 无筹码: 技术面78% + 基本面22%
         """
         try:
             tech_score = float(tech_score) if tech_score is not None else 5.0
@@ -9805,20 +9923,42 @@ K线更新后快速评分完成！
             tech_score = max(1.0, min(10.0, tech_score))
             fund_score = max(1.0, min(10.0, fund_score))
             
-            if chip_score is not None and chip_score > 0:
-                # 有筹码评分：三维度加权
-                chip_score = max(1.0, min(10.0, float(chip_score)))
-                comprehensive_score = (
-                    tech_score * 0.45 +   # 技术面 45%
-                    fund_score * 0.35 +   # 基本面 35%
-                    chip_score * 0.20     # 筹码健康度 20%
-                )
+            # 根据基本面数据质量调整权重
+            if fund_data_quality == 'default':
+                # 使用默认估算值时，大幅降低基本面权重
+                print("⚠️ 检测到基本面使用默认值，降低基本面权重: 35%→15% (有筹码) 或 44%→22% (无筹码)")
+                if chip_score is not None and chip_score > 0:
+                    # 有筹码评分：技术面55% + 基本面15% + 筹码30%
+                    chip_score = max(1.0, min(10.0, float(chip_score)))
+                    comprehensive_score = (
+                        tech_score * 0.55 +   # 技术面 55% (↑10%)
+                        fund_score * 0.15 +   # 基本面 15% (↓20%)
+                        chip_score * 0.30     # 筹码健康度 30% (↑10%)
+                    )
+                    print(f"   权重调整: 技术{tech_score:.1f}×0.55 + 基本面{fund_score:.1f}×0.15 + 筹码{chip_score:.1f}×0.30")
+                else:
+                    # 无筹码评分：技术面78% + 基本面22%
+                    comprehensive_score = (
+                        tech_score * 0.78 +   # 技术面 78%
+                        fund_score * 0.22     # 基本面 22%
+                    )
+                    print(f"   权重调整: 技术{tech_score:.1f}×0.78 + 基本面{fund_score:.1f}×0.22")
             else:
-                # 无筹码评分：二维度加权 (保持45:35的相对比例)
-                comprehensive_score = (
-                    tech_score * 0.5625 +   # 技术面 56.25% (45/80)
-                    fund_score * 0.4375     # 基本面 43.75% (35/80)
-                )
+                # 使用真实数据时，采用标准权重
+                if chip_score is not None and chip_score > 0:
+                    # 有筹码评分：三维度加权
+                    chip_score = max(1.0, min(10.0, float(chip_score)))
+                    comprehensive_score = (
+                        tech_score * 0.45 +   # 技术面 45%
+                        fund_score * 0.35 +   # 基本面 35%
+                        chip_score * 0.20     # 筹码健康度 20%
+                    )
+                else:
+                    # 无筹码评分：二维度加权 (保持45:35的相对比例)
+                    comprehensive_score = (
+                        tech_score * 0.5625 +   # 技术面 56.25% (45/80)
+                        fund_score * 0.4375     # 基本面 43.75% (35/80)
+                    )
             
             # 确保结果在1-10范围内
             comprehensive_score = max(1.0, min(10.0, comprehensive_score))
@@ -10410,7 +10550,7 @@ K线更新后快速评分完成！
             }
     
     def get_long_term_prediction(self, pe_ratio, pb_ratio, roe, ma20, ma60, current_price, stock_info, industry_data=None):
-        """长期预测 (30-90天) - 基于基本面分析和宏观趋势"""
+        """长期预测 (30-90天) - 直接使用统一的基本面评分函数"""
         try:
             # 打印基本面数据详情（用于对比Choice和非Choice的差异）
             stock_code = stock_info.get('code', '') if isinstance(stock_info, dict) else ''
@@ -10431,7 +10571,25 @@ K线更新后快速评分完成！
             print(f"  MA60: ¥{ma60:.2f}")
             print(f"{'='*60}\n")
             
-            # 基本面深度分析评分
+            # 🔧 使用统一的基本面评分函数（1-10分制）
+            # 构造fund_data字典传递给calculate_fundamental_score
+            fund_data = {
+                'pe_ratio': pe_ratio if pe_ratio else 20,
+                'pb_ratio': pb_ratio if pb_ratio else 2.0,
+                'roe': roe if roe else 10.0,
+                'revenue_growth': 5.0,  # 默认值
+                'profit_growth': 5.0,   # 默认值
+                'code': stock_code
+            }
+            
+            final_score = self.calculate_fundamental_score(fund_data)
+            if final_score is None:
+                print(f"[WARNING] {stock_label} 基本面评分失败，使用默认值5.0")
+                final_score = 5.0
+            
+            print(f"[长期预测] {stock_label} 使用基本面评分: {final_score:.2f}/10")
+            
+            # 基本面深度分析评分（仅用于生成信号描述，不影响最终得分）
             fundamental_score = 0
             fundamental_signals = []
             
@@ -10441,92 +10599,125 @@ K线更新后快速评分完成！
             if pb_ratio is None: pb_ratio = 2.0
             if roe is None: roe = 10
             
+            print(f"  [长期预测] 初始分数: {fundamental_score}")
+            
             if pe_ratio < 10:
                 fundamental_score += 4
                 fundamental_signals.append("PE严重低估，投资价值突出")
+                print(f"  [长期-PE评分] {pe_ratio:.2f} < 10 → +4分 → 当前: {fundamental_score}")
             elif pe_ratio < 15:
                 fundamental_score += 3
                 fundamental_signals.append("PE估值偏低，安全边际高")
+                print(f"  [长期-PE评分] {pe_ratio:.2f} < 15 → +3分 → 当前: {fundamental_score}")
             elif pe_ratio < 20:
                 fundamental_score += 1
                 fundamental_signals.append("PE估值合理，风险可控")
+                print(f"  [长期-PE评分] {pe_ratio:.2f} < 20 → +1分 → 当前: {fundamental_score}")
             elif pe_ratio > 35:
                 fundamental_score -= 3
                 fundamental_signals.append("PE估值过高，泡沫风险严重")
+                print(f"  [长期-PE评分] {pe_ratio:.2f} > 35 → -3分 → 当前: {fundamental_score}")
             elif pe_ratio > 25:
                 fundamental_score -= 2
                 fundamental_signals.append("PE估值偏高，回调风险")
+                print(f"  [长期-PE评分] {pe_ratio:.2f} > 25 → -2分 → 当前: {fundamental_score}")
+            else:
+                print(f"  [长期-PE评分] {pe_ratio:.2f} 在20-25之间 → 0分 → 当前: {fundamental_score}")
             
             if pb_ratio < 1.0:
                 fundamental_score += 3
                 fundamental_signals.append("PB破净，资产价值显著低估")
+                print(f"  [长期-PB评分] {pb_ratio:.2f} < 1.0 → +3分 → 当前: {fundamental_score}")
             elif pb_ratio < 1.5:
                 fundamental_score += 2
                 fundamental_signals.append("PB估值偏低，价值投资机会")
+                print(f"  [长期-PB评分] {pb_ratio:.2f} < 1.5 → +2分 → 当前: {fundamental_score}")
             elif pb_ratio < 2.5:
                 fundamental_score += 1
                 fundamental_signals.append("PB估值合理")
+                print(f"  [长期-PB评分] {pb_ratio:.2f} < 2.5 → +1分 → 当前: {fundamental_score}")
             elif pb_ratio > 4:
                 fundamental_score -= 2
                 fundamental_signals.append("PB估值过高，资产泡沫风险")
+                print(f"  [长期-PB评分] {pb_ratio:.2f} > 4 → -2分 → 当前: {fundamental_score}")
+            else:
+                print(f"  [长期-PB评分] {pb_ratio:.2f} 在2.5-4之间 → 0分 → 当前: {fundamental_score}")
             
             # 盈利质量分析 (权重25%)
             if roe > 20:
                 fundamental_score += 3
                 fundamental_signals.append("ROE优异，超强盈利能力")
+                print(f"  [长期-ROE评分] {roe:.2f}% > 20 → +3分")
             elif roe > 15:
                 fundamental_score += 2
                 fundamental_signals.append("ROE优秀，盈利能力强")
+                print(f"  [长期-ROE评分] {roe:.2f}% > 15 → +2分")
             elif roe > 10:
                 fundamental_score += 1
                 fundamental_signals.append("ROE良好，盈利稳定")
+                print(f"  [长期-ROE评分] {roe:.2f}% > 10 → +1分")
             elif roe < 5:
                 fundamental_score -= 2
                 fundamental_signals.append("ROE偏低，盈利能力弱")
+                print(f"  [长期-ROE评分] {roe:.2f}% < 5 → -2分")
+            else:
+                print(f"  [长期-ROE评分] {roe:.2f}% 无评分调整（5-10之间）")
             
             # 长期趋势分析 (权重25%)
             ma60_trend = (current_price - ma60) / ma60 * 100 if ma60 > 0 else 0
             ma20_vs_60 = (ma20 - ma60) / ma60 * 100 if ma60 > 0 else 0
             
+            print(f"  [长期趋势] MA60乖离率={ma60_trend:.2f}%, MA20/MA60={ma20_vs_60:.2f}%")
+            
             if ma60_trend > 15 and ma20_vs_60 > 8:
                 fundamental_score += 3
                 fundamental_signals.append("长期强势上升趋势确立")
+                print(f"  [长期趋势评分] 强势上升 → +3分 → 当前: {fundamental_score}")
             elif ma60_trend > 5 and ma20_vs_60 > 3:
                 fundamental_score += 2
                 fundamental_signals.append("长期趋势向好")
+                print(f"  [长期趋势评分] 趋势向好 → +2分 → 当前: {fundamental_score}")
             elif ma60_trend < -15 and ma20_vs_60 < -8:
                 fundamental_score -= 3
                 fundamental_signals.append("长期弱势下降趋势")
+                print(f"  [长期趋势评分] 弱势下降 → -3分 → 当前: {fundamental_score}")
             elif ma60_trend < -5 and ma20_vs_60 < -3:
                 fundamental_score -= 2
                 fundamental_signals.append("长期趋势偏弱")
+                print(f"  [长期趋势评分] 趋势偏弱 → -2分 → 当前: {fundamental_score}")
+            else:
+                print(f"  [长期趋势评分] 震荡 → 0分 → 当前: {fundamental_score}")
             
             # 行业景气度分析 (权重15%)
             industry = stock_info.get('industry', '')
+            print(f"  [行业分析] 所属行业: {industry if industry else '未知'}")
             
             # 高景气度行业
             hot_industries = ['半导体', '芯片', '新能源', '锂电', '光伏', '储能', '人工智能', '5G', '数字经济']
             if any(keyword in industry for keyword in hot_industries):
                 fundamental_score += 2
                 fundamental_signals.append(f"{industry}行业高景气度，长期成长性强")
+                print(f"  [行业评分] 高景气度行业 → +2分 → 当前: {fundamental_score}")
             
             # 稳定增长行业
-            stable_industries = ['医药', '生物医药', '消费', '白酒', '食品饮料', '家电']
-            if any(keyword in industry for keyword in stable_industries):
+            elif any(keyword in industry for keyword in ['医药', '生物医药', '消费', '白酒', '食品饮料', '家电']):
                 fundamental_score += 1
                 fundamental_signals.append(f"{industry}行业稳定增长，防御性强")
+                print(f"  [行业评分] 稳定增长行业 → +1分 → 当前: {fundamental_score}")
             
             # 周期性行业
-            cyclical_industries = ['钢铁', '煤炭', '有色', '化工', '建筑', '水泥']
-            if any(keyword in industry for keyword in cyclical_industries):
+            elif any(keyword in industry for keyword in ['钢铁', '煤炭', '有色', '化工', '建筑', '水泥']):
                 fundamental_score -= 1
                 fundamental_signals.append(f"{industry}行业周期性强，注意宏观环境")
+                print(f"  [行业评分] 周期性行业 → -1分 → 当前: {fundamental_score}")
             
             # 政策敏感行业
-            policy_sensitive = ['房地产', '教育', '游戏', '互联网金融']
-            if any(keyword in industry for keyword in policy_sensitive):
+            elif any(keyword in industry for keyword in ['房地产', '教育', '游戏', '互联网金融']):
                 fundamental_score -= 1
                 fundamental_signals.append(f"{industry}行业政策敏感，关注政策变化")
+                print(f"  [行业评分] 政策敏感行业 → -1分 → 当前: {fundamental_score}")
+            else:
+                print(f"  [行业评分] 普通行业 → 0分 → 当前: {fundamental_score}")
             
             # 生成长期预测
             if fundamental_score >= 8:
@@ -10572,12 +10763,10 @@ K线更新后快速评分完成！
                 risk_level = "很高"
                 investment_period = "强烈建议回避"
             
-            final_score = max(1.0, min(10.0, 5.0 + fundamental_score * 0.4))
-            
             # 打印基本面评分详情
             print(f"📊 {stock_label} 长期预测评分详情:")
-            print(f"  基本面原始总分: {fundamental_score:+.1f}")
-            print(f"  最终得分(1-10): {final_score:.2f}")
+            print(f"  基本面原始总分: {fundamental_score:+.1f} (仅用于趋势描述)")
+            print(f"  最终得分(1-10): {final_score:.2f} (来自calculate_fundamental_score)")
             print(f"  趋势判断: {trend}\n")
             
             return {
@@ -10836,58 +11025,54 @@ K线更新后快速评分完成！
             return {'code': ticker, 'score': 0}
     
     def _calculate_long_term_score(self, ticker, technical_data, financial_data, stock_info):
-        """计算长期投资评分"""
+        """计算长期投资评分 - 直接使用统一的基本面评分函数"""
         try:
+            # 🔧 使用统一的基本面评分函数（1-10分制）
+            final_score = self.calculate_fundamental_score(financial_data)
+            
+            if final_score is None:
+                print(f"[WARNING] {ticker} 基本面评分失败，使用默认值5.0")
+                final_score = 5.0
+            
+            print(f"[长期评分] {ticker} 直接使用基本面评分: {final_score:.2f}/10")
+            
             current_price = technical_data.get('current_price', 0)
-            ma20 = technical_data.get('ma20', current_price)
-            ma60 = technical_data.get('ma60', current_price)
             
-            pe_ratio = financial_data.get('pe_ratio')
-            if pe_ratio is None: pe_ratio = 20
-            
-            pb_ratio = financial_data.get('pb_ratio')
-            if pb_ratio is None: pb_ratio = 2.0
-            
-            roe = financial_data.get('roe')
-            if roe is None: roe = 10
-            
-            # 使用长期预测算法
-            prediction = self.get_long_term_prediction(
-                pe_ratio, pb_ratio, roe, ma20, ma60, current_price, stock_info
-            )
-            
-            # 计算综合评分 - 长期重基本面和价值投资
-            fund_score = prediction.get('fundamental_score', 0)
-            confidence = prediction.get('confidence', 0)
-            value_score = prediction.get('value_score', 0)  # 价值评分
-            
-            # 长期评分算法：重点关注基本面和估值
-            if fund_score > 10:
-                # 基本面优秀，长期价值突出
-                final_score = min(10.0, 7.0 + fund_score * 0.25 + value_score * 0.15)
-            elif fund_score > 5:
-                # 基本面良好，适度加分
-                final_score = max(4.0, min(8.5, 5.5 + fund_score * 0.3 + confidence * 0.02))
-            elif fund_score < 0:
-                # 基本面较差，大幅降分
-                final_score = max(1.0, 3.5 + fund_score * 0.25)
+            # 根据评分生成趋势判断
+            if final_score >= 8:
+                trend = "强势增长"
+                confidence = 85
+                target_range = "+20% ~ +50%"
+                risk_level = "中低"
+            elif final_score >= 6:
+                trend = "稳步增长"
+                confidence = 75
+                target_range = "+10% ~ +30%"
+                risk_level = "中等"
+            elif final_score >= 4:
+                trend = "温和上涨"
+                confidence = 65
+                target_range = "+5% ~ +15%"
+                risk_level = "中等"
             else:
-                # 基本面一般，保守评分
-                final_score = max(2.5, min(6.5, 4.5 + fund_score * 0.2 + confidence * 0.025))
+                trend = "区间震荡"
+                confidence = 55
+                target_range = "-5% ~ +10%"
+                risk_level = "中高"
             
             return {
                 'code': ticker,
                 'name': stock_info.get('name', '未知'),
                 'price': current_price,
                 'score': final_score,
-                'trend': prediction.get('trend', '未知'),
-                'target_range': prediction.get('target_range', '未知'),
+                'trend': trend,
+                'target_range': target_range,
                 'confidence': confidence,
-                'risk_level': prediction.get('risk_level', '未知'),
-                'investment_period': prediction.get('investment_period', '未知'),
-                'key_signals': prediction.get('key_signals', [])[:3],
+                'risk_level': risk_level,
+                'investment_period': '2-4个月持有',
+                'key_signals': [f"基本面评分{final_score:.1f}/10"],
                 'period_type': '长期',
-                'fund_score': fund_score,
+                'fund_score': final_score,  # 与score保持一致
                 'industry': stock_info.get('industry', '未知'),
                 'concept': stock_info.get('concept', '未知')
             }
@@ -11648,8 +11833,14 @@ WARNING:  风险提示:
             'target_return': target_return
         }
     
-    def format_investment_advice(self, short_term_prediction, medium_term_prediction, long_term_prediction, ticker, overview_final_score=None):
-        """格式化三时间段投资预测显示"""
+    def format_investment_advice(self, short_term_prediction, medium_term_prediction, long_term_prediction, ticker, overview_final_score=None, tech_score_1_10=None, fund_score_1_10=None):
+        """格式化三时间段投资预测显示
+        
+        Args:
+            overview_final_score: 综合评分（1-10分制）
+            tech_score_1_10: 技术面评分（1-10分制），如果提供则直接使用
+            fund_score_1_10: 基本面评分（1-10分制），如果提供则直接使用
+        """
         import time
 
         # 防守性检查：确保输入不为None
@@ -11682,9 +11873,6 @@ WARNING:  风险提示:
             
             print(f"   加权平均最终评分: {final_score:.1f}/10")
         
-        # 生成推荐指数显示（使用一致的评分）
-        comprehensive_index = self.format_recommendation_index(final_score, ticker)
-        
         # 处理价格显示
         price = stock_info.get('price')
         if price is not None:
@@ -11694,9 +11882,42 @@ WARNING:  风险提示:
         else:
             price_display = "当前价格: 网络获取失败，无法显示实时价格"
         
-        # 提取技术面和基本面评分
-        technical_score = short_term_prediction.get('technical_score', short_term_prediction.get('score', 5.0))
-        fundamental_score = long_term_prediction.get('fundamental_score', long_term_prediction.get('score', 5.0))
+        # 获取技术面和基本面评分（优先使用传入的1-10分制评分）
+        if tech_score_1_10 is not None:
+            technical_score = tech_score_1_10
+            print(f"[ADVICE-SCORE] 使用传入的技术面评分: {technical_score:.2f}/10")
+        else:
+            # 从预测数据中提取并转换
+            technical_score_raw = short_term_prediction.get('technical_score', short_term_prediction.get('score', 0))
+            technical_score = max(1.0, min(10.0, (technical_score_raw / 8.0) * 4.5 + 5.5))
+            print(f"[ADVICE-SCORE] 从预测数据转换技术面评分: {technical_score_raw} → {technical_score:.2f}/10")
+        
+        if fund_score_1_10 is not None:
+            fundamental_score = fund_score_1_10
+            print(f"[ADVICE-SCORE] 使用传入的基本面评分: {fundamental_score:.2f}/10")
+        else:
+            # 从预测数据中提取并转换
+            fundamental_score_raw = long_term_prediction.get('fundamental_score', long_term_prediction.get('score', 0))
+            fundamental_score = max(1.0, min(10.0, (fundamental_score_raw / 8.0) * 4.5 + 5.5))
+            print(f"[ADVICE-SCORE] 从预测数据转换基本面评分: {fundamental_score_raw} → {fundamental_score:.2f}/10")
+        
+        # 获取筹码健康度评分
+        chip_score = 0
+        try:
+            if ticker in getattr(self, 'comprehensive_stock_data', {}):
+                chip_result = self.comprehensive_stock_data[ticker].get('chip_result')
+                if chip_result and not chip_result.get('error'):
+                    chip_score = chip_result.get('health_score', 0)
+        except:
+            pass
+        
+        # 生成推荐指数显示（传递技术面、基本面、筹码评分）
+        comprehensive_index = self.format_recommendation_index(
+            final_score, ticker, 
+            technical_score=technical_score,
+            fundamental_score=fundamental_score,
+            chip_score=chip_score
+        )
         
         recommendation = """
 =========================================================
@@ -12060,61 +12281,107 @@ WARNING:  风险管控:
             stock_info = {}
             industry = ""
         
+        # 🔍 调试日志：输入参数
+        print(f"\n{'='*70}")
+        print(f"[基本面评分] {ticker} - 输入参数详情")
+        print(f"{'='*70}")
+        print(f"  PE市盈率: {pe_ratio} (类型: {type(pe_ratio).__name__})")
+        print(f"  PB市净率: {pb_ratio} (类型: {type(pb_ratio).__name__})")
+        print(f"  ROE净资产收益率: {roe}% (类型: {type(roe).__name__})")
+        print(f"  营收增长率: {revenue_growth}% (类型: {type(revenue_growth).__name__})")
+        print(f"  利润增长率: {profit_growth}% (类型: {type(profit_growth).__name__})")
+        print(f"  行业类型: {industry}")
+        print(f"  初始分数: {score}")
+        print(f"\n  ⚠️  请特别注意：")
+        print(f"     - ROE应为百分比形式（10.0=10%）")
+        print(f"     - 增长率应为百分比形式（5.0=5%）")
+        print(f"{'='*70}")
+        
         # 1. PE估值评分 (权重18分，从20→18)
+        pe_score = 0
         try:
             if pe_ratio is None:
                 pe_ratio = 20
             if pe_ratio < 20:
-                score += 18  # 估值合理偏低
+                pe_score = 18  # 估值合理偏低
             elif pe_ratio < 35:
-                score += 9   # 估值中等
+                pe_score = 9   # 估值中等
             else:
-                score -= 14  # 估值过高
-        except Exception:
-            pass
+                pe_score = -14  # 估值过高
+            score += pe_score
+            print(f"  [1] PE评分: {pe_score:+3d} (PE={pe_ratio:.2f}) → 当前分数: {score}")
+        except Exception as e:
+            print(f"  [1] PE评分异常: {e}")
 
         # 2. ROE净资产收益率评分 (权重18分，从20→18)
+        roe_score = 0
         try:
             if roe is None:
                 roe = 10
+            # 🔧 统一ROE格式：如果是小数形式(0-1)转换为百分比形式
+            original_roe = roe
+            if roe < 1 and roe > 0:
+                roe = roe * 100  # 0.15 → 15
+                print(f"  [2-预处理] ROE格式转换: {original_roe:.4f} → {roe:.2f}%")
+            
             if roe > 15:
-                score += 18  # 盈利能力强
+                roe_score = 18  # 盈利能力强
             elif roe > 10:
-                score += 9   # 盈利能力中等
+                roe_score = 9   # 盈利能力中等
             else:
-                score -= 9   # 盈利能力弱
-        except Exception:
-            pass
+                roe_score = -9   # 盈利能力弱
+            score += roe_score
+            print(f"  [2] ROE评分: {roe_score:+3d} (ROE={roe:.2f}%) → 当前分数: {score}")
+        except Exception as e:
+            print(f"  [2] ROE评分异常: {e}")
 
         # 3. 营收增长评分 (权重12分，从15→12)
+        revenue_score = 0
         try:
             if revenue_growth is None:
                 revenue_growth = 0
+            # 🔧 统一格式：如果是小数形式(0-1)转换为百分比形式
+            original_revenue = revenue_growth
+            if revenue_growth < 1 and revenue_growth > 0:
+                revenue_growth = revenue_growth * 100  # 0.05 → 5
+                print(f"  [3-预处理] 营收增长格式转换: {original_revenue:.4f} → {revenue_growth:.2f}%")
+            
             if revenue_growth > 15:
-                score += 12  # 高增长
+                revenue_score = 12  # 高增长
             elif revenue_growth > 5:
-                score += 6   # 中速增长
+                revenue_score = 6   # 中速增长
             elif revenue_growth > 0:
-                score += 2   # 低速增长
+                revenue_score = 2   # 低速增长
             else:
-                score -= 12  # 负增长
-        except Exception:
-            pass
+                revenue_score = -12  # 负增长
+            score += revenue_score
+            print(f"  [3] 营收增长评分: {revenue_score:+3d} (增长={revenue_growth:.2f}%) → 当前分数: {score}")
+        except Exception as e:
+            print(f"  [3] 营收增长评分异常: {e}")
 
         # 4. 净利润增长评分 (权重12分，从15→12)
+        profit_score = 0
         try:
             if profit_growth is None:
                 profit_growth = 0
+            # 🔧 统一格式：如果是小数形式(0-1)转换为百分比形式
+            original_profit = profit_growth
+            if profit_growth < 1 and profit_growth > 0:
+                profit_growth = profit_growth * 100  # 0.05 → 5
+                print(f"  [4-预处理] 利润增长格式转换: {original_profit:.4f} → {profit_growth:.2f}%")
+            
             if profit_growth > 20:
-                score += 12  # 高增长
+                profit_score = 12  # 高增长
             elif profit_growth > 10:
-                score += 6   # 中速增长
+                profit_score = 6   # 中速增长
             elif profit_growth > 0:
-                score += 2   # 低速增长
+                profit_score = 2   # 低速增长
             else:
-                score -= 12  # 负增长
-        except Exception:
-            pass
+                profit_score = -12  # 负增长
+            score += profit_score
+            print(f"  [4] 利润增长评分: {profit_score:+3d} (增长={profit_growth:.2f}%) → 当前分数: {score}")
+        except Exception as e:
+            print(f"  [4] 利润增长评分异常: {e}")
 
         # 5. 现金流评分 (新增，权重8分) ⭐新增
         try:
@@ -12204,8 +12471,14 @@ WARNING:  风险管控:
             pass
 
         # 限制并转换为 1-10
-        score = min(10.0, max(1.0, score / 10.0))
-        return score
+        final_score = min(10.0, max(1.0, score / 10.0))
+        
+        print(f"{'='*70}")
+        print(f"  原始总分: {score}/100")
+        print(f"  最终评分: {final_score:.2f}/10")
+        print(f"{'='*70}\n")
+        
+        return final_score
     
     def generate_sector_analysis(self, ticker):
         """生成板块分析报告"""
@@ -12952,7 +13225,13 @@ CSV批量分析使用方法:
                     long_score,      # 基本面评分（长期）
                     chip_score if chip_score else 0  # 筹码评分
                 )
-                recommendation = self.format_investment_advice(short_prediction, medium_prediction, long_prediction, ticker, final_score)
+                # 传递1-10分制的真实评分
+                recommendation = self.format_investment_advice(
+                    short_prediction, medium_prediction, long_prediction, ticker, 
+                    overview_final_score=final_score,
+                    tech_score_1_10=short_score,  # 传入技术面真实评分
+                    fund_score_1_10=long_score    # 传入基本面真实评分
+                )
                 
                 # 生成筹码健康度分析报告
                 print("生成筹码健康度分析报告...")
@@ -15730,6 +16009,9 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
                 fund_weight = 0.7   # 基本面权重较高
                 strategy_desc = "基本面主导"
             
+            # 检测基本面数据质量，用于后续动态权重调整
+            fund_data_quality = 'normal'  # 默认正常
+            
             # 快速计算初步评分用于日志显示
             try:
                 # 获取真实数据用于快速评分 - 检查是否使用Choice数据
@@ -15772,6 +16054,16 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
                 elif roe < 5:
                     quick_fund_score -= 1
                 
+                # 检测基本面数据是否使用默认值
+                if financial_data.get('is_default_value') or financial_data.get('data_source') == 'default':
+                    fund_data_quality = 'default'
+                    print(f"⚠️ {ticker} 检测到基本面使用默认估算值（PE={pe_ratio}, PB={financial_data.get('pb_ratio')})")
+                    # 动态调整权重：降低基本面权重，提升技术面权重
+                    original_fund_weight = fund_weight
+                    fund_weight = fund_weight * 0.5  # 基本面权重减半
+                    tech_weight = 1.0 - fund_weight   # 技术面权重相应提升
+                    print(f"   权重动态调整: 基本面{original_fund_weight:.1f}→{fund_weight:.1f} 技术面{1.0-original_fund_weight:.1f}→{tech_weight:.1f}")
+                
                 # 限制分数范围
                 quick_tech_score = max(0, min(10, quick_tech_score))
                 quick_fund_score = max(0, min(10, quick_fund_score))
@@ -15779,7 +16071,10 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
                 # 根据投资期限加权计算综合评分
                 quick_total_score = quick_tech_score * tech_weight + quick_fund_score * fund_weight
                 
-                print(f"{ticker} {stock_name} - 快速评分({strategy_desc}): 技术{quick_tech_score:.1f}×{tech_weight:.1f} 基本面{quick_fund_score:.1f}×{fund_weight:.1f} 综合{quick_total_score:.1f}/10")
+                if fund_data_quality == 'default':
+                    print(f"{ticker} {stock_name} - 快速评分({strategy_desc}+权重调整): 技术{quick_tech_score:.1f}×{tech_weight:.1f} 基本面{quick_fund_score:.1f}×{fund_weight:.1f} 综合{quick_total_score:.1f}/10")
+                else:
+                    print(f"{ticker} {stock_name} - 快速评分({strategy_desc}): 技术{quick_tech_score:.1f}×{tech_weight:.1f} 基本面{quick_fund_score:.1f}×{fund_weight:.1f} 综合{quick_total_score:.1f}/10")
                 
             except Exception as e:
                 print(f"{ticker} {stock_name} - 快速评分失败: {e}")
@@ -18821,14 +19116,23 @@ def main():
                 'pe_ratio': float(pe) if pe else 15.0,
                 'pb_ratio': float(pb) if pb else 2.0,
                 'roe': float(roe) if roe else 10.0,
-                'revenue_growth': 0.0,  # Choice CSS不直接提供，使用默认值
-                'profit_growth': 0.0,   # Choice CSS不直接提供，使用默认值
+                'revenue_growth': 5.0,  # Choice CSS不直接提供，使用市场平均默认值5%（百分比形式）
+                'profit_growth': 5.0,   # Choice CSS不直接提供，使用市场平均默认值5%（百分比形式）
                 'code': ticker,
                 'data_source': 'choice_api_realtime'
             }
             
-            print(f"[DEBUG] 返回的基本面字典: {result}")
-            print(f"[DEBUG] roe字段值: {result.get('roe')}, 类型: {type(result.get('roe'))}")
+            print(f"\n{'='*70}")
+            print(f"[Choice API] {ticker} - 返回的基本面数据")
+            print(f"{'='*70}")
+            print(f"  完整字典: {result}")
+            print(f"  PE: {result.get('pe_ratio')} (类型: {type(result.get('pe_ratio')).__name__})")
+            print(f"  PB: {result.get('pb_ratio')} (类型: {type(result.get('pb_ratio')).__name__})")
+            print(f"  ROE: {result.get('roe')} (类型: {type(result.get('roe')).__name__})")
+            print(f"  营收增长: {result.get('revenue_growth')} (类型: {type(result.get('revenue_growth')).__name__})")
+            print(f"  利润增长: {result.get('profit_growth')} (类型: {type(result.get('profit_growth')).__name__})")
+            print(f"  数据源: {result.get('data_source')}")
+            print(f"{'='*70}\n")
             
             return result
             
