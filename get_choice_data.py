@@ -107,8 +107,19 @@ def check_csd_available():
         print("  ✅ CSD接口可用 - 将使用CSD接口（序列数据）")
         return True
     elif data.ErrorCode == 10001012:
-        print("  ⚠️  CSD接口配额不足 (10001012) - 将切换到CSS接口")
-        print("  提示: 周配额可能已用完，将于下周一重置")
+        print(f"\n{'='*70}")
+        print(f"  ⚠️  ⚠️  ⚠️  CSD接口配额不足 (错误码: {data.ErrorCode})  ⚠️  ⚠️  ⚠️")
+        print(f"{'='*70}")
+        print(f"  配额类型: 周配额")
+        print(f"  当前状态: 已用完")
+        print(f"  重置时间: 下周一 00:00")
+        print(f"  替代方案: 将使用CSS接口（仅收盘价数据）")
+        print(f"")
+        print(f"  ⚠️  重要提示：")
+        print(f"     CSS接口只能获取CLOSE和PRECLOSE数据")
+        print(f"     缺少OPEN/HIGH/LOW/VOLUME，无法计算技术指标")
+        print(f"     建议等待配额重置后重新采集数据")
+        print(f"{'='*70}\n")
         return False
     else:
         print(f"  ⚠️  CSD接口错误 ({data.ErrorCode}: {data.ErrorMsg}) - 将切换到CSS接口")
@@ -187,6 +198,100 @@ def get_kline_data_css(stock_code, start_date, end_date):
     }
     
     return result
+
+def calculate_technical_indicators_from_kline(kline_data):
+    """从K线数据计算技术指标
+    
+    Args:
+        kline_data: K线数据列表，每项包含 {date, open, high, low, close, volume}
+    
+    Returns:
+        dict: 技术指标数据 {current_price, ma5, ma10, ma20, ma60, rsi, macd, signal, volume_ratio}
+    """
+    try:
+        import pandas as pd
+        
+        if not kline_data or len(kline_data) < 5:
+            return None
+        
+        # 转换为DataFrame
+        df = pd.DataFrame(kline_data)
+        
+        # 检查是否有close数据
+        if 'close' not in df.columns:
+            return None
+        
+        # 确保数值类型
+        for col in ['close', 'volume', 'open', 'high', 'low']:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # 按日期升序排序
+        if 'date' in df.columns:
+            df = df.sort_values('date')
+        
+        if df.empty or len(df) < 5:
+            return None
+        
+        # 当前价格
+        current_price = float(df['close'].iloc[-1])
+        
+        # 检查数据质量：如果只有1条数据，无法计算技术指标
+        if len(df) < 5:
+            print(f"    ⚠️  数据不足（只有{len(df)}条），无法计算技术指标")
+            return None
+        
+        # 计算均线
+        ma5 = float(df['close'].rolling(window=5).mean().iloc[-1]) if len(df) >= 5 else current_price
+        ma10 = float(df['close'].rolling(window=10).mean().iloc[-1]) if len(df) >= 10 else current_price
+        ma20 = float(df['close'].rolling(window=20).mean().iloc[-1]) if len(df) >= 20 else current_price
+        ma60 = float(df['close'].rolling(window=60).mean().iloc[-1]) if len(df) >= 60 else current_price
+        
+        # 计算RSI (14日)
+        if len(df) >= 14:
+            delta = df['close'].diff()
+            gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+            rs = gain / loss
+            rsi = 100 - (100 / (1 + rs.iloc[-1]))
+        else:
+            rsi = 50
+        
+        # 计算MACD
+        if len(df) >= 26:
+            ema12 = df['close'].ewm(span=12, adjust=False).mean()
+            ema26 = df['close'].ewm(span=26, adjust=False).mean()
+            macd_line = ema12 - ema26
+            signal_line = macd_line.ewm(span=9, adjust=False).mean()
+            macd = float(macd_line.iloc[-1])
+            signal = float(signal_line.iloc[-1])
+        else:
+            macd = 0
+            signal = 0
+        
+        # 计算量比
+        if len(df) >= 5:
+            vol_ma5 = df['volume'].rolling(window=5).mean().iloc[-1]
+            volume_ratio = float(df['volume'].iloc[-1] / vol_ma5) if vol_ma5 > 0 else 1.0
+        else:
+            volume_ratio = 1.0
+        
+        return {
+            'current_price': current_price,
+            'ma5': ma5,
+            'ma10': ma10,
+            'ma20': ma20,
+            'ma60': ma60,
+            'rsi': float(rsi) if not pd.isna(rsi) else 50,
+            'macd': macd,
+            'signal': signal,
+            'volume_ratio': volume_ratio,
+            'data_source': 'choice_calculated'
+        }
+        
+    except Exception as e:
+        print(f"    ⚠️  计算技术指标失败: {e}")
+        return None
 
 def check_cache_date():
     """检查缓存数据日期，如果是今天的数据则返回True"""
@@ -350,6 +455,32 @@ def main():
         print(f"    ✓ 无交易数据的股票")
         print(f"  预计最终有效股票: ~1800-2500 只\n")
         mainboard_stocks = candidate_codes
+        
+        # 批量获取股票名称（用于ST过滤和保存）
+        print("  正在批量获取股票名称...")
+        batch_size = 100
+        names_fetched = 0
+        for batch_start in range(0, len(candidate_codes), batch_size):
+            batch_end = min(batch_start + batch_size, len(candidate_codes))
+            batch_codes = candidate_codes[batch_start:batch_end]
+            batch_codes_str = ",".join(batch_codes)
+            
+            try:
+                name_data = c.css(batch_codes_str, "SEC_NAME", "")
+                if name_data.ErrorCode == 0 and hasattr(name_data, 'Data'):
+                    for code in batch_codes:
+                        if code in name_data.Data and name_data.Data[code]:
+                            name = name_data.Data[code][0] if isinstance(name_data.Data[code], list) else name_data.Data[code]
+                            if name:
+                                mainboard_stock_names[code] = name
+                                names_fetched += 1
+            except Exception as e:
+                pass
+            
+            import time
+            time.sleep(0.05)  # 避免频率限制
+        
+        print(f"  ✅ 获取到 {names_fetched} 只股票名称")
     
     # 3. 预过滤股票（排除新股、退市股）并获取基础信息（上市日期、行业）
     print(f"\n[3/5] 预过滤股票并获取基础信息...")
@@ -731,8 +862,11 @@ def main():
         # 去除后缀 (000001.SZ -> 000001)
         simple_code = stock_code.split('.')[0]
         
-        # 获取股票名称
+        # 获取股票名称（如果为空则使用代码）
         stock_name = mainboard_stock_names.get(stock_code, "")
+        if not stock_name:
+            # 名称为空，使用股票代码作为名称
+            stock_name = simple_code
         
         # 获取基础信息
         basic_info = stock_basic_infos.get(stock_code, {})
@@ -758,6 +892,9 @@ def main():
             }
             formatted_kline.append(formatted_day)
         
+        # 计算技术指标（从K线数据）
+        tech_data = calculate_technical_indicators_from_kline(formatted_kline)
+        
         # 重构数据结构（完全符合标准格式）
         compatible_stocks_data[simple_code] = {
             "code": simple_code,
@@ -776,7 +913,8 @@ def main():
             "kline_data": {
                 "daily": formatted_kline
             },
-            "financial_data": data.get("fund_data", {})
+            "financial_data": data.get("fund_data", {}),
+            "tech_data": tech_data  # 添加计算好的技术指标
         }
     
     # 完全符合标准格式的数据结构
@@ -803,6 +941,25 @@ def main():
     file_size = os.path.getsize(output_file)
     print(f"\n✅ 数据已保存到: {output_file}")
     print(f"   文件大小: {file_size / 1024 / 1024:.2f} MB")
+    
+    # 检查tech_data是否正常生成
+    tech_data_success = sum(1 for s in compatible_stocks_data.values() if s.get('tech_data'))
+    tech_data_total = len(compatible_stocks_data)
+    
+    if tech_data_success == 0:
+        print(f"\n{'='*70}")
+        print(f"  ⚠️  警告：未能生成技术指标数据")
+        print(f"{'='*70}")
+        print(f"  原因：使用CSS接口，数据不完整（仅有收盘价）")
+        print(f"  影响：无法计算RSI/MACD/MA等技术指标")
+        print(f"  建议：")
+        print(f"     1. 等待下周一00:00配额重置后重新运行")
+        print(f"     2. 或使用'获取全部数据'按钮使用Tushare等数据源")
+        print(f"{'='*70}")
+    elif tech_data_success < tech_data_total:
+        print(f"\n  ⚠️  部分股票技术指标计算失败: {tech_data_success}/{tech_data_total}")
+    else:
+        print(f"\n  ✅ 技术指标计算完成: {tech_data_success}/{tech_data_total}")
     
     # 保存失败记录
     if failed_stocks:

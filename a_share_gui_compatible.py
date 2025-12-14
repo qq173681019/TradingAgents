@@ -3963,20 +3963,21 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                 self.comprehensive_stock_data[stock_code] = {}
                             self.comprehensive_stock_data[stock_code]['tech_data'] = tech_data
 
-                # 如果仍然没有技术数据，则尝试网络获取
+                # 如果仍然没有技术数据，尝试实时获取（带详细日志）
                 if 'tech_data' not in cached or not cached['tech_data']:
                     is_cache_miss = True
                     if has_cache:
-                        print(f"\033[1;33m[CACHE] {stock_code} 缓存缺技术数据，尝试获取真实数据...\033[0m")
+                        print(f"\033[1;33m[CACHE-INCOMPLETE] {stock_code} 缓存存在但缺技术数据，尝试实时获取...\033[0m")
                     else:
-                        print(f"\033[1;33m[MISS] {stock_code} 无缓存，尝试获取真实技术数据...\033[0m")
+                        print(f"\033[1;33m[CACHE-MISS] {stock_code} 无缓存，尝试实时获取技术数据...\033[0m")
                     
                     # 检查是否使用Choice数据源
                     if self.use_choice_data.get():
-                        print(f"[BATCH-CHOICE] {stock_code} 使用Choice API补全技术数据")
+                        print(f"[BATCH-REALTIME] {stock_code} 使用Choice API实时获取技术数据")
                         tech_data = self._get_choice_technical_data_realtime(stock_code)
                     else:
                         tech_data = self.get_real_technical_indicators(stock_code)
+                    
                     if tech_data:
                         cached['tech_data'] = tech_data
                         # 更新回全局缓存
@@ -3984,26 +3985,31 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                             if stock_code not in self.comprehensive_stock_data:
                                 self.comprehensive_stock_data[stock_code] = {}
                             self.comprehensive_stock_data[stock_code]['tech_data'] = tech_data
+                        print(f"\033[1;32m[REALTIME-SUCCESS] {stock_code} 实时获取技术数据成功\033[0m")
+                    else:
+                        print(f"\033[1;31m[REALTIME-FAILED] {stock_code} 实时获取技术数据失败\033[0m")
             else:
-                print(f"\033[1;32m[CACHE] {stock_code} 命中技术数据缓存\033[0m")
+                print(f"\033[1;32m[CACHE-HIT] {stock_code} 命中技术数据缓存\033[0m")
 
-            # 3. 检查基本面数据 (如果缺失则只获取基本面数据)
+            # 3. 检查基本面数据（如果缺失则尝试实时获取）
             if 'fund_data' not in cached or not cached['fund_data']:
                 is_cache_miss = True
                 if has_cache:
-                    print(f"\033[1;33m[CACHE] {stock_code} 缓存缺基本面数据，尝试获取真实数据...\033[0m")
+                    print(f"\033[1;33m[CACHE-INCOMPLETE] {stock_code} 缓存存在但缺基本面数据，尝试实时获取...\033[0m")
+                else:
+                    print(f"\033[1;33m[CACHE-MISS] {stock_code} 无缓存，尝试实时获取基本面数据...\033[0m")
                 
                 # 检查是否使用Choice数据源
                 if self.use_choice_data.get():
-                    print(f"[BATCH-CHOICE] {stock_code} 使用Choice API补全基本面数据")
+                    print(f"[BATCH-REALTIME] {stock_code} 使用Choice API实时获取基本面数据")
                     fund_data = self._get_choice_fundamental_data_realtime(stock_code)
                 else:
                     fund_data = self.get_real_fundamental_indicators(stock_code)
                 
-                # ETF特殊处理 (如果获取失败)
+                # ETF特殊处理（如果获取失败）
                 if fund_data is None and self.is_etf_code(stock_code):
-                     print(f"{stock_code} 是ETF，使用ETF专用评估方式")
-                     fund_data = {
+                    print(f"{stock_code} 是ETF，使用ETF默认估值")
+                    fund_data = {
                         'pe_ratio': 12.0,
                         'pb_ratio': 1.5,
                         'roe': 0.1,
@@ -4019,8 +4025,11 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         if stock_code not in self.comprehensive_stock_data:
                             self.comprehensive_stock_data[stock_code] = {}
                         self.comprehensive_stock_data[stock_code]['fund_data'] = fund_data
+                    print(f"\033[1;32m[REALTIME-SUCCESS] {stock_code} 实时获取基本面数据成功\033[0m")
+                else:
+                    print(f"\033[1;31m[REALTIME-FAILED] {stock_code} 实时获取基本面数据失败\033[0m")
             else:
-                print(f"\033[1;32m[CACHE] {stock_code} 命中基本面数据缓存\033[0m")
+                print(f"\033[1;32m[CACHE-HIT] {stock_code} 命中基本面数据缓存\033[0m")
 
             # 4. 准备数据用于后续计算
             tech_data = cached.get('tech_data')
@@ -5173,17 +5182,17 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                      width=12)
         long_analysis_btn.pack(side="left", padx=5)
         
-        # 测试Choice按钮
-        test_choice_btn = tk.Button(data_score_frame, 
-                                    text="测试Choice", 
+        # 获取Choice数据按钮
+        get_choice_btn = tk.Button(data_score_frame, 
+                                    text="获取Choice数据", 
                                     font=("微软雅黑", 11),
                                     bg="#e74c3c", 
                                     fg="white",
                                     activebackground="#c0392b",
-                                    command=self.test_choice_connection,
+                                    command=self.run_choice_data_collection,
                                     cursor="hand2",
                                     width=12)
-        test_choice_btn.pack(side="left", padx=5)
+        get_choice_btn.pack(side="left", padx=5)
         
         # 断点续传控制区域
         resume_frame = tk.Frame(self.root, bg="#f0f0f0")
@@ -6383,6 +6392,62 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     
         except Exception as e:
             output(f"❌ 测试异常: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def run_choice_data_collection(self):
+        """运行Choice数据采集BAT脚本"""
+        import subprocess
+        import os
+        from datetime import datetime
+        
+        try:
+            # 检查今天是否是周一
+            today = datetime.now()
+            is_monday = today.weekday() == 0  # 0 = Monday
+            
+            # 显示配额提示
+            if not is_monday:
+                days_until_monday = (7 - today.weekday()) % 7
+                if days_until_monday == 0:
+                    days_until_monday = 7
+                    
+                msg = f"⚠️  Choice配额提示：\n\n"
+                msg += f"当前时间：{today.strftime('%Y年%m月%d日 %A')}\n"
+                msg += f"配额重置：每周一 00:00\n"
+                msg += f"距离重置：还有 {days_until_monday} 天\n\n"
+                msg += f"如果上周配额已用完，数据采集将使用CSS接口\n"
+                msg += f"（仅能获取收盘价，无法计算技术指标）\n\n"
+                msg += f"是否继续采集数据？"
+                
+                result = messagebox.askyesno("配额提示", msg)
+                if not result:
+                    self.show_progress("❌ 用户取消数据采集")
+                    return
+            
+            self.show_progress("🚀 启动Choice数据采集...")
+            
+            # BAT文件路径
+            bat_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "更新Choice数据.bat")
+            
+            if not os.path.exists(bat_file):
+                self.show_progress(f"ERROR: 找不到BAT文件: {bat_file}")
+                return
+            
+            print(f"[INFO] 运行BAT文件: {bat_file}")
+            
+            # 在新窗口中运行BAT（不阻塞GUI）
+            subprocess.Popen(
+                [bat_file],
+                shell=True,
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+            
+            self.show_progress("✅ 数据采集已启动（在新窗口中运行）")
+            self.show_progress("💡 采集完成后请重新加载数据或重启程序")
+            
+        except Exception as e:
+            self.show_progress(f"ERROR: 启动数据采集失败: {e}")
             import traceback
             traceback.print_exc()
     
@@ -16892,14 +16957,17 @@ WARNING: 重要声明:
                                 continue
                         
                         # 获取筹码健康度信息
+                        # 📌 批量推荐模式：从缓存获取筹码数据，不触发实时分析
                         chip_score = None
                         chip_level = None
                         try:
-                            if self.chip_analyzer:
-                                chip_result = self.chip_analyzer.analyze_stock(code)
-                                if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
-                                    chip_score = chip_result.get('health_score', 0)
-                                    chip_level = chip_result.get('health_level', '未知')
+                            # 优先从comprehensive_stock_data缓存读取
+                            if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
+                                cached_data = self.comprehensive_stock_data[code]
+                                if 'chip_score' in cached_data:
+                                    chip_score = cached_data.get('chip_score', 0)
+                                    chip_level = cached_data.get('chip_level', '未知')
+                            # 如果缓存中没有，不进行实时获取（避免触发Choice连接）
                         except Exception:
                             pass
                         
@@ -18250,20 +18318,36 @@ WARNING: 重要声明:
                 print(f"[WARN] 无法获取股票 {code} 基本信息: {', '.join(debug_info)}")
                 return None
             
-            # 关键：根据Choice选项决定数据来源
-            if self.use_choice_data.get():
-                # 使用Choice实时API
-                print(f"[DEBUG] 批量分析: 从Choice API获取 {code} 数据...")
-                tech_data = self._get_choice_technical_data_realtime(code)
-                fund_data = self._get_choice_fundamental_data_realtime(code)
-                
-                # 如果Choice API失败，不自动切换到其他数据源（保证不混用）
-                if not tech_data or not fund_data:
-                    print(f"[WARN] 批量分析: Choice API获取 {code} 失败，跳过此股票")
-            else:
-                # 使用本地缓存数据
-                tech_data = self._get_cached_technical_data(code)
-                fund_data = self._get_cached_fundamental_data(code)
+            # 批量评分优先使用缓存数据，缓存不存在时才实时获取
+            tech_data = None
+            fund_data = None
+            
+            # 1. 优先从缓存获取
+            if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
+                cached = self.comprehensive_stock_data[code]
+                tech_data = cached.get('tech_data')
+                fund_data = cached.get('fund_data')
+                if tech_data and fund_data:
+                    print(f"[CACHE-HIT] {code} 使用缓存数据（技术+基本面）")
+                elif tech_data:
+                    print(f"[CACHE-PARTIAL] {code} 缓存只有技术数据，需补充基本面")
+                elif fund_data:
+                    print(f"[CACHE-PARTIAL] {code} 缓存只有基本面数据，需补充技术面")
+            
+            # 2. 如果缓存不存在或不完整，则实时获取
+            if not tech_data or not fund_data:
+                if self.use_choice_data.get():
+                    print(f"[REALTIME-CHOICE] {code} 缓存缺失，从Choice API实时获取...")
+                    if not tech_data:
+                        tech_data = self._get_choice_technical_data_realtime(code)
+                    if not fund_data:
+                        fund_data = self._get_choice_fundamental_data_realtime(code)
+                else:
+                    print(f"[REALTIME-CACHE] {code} 缓存缺失，从本地数据源实时获取...")
+                    if not tech_data:
+                        tech_data = self._get_cached_technical_data(code) or self.get_real_technical_indicators(code)
+                    if not fund_data:
+                        fund_data = self._get_cached_fundamental_data(code) or self.get_real_fundamental_indicators(code)
             
             # 如果没有真实数据，返回 -999 而不是生成模拟数据
             if not tech_data or not fund_data:
