@@ -725,17 +725,26 @@ class AShareAnalyzerGUI:
     
     def check_data_status(self):
         """检查本地数据状态并更新界面提示"""
+        import re
         try:
             # 检查全部数据状态
             all_data_status = self._check_comprehensive_data_status()
             if hasattr(self, 'all_data_status_label'):
-                self.all_data_status_label.config(text=all_data_status, fg=self._get_status_color(all_data_status))
+                # 获取颜色（根据AGE信息）
+                color = self._get_status_color(all_data_status)
+                # 移除AGE标记后显示
+                display_text = re.sub(r'\s*\[AGE:\d+\]', '', all_data_status)
+                self.all_data_status_label.config(text=display_text, fg=color)
             
             # 检查K线数据状态
             kline_data_status = self._check_kline_data_status()
             if hasattr(self, 'kline_status_label'):
                 if kline_data_status:  # 只有当状态不为空时才显示
-                    self.kline_status_label.config(text=kline_data_status, fg=self._get_status_color(kline_data_status))
+                    # 获取颜色（根据AGE信息）
+                    color = self._get_status_color(kline_data_status)
+                    # 移除AGE标记后显示
+                    display_text = re.sub(r'\s*\[AGE:\d+\]', '', kline_data_status)
+                    self.kline_status_label.config(text=display_text, fg=color)
                     # 显示包含K线状态的整行
                     if hasattr(self.kline_status_label, 'master') and hasattr(self.kline_status_label.master, 'pack'):
                         self.kline_status_label.master.pack(fill="x", pady=2)
@@ -747,7 +756,11 @@ class AShareAnalyzerGUI:
             # 检查评分数据状态
             score_data_status = self._check_score_data_status()
             if hasattr(self, 'score_status_label'):
-                self.score_status_label.config(text=score_data_status, fg=self._get_status_color(score_data_status))
+                # 获取颜色（根据AGE信息）
+                color = self._get_status_color(score_data_status)
+                # 移除AGE标记后显示
+                display_text = re.sub(r'\s*\[AGE:\d+\]', '', score_data_status)
+                self.score_status_label.config(text=display_text, fg=color)
                 
         except Exception as e:
             print(f"检查数据状态失败: {e}")
@@ -778,6 +791,8 @@ class AShareAnalyzerGUI:
             
             if latest_time:
                 latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
+                # 计算天数差异用于颜色判断
+                days_diff = (datetime.now() - datetime.fromtimestamp(latest_time)).days
                 
                 # 检查是否有Choice数据
                 data_source_info = ""
@@ -801,7 +816,7 @@ class AShareAnalyzerGUI:
                     except:
                         pass
                 
-                return f"本地数据: {latest_date} ({len(part_files)}个文件){data_source_info}"
+                return f"本地数据: {latest_date} ({len(part_files)}个文件){data_source_info} [AGE:{days_diff}]"
             else:
                 return "📂 无本地数据"
                 
@@ -824,7 +839,13 @@ class AShareAnalyzerGUI:
                 
                 last_update = status_data.get('last_update_date', '')
                 if last_update:
-                    return f"K线数据: {last_update}"
+                    # 计算天数差异
+                    try:
+                        data_date = datetime.strptime(last_update, "%Y-%m-%d")
+                        days_diff = (datetime.now() - data_date).days
+                        return f"K线数据: {last_update} [AGE:{days_diff}]"
+                    except:
+                        return f"K线数据: {last_update}"
             
             # 如果没有独立的K线状态文件，检查全部数据（因为全部数据包含K线数据）
             data_dir = 'data'
@@ -842,6 +863,7 @@ class AShareAnalyzerGUI:
                     
                     if latest_time:
                         latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
+                        days_diff = (datetime.now() - datetime.fromtimestamp(latest_time)).days
                         
                         # 构建数据源信息，同时显示常规数据和Choice数据
                         regular_data_info = f"常规数据 {latest_date}"
@@ -866,7 +888,7 @@ class AShareAnalyzerGUI:
                                 pass
                         
                         # 如果两种数据都有，就都显示；如果只有常规数据，就只显示常规数据
-                        return f"K线数据: {latest_date} ({regular_data_info}{choice_data_info})"
+                        return f"K线数据: {latest_date} ({regular_data_info}{choice_data_info}) [AGE:{days_diff}]"
             
             # 如果没有任何数据，返回空字符串（不显示提示）
             return ""
@@ -941,7 +963,9 @@ class AShareAnalyzerGUI:
                 except:
                     pass
                 
-                return f"{latest_date} {latest_time_str} | {latest_model}{data_source_info}"
+                # 计算天数差异
+                days_diff = (datetime.now() - datetime.fromtimestamp(latest_time)).days
+                return f"{latest_date} {latest_time_str} | {latest_model}{data_source_info} [AGE:{days_diff}]"
             else:
                 return "暂无评分数据"
                 
@@ -971,11 +995,16 @@ class AShareAnalyzerGUI:
     
     def _refresh_kline_status(self):
         """刷新K线状态显示"""
+        import re
         try:
             kline_status = self._check_kline_data_status()
             if hasattr(self, 'kline_status_label'):
                 if kline_status:  # 只有当状态不为空时才显示
-                    self.kline_status_label.config(text=kline_status, fg=self._get_status_color(kline_status))
+                    # 获取颜色（根据AGE信息）
+                    color = self._get_status_color(kline_status)
+                    # 移除AGE标记后显示
+                    display_text = re.sub(r'\s*\[AGE:\d+\]', '', kline_status)
+                    self.kline_status_label.config(text=display_text, fg=color)
                     self.kline_status_label.master.pack(fill="x", pady=2)  # 显示父容器
                 else:
                     self.kline_status_label.master.pack_forget()  # 隐藏整行
@@ -984,10 +1013,26 @@ class AShareAnalyzerGUI:
     
     def _get_status_color(self, status_text):
         """根据状态文本返回颜色"""
+        import re
+
+        # 检查是否有错误状态
         if "无" in status_text or "失败" in status_text:
             return "#e74c3c"  # 红色
-        else:
-            return "#27ae60"  # 绿色
+        
+        # 提取天数差异信息 [AGE:X]
+        age_match = re.search(r'\[AGE:(\d+)\]', status_text)
+        if age_match:
+            days_old = int(age_match.group(1))
+            
+            if days_old == 0:
+                return "#27ae60"  # 绿色 - 当天数据
+            elif days_old <= 5:
+                return "#f39c12"  # 黄色 - 1-5天旧数据
+            else:
+                return "#e74c3c"  # 红色 - 超过5天
+        
+        # 没有年龄信息时默认绿色
+        return "#27ae60"
     
     def _load_stock_info_fallback(self):
         """从JSON文件加载后备股票信息数据"""
@@ -3048,7 +3093,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         """按股票类型获取评分 - 集成MiniMax CodingPlan性能优化"""
         import gc
         import threading
-        
+
         # 检查数据源
         if self.use_choice_data.get():
             # 使用Choice数据
@@ -6397,8 +6442,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     
     def run_choice_data_collection(self):
         """运行Choice数据采集BAT脚本"""
-        import subprocess
         import os
+        import subprocess
         from datetime import datetime
         
         try:
@@ -8570,8 +8615,10 @@ K线更新后快速评分完成！
                 # 5. 尝试腾讯财经接口（股票行情页面数据）
                 try:
                     print(f"{ticker} 尝试腾讯财经接口获取PE/PB...")
-                    import requests
                     import re
+
+                    import requests
+
                     # 构建股票代码
                     if ticker.startswith('6'):
                         tencent_code = f"sh{ticker}"
@@ -8609,6 +8656,7 @@ K线更新后快速评分完成！
                 try:
                     print(f"{ticker} 尝试东方财富接口获取PE/PB...")
                     import requests
+
                     # 东方财富个股资料接口
                     secid = f"1.{ticker}" if ticker.startswith('6') else f"0.{ticker}"
                     url = f"http://push2.eastmoney.com/api/qt/stock/get?secid={secid}&fields=f57,f58,f162,f167,f173"
@@ -18875,10 +18923,11 @@ def main():
     def _get_choice_technical_data_realtime(self, ticker):
         """实时调用Choice API获取技术数据"""
         try:
-            from EmQuantAPI import c
             from datetime import datetime, timedelta
-            from config import CHOICE_USERNAME, CHOICE_PASSWORD
-            
+
+            from config import CHOICE_PASSWORD, CHOICE_USERNAME
+            from EmQuantAPI import c
+
             # 转换股票代码格式
             if ticker.startswith('6'):
                 stock_code = f"{ticker}.SH"
@@ -19110,10 +19159,11 @@ def main():
     def _get_choice_fundamental_data_realtime(self, ticker):
         """实时调用Choice API获取基本面数据"""
         try:
-            from EmQuantAPI import c
             from datetime import datetime
-            from config import CHOICE_USERNAME, CHOICE_PASSWORD
-            
+
+            from config import CHOICE_PASSWORD, CHOICE_USERNAME
+            from EmQuantAPI import c
+
             # 转换股票代码格式
             if ticker.startswith('6'):
                 stock_code = f"{ticker}.SH"
