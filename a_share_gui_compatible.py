@@ -3518,6 +3518,30 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                 except Exception:
                                     normalized = float(weighted or 5.0)
 
+                                # 📌 获取筹码健康度数据（如果可用）
+                                chip_score = None
+                                chip_level = None
+                                try:
+                                    # 调试日志
+                                    if i == 0:  # 只在第一只股票时输出一次
+                                        print(f"[CHIP-DEBUG] 筹码分析器状态: chip_analyzer={self.chip_analyzer is not None}, use_choice={self.use_choice_data.get()}")
+                                    
+                                    if self.chip_analyzer and not self.use_choice_data.get():
+                                        chip_result = self.chip_analyzer.analyze_stock(code)
+                                        if chip_result and not chip_result.get('error'):
+                                            chip_score = chip_result.get('health_score', 0)
+                                            chip_level = chip_result.get('health_level', '未知')
+                                            print(f"[CHIP] {code} 筹码健康度: {chip_score:.1f}/10 ({chip_level})")
+                                    else:
+                                        if i == 0:
+                                            if not self.chip_analyzer:
+                                                print("[CHIP-DEBUG] 跳过筹码分析: 筹码分析器未初始化")
+                                            elif self.use_choice_data.get():
+                                                print("[CHIP-DEBUG] 跳过筹码分析: 使用了Choice数据源")
+                                except Exception as chip_err:
+                                    if i == 0:
+                                        print(f"[CHIP-DEBUG] 筹码分析异常: {chip_err}")
+
                                 # 存储包含三个时间段评分的批量评分结果，保留原始加权和归一化分
                                 self.batch_scores[code] = {
                                     'name': stock_name,
@@ -3527,7 +3551,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                     'medium_term_score': float(medium_score),  # 中期评分 
                                     'long_term_score': float(long_score),      # 长期评分
                                     'industry': industry,
-                                    'timestamp': datetime.now().strftime('%H:%M:%S')
+                                    'timestamp': datetime.now().strftime('%H:%M:%S'),
+                                    'chip_score': chip_score,  # 筹码健康度评分
+                                    'chip_level': chip_level   # 筹码健康度等级
                                 }
                                 success_count += 1
                             else:
@@ -17005,19 +17031,9 @@ WARNING: 重要声明:
                                 continue
                         
                         # 获取筹码健康度信息
-                        # 📌 批量推荐模式：从缓存获取筹码数据，不触发实时分析
-                        chip_score = None
-                        chip_level = None
-                        try:
-                            # 优先从comprehensive_stock_data缓存读取
-                            if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
-                                cached_data = self.comprehensive_stock_data[code]
-                                if 'chip_score' in cached_data:
-                                    chip_score = cached_data.get('chip_score', 0)
-                                    chip_level = cached_data.get('chip_level', '未知')
-                            # 如果缓存中没有，不进行实时获取（避免触发Choice连接）
-                        except Exception:
-                            pass
+                        # 📌 批量推荐模式：从batch_scores读取已保存的筹码数据，不触发实时分析
+                        chip_score = score_data.get('chip_score')
+                        chip_level = score_data.get('chip_level')
                         
                         filtered_stocks.append({
                             'code': code,
@@ -17073,21 +17089,9 @@ WARNING: 重要声明:
                                     st_filtered_count += 1
                                     continue
                             
-                            # 获取筹码健康度信息
-                            chip_score = None
-                            chip_level = None
-                            try:
-                                if self.chip_analyzer:
-                                    # 检查是否使用Choice数据源
-                                    if self.use_choice_data.get():
-                                        chip_result = None
-                                    else:
-                                        chip_result = self.chip_analyzer.analyze_stock(code)
-                                    if chip_result and not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
-                                        chip_score = chip_result.get('health_score', 0)
-                                        chip_level = chip_result.get('health_level', '未知')
-                            except Exception:
-                                pass
+                            # 获取筹码健康度信息（从batch_scores读取，避免重复分析）
+                            chip_score = score_data.get('chip_score')
+                            chip_level = score_data.get('chip_level')
                             
                             filtered_stocks.append({
                                 'code': code,
@@ -17152,17 +17156,23 @@ WARNING: 重要声明:
                                         st_filtered_count += 1
                                         continue
                                 
-                                filtered_stocks.append({
-                                    'code': code,
-                                    'name': stock_name,
-                                    'score': weighted_score,  # 使用期限加权评分
-                                    'industry': score_data.get('industry', '未知'),
-                                    'timestamp': score_data.get('timestamp', ''),
-                                    'source': f'batch_{period_type}',
-                                    'short_score': short_score,
-                                    'medium_score': medium_score,
-                                    'long_score': long_score
-                                })
+                            # 获取筹码健康度信息（从batch_scores中读取）
+                            chip_score = score_data.get('chip_score')
+                            chip_level = score_data.get('chip_level')
+                            
+                            filtered_stocks.append({
+                                'code': code,
+                                'name': stock_name,
+                                'score': weighted_score,  # 使用期限加权评分
+                                'industry': score_data.get('industry', '未知'),
+                                'timestamp': score_data.get('timestamp', ''),
+                                'source': f'batch_{period_type}',
+                                'short_score': short_score,
+                                'medium_score': medium_score,
+                                'long_score': long_score,
+                                'chip_score': chip_score,
+                                'chip_level': chip_level
+                            })
                     
                     if st_filtered_count > 0:
                         print(f"🚫 {period_name}推荐已排除 {st_filtered_count} 只ST股票")
@@ -17517,10 +17527,11 @@ WARNING: 重要声明:
             
             # 获取筹码健康度信息（优先从推荐数据中获取）
             chip_info = ""
+            chip_detail_line = ""
             chip_score = stock.get('chip_score')
             chip_level = stock.get('chip_level')
             
-            # 如枟推荐数据中没有，则尝试实时获取
+            # 如果推荐数据中没有，则尝试实时获取
             if chip_score is None and self.chip_analyzer:
                 try:
                     chip_result = self.get_or_compute_chip_result(code)
@@ -17530,7 +17541,7 @@ WARNING: 重要声明:
                 except Exception:
                     pass
             
-            # 生成筹码显示信息
+            # 生成筹码显示信息（始终显示，即使没有数据）
             if chip_score is not None and chip_level:
                 chip_emoji_map = {
                     '极度健康': '🟢',
@@ -17542,6 +17553,11 @@ WARNING: 重要声明:
                 }
                 chip_emoji = chip_emoji_map.get(chip_level, '⚪')
                 chip_info = f" | 筹码:{chip_emoji}{chip_score:.1f}"
+                chip_detail_line = f"    💎 筹码健康度：{chip_score:.2f}/10.0 ({chip_level})\n"
+            else:
+                # 没有筹码数据时也显示说明
+                chip_info = " | 筹码:⚪N/A"
+                chip_detail_line = "    💎 筹码健康度：暂无数据（可能原因：缺少K线缓存数据或批量评分未包含筹码分析）\n"
             
             # 评分等级
             if score >= 9.0:
@@ -17563,6 +17579,8 @@ WARNING: 重要声明:
     📈 趋势判断：{trend}
 """
             
+            # 添加筹码健康度详细信息（始终显示）
+            stock_info += chip_detail_line
             # 添加筹码健康度详细信息
             if chip_score is not None and chip_level:
                 stock_info += f"    💎 筹码健康度：{chip_score:.2f}/10.0 ({chip_level})\n"
@@ -18334,6 +18352,29 @@ WARNING: 重要声明:
             
             print(f"[SUCCESS] 🎉 {mode_name}完成: {processed_count} 只股票")
             self.update_progress_with_bar(final_msg, final_percent, final_detail)
+            
+            # 检查是否有缺失K线数据的股票
+            if hasattr(self, '_batch_missing_kline_stocks') and len(self._batch_missing_kline_stocks) > 0:
+                missing_count = len(self._batch_missing_kline_stocks)
+                warning_msg = (
+                    f"⚠️ 筹码健康度警告\n\n"
+                    f"有 {missing_count} 只股票因缺少K线缓存数据，未能计算筹码健康度。\n\n"
+                    f"建议：\n"
+                    f"1. 点击「更新K线数据」按钮更新本地K线数据\n"
+                    f"2. 然后重新运行批量评分\n\n"
+                    f"注意：批量评分仅使用本地缓存数据，不会从网络实时获取。"
+                )
+                print(f"[CHIP-WARNING] {missing_count} 只股票缺少K线数据: {self._batch_missing_kline_stocks[:10]}...")
+                
+                # 在主线程显示警告对话框
+                def show_kline_warning():
+                    from tkinter import messagebox
+                    messagebox.showwarning("筹码健康度警告", warning_msg)
+                
+                self.root.after(0, show_kline_warning)
+                
+                # 清空记录
+                self._batch_missing_kline_stocks = []
         else:
             self.update_progress_with_bar(f"❌ {current_model}模式未产生有效结果", 0, "处理失败")
 
@@ -18467,7 +18508,63 @@ WARNING: 重要声明:
 
             print(f"[CALC] {code} 评分计算 - 短期:{short_score:.1f}, 中期:{medium_score:.1f}, 长期:{long_score:.1f}, 综合:{overall_score:.1f}")
             
-            return {
+            # === 筹码健康度计算 ===
+            chip_score = None
+            chip_level = None
+            
+            # 只有在不使用Choice数据时才计算筹码健康度（因为Choice数据时使用本地K线）
+            if self.chip_analyzer and not self.use_choice_data.get():
+                try:
+                    print(f"[CHIP-START] {code} 开始计算筹码健康度...")
+                    
+                    # 尝试从缓存中获取K线数据
+                    cached_kline = None
+                    if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
+                        stock_cache = self.comprehensive_stock_data[code]
+                        if 'kline_data' in stock_cache and stock_cache['kline_data']:
+                            # 支持两种K线数据结构
+                            if 'daily' in stock_cache['kline_data']:
+                                cached_kline = stock_cache['kline_data']['daily']
+                            else:
+                                cached_kline = stock_cache['kline_data']
+                            
+                            if cached_kline and len(cached_kline) > 0:
+                                print(f"[CHIP-CACHE] {code} 找到缓存K线: {len(cached_kline)}条")
+                            else:
+                                print(f"[CHIP-NOCACHE] {code} K线数据为空")
+                                cached_kline = None
+                        else:
+                            print(f"[CHIP-NOCACHE] {code} 无K线数据")
+                    else:
+                        print(f"[CHIP-NOCACHE] {code} 不在comprehensive_stock_data中")
+                    
+                    # 【批量模式】调用筹码分析器，传入缓存K线数据和批量模式标志
+                    # is_batch_mode=True 表示只使用缓存，不从网络获取
+                    chip_result = self.chip_analyzer.analyze_stock(code, cached_kline_data=cached_kline, is_batch_mode=True)
+                    
+                    if chip_result and 'error' in chip_result:
+                        # 批量模式下缺少K线数据
+                        print(f"[CHIP-SKIP] {code} {chip_result['error']}")
+                        # 记录缺失K线的股票，用于后续统一警告
+                        if not hasattr(self, '_batch_missing_kline_stocks'):
+                            self._batch_missing_kline_stocks = []
+                        self._batch_missing_kline_stocks.append(code)
+                    elif chip_result and 'health_score' in chip_result:
+                        chip_score = chip_result['health_score']
+                        chip_level = chip_result.get('health_level', '未知')
+                        print(f"[CHIP-SUCCESS] {code} 筹码健康度: {chip_score:.2f}/10.0 ({chip_level})")
+                    else:
+                        print(f"[CHIP-FAIL] {code} 筹码分析返回空结果")
+                except Exception as e:
+                    print(f"[CHIP-ERROR] {code} 筹码健康度计算失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+            else:
+                skip_reason = "使用Choice数据" if self.use_choice_data.get() else "筹码分析器未初始化"
+                print(f"[CHIP-SKIP] {code} 跳过筹码分析 - 原因: {skip_reason}")
+            
+            # 构建返回结果，包含筹码健康度字段
+            result = {
                 'name': stock_info.get('name', ''),
                 'industry': stock_info.get('industry', ''),
                 'short_term_score': round(short_score, 2),
@@ -18481,6 +18578,13 @@ WARNING: 重要声明:
                 'data_source': 'local_cache',
                 'trend': trend  # 添加趋势信息
             }
+            
+            # 添加筹码健康度字段（如果有的话）
+            if chip_score is not None:
+                result['chip_score'] = round(chip_score, 2)
+                result['chip_level'] = chip_level
+            
+            return result
             
         except Exception as e:
             print(f"[ERROR] 算法计算股票 {code} 评分失败: {e}")

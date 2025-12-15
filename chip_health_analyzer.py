@@ -78,18 +78,22 @@ class ChipHealthAnalyzer:
             print("✓ 机器学习增强模式已启用")
             self._initialize_ml_model()
     
-    def analyze_stock(self, stock_code):
+    def analyze_stock(self, stock_code, cached_kline_data=None, is_batch_mode=False):
         """
         分析股票筹码健康度
         
         Args:
             stock_code: 股票代码（6位数字，如'600519'）
+            cached_kline_data: 可选，缓存的K线数据列表，格式：
+                [{'date': '2024-01-01', 'close': 10.5, 'volume': 1000000}, ...]
+                如果提供此参数，将优先使用缓存数据而不是重新从网络获取
+            is_batch_mode: 是否为批量评分模式。如果为True且无缓存数据，将直接返回错误而不从网络获取
         
         Returns:
             dict: 筹码分析结果
         """
         print(f"\n{'='*70}")
-        print(f"  筹码健康度分析 - {stock_code}")
+        print(f"  筹码健康度分析 - {stock_code} {'[批量模式]' if is_batch_mode else '[实时模式]'}")
         print(f"{'='*70}\n")
         
         result = {
@@ -137,7 +141,25 @@ class ChipHealthAnalyzer:
 
         # 1. 获取当前价格和历史数据
         step_log("获取价格和历史数据...")
-        current_price, hist_data = self._get_price_and_history(stock_code)
+        
+        # 批量模式：只使用缓存数据，不从网络获取
+        if is_batch_mode:
+            if cached_kline_data is not None and len(cached_kline_data) > 0:
+                print("  ✓ [批量模式] 使用缓存K线数据")
+                current_price, hist_data = self._convert_cached_kline_to_dataframe(cached_kline_data)
+            else:
+                print("  ❌ [批量模式] 无缓存K线数据，跳过筹码分析")
+                result['error'] = '批量模式下缺少K线缓存数据，请先更新K线数据'
+                return result
+        else:
+            # 实时模式：优先使用缓存，没有缓存时从网络获取
+            if cached_kline_data is not None and len(cached_kline_data) > 0:
+                print("  ✓ [实时模式] 使用缓存K线数据")
+                current_price, hist_data = self._convert_cached_kline_to_dataframe(cached_kline_data)
+            else:
+                print("  ⚠ [实时模式] 无缓存数据，从网络获取...")
+                current_price, hist_data = self._get_price_and_history(stock_code)
+        
         if current_price == 0 or hist_data is None:
             print("❌ 无法获取价格数据")
             result['error'] = '无法获取股票数据，请检查网络连接或稍后重试'
@@ -167,27 +189,33 @@ class ChipHealthAnalyzer:
             print(f"✓ 当前价格: ¥{current_price:.2f}")
             print(f"⚠ 未找到日期列，数据天数: {result['data_days']}天")
         
-        # 2. 获取十大流通股东
+        # 2. 获取十大流通股东（批量模式下跳过网络请求）
         print("")
         step_log("获取十大流通股东数据...")
-        top10_data = self._get_top10_holders(stock_code)
-        if top10_data is not None:
-            result['top10_holders'] = top10_data
-            chip_concentration = self._calculate_concentration(top10_data)
-            result['chip_concentration'] = chip_concentration
-            print(f"✓ 十大股东持股: {chip_concentration:.2f}%")
+        if is_batch_mode:
+            print("  ⚠ [批量模式] 跳过十大股东数据获取（避免网络请求）")
         else:
-            print("⚠ 未获取到十大股东数据")
+            top10_data = self._get_top10_holders(stock_code)
+            if top10_data is not None:
+                result['top10_holders'] = top10_data
+                chip_concentration = self._calculate_concentration(top10_data)
+                result['chip_concentration'] = chip_concentration
+                print(f"✓ 十大股东持股: {chip_concentration:.2f}%")
+            else:
+                print("⚠ 未获取到十大股东数据")
         
-        # 3. 获取股东户数变化
+        # 3. 获取股东户数变化（批量模式下跳过网络请求）
         print("")
         step_log("获取股东户数变化...")
-        holder_change = self._get_holder_count_change(stock_code)
-        if holder_change != 0:
-            result['holder_count_change'] = holder_change
-            print(f"✓ 股东户数变化: {holder_change:+.2f}%")
+        if is_batch_mode:
+            print("  ⚠ [批量模式] 跳过股东户数数据获取（避免网络请求）")
         else:
-            print("⚠ 未获取到股东户数数据")
+            holder_change = self._get_holder_count_change(stock_code)
+            if holder_change != 0:
+                result['holder_count_change'] = holder_change
+                print(f"✓ 股东户数变化: {holder_change:+.2f}%")
+            else:
+                print("⚠ 未获取到股东户数数据")
         
         # 4. 计算筹码成本分位数（P10/P50/P90）和SCR
         print("")
@@ -421,6 +449,60 @@ class ChipHealthAnalyzer:
         
         print("❌ 所有数据源均失败")
         return 0, None
+    
+    def _convert_cached_kline_to_dataframe(self, cached_kline_data):
+        """
+        将缓存的K线数据转换为筹码分析所需的DataFrame格式
+        
+        Args:
+            cached_kline_data: K线数据列表，每项可能包含：
+                - {'date': '2024-01-01', 'close': 10.5, 'volume': 1000000, ...}
+                或
+                - {'日期': '2024-01-01', '收盘': 10.5, '成交量': 1000000, ...}
+        
+        Returns:
+            (current_price, DataFrame): 当前价格和历史数据
+        """
+        try:
+            if not cached_kline_data or len(cached_kline_data) == 0:
+                return 0, None
+            
+            # 转换为DataFrame
+            df = pd.DataFrame(cached_kline_data)
+            
+            # 统一列名（支持中英文）
+            rename_map = {}
+            if 'date' in df.columns:
+                rename_map['date'] = '日期'
+            if 'close' in df.columns:
+                rename_map['close'] = '收盘'
+            if 'volume' in df.columns:
+                rename_map['volume'] = '成交量'
+            
+            if rename_map:
+                df = df.rename(columns=rename_map)
+            
+            # 确保必需的列存在
+            if '日期' not in df.columns or '收盘' not in df.columns or '成交量' not in df.columns:
+                print(f"  ❌ 缓存数据格式错误，列名: {list(df.columns)}")
+                return 0, None
+            
+            # 确保日期格式
+            if df['日期'].dtype == 'object':
+                df['日期'] = pd.to_datetime(df['日期']).dt.strftime('%Y-%m-%d')
+            
+            # 获取当前价格（最后一条数据的收盘价）
+            current_price = float(df['收盘'].iloc[-1])
+            
+            print(f"  ✓ 缓存数据转换成功: {len(df)}条K线，当前价: ¥{current_price:.2f}")
+            
+            return current_price, df
+            
+        except Exception as e:
+            print(f"  ❌ 缓存数据转换失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return 0, None
     
     def _get_top10_holders(self, stock_code):
         """获取十大流通股东"""
