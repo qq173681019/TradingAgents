@@ -17581,9 +17581,6 @@ WARNING: 重要声明:
             
             # 添加筹码健康度详细信息（始终显示）
             stock_info += chip_detail_line
-            # 添加筹码健康度详细信息
-            if chip_score is not None and chip_level:
-                stock_info += f"    💎 筹码健康度：{chip_score:.2f}/10.0 ({chip_level})\n"
             
             if strategy:
                 stock_info += f"   💡 投资策略：{strategy}\n"

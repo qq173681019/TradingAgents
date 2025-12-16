@@ -4163,6 +4163,8 @@ class ComprehensiveDataCollector:
                                     if date_col:
                                         # 合并新旧数据，去重并排序
                                         combined_df = pd.concat([old_df, new_kline_df], ignore_index=True)
+                                        # 统一日期类型为字符串，避免 Timestamp 和 str 混合导致排序错误
+                                        combined_df[date_col] = combined_df[date_col].astype(str)
                                         combined_df = combined_df.drop_duplicates(subset=[date_col], keep='last')
                                         combined_df = combined_df.sort_values(by=date_col)
                                         kline_df = combined_df
