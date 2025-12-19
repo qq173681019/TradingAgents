@@ -1,0 +1,32 @@
+{
+    "choice_account": {
+        "username": "hczq2048",
+        "activated_at": "2025-12-06T00:03:56+08:00",
+        "activation_status": "pending_token_file",
+        "error_code": 0,
+        "message": "manual activate success, please contact with your service manager to get token file"
+    },
+    "device_info": {
+        "hostname": "龚若兰",
+        "username_system": "龚若兰",
+        "python_version": "3.12.5",
+        "platform": "Windows",
+        "python_exe": "c:\\Users\\龚若兰\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+    },
+    "next_steps": [
+        "1. 联系 Choice 服务管理员",
+        "2. 提供以下信息:",
+        "   - 账户: hczq2048",
+        "   - 激活时间: 2025-12-06 00:03:56",
+        "   - 设备: 龚若兰 (Windows)",
+        "3. 请求获取 Token 文件",
+        "4. 收到 Token 文件后，放入:",
+        "   - %APPDATA%\\EmQuantAPI\\",
+        "   - 或 ~/.EmQuantAPI/",
+        "5. 重启 Python 后重新测试"
+    ],
+    "commands_to_test": [
+        "python test_choice_worker_direct.py",
+        "python test_choice_mainboard_50days.py"
+    ]
+}
