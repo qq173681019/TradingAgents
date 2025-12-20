@@ -211,8 +211,8 @@ class UtilAccess:
     def __getLibraryPath_window():
         # 优先使用相对于 EmQuantAPI.py 的路径
         baseDir = _os.path.dirname(_os.path.abspath(__file__))
+        # 首先检查相对于当前文件的 libs/windows
         libsDir = _os.path.join(baseDir, "libs", "windows")
-        
         # 如果相对路径存在，直接使用
         if _os.path.exists(libsDir):
             if UtilAccess.adapter.get_py_bit() == PY_Bit32:
@@ -221,6 +221,21 @@ class UtilAccess:
                 apiDllPath = _os.path.join(libsDir, "EmQuantAPI_x64.dll")
             if _os.path.exists(apiDllPath):
                 return apiDllPath
+
+        # 如果未找到，向上搜索父目录中的 libs/windows（最多向上 3 层）
+        cur_dir = baseDir
+        for _i in range(3):
+            cur_dir = _os.path.dirname(cur_dir)
+            if not cur_dir:
+                break
+            candidate = _os.path.join(cur_dir, "libs", "windows")
+            if _os.path.exists(candidate):
+                if UtilAccess.adapter.get_py_bit() == PY_Bit32:
+                    apiDllPath = _os.path.join(candidate, "EmQuantAPI.dll")
+                else:
+                    apiDllPath = _os.path.join(candidate, "EmQuantAPI_x64.dll")
+                if _os.path.exists(apiDllPath):
+                    return apiDllPath
         
         # 回退到原有的 .pth 文件方式
         apiPackagePath = "."

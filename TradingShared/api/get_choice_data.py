@@ -4,7 +4,21 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-from config import CHOICE_PASSWORD, CHOICE_USERNAME
+# 添加 TradingShared 到路径，以便导入 config
+script_dir = os.path.dirname(os.path.abspath(__file__))
+tradingshared_root = os.path.dirname(script_dir)
+if tradingshared_root not in sys.path:
+    sys.path.insert(0, tradingshared_root)
+
+try:
+    from config import CHOICE_PASSWORD, CHOICE_USERNAME
+except ImportError:
+    # 如果相对导入失败，尝试绝对导入
+    try:
+        from TradingShared.config import CHOICE_PASSWORD, CHOICE_USERNAME
+    except ImportError:
+        print("无法导入 config，请检查路径")
+        sys.exit(1)
 
 
 # 修复 WinError 87: 预加载依赖 DLL 并设置正确的加载模式
@@ -12,11 +26,11 @@ def setup_choice_dll_path():
     """设置 Choice DLL 路径以避免 WinError 87"""
     import ctypes
 
-    # Choice DLL 在项目根目录的 libs/windows 目录
+    # Choice DLL 在 TradingShared 目录的 libs/windows 目录
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # 从 TradingShared/api 向上两级到达项目根目录
-    project_root = os.path.dirname(os.path.dirname(script_dir))
-    dll_dir = os.path.join(project_root, "libs", "windows")
+    # 从 TradingShared/api 向上一级到达 TradingShared 目录
+    tradingshared_root = os.path.dirname(script_dir)
+    dll_dir = os.path.join(tradingshared_root, "libs", "windows")
     
     if not os.path.exists(dll_dir):
         print(f"警告: Choice DLL 目录不存在: {dll_dir}")
@@ -88,7 +102,27 @@ if not setup_choice_dll_path():
 
 print("\n✓ Choice SDK 环境设置完成，开始导入 EmQuantAPI...")
 
-from EmQuantAPI import c
+try:
+    from .EmQuantAPI import c
+except ImportError:
+    # 如果相对导入失败，尝试绝对导入
+    try:
+        from EmQuantAPI import c
+    except ImportError:
+        # 如果绝对导入也失败，尝试从当前目录导入
+        try:
+            import importlib.util
+            emquantapi_path = os.path.join(script_dir, 'EmQuantAPI.py')
+            if os.path.exists(emquantapi_path):
+                spec = importlib.util.spec_from_file_location("EmQuantAPI", emquantapi_path)
+                emquantapi_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(emquantapi_module)
+                c = emquantapi_module.c
+            else:
+                raise ImportError("EmQuantAPI.py not found")
+        except Exception as e:
+            print(f"无法导入 EmQuantAPI: {e}")
+            sys.exit(1)
 
 print("✓ EmQuantAPI 导入成功\n")
 

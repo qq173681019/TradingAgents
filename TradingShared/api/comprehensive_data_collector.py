@@ -1014,10 +1014,13 @@ class ComprehensiveDataCollector:
                     import sys
                     import os
                     api_dir = os.path.dirname(os.path.abspath(__file__))
+                    tradingshared_dir = os.path.dirname(api_dir)
                     if api_dir not in sys.path:
                         sys.path.insert(0, api_dir)
+                    if tradingshared_dir not in sys.path:
+                        sys.path.insert(0, tradingshared_dir)
                     
-                    from get_choice_data import get_kline_data_css
+                    from TradingShared.api.get_choice_data import get_kline_data_css
                     import pandas as pd
                     
                     # 使用Choice批量获取K线数据

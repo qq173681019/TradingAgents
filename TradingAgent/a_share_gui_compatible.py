@@ -17691,6 +17691,21 @@ WARNING: 重要声明:
             current_dir = os.path.dirname(os.path.abspath(__file__))
             sys.path.insert(0, current_dir)
             
+            # 添加TradingShared路径
+            tradingshared_path = os.path.join(os.path.dirname(current_dir), 'TradingShared')
+            print(f"[DEBUG] Setting up paths...")
+            print(f"[DEBUG] current_dir: {current_dir}")
+            print(f"[DEBUG] tradingshared_path: {tradingshared_path}")
+            print(f"[DEBUG] tradingshared_path exists: {os.path.exists(tradingshared_path)}")
+            if tradingshared_path not in sys.path:
+                sys.path.insert(0, tradingshared_path)
+                print(f"[DEBUG] Added to sys.path: {tradingshared_path}")
+            api_path = os.path.join(tradingshared_path, 'api')
+            if api_path not in sys.path:
+                sys.path.insert(0, api_path)
+                print(f"[DEBUG] Added to sys.path: {api_path}")
+            print(f"[DEBUG] sys.path[:3]: {sys.path[:3]}")
+            
             def update_status(message, progress=None, detail=""):
                 """更新状态显示"""
                 self.root.after(0, lambda: self.data_collection_status_label.config(text=message, fg="#27ae60"))
@@ -17743,10 +17758,55 @@ WARNING: 重要声明:
                 
                 try:
                     # 导入Choice相关模块
-                    from get_choice_data import get_kline_data_css
+                    print(f"[DEBUG] About to import TradingShared.api.get_choice_data")
+                    from TradingShared.api.get_choice_data import get_kline_data_css
+                    print(f"[DEBUG] Import successful")
                     from datetime import datetime, timedelta
                     import json
                     import pandas as pd
+                    
+                except ImportError as import_error:
+                    print(f"[DEBUG] Import failed: {import_error}")
+                    print(f"[DEBUG] Attempting to fix path...")
+                    # 尝试重新设置路径
+                    try:
+                        import os
+                        import sys
+                        import importlib.util
+                        
+                        script_dir = os.path.dirname(os.path.abspath(__file__))
+                        tradingshared_root = os.path.join(os.path.dirname(script_dir), 'TradingShared')
+                        get_choice_data_path = os.path.join(tradingshared_root, 'api', 'get_choice_data.py')
+                        
+                        print(f"[DEBUG] tradingshared_root: {tradingshared_root}")
+                        print(f"[DEBUG] get_choice_data_path: {get_choice_data_path}")
+                        print(f"[DEBUG] get_choice_data_path exists: {os.path.exists(get_choice_data_path)}")
+                        
+                        if tradingshared_root not in sys.path:
+                            sys.path.insert(0, tradingshared_root)
+                            print(f"[DEBUG] Added tradingshared_root to sys.path: {tradingshared_root}")
+                        api_dir = os.path.join(tradingshared_root, 'api')
+                        if api_dir not in sys.path:
+                            sys.path.insert(0, api_dir)
+                            print(f"[DEBUG] Added api_dir to sys.path: {api_dir}")
+                        print(f"[DEBUG] sys.path[:5]: {sys.path[:5]}")
+                        
+                        # 使用 importlib 直接导入
+                        print(f"[DEBUG] Using importlib to import directly...")
+                        spec = importlib.util.spec_from_file_location("get_choice_data", get_choice_data_path)
+                        get_choice_data_module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(get_choice_data_module)
+                        get_kline_data_css = get_choice_data_module.get_kline_data_css
+                        print(f"[DEBUG] Direct importlib import successful")
+                        
+                        from datetime import datetime, timedelta
+                        import json
+                        import pandas as pd
+                    except Exception as retry_error:
+                        print(f"[DEBUG] Direct importlib import also failed: {retry_error}")
+                        import traceback
+                        traceback.print_exc()
+                        raise import_error
                     
                     # 加载本地数据
                     update_status("加载本地数据...", 5, "读取已有股票数据...")
@@ -17950,6 +18010,7 @@ WARNING: 重要声明:
             
             self.data_collection_active = False
             error_msg = f"K线更新失败：{str(e)}"
+            print(f"[ERROR] {error_msg}")
             self.root.after(0, lambda: self.data_collection_status_label.config(text="更新失败", fg="#e74c3c"))
             self.root.after(0, lambda: self.data_collection_detail_label.config(text="发生错误，请检查网络连接和API状态"))
             self.root.after(0, lambda: self.data_collection_progress.config(value=0))
