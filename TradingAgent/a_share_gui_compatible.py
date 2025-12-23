@@ -609,6 +609,7 @@ class AShareAnalyzerGUI:
         
         # 新增：数据收集相关属性
         self.data_collection_active = False  # 数据收集是否正在进行
+        self.status_checker = None           # 股票状态检测器 (单例)
         
         # ST股票筛选关键字
         self.st_keywords = ['ST', '*ST', 'ST*', 'S*ST', 'SST', '退', '停牌']
@@ -737,6 +738,19 @@ class AShareAnalyzerGUI:
             # 延迟执行数据状态检查，确保UI已完全加载
             self.root.after(1000, self.check_data_status)
     
+    def _get_status_checker(self):
+        """获取或初始化股票状态检测器（单例模式）"""
+        if not hasattr(self, 'status_checker') or self.status_checker is None:
+            try:
+                from stock_status_checker import StockStatusChecker
+                self.status_checker = StockStatusChecker()
+                # 首次初始化时更新一次状态
+                self.status_checker.update_status()
+            except Exception as e:
+                print(f"[ERROR] 初始化 StockStatusChecker 失败: {e}")
+                return None
+        return self.status_checker
+
     def check_data_status(self):
         """检查本地数据状态并更新界面提示"""
         import re
@@ -1746,7 +1760,7 @@ class AShareAnalyzerGUI:
             return False
 
     def load_comprehensive_stock_data(self):
-        """尝试将数据收集器生成的完整数据加载到内存缓存中，支持分卷文件和单文件"""
+        """尝试将数据收集器生成的完整数据加载到内存缓存中，支持分卷文件和单文件并进行合并"""
         import glob
         import json
         import os
@@ -1757,18 +1771,50 @@ class AShareAnalyzerGUI:
         self.stock_file_index = {}  # 初始化 stock_file_index
         loaded_count = 0
         
-        # 1. 尝试加载分卷数据 (comprehensive_stock_data_part_*.json)
-        # 使用共享数据目录
+        # 统一数据目录
         shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
         data_dir = shared_data_dir
-        # 从文件路径中提取文件名
+        
+        # 1. 首先加载单文件 (作为基础数据)
+        candidates = [
+            os.path.join(shared_data_dir, 'comprehensive_stock_data.json'),
+            self.comprehensive_data_file
+        ]
+        
+        for path in candidates:
+            if os.path.exists(path):
+                print(f"\033[1;33m[DEBUG] 正在从单体文件加载基础数据: {path}\033[0m")
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    loaded = {}
+                    if isinstance(data, dict):
+                        if 'data' in data and isinstance(data['data'], dict):
+                            loaded = data['data']
+                        elif 'stocks' in data and isinstance(data['stocks'], dict):
+                            loaded = data['stocks']
+                        else:
+                            loaded = data
+                    
+                    self.comprehensive_stock_data.update(loaded)
+                    print(f"\033[1;32m[INFO] 从单体文件加载了 {len(loaded)} 条数据\033[0m")
+                except Exception as e:
+                    print(f"\033[1;31m[ERROR] 加载单体文件 {path} 失败: {e}\033[0m")
+
+        # 2. 然后加载分卷数据 (覆盖/补充单体文件中的数据)
         base_name = os.path.basename(self.comprehensive_data_file).replace('.json', '')
-            
         part_pattern = os.path.join(data_dir, f"{base_name}_part_*.json")
         part_files = glob.glob(part_pattern)
         
         if part_files:
-            print(f"\033[1;33m[DEBUG] 发现 {len(part_files)} 个分卷数据文件\033[0m")
+            print(f"\033[1;33m[DEBUG] 发现 {len(part_files)} 个分卷数据文件，正在合并...\033[0m")
+            # 按编号排序确保加载顺序一致
+            try:
+                part_files.sort(key=lambda x: int(x.split('_part_')[-1].replace('.json', '')))
+            except:
+                part_files.sort()
+                
             for path in part_files:
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
@@ -1784,83 +1830,30 @@ class AShareAnalyzerGUI:
                             loaded_part = data
                     
                     self.comprehensive_stock_data.update(loaded_part)
-                    loaded_count += len(loaded_part)
-                    print(f"\033[1;32m[INFO] 已加载分卷: {os.path.basename(path)} ({len(loaded_part)} 条)\033[0m")
+                    print(f"\033[1;32m[INFO] 已合并分卷: {os.path.basename(path)} ({len(loaded_part)} 条)\033[0m")
                 except Exception as e:
                     print(f"\033[1;31m[ERROR] 加载分卷 {path} 失败: {e}\033[0m")
             
-            if loaded_count > 0:
-                # 同步到 self.comprehensive_data
+            # 建立 stock_file_index 映射
+            self._build_stock_file_index(part_files)
+
+        loaded_count = len(self.comprehensive_stock_data)
+        if loaded_count > 0:
+            self.comprehensive_data = self.comprehensive_stock_data
+            self.comprehensive_data_loaded = True
+            print(f"\033[1;32m[SUCCESS] 数据加载完成: 共 {loaded_count} 条股票数据\033[0m")
+            
+            # 同步评分缓存
+            for code, item in self.comprehensive_stock_data.items():
                 try:
-                    self.comprehensive_data = self.comprehensive_stock_data
+                    score = item.get('overall_score')
+                    if score is not None:
+                        self.scores_cache[code] = float(score)
                 except Exception:
-                    pass
-                # 建立 stock_file_index 映射
-                self._build_stock_file_index(part_files)
-                self.comprehensive_data_loaded = True
-                print(f"\033[1;32m[SUCCESS] 已加载所有分卷数据: 共 {loaded_count} 条\033[0m")
-                
-                # 同步评分缓存
-                for code, item in self.comprehensive_stock_data.items():
-                    try:
-                        score = item.get('overall_score')
-                        if score is not None:
-                            self.scores_cache[code] = float(score)
-                    except Exception:
-                        continue
-                return True
-
-        # 2. 如果没有分卷数据，尝试加载单文件 (兼容旧模式)
-        candidates = []
-        candidates.append(os.path.join(shared_data_dir, 'comprehensive_stock_data.json')) # 优先尝试标准路径
-        candidates.append(self.comprehensive_data_file)
-        if not os.path.isabs(self.comprehensive_data_file):
-            candidates.append(os.path.join(shared_data_dir, os.path.basename(self.comprehensive_data_file)))
-
-        for path in candidates:
-            print(f"\033[1;33m[DEBUG] 检查单体数据文件: {path}\033[0m")
-            try:
-                if os.path.exists(path):
-                    print(f"\033[1;32m[INFO] 发现数据文件: {path}\033[0m")
-                    with open(path, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-
-                    # 支持两种格式：直接为 dict 或者 {'data': {...}} 或者 {'stocks': {...}}
-                    if isinstance(data, dict):
-                        if 'data' in data and isinstance(data['data'], dict):
-                            loaded = data['data']
-                        elif 'stocks' in data and isinstance(data['stocks'], dict):
-                            loaded = data['stocks']
-                        else:
-                            loaded = data
-
-                        # 写入内存缓存
-                        self.comprehensive_stock_data = loaded
-                        # 为兼容现有推荐逻辑，同步到 self.comprehensive_data
-                        try:
-                            self.comprehensive_data = loaded
-                        except Exception:
-                            pass
-                        self.comprehensive_data_loaded = True
-                        count = len(self.comprehensive_stock_data)
-                        print(f"\033[1;32m[SUCCESS] 已加载完整数据到内存缓存: {count} 条 (来源: {path})\033[0m")
-                        # 同步部分评分缓存（如果数据包含 overall_score）
-                        for code, item in self.comprehensive_stock_data.items():
-                            try:
-                                score = item.get('overall_score')
-                                if score is not None:
-                                    self.scores_cache[code] = float(score)
-                            except Exception:
-                                continue
-                        return True
-                else:
-                    # print(f"\033[1;33m[DEBUG] 文件不存在: {path}\033[0m")
-                    pass
-            except Exception as e:
-                print(f"\033[1;31m[ERROR] 尝试加载 {path} 失败: {e}\033[0m")
-                continue
-
-        print("\033[1;31m[WARNING] 未找到完整数据文件以加载到内存缓存\033[0m")
+                    continue
+            return True
+        
+        print("\033[1;31m[WARN] 未能加载到任何有效数据\033[0m")
         return False
     
     def is_stock_type_match(self, code, stock_type):
@@ -3466,25 +3459,28 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     def _check_stock_delisting_status(self, stock_code):
         """检查股票是否已退市"""
         try:
-            # 使用现有的退市检测系统
-            if hasattr(self, 'delisting_protection_enabled') and self.delisting_protection_enabled:
-                from stock_status_checker import StockStatusChecker
-                checker = StockStatusChecker()
-                status = checker.check_single_stock(stock_code)
-                
-                if status['status'] in ['delisted', 'invalid']:
-                    reason = f"{status['status']}"
-                    if status.get('delisting_date'):
-                        reason += f" (退市日期: {status['delisting_date']})"
-                    return {
-                        'is_delisted': True,
-                        'status': status['status'], 
-                        'reason': reason,
-                        'delisting_date': status.get('delisting_date')
-                    }
+            # 🔴 改进：使用单例 StockStatusChecker 进行准确检测
+            try:
+                checker = self._get_status_checker()
+                if checker:
+                    status = checker.check_single_stock(stock_code)
+                    
+                    if status['status'] in ['delisted', 'invalid']:
+                        return {
+                            'is_delisted': True,
+                            'status': status['status'], 
+                            'reason': f"状态检测: {status['status']}"
+                        }
+                    elif status['status'] in ['active', 'st', 'suspended']:
+                        return {
+                            'is_delisted': False,
+                            'status': status['status'],
+                            'reason': None
+                        }
+            except Exception as e:
+                print(f"[DEBUG] StockStatusChecker 检查失败: {e}")
             
-            # 如果退市保护未启用，进行简单检查
-            # 检查是否为明显的无效代码
+            # 备选方案：检查是否为明显的无效代码
             if stock_code.startswith(('999', '888', '777')):
                 return {
                     'is_delisted': True,
@@ -3512,12 +3508,11 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         filtered_count = 0
         
         try:
-            # 如果启用了退市保护，使用批量检测
-            if hasattr(self, 'delisting_protection_enabled') and self.delisting_protection_enabled:
-                try:
-                    from stock_status_checker import StockStatusChecker
-                    checker = StockStatusChecker()
-                    
+            # 🔴 改进：使用单例 StockStatusChecker 进行批量检测
+            try:
+                checker = self._get_status_checker()
+                
+                if checker:
                     # 批量检测股票状态（更高效）
                     print(f"[OPTIMIZE] 批量检测 {len(stock_codes)} 只股票的退市状态...")
                     batch_results = checker.batch_check_stocks(stock_codes)
@@ -3532,9 +3527,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         active_codes.append(code)
                     
                     return active_codes, filtered_count
-                    
-                except Exception as e:
-                    print(f"[WARN] 批量退市检测失败，使用简单过滤: {e}")
+                
+            except Exception as e:
+                print(f"[WARN] 批量退市检测失败，使用简单过滤: {e}")
             
             # 简单过滤：跳过明显无效的代码
             for code in stock_codes:
@@ -6468,29 +6463,22 @@ KDJ: {tech_data.get('kdj', 'N/A')}
 
             # 应用与评分按钮一致的过滤逻辑 (ST, 创业板, 科创板, 退市)
             self.show_progress("🔍 正在应用过滤条件 (ST/创业板/科创板/退市)...")
+            
+            # 🔴 核心改进：使用单例 StockStatusChecker 进行统一过滤
+            try:
+                checker = self._get_status_checker()
+                if checker:
+                    exclude_st = self.filter_st_var.get() if hasattr(self, 'filter_st_var') else True
+                    # 过滤掉退市、ST(如果勾选)和停牌
+                    all_codes = checker.filter_codes(all_codes, exclude_st=exclude_st, exclude_suspended=True)
+                    print(f"[INFO] 数据检查过滤后剩余 {len(all_codes)} 只股票")
+            except Exception as e:
+                print(f"[WARN] 数据检查使用 StockStatusChecker 过滤失败: {e}")
+
             filtered_codes = []
             for code in all_codes:
-                # 获取名称用于ST判断
-                name = ""
-                if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
-                    stock_data = self.comprehensive_stock_data[code]
-                    if isinstance(stock_data, dict):
-                        if 'basic_info' in stock_data and isinstance(stock_data['basic_info'], dict):
-                            name = stock_data['basic_info'].get('name', '')
-                        if not name:
-                            name = stock_data.get('name', '')
-                
-                # 1. 排除ST股票
-                if hasattr(self, 'filter_st_var') and self.filter_st_var.get() and self.is_st_stock(code, name):
-                    continue
-                
-                # 2. 排除创业板/科创板 (主板模式下)
+                # 排除创业板/科创板 (主板模式下)
                 if code.startswith('300') or code.startswith('688'):
-                    continue
-                
-                # 3. 排除退市股票
-                delisting_status = self._check_stock_delisting_status(code)
-                if delisting_status and delisting_status.get('is_delisted', False):
                     continue
                 
                 filtered_codes.append(code)

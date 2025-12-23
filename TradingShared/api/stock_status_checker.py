@@ -4,6 +4,7 @@
 股票状态检测器 - 识别 ST 和 停牌股票
 """
 
+import json
 import os
 import time
 from datetime import date, datetime
@@ -17,6 +18,28 @@ except ImportError:
 
 class StockStatusChecker:
     def __init__(self, tushare_token=None):
+        if tushare_token is None:
+            # 尝试从环境变量或 config 导入
+            tushare_token = os.environ.get('TUSHARE_TOKEN')
+            if not tushare_token:
+                try:
+                    # 尝试从当前目录或上级目录的 config 导入
+                    try:
+                        from config import TUSHARE_TOKEN as token
+                        tushare_token = token
+                    except ImportError:
+                        # 尝试从 TradingShared.config 导入
+                        import sys
+                        if 'TradingShared' not in sys.modules:
+                            # 尝试寻找 TradingShared 路径
+                            shared_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared')
+                            if os.path.exists(shared_path) and shared_path not in sys.path:
+                                sys.path.insert(0, shared_path)
+                        from config import TUSHARE_TOKEN as token
+                        tushare_token = token
+                except Exception:
+                    pass
+                    
         self.tushare_token = tushare_token
         self.pro = None
         if ts and tushare_token:
@@ -28,7 +51,46 @@ class StockStatusChecker:
         self.st_stocks = set()
         self.suspended_stocks = set()
         self.delisted_stocks = set()
+        self.listed_stocks = set()  # 新增：记录所有在市股票
         self.last_update_date = None
+        
+        # 缓存文件路径
+        shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+        self.cache_file = os.path.join(shared_data_dir, 'stock_status_cache.json')
+        self._load_cache()
+
+    def _load_cache(self):
+        """从文件加载状态缓存"""
+        if os.path.exists(self.cache_file):
+            try:
+                with open(self.cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                
+                if cache_data.get('date') == date.today().isoformat():
+                    self.st_stocks = set(cache_data.get('st_stocks', []))
+                    self.suspended_stocks = set(cache_data.get('suspended_stocks', []))
+                    self.delisted_stocks = set(cache_data.get('delisted_stocks', []))
+                    self.listed_stocks = set(cache_data.get('listed_stocks', []))
+                    self.last_update_date = cache_data.get('date')
+                    # print(f"[INFO] 已从缓存加载股票状态: ST={len(self.st_stocks)}, 停牌={len(self.suspended_stocks)}")
+            except Exception as e:
+                print(f"[WARN] 加载股票状态缓存失败: {e}")
+
+    def _save_cache(self):
+        """保存状态到文件缓存"""
+        try:
+            os.makedirs(os.path.dirname(self.cache_file), exist_ok=True)
+            cache_data = {
+                'date': self.last_update_date,
+                'st_stocks': list(self.st_stocks),
+                'suspended_stocks': list(self.suspended_stocks),
+                'delisted_stocks': list(self.delisted_stocks),
+                'listed_stocks': list(self.listed_stocks)
+            }
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[WARN] 保存股票状态缓存失败: {e}")
 
     def update_status(self, force=False):
         """更新 ST、停牌和退市股票列表"""
@@ -42,18 +104,32 @@ class StockStatusChecker:
         self.st_stocks = set()
         self.suspended_stocks = set()
         self.delisted_stocks = set()
+        self.listed_stocks = set()
         
         # 1. 优先使用 AKShare 获取全市场快照 (最快且包含 ST 和 实时停牌信息)
         ak_success = False
         try:
             import akshare as ak
-            print("[INFO] 正在通过 AKShare 获取全市场快照...")
+            print("[INFO] 正在通过 AKShare 获取全量股票列表...")
+            # 获取全量 A 股列表作为基础
+            try:
+                df_all = ak.stock_info_a_code_name()
+                if not df_all.empty:
+                    self.listed_stocks = set(df_all['code'].tolist())
+                    print(f"[INFO] AKShare 获取到 {len(self.listed_stocks)} 只在市股票")
+            except Exception as e:
+                print(f"[WARN] AKShare 获取全量列表失败: {e}")
+
+            print("[INFO] 正在通过 AKShare 获取实时快照...")
             df_spot = ak.stock_zh_a_spot_em()
             if not df_spot.empty:
                 st_keywords = ['ST', '*ST', 'ST*', 'S*ST', 'SST', '退']
                 for _, row in df_spot.iterrows():
                     code = str(row['代码'])
                     name = str(row['名称'])
+                    
+                    # 记录在市股票
+                    self.listed_stocks.add(code)
                     
                     # 识别 ST
                     if any(kw in name.upper() for kw in st_keywords):
@@ -83,6 +159,8 @@ class StockStatusChecker:
                                 self.delisted_stocks.update(codes)
                             elif status == 'P':
                                 self.suspended_stocks.update(codes)
+                            else:
+                                self.listed_stocks.update(codes)
                             
                             # 补充 ST 识别
                             st_keywords = ['ST', '*ST', 'ST*', 'S*ST', 'SST', '退']
@@ -108,17 +186,14 @@ class StockStatusChecker:
 
         self.last_update_date = today
         # 只要有一种方式成功获取了数据，就返回 True
-        success = ak_success or bool(self.st_stocks or self.suspended_stocks)
+        success = ak_success or bool(self.st_stocks or self.suspended_stocks or self.listed_stocks)
         if success:
-            print(f"[INFO] 股票状态更新完成: ST={len(self.st_stocks)}, 停牌={len(self.suspended_stocks)}, 退市={len(self.delisted_stocks)}")
+            print(f"[INFO] 股票状态更新完成: 在市={len(self.listed_stocks)}, ST={len(self.st_stocks)}, 停牌={len(self.suspended_stocks)}, 退市={len(self.delisted_stocks)}")
+            self._save_cache()
         else:
             print("[ERROR] 所有数据源均未能获取股票状态列表")
             
         return success
-            
-        except Exception as e:
-            print(f"[ERROR] 更新股票状态时发生错误: {e}")
-            return False
 
     def batch_check_stocks(self, codes):
         """批量检查股票状态，返回分类结果 (对接 ComprehensiveDataCollector)"""
@@ -126,22 +201,27 @@ class StockStatusChecker:
         
         results = {}
         for code in codes:
-            clean_code = code.split('.')[0] if '.' in code else code
-            
-            if clean_code in self.delisted_stocks:
-                status = 'delisted'
-            elif clean_code in self.suspended_stocks:
-                status = 'suspended'
-            elif clean_code in self.st_stocks:
-                status = 'st'
-            elif not clean_code.isdigit() or len(clean_code) != 6:
-                status = 'invalid'
-            else:
-                status = 'active'
-                
-            results[code] = {'status': status}
+            results[code] = self.check_single_stock(code)
             
         return results
+
+    def check_single_stock(self, code):
+        """检查单只股票状态"""
+        self.update_status()
+        clean_code = code.split('.')[0] if '.' in code else code
+        
+        if self.is_delisted(code):
+            status = 'delisted'
+        elif clean_code in self.suspended_stocks:
+            status = 'suspended'
+        elif clean_code in self.st_stocks:
+            status = 'st'
+        elif not clean_code.isdigit() or len(clean_code) != 6:
+            status = 'invalid'
+        else:
+            status = 'active'
+            
+        return {'status': status}
 
     def is_st(self, code):
         """判断是否为 ST 股票"""
@@ -157,25 +237,31 @@ class StockStatusChecker:
     def is_delisted(self, code):
         """判断是否为退市股票"""
         clean_code = code.split('.')[0] if '.' in code else code
-        return clean_code in self.delisted_stocks
+        # 如果在退市列表中，肯定是退市
+        if clean_code in self.delisted_stocks:
+            return True
+        # 如果在市列表已加载，且不在在市列表中，也视为退市/无效
+        if self.listed_stocks and clean_code not in self.listed_stocks:
+            return True
+        return False
 
     def filter_codes(self, codes, exclude_st=True, exclude_suspended=True):
         """过滤股票代码列表"""
-        if not exclude_st and not exclude_suspended:
-            # 即使不排除 ST 和停牌，也应该排除退市股票
-            filtered = [c for c in codes if not self.is_delisted(c)]
-            return filtered
-            
+        # 确保状态已更新
+        self.update_status()
+        
         filtered = []
         st_count = 0
         suspend_count = 0
         delisted_count = 0
         
         for code in codes:
+            # 1. 首先排除退市/无效股票 (无论设置如何都排除)
             if self.is_delisted(code):
                 delisted_count += 1
                 continue
                 
+            # 2. 根据设置排除 ST 和 停牌
             is_st = self.is_st(code)
             is_sus = self.is_suspended(code)
             
@@ -189,7 +275,7 @@ class StockStatusChecker:
             filtered.append(code)
             
         if st_count > 0 or suspend_count > 0 or delisted_count > 0:
-            print(f"[INFO] 过滤完成: 排除 {delisted_count} 只退市, {st_count} 只 ST, {suspend_count} 只停牌. 剩余 {len(filtered)} 只.")
+            print(f"[INFO] 过滤完成: 排除 {delisted_count} 只退市/无效, {st_count} 只 ST, {suspend_count} 只停牌. 剩余 {len(filtered)} 只.")
             
         return filtered
 
