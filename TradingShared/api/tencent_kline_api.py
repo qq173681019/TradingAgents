@@ -5,12 +5,14 @@
 专门用于获取股票K线数据，替代JoinQuant
 """
 
-import requests
-import pandas as pd
 import json
 import time
-from typing import Dict, List, Optional
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+
+import pandas as pd
+import requests
+
 
 class TencentKlineAPI:
     def __init__(self):
@@ -42,6 +44,7 @@ class TencentKlineAPI:
             tencent_code = self._convert_stock_code(code)
             
             # 构建请求参数
+            # 🔴 改进：腾讯API对日期范围比较敏感，如果带日期范围失败，尝试只获取最近数据
             params = {
                 '_var': f'kline_{period}',
                 'param': f'{tencent_code},{period},{start_date},{end_date},320,qfq',  # 320条数据，前复权
@@ -54,10 +57,18 @@ class TencentKlineAPI:
             response = self.session.get(self.kline_url, params=params, timeout=15)
             
             if response.status_code == 200:
+                df = self._parse_kline_response(response.text, code, period)
+                if df is not None and not df.empty:
+                    return df
+            
+            # 🔴 兜底方案：如果不带日期能获取到，则使用不带日期的请求
+            print(f"[INFO] 腾讯API带日期请求失败，尝试不带日期获取最近数据: {code}")
+            params['param'] = f'{tencent_code},{period},,,320,qfq'
+            response = self.session.get(self.kline_url, params=params, timeout=15)
+            if response.status_code == 200:
                 return self._parse_kline_response(response.text, code, period)
-            else:
-                print(f"[WARN] 腾讯K线API请求失败{code}: {response.status_code}")
-                return None
+                
+            return None
                 
         except Exception as e:
             print(f"[ERROR] 腾讯K线API异常{code}: {e}")
@@ -105,18 +116,27 @@ class TencentKlineAPI:
         将股票代码转换为腾讯格式
         
         Args:
-            code: 股票代码，如 '000001'
+            code: 股票代码，如 '000001' 或 '000001.SZ'
             
         Returns:
-            腾讯格式的股票代码，如 'sz000001' 或 'sh600000'
+            腾讯格式的股票代码，如 'sz000001' 或 'sh600000' 或 'bj830832'
         """
-        if code.startswith(('000', '002', '300')):  # 深圳市场
-            return f'sz{code}'
-        elif code.startswith(('600', '601', '603', '605', '688')):  # 上海市场
-            return f'sh{code}'
+        # 🔴 改进：先剥离可能的后缀，确保代码纯净
+        pure_code = code.split('.')[0] if '.' in code else code
+        
+        if pure_code.startswith(('000', '001', '002', '300', '301')):  # 深圳市场
+            return f'sz{pure_code}'
+        elif pure_code.startswith(('600', '601', '603', '605', '688')):  # 上海市场
+            return f'sh{pure_code}'
+        elif pure_code.startswith(('4', '8', '9')):  # 北京市场
+            return f'bj{pure_code}'
         else:
-            # 默认深圳
-            return f'sz{code}'
+            # 默认逻辑
+            if pure_code.startswith('6'):
+                return f'sh{pure_code}'
+            elif pure_code.startswith(('0', '3')):
+                return f'sz{pure_code}'
+            return f'sz{pure_code}'
     
     def _parse_kline_response(self, content: str, code: str, period: str) -> Optional[pd.DataFrame]:
         """
@@ -131,51 +151,50 @@ class TencentKlineAPI:
             解析后的K线DataFrame
         """
         try:
-            # 查找JSON数据
-            var_name = f'kline_{period}='
-            if var_name in content:
-                json_str = content.split(var_name)[1].strip()
+            # 🔴 改进：更灵活的 JSON 提取逻辑，处理带变量名和不带变量名的情况
+            json_str = content
+            if '=' in content:
+                json_str = content.split('=', 1)[1].strip()
+            
+            # 移除末尾的分号
+            if json_str.endswith(';'):
+                json_str = json_str[:-1].strip()
                 
-                # 解析JSON
-                data = json.loads(json_str)
+            # 解析JSON
+            data = json.loads(json_str)
+            
+            if data.get('code') == 0 and 'data' in data:
+                # 获取K线数据
+                # 🔴 改进：尝试多种可能的代码格式（带前缀和不带前缀）
+                tencent_code = self._convert_stock_code(code)
+                pure_code = code.split('.')[0] if '.' in code else code
                 
-                if data.get('code') == 0 and 'data' in data:
-                    # 获取K线数据
-                    tencent_code = self._convert_stock_code(code)
+                stock_data = None
+                for key in [tencent_code, pure_code, tencent_code.upper(), tencent_code.lower()]:
+                    if key in data['data']:
+                        stock_data = data['data'][key]
+                        break
+                
+                if stock_data:
+                    # 根据周期选择数据字段
+                    klines = None
+                    # 🔴 改进：增加更多可能的字段名
+                    possible_keys = [f'qfq{period}', period, 'qfqday', 'day', 'kline']
+                    for key in possible_keys:
+                        if key in stock_data:
+                            klines = stock_data[key]
+                            break
                     
-                    if tencent_code in data['data']:
-                        stock_data = data['data'][tencent_code]
-                        
-                        # 根据周期选择数据字段
-                        if period == 'day' and 'qfqday' in stock_data:
-                            klines = stock_data['qfqday']
-                        elif period == 'week' and 'qfqweek' in stock_data:
-                            klines = stock_data['qfqweek']
-                        elif period == 'month' and 'qfqmonth' in stock_data:
-                            klines = stock_data['qfqmonth']
-                        else:
-                            # 尝试其他字段
-                            for key in ['qfqday', 'day', 'kline']:
-                                if key in stock_data:
-                                    klines = stock_data[key]
-                                    break
-                            else:
-                                print(f"[WARN] 腾讯K线响应无数据字段{code}: {list(stock_data.keys())}")
-                                return None
-                        
-                        if klines:
-                            return self._convert_to_dataframe(klines, code)
-                        else:
-                            print(f"[WARN] 腾讯K线数据为空{code}")
-                            return None
+                    if klines:
+                        return self._convert_to_dataframe(klines, code)
                     else:
-                        print(f"[WARN] 腾讯K线响应中无{tencent_code}数据")
+                        print(f"[WARN] 腾讯K线数据字段为空{code}: {list(stock_data.keys())}")
                         return None
                 else:
-                    print(f"[WARN] 腾讯K线API返回错误{code}: {data.get('msg', 'Unknown error')}")
+                    print(f"[WARN] 腾讯K线响应中无{tencent_code}数据，可用键: {list(data['data'].keys())}")
                     return None
             else:
-                print(f"[WARN] 腾讯K线响应格式异常{code}: {content[:100]}...")
+                print(f"[WARN] 腾讯K线API返回错误{code}: {data.get('msg', 'Unknown error')}")
                 return None
                 
         except json.JSONDecodeError as e:
@@ -201,19 +220,22 @@ class TencentKlineAPI:
                 return pd.DataFrame()
             
             # 检查数据列数并动态处理
-            first_row = klines[0] if klines else []
-            num_cols = len(first_row)
+            # 腾讯API可能返回6列或7列数据，有时甚至不一致
+            # 我们通过检查前几行来确定目标列数
+            target_cols = 6
+            if klines and any(len(row) >= 7 for row in klines[:5]):
+                target_cols = 7
             
-            # 腾讯API可能返回6列或7列数据
-            if num_cols == 7:
+            if target_cols == 7:
                 # 7列：日期, 开盘, 收盘, 最高, 最低, 成交量, 成交额
-                df = pd.DataFrame(klines, columns=['date', 'open', 'close', 'high', 'low', 'volume', 'amount'])
-            elif num_cols == 6:
-                # 6列：日期, 开盘, 收盘, 最高, 最低, 成交量
-                df = pd.DataFrame(klines, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
+                cols = ['date', 'open', 'close', 'high', 'low', 'volume', 'amount']
             else:
-                print(f"[ERROR] 腾讯K线数据列数异常{code}: 期望6或7列, 实际{num_cols}列")
-                return pd.DataFrame()
+                # 6列：日期, 开盘, 收盘, 最高, 最低, 成交量
+                cols = ['date', 'open', 'close', 'high', 'low', 'volume']
+            
+            # 对每一行进行切片，确保列数与列名一致，防止 DataFrame 创建失败
+            df = pd.DataFrame([row[:target_cols] for row in klines], columns=cols)
+            num_cols = target_cols
             
             # 数据类型转换
             df['date'] = pd.to_datetime(df['date'])

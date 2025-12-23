@@ -15,6 +15,13 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import pandas as pd
 
+# 尝试导入路径配置
+try:
+    import path_config
+    HAS_PATH_CONFIG = True
+except ImportError:
+    HAS_PATH_CONFIG = False
+
 # 数据源可用性检查
 try:
     import akshare as ak
@@ -96,6 +103,15 @@ except ImportError:
     TENCENT_KLINE_AVAILABLE = False
     print("[WARN] 腾讯K线API 未找到")
 
+# 新浪K线API支持
+try:
+    from sina_kline_api import SinaKLineAPI
+    SINA_KLINE_AVAILABLE = True
+    print("[INFO] 新浪K线API 已加载")
+except ImportError:
+    SINA_KLINE_AVAILABLE = False
+    print("[WARN] 新浪K线API 未找到")
+
 # BaoStock API 支持（免费K线数据兜底）
 try:
     from baostock_api import BaoStockAPI
@@ -116,12 +132,14 @@ except ImportError:
 
 # Choice金融终端
 try:
-    from config import CHOICE_PASSWORD, CHOICE_USERNAME, ENABLE_CHOICE
+    from config import (CHOICE_PASSWORD, CHOICE_USERNAME, ENABLE_CHOICE,
+                        TUSHARE_TOKEN)
 except ImportError:
     ENABLE_CHOICE = False
     CHOICE_USERNAME = ""
     CHOICE_PASSWORD = ""
-    print("[WARN] Choice配置未找到")
+    TUSHARE_TOKEN = "4a1bd8dea786a5525663fafcf729a2b081f9f66145a0671c8adf2f28"
+    print("[WARN] Choice/Tushare配置未找到")
 
 print(f"[INFO] BaoStock分析: 免费稳定的A股K线数据源，作为最终兜底方案：")
 print(f"       - K线数据: 免费稳定（日K线）")
@@ -173,10 +191,21 @@ class DateTimeEncoder(json.JSONEncoder):
 class ComprehensiveDataCollector:
     """全面数据采集器"""
     
-    def __init__(self):
-        self.tushare_token = os.environ.get('TUSHARE_TOKEN', '4a1bd8dea786a5525663fafcf729a2b081f9f66145a0671c8adf2f28')
+    def __init__(self, use_choice=None):
+        # 优先从环境变量获取，其次从 config.py 获取，最后使用硬编码兜底
+        self.tushare_token = os.environ.get('TUSHARE_TOKEN', TUSHARE_TOKEN)
         self.data_sources = ['tushare', 'baostock', 'yfinance', 'tencent', 'akshare']  # 移除choice API
         self.current_source_index = 0
+        self.use_choice = use_choice  # 是否强制使用或禁用Choice数据源
+        
+        # 初始化股票状态检测器
+        self.status_checker = None
+        if STOCK_STATUS_CHECKER_AVAILABLE:
+            try:
+                self.status_checker = StockStatusChecker(self.tushare_token)
+                print("[INFO] 股票状态检测器初始化成功")
+            except Exception as e:
+                print(f"[WARN] 股票状态检测器初始化失败: {e}")
         
         # 等待期间数据源策略
         self.wait_period_strategy = {
@@ -186,7 +215,48 @@ class ComprehensiveDataCollector:
             'fund_flow': ['tencent', 'akshare']          # 资金流向使用腾讯/akshare
         }
         self.collected_data = {}
-        self.output_file = 'data/comprehensive_stock_data.json'
+        
+        # 使用统一的路径配置 - 优先定位 TradingShared/data
+        data_dir = None
+        try:
+            # 1. 优先使用 path_config
+            if HAS_PATH_CONFIG and hasattr(path_config, 'DATA_DIR'):
+                data_dir = path_config.DATA_DIR
+                print(f"[INFO] 使用 path_config 定位数据目录: {data_dir}")
+            
+            # 2. 如果 path_config 不可用，尝试基于当前文件路径定位
+            if not data_dir or not os.path.exists(data_dir):
+                # 当前文件在 TradingShared/api/comprehensive_data_collector.py
+                api_dir = os.path.dirname(os.path.abspath(__file__))
+                shared_root = os.path.dirname(api_dir)
+                potential_data_dir = os.path.join(shared_root, 'data')
+                
+                if os.path.exists(potential_data_dir):
+                    data_dir = potential_data_dir
+                    print(f"[INFO] 基于文件路径定位数据目录: {data_dir}")
+            
+            # 3. 尝试相对于工作目录定位
+            if not data_dir or not os.path.exists(data_dir):
+                cwd = os.getcwd()
+                # 检查 TradingShared/data
+                potential_data_dir = os.path.join(cwd, 'TradingShared', 'data')
+                if os.path.exists(potential_data_dir):
+                    data_dir = potential_data_dir
+                    print(f"[INFO] 基于工作目录定位数据目录: {data_dir}")
+            
+            if data_dir and os.path.exists(data_dir):
+                self.output_file = os.path.join(data_dir, 'comprehensive_stock_data.json')
+            else:
+                # 回退到 root/data (相对于当前工作目录)
+                self.output_file = os.path.abspath('data/comprehensive_stock_data.json')
+                print(f"[WARN] 未找到共享数据目录，使用默认路径: {self.output_file}")
+                
+                # 确保目录存在
+                os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
+                
+        except Exception as e:
+            print(f"[WARN] 路径定位失败: {e}")
+            self.output_file = os.path.abspath('data/comprehensive_stock_data.json')
         
         # 批量K线数据采集相关配置（基于测试优化）
         self.batch_kline_cache = {}  # 缓存批量获取的K线数据
@@ -264,6 +334,15 @@ class ComprehensiveDataCollector:
                 print("[INFO] 腾讯K线API 初始化成功")
             except Exception as e:
                 print(f"[WARN] 腾讯K线API 初始化失败: {e}")
+
+        # 初始化 Sina Kline API
+        self.sina_kline = None
+        if SINA_KLINE_AVAILABLE:
+            try:
+                self.sina_kline = SinaKLineAPI()
+                print("[INFO] 新浪K线API 初始化成功")
+            except Exception as e:
+                print(f"[WARN] 新浪K线API 初始化失败: {e}")
         
         # 初始化 Alpha Vantage API
         self.alpha_vantage = None
@@ -478,6 +557,20 @@ class ComprehensiveDataCollector:
         print(f"  美股: {result['summary']['us_success']}/{result['summary']['us_count']}")
         
         return result
+
+    def get_global_market_news(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        获取全球市场新闻 (利用 Polygon.io 的强项)
+        
+        Args:
+            limit: 获取新闻条数
+        """
+        if self.polygon and self.polygon.is_available:
+            print(f"[INFO] 使用 Polygon.io 获取全球市场新闻 ({limit} 条)...")
+            return self.polygon.get_market_news(limit)
+        else:
+            print("[WARN] Polygon.io 不可用，无法获取全球新闻")
+            return []
     
     def collect_multi_market_basic_info(self, codes: List[str]) -> Dict[str, Any]:
         """
@@ -883,15 +976,21 @@ class ComprehensiveDataCollector:
         try:
             import json
 
-            # 使用相对路径，因为data_dir可能未初始化
-            index_file = "data/stock_file_index.json"
+            # 优先使用初始化时确定的数据目录
+            data_dir = os.path.dirname(self.output_file)
+            index_file = os.path.join(data_dir, "stock_file_index.json")
+            
+            if not os.path.exists(index_file):
+                # 回退到相对路径
+                index_file = "data/stock_file_index.json"
+                
             if os.path.exists(index_file):
                 with open(index_file, "r", encoding="utf-8") as f:
                     index_data = json.load(f)
                     # 排除创业板(300)和科创板(688)
                     filtered_codes = [code for code in index_data.keys() if not (code.startswith('300') or code.startswith('688'))]
                     stock_codes = filtered_codes[:limit]
-                    print(f"[INFO] 从现有数据文件获取 {len(stock_codes)} 只主板股票（已排除创业板和科创板）")
+                    print(f"[INFO] 从现有数据文件 {index_file} 获取 {len(stock_codes)} 只主板股票（已排除创业板和科创板）")
                     return stock_codes
         except Exception as e:
             print(f"[WARN] 从数据文件获取股票列表失败: {e}")
@@ -946,6 +1045,16 @@ class ComprehensiveDataCollector:
                 '日期': 'date', '开盘': 'open', '最高': 'high', '最低': 'low', '收盘': 'close', '成交量': 'volume',
                 'date': 'date', 'open': 'open', 'high': 'high', 'low': 'low', 'close': 'close', 'volume': 'volume',
                 'code': 'code'
+            },
+            'sina': {
+                'day': 'date', 'open': 'open', 'high': 'high', 'low': 'low', 'close': 'close', 'volume': 'volume',
+                'date': 'date'
+            },
+            'tencent': {
+                'date': 'date', 'open': 'open', 'high': 'high', 'low': 'low', 'close': 'close', 'volume': 'volume'
+            },
+            'baostock': {
+                'date': 'date', 'open': 'open', 'high': 'high', 'low': 'low', 'close': 'close', 'volume': 'volume'
             }
         }
         
@@ -971,7 +1080,25 @@ class ComprehensiveDataCollector:
             existing_columns = [col for col in required_columns if col in df.columns]
             
             if len(existing_columns) >= 4:  # 至少有基础的OHLC数据
-                return df[existing_columns].copy()
+                df = df[existing_columns].copy()
+                
+                # 🔴 改进：统一日期格式并按日期升序排列（技术指标计算需要升序）
+                if 'date' in df.columns:
+                    def normalize_date_func(d):
+                        d_str = str(d).split(' ')[0].replace('-', '').replace('/', '')
+                        if len(d_str) >= 8:
+                            return f"{d_str[:4]}-{d_str[4:6]}-{d_str[6:8]}"
+                        return str(d)
+                    
+                    df['date'] = df['date'].apply(normalize_date_func)
+                    df = df.sort_values('date')
+                
+                # 确保数值列为浮点型
+                for col in ['open', 'high', 'low', 'close', 'volume']:
+                    if col in df.columns:
+                        df[col] = pd.to_numeric(df[col], errors='coerce')
+                
+                return df.dropna(subset=['close']) # 至少要有收盘价
             else:
                 print(f"[WARN] 数据列不足，现有列: {list(df.columns)}")
                 return df
@@ -980,23 +1107,45 @@ class ComprehensiveDataCollector:
             print(f"[ERROR] 列名标准化失败: {e}")
             return df
     
-    def collect_batch_kline_data(self, codes: List[str], source: str = 'auto') -> Dict[str, pd.DataFrame]:
+    def collect_batch_kline_data(self, codes: List[str], source: str = 'auto', start_date_override: Optional[str] = None) -> Dict[str, pd.DataFrame]:
         """批量采集K线数据 - 新策略: 基于时间控制的TUSHARE优先 → AKShare替代 → 腾讯K线兜底"""
         result = {}
         total_codes = len(codes)
         
+        # 确定是否启用Choice
+        try:
+            from config import CHOICE_PASSWORD, CHOICE_USERNAME, ENABLE_CHOICE
+            effective_enable_choice = self.use_choice if self.use_choice is not None else ENABLE_CHOICE
+            choice_active = effective_enable_choice and CHOICE_USERNAME and CHOICE_PASSWORD
+        except:
+            choice_active = False
+
         print(f"[INFO] 开始采集K线数据，共 {total_codes} 只股票")
-        print(f"[INFO] 新采集策略: Choice金融终端优先 → TUSHARE → AKShare → 腾讯K线兜底")
+        if choice_active:
+            print(f"[INFO] 新采集策略: Choice金融终端优先 → TUSHARE → AKShare → 腾讯K线兜底")
+        else:
+            print(f"[INFO] 新采集策略: TUSHARE优先 → AKShare → 腾讯K线兜底 (Choice已禁用)")
         
         # 计算日期范围
         end_date = datetime.now()
-        start_date = end_date - timedelta(days=self.kline_days)
+        if start_date_override:
+            try:
+                # 统一格式为 YYYYMMDD 或 YYYY-MM-DD
+                if '-' in start_date_override:
+                    start_date = datetime.strptime(start_date_override, '%Y-%m-%d')
+                else:
+                    start_date = datetime.strptime(start_date_override, '%Y%m%d')
+            except:
+                start_date = end_date - timedelta(days=self.kline_days)
+        else:
+            start_date = end_date - timedelta(days=self.kline_days)
+            
         start_str = start_date.strftime('%Y%m%d')
         end_str = end_date.strftime('%Y%m%d')
         start_iso = start_date.strftime('%Y-%m-%d')
         end_iso = end_date.strftime('%Y-%m-%d')
         
-        print(f"[INFO] 获取日期范围: {start_iso} 到 {end_iso} ({self.kline_days}天)")
+        print(f"[INFO] 获取日期范围: {start_iso} 到 {end_iso}")
         
         # 检查是否应该使用Choice数据源
         primary_source = None
@@ -1004,15 +1153,18 @@ class ComprehensiveDataCollector:
         
         # 尝试使用Choice作为主数据源（如果启用且配置正确）
         try:
-            from config import ENABLE_CHOICE, CHOICE_USERNAME, CHOICE_PASSWORD
-            choice_enabled = ENABLE_CHOICE and CHOICE_USERNAME and CHOICE_PASSWORD
+            from config import CHOICE_PASSWORD, CHOICE_USERNAME, ENABLE_CHOICE
+
+            # 优先使用实例设置的 use_choice，否则使用 config 中的 ENABLE_CHOICE
+            effective_enable_choice = self.use_choice if self.use_choice is not None else ENABLE_CHOICE
+            choice_enabled = effective_enable_choice and CHOICE_USERNAME and CHOICE_PASSWORD
             
             if choice_enabled:
                 print(f"[INFO] Choice数据源已启用，优先使用Choice获取 {len(codes)} 只股票")
                 try:
                     # 导入Choice相关函数
-                    import sys
                     import os
+                    import sys
                     api_dir = os.path.dirname(os.path.abspath(__file__))
                     tradingshared_dir = os.path.dirname(api_dir)
                     if api_dir not in sys.path:
@@ -1020,11 +1172,18 @@ class ComprehensiveDataCollector:
                     if tradingshared_dir not in sys.path:
                         sys.path.insert(0, tradingshared_dir)
                     
-                    from TradingShared.api.get_choice_data import get_kline_data_css
                     import pandas as pd
-                    
+
+                    from TradingShared.api.get_choice_data import \
+                        get_kline_data_css
+
                     # 使用Choice批量获取K线数据
                     choice_success = []
+                    
+                    # 确定日期格式
+                    c_start_iso = start_iso
+                    c_end_iso = end_iso
+                    
                     for code in codes:
                         try:
                             # 转换股票代码为Choice格式 (000001 -> 000001.SZ)
@@ -1034,7 +1193,7 @@ class ComprehensiveDataCollector:
                                 choice_code = f"{code}.SH"
                             
                             # Choice API获取K线数据
-                            kline_data = get_kline_data_css(choice_code, start_iso, end_iso)
+                            kline_data = get_kline_data_css(choice_code, c_start_iso, c_end_iso)
                             
                             if kline_data and 'dates' in kline_data and kline_data['dates']:
                                 # 将Choice返回的数据转换为DataFrame
@@ -1107,45 +1266,88 @@ class ComprehensiveDataCollector:
         fallback_codes = []  # 初始化失败股票列表
         if primary_source == 'tushare' and TUSHARE_AVAILABLE and self.tushare_token:
             print(f"[INFO] TUSHARE 批量处理 {len(primary_codes)} 只股票...")
+            print(f"[DEBUG] TUSHARE 日期范围: {start_str} 到 {end_str}")
             try:
                 pro = ts.pro_api(self.tushare_token)
                 
                 # 更新TUSHARE调用时间
                 self.last_tushare_call = time.time()
                 
+                # 🔴 改进：使用 Tushare 批量接口，提高效率和成功率
+                ts_code_map = {}
                 for code in primary_codes:
-                    try:
-                        ts_code = f"{code}.SZ" if code.startswith(('000', '002', '300')) else f"{code}.SH"
-                        df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
-                        if not df.empty:
-                            df = self.standardize_kline_columns(df, 'tushare')
-                            result[code] = df
-                            primary_success.append(code)
-                        time.sleep(0.1)  # TUSHARE请求间隔
-                    except Exception as e:
-                        error_msg = str(e)
-                        error_type = type(e).__name__
+                    # 提取纯数字部分，防止重复添加后缀
+                    pure_code = code.split('.')[0]
+                    if pure_code.startswith(('000', '001', '002', '300', '301')):
+                        ts_code = f"{pure_code}.SZ"
+                    elif pure_code.startswith(('4', '8', '9')):
+                        ts_code = f"{pure_code}.BJ"
+                    else:
+                        ts_code = f"{pure_code}.SH"
+                    ts_code_map[ts_code] = code
+                
+                ts_codes_str = ",".join(ts_code_map.keys())
+                
+                try:
+                    # 批量获取数据
+                    df = pro.daily(ts_code=ts_codes_str, start_date=start_str, end_date=end_str)
+                    
+                    if df is not None and not df.empty:
+                        # 按股票代码分组处理
+                        for ts_code, group in df.groupby('ts_code'):
+                            orig_code = ts_code_map.get(ts_code)
+                            if orig_code:
+                                standardized_df = self.standardize_kline_columns(group, 'tushare')
+                                result[orig_code] = standardized_df
+                                primary_success.append(orig_code)
                         
-                        # 详细诊断Tushare常见错误
-                        if 'no data' in error_msg.lower() or 'empty' in error_msg.lower():
-                            print(f"[WARN] TUSHARE获取{code}失败: 无数据 - 可能该股票在指定时间范围内无交易数据")
-                        elif 'permission' in error_msg.lower() or 'not authorized' in error_msg.lower():
-                            print(f"[WARN] TUSHARE获取{code}失败: 权限不足 - 可能需要更高权限的Token或该数据需要付费")
-                        elif 'frequency' in error_msg.lower() or 'limit' in error_msg.lower() or 'too many' in error_msg.lower():
-                            print(f"[WARN] TUSHARE获取{code}失败: 频率限制 - API调用过于频繁，已触发限流")
-                        elif 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
-                            print(f"[WARN] TUSHARE获取{code}失败: 网络超时 - 可能网络连接不稳定")
-                        elif 'invalid' in error_msg.lower() and 'symbol' in error_msg.lower():
-                            print(f"[WARN] TUSHARE获取{code}失败: 股票代码无效 - {ts_code}可能不存在或已退市")
-                        elif '40001' in error_msg or '40002' in error_msg or '40003' in error_msg:
-                            print(f"[WARN] TUSHARE获取{code}失败: API错误({error_msg}) - Tushare服务端问题")
-                        elif 'token' in error_msg.lower() or 'invalid token' in error_msg.lower():
-                            print(f"[WARN] TUSHARE获取{code}失败: Token无效 - 请检查Tushare Token是否正确")
-                        else:
-                            print(f"[WARN] TUSHARE获取{code}失败: {error_type}: {error_msg}")
-                        
-                        fallback_codes.append(code)
-                        continue
+                        # 检查哪些股票没有获取到数据
+                        for ts_code, orig_code in ts_code_map.items():
+                            if orig_code not in primary_success:
+                                print(f"[WARN] TUSHARE获取{orig_code} ({ts_code}) 返回数据为空，转入后备处理")
+                                fallback_codes.append(orig_code)
+                    else:
+                        # 🔴 改进：如果批量获取返回空，可能是积分不足（<2000点无法批量获取），触发逐个获取
+                        print(f"[WARN] TUSHARE批量获取返回数据为空 (日期范围: {start_str}-{end_str})，尝试逐个获取...")
+                        raise Exception("Batch returned empty, likely insufficient points")
+                except Exception as batch_e:
+                    print(f"[ERROR] TUSHARE 批量获取失败或权限不足: {batch_e}，尝试逐个获取...")
+                    # 兜底：逐个获取
+                    for code in primary_codes:
+                        try:
+                            # 找到对应的 ts_code
+                            ts_code = None
+                            for k, v in ts_code_map.items():
+                                if v == code:
+                                    ts_code = k
+                                    break
+                            
+                            if not ts_code:
+                                fallback_codes.append(code)
+                                continue
+                                
+                            # 🔴 改进：增加诊断信息，如果返回为空，尝试获取股票基本信息判断状态
+                            df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
+                            if df is not None and not df.empty:
+                                df = self.standardize_kline_columns(df, 'tushare')
+                                result[code] = df
+                                primary_success.append(code)
+                                print(f"[SUCCESS] TUSHARE 逐个获取 {code} 成功")
+                            else:
+                                # 尝试诊断：是否因为停牌或代码无效
+                                print(f"[WARN] TUSHARE 逐个获取 {code} ({ts_code}) 仍为空，可能处于停牌期或 Token 权限受限")
+                                
+                                # 🔴 自动标记为疑似停牌，防止后续重复尝试
+                                if hasattr(self, 'status_checker') and self.status_checker:
+                                    clean_code = code.split('.')[0]
+                                    self.status_checker.suspended_stocks.add(clean_code)
+                                    print(f"[DEBUG] 已将 {code} 自动加入临时停牌列表")
+                                    
+                                fallback_codes.append(code)
+                            time.sleep(0.1)
+                        except Exception as single_e:
+                            print(f"[WARN] TUSHARE 逐个获取 {code} 失败: {single_e}")
+                            fallback_codes.append(code)
                 
                 print(f"[SUCCESS] TUSHARE 成功: {len(primary_success)}/{len(primary_codes)} 只")
             except Exception as e:
@@ -1204,6 +1406,32 @@ class ComprehensiveDataCollector:
             print(f"[WARN] {primary_source.upper()} 不可用，将所有股票转为后备处理")
             fallback_codes.extend(primary_codes)
         
+        # 1.5 JoinQuant 替代处理 (已禁用 K 线后备，仅保留基础信息后备)
+        # 根据用户反馈，JoinQuant 拿不到 K 线时不再作为 K 线后备数据源
+        joinquant_success = []
+        if False and fallback_codes and self.joinquant:
+            print(f"[INFO] JoinQuant API 替代处理 {len(fallback_codes)} 只失败股票...")
+            try:
+                temp_remaining = []
+                for code in fallback_codes:
+                    try:
+                        df = self.joinquant.get_stock_kline(code, start_iso, end_iso)
+                        if df is not None and not df.empty:
+                            df = self.standardize_kline_columns(df, 'joinquant')
+                            if not df.empty:
+                                result[code] = df
+                                joinquant_success.append(code)
+                                continue
+                        temp_remaining.append(code)
+                    except Exception as e:
+                        print(f"[WARN] JoinQuant获取{code}失败: {e}")
+                        temp_remaining.append(code)
+                
+                fallback_codes = temp_remaining
+                print(f"[SUCCESS] JoinQuant API 替代成功: {len(joinquant_success)}/{len(joinquant_success) + len(fallback_codes)} 只")
+            except Exception as e:
+                print(f"[ERROR] JoinQuant API 替代处理异常: {e}")
+        
         # 2. 失败股票的多级后备处理：腾讯K线 → AlphaVantage → yfinance
         if fallback_codes:
             print(f"[INFO] 有 {len(fallback_codes)} 只股票需要后备数据源处理")
@@ -1237,16 +1465,46 @@ class ComprehensiveDataCollector:
             elif remaining_codes and not self.tencent_kline:
                 print(f"[WARN] 腾讯K线API未初始化，跳过处理 {len(remaining_codes)} 只股票")
             
-            # 第二级：API轮换替代处理 (Alpha Vantage + Polygon.io)
+            # 第一级.5：新浪K线替代处理 (新增)
+            sina_success = []
+            if remaining_codes and self.sina_kline:
+                print(f"[INFO] 新浪K线API 替代处理 {len(remaining_codes)} 只失败股票...")
+                try:
+                    temp_remaining = []
+                    for code in remaining_codes:
+                        try:
+                            # 计算天数
+                            days = (datetime.now() - start_date).days + 5
+                            df = self.sina_kline.get_stock_kline(code, days=days)
+                            if df is not None and not df.empty:
+                                df = self.standardize_kline_columns(df, 'sina')
+                                if not df.empty:
+                                    result[code] = df
+                                    sina_success.append(code)
+                                    time.sleep(0.2)  # 🔴 增加小量延迟，避免被新浪封禁
+                                    continue
+                            temp_remaining.append(code)
+                        except Exception as e:
+                            print(f"[WARN] 新浪K线获取{code}失败: {e}")
+                            temp_remaining.append(code)
+                    
+                    remaining_codes = temp_remaining
+                    print(f"[SUCCESS] 新浪K线API 替代成功: {len(sina_success)}/{len(sina_success) + len(remaining_codes)} 只")
+                except Exception as e:
+                    print(f"[ERROR] 新浪K线API 替代处理异常: {e}")
+
+            # 第二级：API轮换替代处理 (Alpha Vantage)
+            # 🔴 改进：根据用户要求，不再使用 Polygon 获取 K 线，Polygon 将用于获取新闻等其他数据
             api_rotation_success = []
-            if remaining_codes and (self.alpha_vantage or (self.polygon and self.polygon.is_available)):
+            if remaining_codes and self.alpha_vantage:
                 print(f"[INFO] API轮换替代处理 {len(remaining_codes)} 只失败股票...")
                 try:
                     temp_remaining = []
                     for code in remaining_codes:
                         try:
-                            # 获取下一个可用API
-                            api_name, api_instance = self._get_next_api()
+                            # 🔴 改进：直接使用 Alpha Vantage，不再轮换 Polygon
+                            api_name = 'alpha_vantage'
+                            api_instance = self.alpha_vantage
                             
                             if not api_instance:
                                 temp_remaining.append(code)
@@ -1258,9 +1516,6 @@ class ComprehensiveDataCollector:
                             if api_name == 'alpha_vantage':
                                 print(f"[INFO] {code}: 使用 Alpha Vantage")
                                 df = api_instance.get_daily_kline(code, outputsize='compact')
-                            elif api_name == 'polygon':
-                                print(f"[INFO] {code}: 使用 Polygon.io") 
-                                df = api_instance.get_us_stock_kline(code, days=30)  # Polygon.io使用正确的方法名
                             
                             if df is not None and not df.empty:
                                 # 处理数据格式
@@ -1282,16 +1537,49 @@ class ComprehensiveDataCollector:
                                     continue
                             
                             temp_remaining.append(code)
-                            
+                            # Alpha Vantage 免费版有频率限制，适当等待
+                            time.sleep(12) 
                         except Exception as e:
                             print(f"[WARN] API轮换获取{code}失败: {e}")
                             temp_remaining.append(code)
-                            time.sleep(0.5)  # 减少等待时间
                     
                     remaining_codes = temp_remaining
                     print(f"[SUCCESS] API轮换替代成功: {len(api_rotation_success)}/{len(fallback_codes)} 只")
                 except Exception as e:
                     print(f"[ERROR] API轮换替代处理异常: {e}")
+
+            # 第三级：BaoStock 最终兜底 (针对 A 股最稳定的免费源)
+            baostock_success = []
+            if remaining_codes and BAOSTOCK_AVAILABLE:
+                print(f"[INFO] BaoStock API 最终兜底处理 {len(remaining_codes)} 只失败股票...")
+                try:
+                    # 🔴 改进：确保 BaoStockAPI 已初始化
+                    if not hasattr(self, 'baostock_api') or self.baostock_api is None:
+                        from baostock_api import BaoStockAPI
+                        self.baostock_api = BaoStockAPI()
+                    
+                    temp_remaining = []
+                    for code in remaining_codes:
+                        try:
+                            # 计算天数
+                            days = (datetime.now() - start_date).days + 5
+                            df = self.baostock_api.get_stock_kline(code, days=days)
+                            if df is not None and not df.empty:
+                                df = self.standardize_kline_columns(df, 'baostock')
+                                if not df.empty:
+                                    result[code] = df
+                                    baostock_success.append(code)
+                                    print(f"[SUCCESS] BaoStock 兜底获取 {code} 成功")
+                                    continue
+                            temp_remaining.append(code)
+                        except Exception as e:
+                            print(f"[WARN] BaoStock获取{code}失败: {e}")
+                            temp_remaining.append(code)
+                    
+                    remaining_codes = temp_remaining
+                    print(f"[SUCCESS] BaoStock 最终兜底完成: {len(baostock_success)} 只成功")
+                except Exception as e:
+                    print(f"[ERROR] BaoStock 兜底处理异常: {e}")
             elif remaining_codes and not (self.alpha_vantage or (self.polygon and self.polygon.is_available)):
                 print(f"[WARN] API轮换不可用，跳过处理 {len(remaining_codes)} 只股票")
             
@@ -1373,9 +1661,16 @@ class ComprehensiveDataCollector:
                     temp_remaining = []
                     for code in remaining_codes:
                         try:
-                            ts_code = f"{code}.SZ" if code.startswith(('000', '002', '300')) else f"{code}.SH"
+                            # 优化股票代码后缀逻辑
+                            if code.startswith(('000', '001', '002', '300', '301')):
+                                ts_code = f"{code}.SZ"
+                            elif code.startswith(('4', '8', '9')):
+                                ts_code = f"{code}.BJ"
+                            else:
+                                ts_code = f"{code}.SH"
+                                
                             df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
-                            if not df.empty:
+                            if df is not None and not df.empty:
                                 df = self.standardize_kline_columns(df, 'tushare')
                                 result[code] = df
                                 secondary_success.append(code)
@@ -1521,6 +1816,28 @@ class ComprehensiveDataCollector:
         elif still_failed and not self.alpha_vantage:
             print(f"[WARN] Alpha Vantage API未初始化，无法兜底处理 {len(still_failed)} 只股票")
         
+        # 7. Jina API 最终尝试 (新增)
+        jina_success = []
+        still_failed = [code for code in codes if code not in result]
+        if still_failed and self.jina_api:
+            print(f"[INFO] Jina API 最终尝试处理 {len(still_failed)} 只失败股票...")
+            try:
+                for code in still_failed:
+                    try:
+                        # 尝试通过Jina搜索获取K线数据 (实验性)
+                        query = f"股票 {code} 最近30天K线数据 OHLC"
+                        search_result = self.jina_api.search(query)
+                        
+                        # 这里需要复杂的解析逻辑，暂时记录日志
+                        if search_result and len(search_result) > 100:
+                            print(f"[INFO] Jina API 搜索到 {code} 相关信息，但解析逻辑尚未完善")
+                        
+                    except Exception as e:
+                        print(f"[WARN] Jina API 处理{code}失败: {e}")
+                        continue
+            except Exception as e:
+                print(f"[ERROR] Jina API 处理异常: {e}")
+
         # 统计最终结果
         success_count = len(result)
         success_rate = (success_count / total_codes) * 100 if total_codes > 0 else 0
@@ -1529,14 +1846,30 @@ class ComprehensiveDataCollector:
         
         # 按数据源统计成功情况
         print(f"[DETAIL] 各数据源表现:")
+        if 'choice_success' in locals() and choice_success:
+            print(f"  Choice: {len(choice_success)} 只")
+        
         if primary_source == 'tushare':
             print(f"  TUSHARE(主): {len(primary_success)}/{len(primary_codes)} ({len(primary_success)/len(primary_codes)*100:.1f}%)" if primary_codes else "  TUSHARE(主): 0/0")
-            if 'secondary_success' in locals():
-                print(f"  AKShare(备): {len(secondary_success)}/{len(fallback_codes)} ({len(secondary_success)/len(fallback_codes)*100:.1f}%)" if fallback_codes else "  AKShare(备): 0/0")
-        else:
+        elif primary_source == 'akshare':
             print(f"  AKShare(主): {len(primary_success)}/{len(primary_codes)} ({len(primary_success)/len(primary_codes)*100:.1f}%)" if primary_codes else "  AKShare(主): 0/0")
-            if 'secondary_success' in locals():
-                print(f"  TUSHARE(备): {len(secondary_success)}/{len(fallback_codes)} ({len(secondary_success)/len(fallback_codes)*100:.1f}%)" if fallback_codes else "  TUSHARE(备): 0/0")
+        
+        if 'joinquant_success' in locals() and joinquant_success:
+            print(f"  JoinQuant: {len(joinquant_success)} 只")
+        if 'tencent_success' in locals() and tencent_success:
+            print(f"  Tencent(替代): {len(tencent_success)} 只")
+        if 'sina_success' in locals() and sina_success:
+            print(f"  Sina(替代): {len(sina_success)} 只")
+        if 'api_rotation_success' in locals() and api_rotation_success:
+            print(f"  API Rotation: {len(api_rotation_success)} 只")
+        if 'yfinance_success' in locals() and yfinance_success:
+            print(f"  yfinance: {len(yfinance_success)} 只")
+        if 'baostock_success' in locals() and baostock_success:
+            print(f"  BaoStock: {len(baostock_success)} 只")
+        if 'alpha_success' in locals() and alpha_success:
+            print(f"  Alpha Vantage: {len(alpha_success)} 只")
+        
+        return result
         
         if 'final_failed_codes' in locals() and final_failed_codes:
             print(f"  BaoStock(兜底): {len(baostock_success)}/{len(final_failed_codes)}")
@@ -1883,7 +2216,13 @@ class ComprehensiveDataCollector:
             code_mapping = {}  # 映射关系: ts_code -> original_code
             
             for code in codes:
-                ts_code = f"{code}.SH" if code.startswith('6') else f"{code}.SZ"
+                # 优化股票代码后缀逻辑
+                if code.startswith(('000', '001', '002', '300', '301')):
+                    ts_code = f"{code}.SZ"
+                elif code.startswith(('4', '8', '9')):
+                    ts_code = f"{code}.BJ"
+                else:
+                    ts_code = f"{code}.SH"
                 ts_codes.append(ts_code)
                 code_mapping[ts_code] = code
             
@@ -3505,9 +3844,16 @@ class ComprehensiveDataCollector:
         if source == 'tushare' or (source == 'auto' and TUSHARE_AVAILABLE and self.tushare_token):
             try:
                 pro = ts.pro_api(self.tushare_token)
-                ts_code = f"{code}.SZ" if code.startswith(('000', '002', '300')) else f"{code}.SH"
+                # 优化股票代码后缀逻辑
+                if code.startswith(('000', '001', '002', '300', '301')):
+                    ts_code = f"{code}.SZ"
+                elif code.startswith(('4', '8', '9')):
+                    ts_code = f"{code}.BJ"
+                else:
+                    ts_code = f"{code}.SH"
+                    
                 df = pro.daily(ts_code=ts_code, start_date=start_compact, end_date=end_compact)
-                if not df.empty:
+                if df is not None and not df.empty:
                     return self.standardize_kline_columns(df, 'tushare')
             except Exception as e:
                 print(f"[WARN] Tushare获取单股K线失败 {code}: {e}")
@@ -3545,7 +3891,8 @@ class ComprehensiveDataCollector:
                 'valid_codes': [],
                 'delisted': [],
                 'invalid': [],
-                'suspended': []
+                'suspended': [],
+                'st': []
             }
             
             for code, info in status_results.items():
@@ -3557,13 +3904,16 @@ class ComprehensiveDataCollector:
                     categorized['invalid'].append(code)
                 elif info['status'] == 'suspended':
                     categorized['suspended'].append(code)
+                elif info['status'] == 'st':
+                    categorized['st'].append(code)
             
             # 报告结果
             print(f"[SUCCESS] 股票预检完成:")
             print(f"  OK 有效活跃: {len(categorized['valid_codes'])} 只")
-            print(f"  DELISTED 已退市: {len(categorized['delisted'])} 只 {categorized['delisted'][:5]}{'...' if len(categorized['delisted']) > 5 else ''}")
-            print(f"  INVALID 无效代码: {len(categorized['invalid'])} 只 {categorized['invalid'][:5]}{'...' if len(categorized['invalid']) > 5 else ''}")
-            print(f"  SUSPENDED 停牌特处: {len(categorized['suspended'])} 只 {categorized['suspended'][:5]}{'...' if len(categorized['suspended']) > 5 else ''}")
+            print(f"  DELISTED 已退市: {len(categorized['delisted'])} 只")
+            print(f"  INVALID 无效代码: {len(categorized['invalid'])} 只")
+            print(f"  SUSPENDED 停牌: {len(categorized['suspended'])} 只")
+            print(f"  ST 风险警示: {len(categorized['st'])} 只")
             
             return categorized
             
@@ -3738,7 +4088,7 @@ class ComprehensiveDataCollector:
             print(f"[ERROR] 计算技术指标失败: {e}")
             return {'status': 'calculation_error', 'error': str(e)}
 
-    def collect_comprehensive_data(self, codes: List[str], batch_size: int = 15) -> Dict[str, Any]:
+    def collect_comprehensive_data(self, codes: List[str], batch_size: int = 15, exclude_st: bool = True) -> Dict[str, Any]:
         """采集综合数据 - 专门化数据源分配策略"""
         results = {}
         
@@ -3750,7 +4100,12 @@ class ComprehensiveDataCollector:
             try:
                 validity_check = self.pre_check_stock_validity(codes)
                 original_count = len(codes)
-                codes = validity_check['valid_codes']  # 只使用有效的股票
+                
+                # 根据参数决定是否包含 ST 股票
+                if exclude_st:
+                    codes = validity_check['valid_codes']  # 只使用有效的股票
+                else:
+                    codes = validity_check['valid_codes'] + validity_check.get('st', [])
                 
                 # 记录被过滤的股票
                 filtered_count = original_count - len(codes)
@@ -3762,6 +4117,8 @@ class ComprehensiveDataCollector:
                         print(f"  - 无效代码: {len(validity_check['invalid'])} 只")
                     if validity_check['suspended']:
                         print(f"  - 停牌股票: {len(validity_check['suspended'])} 只")
+                    if validity_check.get('st'):
+                        print(f"  - ST 股票: {len(validity_check['st'])} 只")
                         
                 print(f"[INFO] 预检后有效股票: {len(codes)} 只")
             except Exception as e:
@@ -4012,6 +4369,17 @@ class ComprehensiveDataCollector:
             
         # 分配数据到文件
         for code, stock_info in cleaned_data.items():
+            # 自动清理过期的K线数据：保留总计60天的数据，删除超过80天以外的数据
+            if isinstance(stock_info, dict) and 'kline_data' in stock_info:
+                kline_obj = stock_info['kline_data']
+                if isinstance(kline_obj, dict) and 'daily' in kline_obj:
+                    daily_list = kline_obj['daily']
+                    if isinstance(daily_list, list) and len(daily_list) > 80:
+                        # 截断到最近的80天（硬上限）
+                        kline_obj['daily'] = daily_list[-80:]
+                        kline_obj['data_points'] = len(kline_obj['daily'])
+                        kline_obj['update_time'] = datetime.now().isoformat()
+            
             target_file = None
             
             # 1. 检查是否已存在于某个文件中 (更新)
@@ -4100,7 +4468,7 @@ class ComprehensiveDataCollector:
         # 更新K线状态文件（因为全部数据包含K线）
         self._update_kline_status_file(base_dir, cleaned_data)
     
-    def update_kline_data_only(self, batch_size: int = 20, total_batches: int = None, stock_type: str = "主板", progress_callback=None):
+    def update_kline_data_only(self, batch_size: int = 20, total_batches: int = None, stock_type: str = "主板", progress_callback=None, exclude_st: bool = True):
         """只更新K线数据和技术指标（高效模式）"""
         
         # 首先加载本地已有数据，只更新本地存在的股票
@@ -4129,6 +4497,16 @@ class ComprehensiveDataCollector:
                 if code.startswith('300'):
                     all_codes.append(code)
         
+        # 🔴 预过滤：排除 ST 和 停牌股票
+        if self.status_checker:
+            print(f"[INFO] 正在检查 {len(all_codes)} 只股票的状态 (ST/停牌)...")
+            if progress_callback:
+                progress_callback("检查股票状态...", 1, "正在获取全市场 ST 和停牌信息...")
+            
+            if self.status_checker.update_status():
+                # 过滤代码列表
+                all_codes = self.status_checker.filter_codes(all_codes, exclude_st=exclude_st, exclude_suspended=True)
+        
         actual_total = len(all_codes)
         
         # 根据实际股票数量动态计算批次
@@ -4152,9 +4530,6 @@ class ComprehensiveDataCollector:
         
         if progress_callback:
             progress_callback("开始K线更新...", 2, f"获得 {actual_total} 只股票，开始K线数据更新...")
-        
-        # 加载现有数据
-        existing_data = self.load_existing_data()
         
         for batch_num in range(total_batches):
             start_idx = batch_num * batch_size
@@ -4181,8 +4556,10 @@ class ComprehensiveDataCollector:
             
             # 批量采集K线数据（增量更新模式）
             try:
-                # 为每只股票确定需要获取的日期范围
+                # 为每只股票确定需要获取的日期范围，并找到本批次的最早开始日期
                 codes_with_date_range = {}
+                min_start_date = None
+                
                 for code in batch_codes:
                     try:
                         if code in existing_data and 'kline_data' in existing_data[code]:
@@ -4194,12 +4571,13 @@ class ComprehensiveDataCollector:
                             
                             daily_data = kline_data_obj.get('daily', []) if isinstance(kline_data_obj, dict) else []
                             if daily_data and isinstance(daily_data, list) and len(daily_data) > 0:
-                                # 找到最后一天的日期，确保最后一个元素不是None
+                                # 找到最后一天的日期
                                 last_item = daily_data[-1]
                                 if last_item and isinstance(last_item, dict):
                                     last_date_str = last_item.get('date', last_item.get('trade_date', ''))
                                 else:
                                     last_date_str = ''
+                                
                                 if last_date_str:
                                     try:
                                         # 解析日期
@@ -4210,25 +4588,51 @@ class ComprehensiveDataCollector:
                                         
                                         # 从下一天开始获取
                                         start_date = last_date + timedelta(days=1)
+                                        
+                                        # 限制获取范围：只要统计从获取当天开始往前推60天的数据即可
+                                        limit_date = datetime.now() - timedelta(days=self.kline_days)
+                                        if start_date < limit_date:
+                                            start_date = limit_date
+                                            print(f"    {code}: 历史数据太旧({last_date_str})，调整从{start_date.strftime('%Y-%m-%d')}开始补全")
+                                        
                                         codes_with_date_range[code] = start_date
-                                        print(f"    {code}: 历史数据到{last_date_str}，将获取{start_date.strftime('%Y-%m-%d')}之后的数据")
+                                        
+                                        # 更新本批次的最早开始日期
+                                        if min_start_date is None or start_date < min_start_date:
+                                            min_start_date = start_date
+                                            
+                                        if start_date > last_date:
+                                            print(f"    {code}: 历史数据到{last_date_str}，建议从{start_date.strftime('%Y-%m-%d')}补全")
                                     except Exception as date_parse_err:
-                                        # 解析失败，获取全部数据
                                         print(f"    {code}: 日期解析失败 ({date_parse_err})，将获取全部数据")
                                         codes_with_date_range[code] = None
+                                        min_start_date = datetime.now() - timedelta(days=self.kline_days)
                                 else:
                                     codes_with_date_range[code] = None
+                                    min_start_date = datetime.now() - timedelta(days=self.kline_days)
                             else:
                                 codes_with_date_range[code] = None
+                                min_start_date = datetime.now() - timedelta(days=self.kline_days)
                         else:
-                            # 新股票，获取全部数据
                             codes_with_date_range[code] = None
+                            min_start_date = datetime.now() - timedelta(days=self.kline_days)
                     except Exception as code_err:
                         print(f"    [WARNING] {code}: 处理失败 ({code_err})，跳过")
                         codes_with_date_range[code] = None
                 
+                # 确定最终使用的开始日期
+                final_start_str = None
+                if min_start_date:
+                    # 如果最早开始日期晚于今天，说明数据已是最新
+                    if min_start_date > datetime.now():
+                        print(f"[INFO] 本批次股票数据已是最新，仅进行常规检查")
+                        final_start_str = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
+                    else:
+                        final_start_str = min_start_date.strftime('%Y%m%d')
+                        print(f"[INFO] 本批次将从 {min_start_date.strftime('%Y-%m-%d')} 开始增量获取")
+                
                 # 批量采集新数据
-                batch_kline_data = self.collect_batch_kline_data(batch_codes, 'auto')
+                batch_kline_data = self.collect_batch_kline_data(batch_codes, 'auto', start_date_override=final_start_str)
                 print(f"[INFO] 本批K线数据采集完成，获得 {len(batch_kline_data)} 只股票")
                 
                 # 更新每只股票的K线数据（合并历史数据）
@@ -4243,24 +4647,48 @@ class ComprehensiveDataCollector:
                                     # 将历史数据转换为DataFrame
                                     old_df = pd.DataFrame(old_daily)
                                     
-                                    # 统一日期列名
-                                    date_col = None
-                                    for col in ['date', 'trade_date', '日期']:
-                                        if col in old_df.columns:
-                                            date_col = col
-                                            break
+                                    # 🔴 改进：统一新旧数据的列名，确保合并正确
+                                    # 明确指定 source 为 'auto' 或根据数据特征识别
+                                    old_df = self.standardize_kline_columns(old_df, 'auto')
+                                    new_kline_df = self.standardize_kline_columns(new_kline_df, 'auto')
                                     
-                                    if date_col:
+                                    date_col = 'date'
+                                    
+                                    if date_col in old_df.columns:
+                                        # 记录合并前的日期
+                                        old_dates = set(old_df[date_col].astype(str).tolist())
+                                        
                                         # 合并新旧数据，去重并排序
                                         combined_df = pd.concat([old_df, new_kline_df], ignore_index=True)
-                                        # 统一日期类型为字符串，避免 Timestamp 和 str 混合导致排序错误
-                                        combined_df[date_col] = combined_df[date_col].astype(str)
+                                        
+                                        # 统一日期格式为 YYYY-MM-DD，避免混合格式导致排序错误
+                                        def normalize_date_func(d):
+                                            d_str = str(d).split(' ')[0].replace('-', '').replace('/', '')
+                                            if len(d_str) >= 8:
+                                                return f"{d_str[:4]}-{d_str[4:6]}-{d_str[6:8]}"
+                                            return str(d)
+                                            
+                                        combined_df[date_col] = combined_df[date_col].apply(normalize_date_func)
                                         combined_df = combined_df.drop_duplicates(subset=[date_col], keep='last')
                                         combined_df = combined_df.sort_values(by=date_col)
+                                        
+                                        # 限制数据量：保留总计60天的数据，删除超过80天以外的数据
+                                        if len(combined_df) > 80:
+                                            combined_df = combined_df.tail(80)
+                                            print(f"    ! {code}: 数据超过80天，已截断保留最近80天")
+                                        elif len(combined_df) > 60:
+                                            # 如果超过60天但没到80天，也可以根据需要截断到60天
+                                            # 这里我们保留到80天作为缓冲，但确保不无限增长
+                                            pass
+                                            
                                         kline_df = combined_df
-                                        added_count = len(new_kline_df)
+                                        
+                                        # 计算真正新增的天数
+                                        new_dates = set(kline_df[date_col].astype(str).tolist())
+                                        truly_added = len(new_dates - old_dates)
+                                        
                                         total_count = len(kline_df)
-                                        print(f"    ✓ {code}: 新增{added_count}天，总计{total_count}天K线")
+                                        print(f"    ✓ {code}: 接口返回{len(new_kline_df)}天，实际新增{truly_added}天，总计{total_count}天K线")
                                     else:
                                         # 无法合并，使用新数据
                                         kline_df = new_kline_df
@@ -4343,31 +4771,57 @@ class ComprehensiveDataCollector:
         print(f"\n[SUCCESS] 所有批次K线数据更新完成！")
     
     def load_existing_data(self):
-        """加载现有数据"""
+        """加载现有数据 - 支持分卷加载"""
+        import glob
         import json
         import os
 
-        # 尝试从分卷文件加载
-        data_dir = 'data'
+        # 确定数据目录
+        data_dir = os.path.dirname(os.path.abspath(self.output_file))
+        base_name = os.path.basename(self.output_file).replace('.json', '')
         all_data = {}
         
+        print(f"[INFO] 正在从目录加载数据: {data_dir}")
+        
         if os.path.exists(data_dir):
-            for i in range(1, 6):
-                part_file = os.path.join(data_dir, f'comprehensive_stock_data_part_{i}.json')
-                if os.path.exists(part_file):
+            # 使用 glob 查找所有分卷文件
+            part_pattern = os.path.join(data_dir, f"{base_name}_part_*.json")
+            part_files = glob.glob(part_pattern)
+            
+            if part_files:
+                # 按分卷编号排序
+                try:
+                    part_files.sort(key=lambda x: int(x.split('_part_')[-1].replace('.json', '')))
+                except:
+                    part_files.sort()
+                
+                for part_file in part_files:
                     try:
                         with open(part_file, 'r', encoding='utf-8') as f:
                             content = json.load(f)
                             if 'stocks' in content:
                                 all_data.update(content['stocks'])
-                                print(f"[INFO] 加载分卷 {i}: {len(content['stocks'])} 只股票")
+                                print(f"[INFO] 加载分卷 {os.path.basename(part_file)}: {len(content['stocks'])} 只股票")
                     except Exception as e:
                         print(f"[WARN] 加载 {part_file} 失败: {e}")
+            else:
+                # 尝试加载单文件
+                if os.path.exists(self.output_file):
+                    try:
+                        with open(self.output_file, 'r', encoding='utf-8') as f:
+                            content = json.load(f)
+                            if 'stocks' in content:
+                                all_data = content['stocks']
+                            else:
+                                all_data = content
+                        print(f"[INFO] 加载单文件数据: {len(all_data)} 只股票")
+                    except Exception as e:
+                        print(f"[WARN] 加载 {self.output_file} 失败: {e}")
         
-        print(f"[INFO] 加载现有数据: {len(all_data)} 只股票")
+        print(f"[INFO] 加载现有数据完成: 共 {len(all_data)} 只股票")
         return all_data
     
-    def run_batch_collection_with_progress(self, batch_size: int = 15, total_batches: int = None, stock_type: str = "主板", progress_callback=None):
+    def run_batch_collection_with_progress(self, batch_size: int = 15, total_batches: int = None, stock_type: str = "主板", progress_callback=None, exclude_st: bool = True):
         """运行专门化数据源分配批量采集，支持进度回调"""
         
         # 首先获取股票列表来确定实际数量
@@ -4378,6 +4832,16 @@ class ComprehensiveDataCollector:
             # 其他类型：根据预估数量获取
             estimated_limit = (total_batches * batch_size) if total_batches else 5000
             all_codes = self.get_stock_list_by_type(stock_type, limit=estimated_limit)
+        
+        # 🔴 预过滤：排除 ST 和 停牌股票
+        if self.status_checker:
+            print(f"[INFO] 正在检查 {len(all_codes)} 只股票的状态 (ST/停牌)...")
+            if progress_callback:
+                progress_callback("检查股票状态...", 1, "正在获取全市场 ST 和停牌信息...")
+            
+            if self.status_checker.update_status():
+                # 过滤代码列表
+                all_codes = self.status_checker.filter_codes(all_codes, exclude_st=exclude_st, exclude_suspended=True)
         
         actual_total = len(all_codes)
         
@@ -4425,7 +4889,7 @@ class ComprehensiveDataCollector:
             
             # 采集数据
             try:
-                batch_data = self.collect_comprehensive_data(batch_codes, batch_size)
+                batch_data = self.collect_comprehensive_data(batch_codes, batch_size, exclude_st=exclude_st)
                 
                 # 保存数据
                 self.save_data(batch_data)
@@ -4452,13 +4916,20 @@ class ComprehensiveDataCollector:
         
         print(f"\n[SUCCESS] 所有批次专门化数据采集完成！")
     
-    def run_batch_collection(self, batch_size: int = 15, total_batches: int = 166):
+    def run_batch_collection(self, batch_size: int = 15, total_batches: int = 166, exclude_st: bool = True):
         """运行专门化数据源分配批量采集"""
         print(f"[INFO] 开始专门化数据源分配批量采集 (每批 {batch_size} 只股票，共 {total_batches} 批)")
         print(f"[INFO] 优化策略: 每个API专注其专长领域，智能批量，频次控制")
         
         # 获取股票列表（只包含主板股票）
         all_codes = self.get_stock_list_excluding_cyb(limit=batch_size * total_batches)
+        
+        # 🔴 预过滤：排除 ST 和 停牌股票
+        if self.status_checker:
+            print(f"[INFO] 正在检查 {len(all_codes)} 只股票的状态 (ST/停牌)...")
+            if self.status_checker.update_status():
+                # 过滤代码列表
+                all_codes = self.status_checker.filter_codes(all_codes, exclude_st=exclude_st, exclude_suspended=True)
         
         for batch_num in range(total_batches):
             start_idx = batch_num * batch_size
@@ -4474,7 +4945,7 @@ class ComprehensiveDataCollector:
             print(f"{'='*50}")
             
             # 采集数据
-            batch_data = self.collect_comprehensive_data(batch_codes, batch_size)
+            batch_data = self.collect_comprehensive_data(batch_codes, batch_size, exclude_st=exclude_st)
             
             # 保存数据
             self.save_data(batch_data)
@@ -4490,7 +4961,7 @@ class ComprehensiveDataCollector:
         """更新K线状态文件，记录实际K线数据的最新日期"""
         try:
             from datetime import datetime
-            
+
             # 从股票数据中提取最新K线日期
             latest_kline_date = None
             
@@ -4500,20 +4971,39 @@ class ComprehensiveDataCollector:
                     daily = kline.get('daily', []) if isinstance(kline, dict) else []
                     
                     if daily and len(daily) > 0:
-                        # 获取第一条K线日期（通常是最新的）
-                        date_str = daily[0].get('date', '')
-                        if date_str:
-                            # 转换格式：20251218 -> 2025-12-18
-                            formatted_date = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
-                            
-                            # 比较找到最新的
-                            if latest_kline_date is None or formatted_date > latest_kline_date:
-                                latest_kline_date = formatted_date
+                        # 遍历所有K线，找到真正的最新日期（防止排序错误）
+                        for item in daily:
+                            date_str = item.get('date', item.get('trade_date', ''))
+                            if not date_str:
+                                continue
+                                
+                            # 统一格式：20251218 或 2025-12-18 00:00:00 -> 2025-12-18
+                            temp_date = str(date_str).split(' ')[0].replace('-', '').replace('/', '')
+                            if len(temp_date) >= 8:
+                                formatted_date = f"{temp_date[:4]}-{temp_date[4:6]}-{temp_date[6:8]}"
+                                
+                                # 比较找到最新的
+                                if latest_kline_date is None or formatted_date > latest_kline_date:
+                                    latest_kline_date = formatted_date
                 except:
                     continue
             
             # 如果找到了K线日期，更新状态文件
             if latest_kline_date:
+                status_file = os.path.join(data_dir, "kline_update_status.json")
+                
+                # 🔴 改进：读取现有状态，确保日期只增不减
+                if os.path.exists(status_file):
+                    try:
+                        with open(status_file, 'r', encoding='utf-8') as f:
+                            old_status = json.load(f)
+                            old_date = old_status.get('last_update_date', '')
+                            if old_date and old_date > latest_kline_date:
+                                print(f"[INFO] 状态文件日期 {old_date} 晚于当前批次日期 {latest_kline_date}，保持原样")
+                                latest_kline_date = old_date
+                    except:
+                        pass
+
                 status_data = {
                     'last_update_date': latest_kline_date,
                     'last_update_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -4521,7 +5011,6 @@ class ComprehensiveDataCollector:
                     'data_source': 'comprehensive_data_collector'
                 }
                 
-                status_file = os.path.join(data_dir, "kline_update_status.json")
                 with open(status_file, 'w', encoding='utf-8') as f:
                     json.dump(status_data, f, ensure_ascii=False, indent=2)
                 
