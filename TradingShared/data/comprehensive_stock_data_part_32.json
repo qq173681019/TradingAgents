@@ -1945,8 +1945,8 @@
     },
     "000666": {
       "code": "000666",
-      "timestamp": "2025-12-24T01:37:19.463845",
-      "collection_time": "2025-12-24 01:37:19",
+      "timestamp": "2025-12-24T02:38:34.184001",
+      "collection_time": "2025-12-24 02:38:34",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -2611,7 +2611,7 @@
         "latest_price": 8.97,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:37:20.447686"
+        "update_time": "2025-12-24T02:38:37.643750"
       },
       "financial_data": {
         "code": "000666",
@@ -2663,7 +2663,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:37:19.468230",
+        "timestamp": "2025-12-24T02:38:34.188636",
         "success_rate": 0.8
       }
     },
@@ -9825,8 +9825,8 @@
     },
     "000748": {
       "code": "000748",
-      "timestamp": "2025-12-24T01:45:33.596920",
-      "collection_time": "2025-12-24 01:45:33",
+      "timestamp": "2025-12-24T02:40:32.042326",
+      "collection_time": "2025-12-24 02:40:32",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -9838,8 +9838,12 @@
       },
       "basic_info": {
         "code": "000748",
-        "name": "股票000748",
-        "source": "fallback"
+        "name": "长城信息",
+        "type": "1",
+        "status": "0",
+        "industry": "未知",
+        "listing_date": "1997-07-04",
+        "source": "baostock"
       },
       "kline_data": {
         "daily": [
@@ -10487,7 +10491,7 @@
         "latest_price": 20.31,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:45:34.380691"
+        "update_time": "2025-12-24T02:40:33.720235"
       },
       "financial_data": {
         "code": "000748",
@@ -10531,7 +10535,7 @@
         "source": "akshare"
       },
       "data_sources_used": {
-        "basic_info": "fallback",
+        "basic_info": "baostock",
         "financial_data": "fallback",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
@@ -10539,8 +10543,8 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:45:33.600003",
-        "success_rate": 0.6
+        "timestamp": "2025-12-24T02:40:32.046602",
+        "success_rate": 0.8
       }
     },
     "000749": {
@@ -11278,8 +11282,8 @@
     },
     "000763": {
       "code": "000763",
-      "timestamp": "2025-12-24T01:42:11.441985",
-      "collection_time": "2025-12-24 01:42:11",
+      "timestamp": "2025-12-24T02:38:36.317402",
+      "collection_time": "2025-12-24 02:38:36",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -11944,7 +11948,7 @@
         "latest_price": 4.22,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:42:11.792800"
+        "update_time": "2025-12-24T02:38:37.643885"
       },
       "financial_data": {
         "code": "000763",
@@ -11996,7 +12000,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:42:11.445382",
+        "timestamp": "2025-12-24T02:38:36.321292",
         "success_rate": 0.8
       }
     },
@@ -22331,8 +22335,8 @@
     },
     "000861": {
       "code": "000861",
-      "timestamp": "2025-12-24T01:35:43.691674",
-      "collection_time": "2025-12-24 01:35:43",
+      "timestamp": "2025-12-24T02:39:44.752829",
+      "collection_time": "2025-12-24 02:39:44",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -22997,7 +23001,7 @@
         "latest_price": 0.62,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:35:46.942749"
+        "update_time": "2025-12-24T02:39:47.516332"
       },
       "financial_data": {
         "code": "000861",
@@ -23049,7 +23053,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:35:43.694282",
+        "timestamp": "2025-12-24T02:39:44.759166",
         "success_rate": 0.8
       }
     },
@@ -24803,8 +24807,8 @@
     },
     "000916": {
       "code": "000916",
-      "timestamp": "2025-12-24T01:47:09.771829",
-      "collection_time": "2025-12-24 01:47:09",
+      "timestamp": "2025-12-24T02:40:31.736434",
+      "collection_time": "2025-12-24 02:40:31",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -25469,7 +25473,7 @@
         "latest_price": 8.82,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:47:10.103147"
+        "update_time": "2025-12-24T02:40:33.720220"
       },
       "financial_data": {
         "code": "000916",
@@ -25521,7 +25525,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:47:09.774515",
+        "timestamp": "2025-12-24T02:40:31.742176",
         "success_rate": 0.8
       }
     },
@@ -27441,8 +27445,8 @@
     },
     "000956": {
       "code": "000956",
-      "timestamp": "2025-12-24T01:40:14.216176",
-      "collection_time": "2025-12-24 01:40:14",
+      "timestamp": "2025-12-24T02:38:35.096989",
+      "collection_time": "2025-12-24 02:38:35",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -28107,7 +28111,7 @@
         "latest_price": 11.91,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:40:17.511447"
+        "update_time": "2025-12-24T02:38:37.643812"
       },
       "financial_data": {
         "code": "000956",
@@ -28159,7 +28163,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:40:14.219224",
+        "timestamp": "2025-12-24T02:38:35.101055",
         "success_rate": 0.8
       }
     },
@@ -32866,8 +32870,8 @@
     },
     "002013": {
       "code": "002013",
-      "timestamp": "2025-12-24T01:44:38.082647",
-      "collection_time": "2025-12-24 01:44:38",
+      "timestamp": "2025-12-24T02:39:14.218891",
+      "collection_time": "2025-12-24 02:39:14",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -32879,8 +32883,12 @@
       },
       "basic_info": {
         "code": "002013",
-        "name": "股票002013",
-        "source": "fallback"
+        "name": "中航机电",
+        "type": "1",
+        "status": "0",
+        "industry": "未知",
+        "listing_date": "2004-07-05",
+        "source": "baostock"
       },
       "kline_data": {
         "daily": [
@@ -33528,7 +33536,7 @@
         "latest_price": 10.78,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:44:38.820999"
+        "update_time": "2025-12-24T02:39:14.934007"
       },
       "financial_data": {
         "code": "002013",
@@ -33572,7 +33580,7 @@
         "source": "akshare"
       },
       "data_sources_used": {
-        "basic_info": "fallback",
+        "basic_info": "baostock",
         "financial_data": "fallback",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
@@ -33580,8 +33588,8 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:44:38.086360",
-        "success_rate": 0.6
+        "timestamp": "2025-12-24T02:39:14.223701",
+        "success_rate": 0.8
       }
     },
     "002018": {
@@ -64967,6 +64975,6 @@
       }
     }
   },
-  "last_updated": "2025-12-24T02:37:51.543288",
+  "last_updated": "2025-12-24T02:40:33.920343",
   "total_stocks": 200
 }

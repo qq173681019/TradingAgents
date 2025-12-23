@@ -11382,8 +11382,8 @@
     },
     "000015": {
       "code": "000015",
-      "timestamp": "2025-12-24T01:34:35.301340",
-      "collection_time": "2025-12-24 01:34:35",
+      "timestamp": "2025-12-24T02:39:46.590391",
+      "collection_time": "2025-12-24 02:39:46",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -12048,7 +12048,7 @@
         "latest_price": 6.85,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:34:35.645296"
+        "update_time": "2025-12-24T02:39:47.516415"
       },
       "financial_data": {
         "code": "000015",
@@ -12100,7 +12100,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:34:35.305858",
+        "timestamp": "2025-12-24T02:39:46.594277",
         "success_rate": 0.8
       }
     },
@@ -22329,6 +22329,6 @@
       }
     }
   },
-  "last_updated": "2025-12-24T02:37:51.230938",
+  "last_updated": "2025-12-24T02:39:47.843002",
   "total_stocks": 200
 }

@@ -7834,8 +7834,8 @@
     },
     "600001": {
       "code": "600001",
-      "timestamp": "2025-12-24T01:37:08.752461",
-      "collection_time": "2025-12-24 01:37:08",
+      "timestamp": "2025-12-24T02:40:33.262312",
+      "collection_time": "2025-12-24 02:40:33",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -7847,8 +7847,12 @@
       },
       "basic_info": {
         "code": "600001",
-        "name": "股票600001",
-        "source": "fallback"
+        "name": "邯郸钢铁",
+        "type": "1",
+        "status": "0",
+        "industry": "未知",
+        "listing_date": "1998-01-22",
+        "source": "baostock"
       },
       "kline_data": {
         "daily": [
@@ -8496,7 +8500,7 @@
         "latest_price": 5.29,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:37:09.391518"
+        "update_time": "2025-12-24T02:40:33.720258"
       },
       "financial_data": {
         "code": "600001",
@@ -8540,7 +8544,7 @@
         "source": "akshare"
       },
       "data_sources_used": {
-        "basic_info": "fallback",
+        "basic_info": "baostock",
         "financial_data": "fallback",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
@@ -8548,8 +8552,8 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:37:08.755551",
-        "success_rate": 0.6
+        "timestamp": "2025-12-24T02:40:33.272586",
+        "success_rate": 0.8
       }
     },
     "600002": {
@@ -9883,8 +9887,8 @@
     },
     "600005": {
       "code": "600005",
-      "timestamp": "2025-12-24T01:39:47.824321",
-      "collection_time": "2025-12-24 01:39:47",
+      "timestamp": "2025-12-24T02:39:14.524210",
+      "collection_time": "2025-12-24 02:39:14",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -10549,7 +10553,7 @@
         "latest_price": 3.71,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:39:48.371050"
+        "update_time": "2025-12-24T02:39:14.934024"
       },
       "financial_data": {
         "code": "600005",
@@ -10601,7 +10605,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:39:47.828050",
+        "timestamp": "2025-12-24T02:39:14.530414",
         "success_rate": 0.8
       }
     },
@@ -19441,8 +19445,8 @@
     },
     "600102": {
       "code": "600102",
-      "timestamp": "2025-12-24T01:43:38.103299",
-      "collection_time": "2025-12-24 01:43:38",
+      "timestamp": "2025-12-24T02:38:35.401586",
+      "collection_time": "2025-12-24 02:38:35",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -19454,8 +19458,12 @@
       },
       "basic_info": {
         "code": "600102",
-        "name": "股票600102",
-        "source": "fallback"
+        "name": "莱钢股份",
+        "type": "1",
+        "status": "0",
+        "industry": "未知",
+        "listing_date": "1997-08-28",
+        "source": "baostock"
       },
       "kline_data": {
         "daily": [
@@ -20103,7 +20111,7 @@
         "latest_price": 7.13,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:43:38.444630"
+        "update_time": "2025-12-24T02:38:37.643838"
       },
       "financial_data": {
         "code": "600102",
@@ -20147,7 +20155,7 @@
         "source": "akshare"
       },
       "data_sources_used": {
-        "basic_info": "fallback",
+        "basic_info": "baostock",
         "financial_data": "fallback",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
@@ -20155,8 +20163,8 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:43:38.106872",
-        "success_rate": 0.6
+        "timestamp": "2025-12-24T02:38:35.407388",
+        "success_rate": 0.8
       }
     },
     "600112": {
@@ -25714,8 +25722,8 @@
     },
     "600205": {
       "code": "600205",
-      "timestamp": "2025-12-24T01:35:43.994811",
-      "collection_time": "2025-12-24 01:35:43",
+      "timestamp": "2025-12-24T02:39:43.836921",
+      "collection_time": "2025-12-24 02:39:43",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -26380,7 +26388,7 @@
         "latest_price": 25.41,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:35:46.942789"
+        "update_time": "2025-12-24T02:39:47.516288"
       },
       "financial_data": {
         "code": "600205",
@@ -26432,7 +26440,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:35:43.998150",
+        "timestamp": "2025-12-24T02:39:43.842605",
         "success_rate": 0.8
       }
     },
@@ -33119,8 +33127,8 @@
     },
     "600270": {
       "code": "600270",
-      "timestamp": "2025-12-24T01:39:47.520960",
-      "collection_time": "2025-12-24 01:39:47",
+      "timestamp": "2025-12-24T02:39:13.297681",
+      "collection_time": "2025-12-24 02:39:13",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -33785,7 +33793,7 @@
         "latest_price": 20.99,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:39:48.371010"
+        "update_time": "2025-12-24T02:39:14.933983"
       },
       "financial_data": {
         "code": "600270",
@@ -33837,7 +33845,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:39:47.524008",
+        "timestamp": "2025-12-24T02:39:13.304243",
         "success_rate": 0.8
       }
     },
@@ -36996,8 +37004,8 @@
     },
     "600296": {
       "code": "600296",
-      "timestamp": "2025-12-24T01:44:52.997466",
-      "collection_time": "2025-12-24 01:44:52",
+      "timestamp": "2025-12-24T02:40:31.122173",
+      "collection_time": "2025-12-24 02:40:31",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -37662,7 +37670,7 @@
         "latest_price": 14.61,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:44:53.336101"
+        "update_time": "2025-12-24T02:40:33.720201"
       },
       "financial_data": {
         "code": "600296",
@@ -37714,14 +37722,14 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:44:53.001106",
+        "timestamp": "2025-12-24T02:40:31.129039",
         "success_rate": 0.8
       }
     },
     "600297": {
       "code": "600297",
-      "timestamp": "2025-12-24T01:45:51.479519",
-      "collection_time": "2025-12-24 01:45:51",
+      "timestamp": "2025-12-24T02:40:30.507181",
+      "collection_time": "2025-12-24 02:40:30",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -38386,7 +38394,7 @@
         "latest_price": 0.78,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:45:52.116442"
+        "update_time": "2025-12-24T02:40:33.720184"
       },
       "financial_data": {
         "code": "600297",
@@ -38438,7 +38446,7 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:45:51.482271",
+        "timestamp": "2025-12-24T02:40:30.513800",
         "success_rate": 0.8
       }
     },
@@ -39782,8 +39790,8 @@
     },
     "600317": {
       "code": "600317",
-      "timestamp": "2025-12-24T01:44:14.943327",
-      "collection_time": "2025-12-24 01:44:14",
+      "timestamp": "2025-12-24T02:38:32.957842",
+      "collection_time": "2025-12-24 02:38:32",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -40448,7 +40456,7 @@
         "latest_price": 2.6,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:44:15.334212"
+        "update_time": "2025-12-24T02:38:37.643633"
       },
       "financial_data": {
         "code": "600317",
@@ -40500,11 +40508,11 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:44:14.947042",
+        "timestamp": "2025-12-24T02:38:32.964715",
         "success_rate": 0.8
       }
     }
   },
-  "last_updated": "2025-12-24T02:37:51.431319",
+  "last_updated": "2025-12-24T02:40:33.860979",
   "total_stocks": 200
 }
