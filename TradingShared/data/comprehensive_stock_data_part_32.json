@@ -52422,8 +52422,8 @@
     },
     "002505": {
       "code": "002505",
-      "timestamp": "2025-12-24T01:33:52.313195",
-      "collection_time": "2025-12-24 01:33:52",
+      "timestamp": "2025-12-24T02:40:42.934409",
+      "collection_time": "2025-12-24 02:40:42",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
         "kline": "tushare_akshare_rotation",
@@ -52435,12 +52435,8 @@
       },
       "basic_info": {
         "code": "002505",
-        "name": "鹏都农牧",
-        "type": "1",
-        "status": "0",
-        "industry": "未知",
-        "listing_date": "2010-11-18",
-        "source": "baostock"
+        "name": "股票002505",
+        "source": "fallback"
       },
       "kline_data": {
         "daily": [
@@ -53088,7 +53084,7 @@
         "latest_price": 0.36,
         "data_points": 80,
         "source": "batch_rotation",
-        "update_time": "2025-12-24T01:33:52.646018"
+        "update_time": "2025-12-24T02:40:43.271772"
       },
       "financial_data": {
         "code": "002505",
@@ -53132,7 +53128,7 @@
         "source": "akshare"
       },
       "data_sources_used": {
-        "basic_info": "baostock",
+        "basic_info": "fallback",
         "financial_data": "fallback",
         "industry_concept": "baostock_default",
         "fund_flow": "default",
@@ -53140,8 +53136,8 @@
       },
       "collection_summary": {
         "strategy": "specialized_api_distribution",
-        "timestamp": "2025-12-24T01:33:52.318378",
-        "success_rate": 0.8
+        "timestamp": "2025-12-24T02:40:42.938968",
+        "success_rate": 0.6
       }
     },
     "002509": {
@@ -64975,6 +64971,6 @@
       }
     }
   },
-  "last_updated": "2025-12-24T02:40:33.920343",
+  "last_updated": "2025-12-24T02:40:43.348488",
   "total_stocks": 200
 }
