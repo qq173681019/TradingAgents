@@ -2,13 +2,15 @@
 Polygon.io API集成模块
 支持美股数据获取，可集成到现有数据收集系统
 """
-import requests
 import json
-import pandas as pd
-from typing import Dict, List, Optional, Any, Union
-from datetime import datetime, timedelta
-import time
 import os
+import time
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Union
+
+import pandas as pd
+import requests
+
 
 class PolygonAPI:
     """Polygon.io API集成类，支持美股和部分国际股票数据"""
@@ -223,6 +225,37 @@ class PolygonAPI:
         print(f"[SUMMARY] Polygon.io批量获取完成: {len(results)}/{len(symbols)} ({success_rate:.1f}%)")
         
         return results
+
+    def get_market_news(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        获取市场新闻 (Polygon.io 强项)
+        
+        Args:
+            limit: 获取新闻条数
+        """
+        if not self.is_available or not self._check_rate_limit():
+            return []
+            
+        try:
+            url = f"{self.base_url}/v2/reference/news"
+            params = {
+                'apikey': self.api_key,
+                'limit': limit,
+                'order': 'desc',
+                'sort': 'published_utc'
+            }
+            
+            response = self.session.get(url, params=params, timeout=15)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == 'OK':
+                    return data.get('results', [])
+            
+            return []
+        except Exception as e:
+            print(f"[ERROR] Polygon.io获取新闻失败: {e}")
+            return []
 
 def demonstrate_polygon_integration():
     """演示Polygon.io集成效果"""

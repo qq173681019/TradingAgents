@@ -609,6 +609,7 @@ class AShareAnalyzerGUI:
         
         # 新增：数据收集相关属性
         self.data_collection_active = False  # 数据收集是否正在进行
+        self.status_checker = None           # 股票状态检测器 (单例)
         
         # ST股票筛选关键字
         self.st_keywords = ['ST', '*ST', 'ST*', 'S*ST', 'SST', '退', '停牌']
@@ -737,6 +738,19 @@ class AShareAnalyzerGUI:
             # 延迟执行数据状态检查，确保UI已完全加载
             self.root.after(1000, self.check_data_status)
     
+    def _get_status_checker(self):
+        """获取或初始化股票状态检测器（单例模式）"""
+        if not hasattr(self, 'status_checker') or self.status_checker is None:
+            try:
+                from stock_status_checker import StockStatusChecker
+                self.status_checker = StockStatusChecker()
+                # 首次初始化时更新一次状态
+                self.status_checker.update_status()
+            except Exception as e:
+                print(f"[ERROR] 初始化 StockStatusChecker 失败: {e}")
+                return None
+        return self.status_checker
+
     def check_data_status(self):
         """检查本地数据状态并更新界面提示"""
         import re
@@ -786,6 +800,7 @@ class AShareAnalyzerGUI:
         
         try:
             import json
+
             # 使用共享数据目录
             shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
             data_dir = shared_data_dir
@@ -810,50 +825,64 @@ class AShareAnalyzerGUI:
                 latest_date = datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d")
                 days_diff = (datetime.now() - datetime.fromtimestamp(latest_time)).days
                 
-                # 从实际数据中读取K线最新日期
+                # 优先从 kline_update_status.json 读取最新日期
                 kline_date_str = ""
                 try:
-                    first_part = os.path.join(data_dir, sorted(part_files)[0])
-                    with open(first_part, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
+                    status_file = os.path.join(data_dir, "kline_update_status.json")
+                    if os.path.exists(status_file):
+                        with open(status_file, 'r', encoding='utf-8') as f:
+                            status_data = json.load(f)
+                            kline_date_formatted = status_data.get('last_update_date', '')
+                            if kline_date_formatted:
+                                kline_date_str = f" | K线: {kline_date_formatted}"
                     
-                    stock_data = None
-                    if 'stocks' in data and isinstance(data['stocks'], dict):
-                        stock_data = list(data['stocks'].values())[0]
-                    elif 'data' in data and isinstance(data['data'], dict):
-                        stock_data = list(data['data'].values())[0]
-                    
-                    if stock_data:
-                        kline = stock_data.get('kline_data', {})
-                        daily = kline.get('daily', []) if isinstance(kline, dict) else []
+                    # 如果状态文件不可用，回退到读取第一分卷
+                    if not kline_date_str:
+                        first_part = os.path.join(data_dir, sorted(part_files)[0])
+                        with open(first_part, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
                         
-                        if daily and len(daily) > 0:
-                            # 取最后一条记录（最新日期），因为K线数据按日期升序排列
-                            latest_kline = daily[-1].get('date', '')
-                            if latest_kline:
-                                # 处理两种日期格式：20251218 或 2025-12-18
-                                if '-' in latest_kline:
-                                    # 已经是 YYYY-MM-DD 格式（Choice返回的格式）
-                                    kline_date_formatted = latest_kline
-                                elif len(latest_kline) == 8 and latest_kline.isdigit():
-                                    # 8位数字格式：20251218 -> 2025-12-18
-                                    kline_date_formatted = f"{latest_kline[:4]}-{latest_kline[4:6]}-{latest_kline[6:]}"
-                                else:
-                                    # 无法识别的格式，直接使用
-                                    kline_date_formatted = latest_kline
+                        stock_data = None
+                        if 'stocks' in data and isinstance(data['stocks'], dict):
+                            stock_data = list(data['stocks'].values())[0]
+                        elif 'data' in data and isinstance(data['data'], dict):
+                            stock_data = list(data['data'].values())[0]
+                        
+                        if stock_data:
+                            kline = stock_data.get('kline_data', {})
+                            daily = kline.get('daily', []) if isinstance(kline, dict) else []
+                            
+                            if daily and len(daily) > 0:
+                                # 遍历所有K线，找到真正的最新日期（防止排序错误）
+                                latest_found_date = ""
+                                for item in daily:
+                                    d = item.get('date', item.get('trade_date', ''))
+                                    if not d: continue
+                                    
+                                    # 统一格式：20251218 或 2025-12-18 00:00:00 -> 2025-12-18
+                                    temp_d = str(d).split(' ')[0].replace('-', '').replace('/', '')
+                                    if len(temp_d) >= 8:
+                                        fmt_d = f"{temp_d[:4]}-{temp_d[4:6]}-{temp_d[6:8]}"
+                                        if not latest_found_date or fmt_d > latest_found_date:
+                                            latest_found_date = fmt_d
                                 
-                                # 检查是否是今天的数据
-                                today = datetime.now().strftime('%Y-%m-%d')
-                                if kline_date_formatted < today and datetime.now().weekday() < 5:
-                                    # 不是今天的数据且今天是交易日
-                                    if datetime.now().hour < 20:
-                                        kline_date_str = f" | K线: {kline_date_formatted}（数据源更新中）"
-                                    else:
-                                        kline_date_str = f" | K线: {kline_date_formatted}"
-                                else:
+                                if latest_found_date:
+                                    kline_date_formatted = latest_found_date
                                     kline_date_str = f" | K线: {kline_date_formatted}"
                 except:
                     pass
+                
+                # 检查是否是今天的数据
+                if kline_date_str and "K线: " in kline_date_str:
+                    try:
+                        kline_date_formatted = kline_date_str.split("K线: ")[1].strip()
+                        today = datetime.now().strftime('%Y-%m-%d')
+                        if kline_date_formatted < today and datetime.now().weekday() < 5:
+                            # 不是今天的数据且今天是交易日
+                            if datetime.now().hour < 20:
+                                kline_date_str += "（数据源更新中）"
+                    except:
+                        pass
                 
                 return f"本地数据: {latest_date} ({len(part_files)}个文件){kline_date_str} [AGE:{days_diff}]"
             else:
@@ -1731,7 +1760,7 @@ class AShareAnalyzerGUI:
             return False
 
     def load_comprehensive_stock_data(self):
-        """尝试将数据收集器生成的完整数据加载到内存缓存中，支持分卷文件和单文件"""
+        """尝试将数据收集器生成的完整数据加载到内存缓存中，支持分卷文件和单文件并进行合并"""
         import glob
         import json
         import os
@@ -1742,18 +1771,50 @@ class AShareAnalyzerGUI:
         self.stock_file_index = {}  # 初始化 stock_file_index
         loaded_count = 0
         
-        # 1. 尝试加载分卷数据 (comprehensive_stock_data_part_*.json)
-        # 使用共享数据目录
+        # 统一数据目录
         shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
         data_dir = shared_data_dir
-        # 从文件路径中提取文件名
+        
+        # 1. 首先加载单文件 (作为基础数据)
+        candidates = [
+            os.path.join(shared_data_dir, 'comprehensive_stock_data.json'),
+            self.comprehensive_data_file
+        ]
+        
+        for path in candidates:
+            if os.path.exists(path):
+                print(f"\033[1;33m[DEBUG] 正在从单体文件加载基础数据: {path}\033[0m")
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    loaded = {}
+                    if isinstance(data, dict):
+                        if 'data' in data and isinstance(data['data'], dict):
+                            loaded = data['data']
+                        elif 'stocks' in data and isinstance(data['stocks'], dict):
+                            loaded = data['stocks']
+                        else:
+                            loaded = data
+                    
+                    self.comprehensive_stock_data.update(loaded)
+                    print(f"\033[1;32m[INFO] 从单体文件加载了 {len(loaded)} 条数据\033[0m")
+                except Exception as e:
+                    print(f"\033[1;31m[ERROR] 加载单体文件 {path} 失败: {e}\033[0m")
+
+        # 2. 然后加载分卷数据 (覆盖/补充单体文件中的数据)
         base_name = os.path.basename(self.comprehensive_data_file).replace('.json', '')
-            
         part_pattern = os.path.join(data_dir, f"{base_name}_part_*.json")
         part_files = glob.glob(part_pattern)
         
         if part_files:
-            print(f"\033[1;33m[DEBUG] 发现 {len(part_files)} 个分卷数据文件\033[0m")
+            print(f"\033[1;33m[DEBUG] 发现 {len(part_files)} 个分卷数据文件，正在合并...\033[0m")
+            # 按编号排序确保加载顺序一致
+            try:
+                part_files.sort(key=lambda x: int(x.split('_part_')[-1].replace('.json', '')))
+            except:
+                part_files.sort()
+                
             for path in part_files:
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
@@ -1769,83 +1830,30 @@ class AShareAnalyzerGUI:
                             loaded_part = data
                     
                     self.comprehensive_stock_data.update(loaded_part)
-                    loaded_count += len(loaded_part)
-                    print(f"\033[1;32m[INFO] 已加载分卷: {os.path.basename(path)} ({len(loaded_part)} 条)\033[0m")
+                    print(f"\033[1;32m[INFO] 已合并分卷: {os.path.basename(path)} ({len(loaded_part)} 条)\033[0m")
                 except Exception as e:
                     print(f"\033[1;31m[ERROR] 加载分卷 {path} 失败: {e}\033[0m")
             
-            if loaded_count > 0:
-                # 同步到 self.comprehensive_data
+            # 建立 stock_file_index 映射
+            self._build_stock_file_index(part_files)
+
+        loaded_count = len(self.comprehensive_stock_data)
+        if loaded_count > 0:
+            self.comprehensive_data = self.comprehensive_stock_data
+            self.comprehensive_data_loaded = True
+            print(f"\033[1;32m[SUCCESS] 数据加载完成: 共 {loaded_count} 条股票数据\033[0m")
+            
+            # 同步评分缓存
+            for code, item in self.comprehensive_stock_data.items():
                 try:
-                    self.comprehensive_data = self.comprehensive_stock_data
+                    score = item.get('overall_score')
+                    if score is not None:
+                        self.scores_cache[code] = float(score)
                 except Exception:
-                    pass
-                # 建立 stock_file_index 映射
-                self._build_stock_file_index(part_files)
-                self.comprehensive_data_loaded = True
-                print(f"\033[1;32m[SUCCESS] 已加载所有分卷数据: 共 {loaded_count} 条\033[0m")
-                
-                # 同步评分缓存
-                for code, item in self.comprehensive_stock_data.items():
-                    try:
-                        score = item.get('overall_score')
-                        if score is not None:
-                            self.scores_cache[code] = float(score)
-                    except Exception:
-                        continue
-                return True
-
-        # 2. 如果没有分卷数据，尝试加载单文件 (兼容旧模式)
-        candidates = []
-        candidates.append(os.path.join(shared_data_dir, 'comprehensive_stock_data.json')) # 优先尝试标准路径
-        candidates.append(self.comprehensive_data_file)
-        if not os.path.isabs(self.comprehensive_data_file):
-            candidates.append(os.path.join(shared_data_dir, os.path.basename(self.comprehensive_data_file)))
-
-        for path in candidates:
-            print(f"\033[1;33m[DEBUG] 检查单体数据文件: {path}\033[0m")
-            try:
-                if os.path.exists(path):
-                    print(f"\033[1;32m[INFO] 发现数据文件: {path}\033[0m")
-                    with open(path, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-
-                    # 支持两种格式：直接为 dict 或者 {'data': {...}} 或者 {'stocks': {...}}
-                    if isinstance(data, dict):
-                        if 'data' in data and isinstance(data['data'], dict):
-                            loaded = data['data']
-                        elif 'stocks' in data and isinstance(data['stocks'], dict):
-                            loaded = data['stocks']
-                        else:
-                            loaded = data
-
-                        # 写入内存缓存
-                        self.comprehensive_stock_data = loaded
-                        # 为兼容现有推荐逻辑，同步到 self.comprehensive_data
-                        try:
-                            self.comprehensive_data = loaded
-                        except Exception:
-                            pass
-                        self.comprehensive_data_loaded = True
-                        count = len(self.comprehensive_stock_data)
-                        print(f"\033[1;32m[SUCCESS] 已加载完整数据到内存缓存: {count} 条 (来源: {path})\033[0m")
-                        # 同步部分评分缓存（如果数据包含 overall_score）
-                        for code, item in self.comprehensive_stock_data.items():
-                            try:
-                                score = item.get('overall_score')
-                                if score is not None:
-                                    self.scores_cache[code] = float(score)
-                            except Exception:
-                                continue
-                        return True
-                else:
-                    # print(f"\033[1;33m[DEBUG] 文件不存在: {path}\033[0m")
-                    pass
-            except Exception as e:
-                print(f"\033[1;31m[ERROR] 尝试加载 {path} 失败: {e}\033[0m")
-                continue
-
-        print("\033[1;31m[WARNING] 未找到完整数据文件以加载到内存缓存\033[0m")
+                    continue
+            return True
+        
+        print("\033[1;31m[WARN] 未能加载到任何有效数据\033[0m")
         return False
     
     def is_stock_type_match(self, code, stock_type):
@@ -2059,8 +2067,15 @@ class AShareAnalyzerGUI:
         """从股票文件索引中获取股票代码"""
         import json
         import os
+
+        # 优先使用共享数据目录
+        shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
+        index_file = os.path.join(shared_data_dir, 'stock_file_index.json')
         
-        index_file = os.path.join('data', 'stock_file_index.json')
+        if not os.path.exists(index_file):
+            # 回退到当前目录下的 data
+            index_file = os.path.join('data', 'stock_file_index.json')
+            
         if not os.path.exists(index_file):
             print(f"[WARN] 索引文件不存在: {index_file}")
             return []
@@ -2078,7 +2093,7 @@ class AShareAnalyzerGUI:
                 if self.is_stock_type_match(code, stock_type):
                     filtered_codes.append(code)
             
-            print(f"[INFO] 从索引文件中找到 {len(filtered_codes)} 只{stock_type}股票")
+            print(f"[INFO] 从索引文件 {index_file} 中找到 {len(filtered_codes)} 只{stock_type}股票")
             return sorted(filtered_codes)
             
         except Exception as e:
@@ -3282,362 +3297,6 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         except Exception as e:
             self.show_progress(f"ERROR: 启动批量评分失败: {e}")
             self._batch_running = False
-        
-        # 标记为正在运行 (在主线程设置，防止重复点击)
-        self._batch_running = True
-        
-        # 🚀 使用优化后的异步处理（基于MiniMax CodingPlan）
-        def optimized_batch_scoring_thread():
-            try:
-                # 转换股票类型
-                if stock_type == "60/00/68":
-                    filter_type = "60/00"  # 使用现有的60/00过滤逻辑（已包含688）
-                elif stock_type == "主板":
-                    filter_type = "主板"  # 主板类型（60/000/002，排除30创业板和688科创板）
-                else:
-                    filter_type = stock_type
-                
-                print(f"[DEBUG] 🚀 启动优化批量评分线程，类型: {filter_type}")
-                self.show_progress(f"START: 开始获取{stock_type}股票评分（优化模式）...")
-                
-                # 检查缓存状态，如果未加载则尝试加载
-                if not getattr(self, 'comprehensive_data_loaded', False):
-                    print(f"[DEBUG] 内存缓存未加载，尝试从磁盘加载...")
-                    self.load_comprehensive_stock_data()
-                
-                # 🎯 优化的股票代码获取策略
-                all_codes = self._get_optimized_stock_codes(filter_type)
-                total_stocks = len(all_codes)
-                
-                print(f"[INFO] 🎯 优化模式获取到 {total_stocks} 只{stock_type}股票")
-                self.show_progress(f"INFO: 优化模式获取到 {total_stocks} 只{stock_type}股票")
-                
-                # 🚀 使用异步批量处理（如果可用）
-                if self.async_processor and total_stocks > 0:
-                    print(f"[INFO] 🚀 启用MiniMax异步优化处理 {total_stocks} 只股票")
-                    self.show_progress(f"🚀 启用异步优化处理...")
-                    
-                    # 运行异步处理
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
-                    try:
-                        # 异步批量处理
-                        batch_size = min(200, max(100, total_stocks // 10))  # 动态批次大小，默认100
-                        results = loop.run_until_complete(
-                            self.async_processor.process_batch_async(all_codes, batch_size)
-                        )
-                        
-                        # 转换为系统格式并保存
-                        converted_results = self._convert_async_results_to_batch_scores(results)
-                        self._save_optimized_batch_scores(converted_results, stock_type)
-                        
-                        print(f"[SUCCESS] 🎉 异步优化完成: {len(converted_results)} 只股票")
-                        self.show_progress(f"🎉 异步优化完成: {len(converted_results)} 只股票")
-                        
-                        # 显示性能报告
-                        if hasattr(self.async_processor, 'cache'):
-                            cache_stats = self.async_processor.cache.get_stats()
-                            print(f"[PERFORMANCE] 缓存命中率: {cache_stats['hit_rate']}")
-                            self.show_progress(f"⚡ 缓存命中率: {cache_stats['hit_rate']}")
-                    
-                    except Exception as e:
-                        print(f"[ERROR] 异步处理失败，回退到标准模式: {e}")
-                        self.show_progress(f"异步处理异常，回退标准模式...")
-                        # 回退到原有处理逻辑
-                        self._fallback_to_standard_processing(all_codes, filter_type, start_from_index, total_stocks)
-                    finally:
-                        loop.close()
-                else:
-                    # 使用标准处理模式
-                    print(f"[INFO] 使用标准批量处理模式")
-                    self._fallback_to_standard_processing(all_codes, filter_type, start_from_index, total_stocks)
-                
-                if total_stocks == 0:
-                    self.show_progress(f"ERROR: 未找到{stock_type}类型的股票代码")
-                    return
-                
-                # 性能优化：提前过滤退市股票，避免后续无效计算
-                print(f"[OPTIMIZE] 开始预过滤退市股票，提升计算效率...")
-                active_codes, filtered_count = self._prefilter_delisted_stocks(all_codes)
-                
-                if filtered_count > 0:
-                    print(f"[OPTIMIZE] 已跳过 {filtered_count} 只退市股票，节省计算时间")
-                    self.show_progress(f"OPTIMIZE: 已跳过 {filtered_count} 只退市股票，优化计算效率")
-                
-                # 更新处理的股票列表
-                all_codes = active_codes
-                total_stocks = len(all_codes)
-                
-                if total_stocks == 0:
-                    self.show_progress(f"NOTICE: 过滤退市股票后，没有有效的{stock_type}股票需要评分")
-                    return
-                    
-                print(f"[OPTIMIZE] 过滤后剩余 {total_stocks} 只有效股票，开始评分...")
-                
-                # 限制最大处理数量，防止内存溢出
-                max_process = min(total_stocks, 5000)
-                if total_stocks > max_process:
-                    self.show_progress(f"WARNING: 股票数量过多，本次处理前{max_process}只")
-                    all_codes = all_codes[:max_process]
-                    total_stocks = max_process
-                
-                self.show_progress(f"DATA: 准备分析 {total_stocks} 只{stock_type}股票...")
-                
-                # 检测评分模式
-                use_llm_mode = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openrouter", "gemini"]
-                if use_llm_mode:
-                    print(f"\033[1;35m[评分模式] AI模式 - 使用{self.llm_model}大模型进行智能评分\033[0m")
-                    self.show_progress(f"MODE: AI模式 - 使用{self.llm_model}进行评分（较慢但更准确）")
-                else:
-                    print(f"\033[1;36m[评分模式] ⚡ 快速模式 - 使用本地规则引擎评分\033[0m")
-                    self.show_progress(f"MODE: ⚡ 快速模式 - 使用本地规则引擎强制重新计算")
-                
-                # 初始化批量评分进度条
-                def init_batch_progress():
-                    if hasattr(self, 'batch_scoring_status_label'):
-                        self.batch_scoring_status_label.config(text="准备中")
-                    if hasattr(self, 'batch_scoring_detail_label'):
-                        self.batch_scoring_detail_label.config(text=f"准备分析 {total_stocks} 只{stock_type}股票...")
-                    if hasattr(self, 'batch_scoring_progress'):
-                        self.batch_scoring_progress.config(mode='determinate', maximum=100, value=0)
-                self.root.after(0, init_batch_progress)
-                
-                success_count = 0
-                failed_count = 0
-                cache_hit_count = 0  # 缓存命中计数
-                recalculated_count = 0  # 重新计算计数
-                batch_save_interval = 20
-                start_time = time.time()  # 记录开始时间用于计算 ETA
-                
-                # 记录未命中缓存的股票
-                self._current_batch_cache_miss = []
-                
-                for i, code in enumerate(all_codes):
-                    try:
-                        # 检查是否需要停止
-                        if hasattr(self, '_stop_batch') and self._stop_batch:
-                            self.show_progress("⏹️ 用户停止了批量分析")
-                            break
-                        
-                        # 更新进度
-                        progress = (i + 1) / total_stocks * 100
-                        
-                        # 计算 ETA
-                        elapsed = time.time() - start_time
-                        if i > 0:
-                            avg_time_per_stock = elapsed / (i + 1)
-                            remaining = total_stocks - (i + 1)
-                            eta_seconds = remaining * avg_time_per_stock
-                            eta_str = f"剩余 {int(eta_seconds//60)}分{int(eta_seconds%60)}秒"
-                        else:
-                            eta_str = "计算中..."
-                        
-                        # 更新批量评分专用进度条和状态标签
-                        def update_batch_progress(msg, detail_msg, val):
-                            if hasattr(self, 'batch_scoring_status_label'):
-                                self.batch_scoring_status_label.config(text=msg)
-                            if hasattr(self, 'batch_scoring_detail_label'):
-                                self.batch_scoring_detail_label.config(text=detail_msg)
-                            if hasattr(self, 'batch_scoring_progress'):
-                                self.batch_scoring_progress['value'] = val
-                            self.root.update_idletasks()
-                            
-                        self.root.after(0, lambda p=progress, c=code, idx=i, t=total_stocks, eta=eta_str, succ=success_count: 
-                                      update_batch_progress(f"评分中", f"{c} ({idx+1}/{t}) {p:.1f}% | 成功:{succ} | {eta}", p))
-                        
-                        # 获取股票分析和评分
-                        try:
-                            comprehensive_data = self.get_comprehensive_stock_data_for_batch(code)
-                            
-                            if comprehensive_data:
-                                self.comprehensive_data[code] = comprehensive_data
-                                
-                                # 【关键逻辑】批量评分强制重新计算，不使用缓存评分
-                                # 1. 如果选择了LLM模型，使用AI评分
-                                # 2. 否则使用本地规则引擎评分
-                                use_llm = hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openrouter", "gemini"]
-                                
-                                if use_llm:
-                                    # AI模式：使用LLM进行智能评分
-                                    print(f"[AI-MODE] 使用{self.llm_model}评分: {code}")
-                                    # 更新进度显示AI调用状态
-                                    def update_ai_status(c=code, idx=i, t=total_stocks):
-                                        if hasattr(self, 'batch_scoring_detail_label'):
-                                            self.batch_scoring_detail_label.config(text=f"{self.llm_model.upper()}分析: {c} ({idx+1}/{t})")
-                                    self.root.after(0, update_ai_status)
-                                else:
-                                    # 快速模式：使用本地规则引擎评分
-                                    print(f"[LOCAL-MODE] 本地规则引擎评分: {code}")
-                                
-                                # 强制重新计算评分（不使用缓存）
-                                score = self.get_stock_score_for_batch(code)
-                                if score is not None:
-                                    comprehensive_data['overall_score'] = score
-                                    recalculated_count += 1
-                                    
-                                    # 显示评分结果
-                                    if use_llm:
-                                        print(f"[AI完成] {code} 评分: {score:.1f}/10")
-                                        def update_score_result(c=code, s=score, idx=i, t=total_stocks):
-                                            if hasattr(self, 'batch_scoring_detail_label'):
-                                                self.batch_scoring_detail_label.config(text=f"{c} 评分: {s:.1f}/10 ({idx+1}/{t})")
-                                        self.root.after(0, update_score_result)
-                                else:
-                                    print(f"[ERROR] 评分失败: {code}")
-                                    failed_count += 1
-                                    continue
-                                
-                                stock_name = comprehensive_data.get('name', self.stock_info.get(code, {}).get('name', '未知'))
-                                industry = comprehensive_data.get('fund_data', {}).get('industry', '未知')
-                                
-                                # 提取三个时间段的评分
-                                short_score = comprehensive_data.get('short_term', {}).get('score', 0)
-                                medium_score = comprehensive_data.get('medium_term', {}).get('score', 0) 
-                                long_score = comprehensive_data.get('long_term', {}).get('score', 0)
-
-                                # 以原始加权分为基础，计算用于显示的归一化分数（与单票计算一致）
-                                weighted = comprehensive_data.get('overall_score', 0)
-                                try:
-                                    normalized = max(1.0, min(10.0, 5.0 + float(weighted) * 0.5))
-                                except Exception:
-                                    normalized = float(weighted or 5.0)
-
-                                # 📌 获取筹码健康度数据（如果可用）
-                                chip_score = None
-                                chip_level = None
-                                try:
-                                    # 调试日志
-                                    if i == 0:  # 只在第一只股票时输出一次
-                                        print(f"[CHIP-DEBUG] 筹码分析器状态: chip_analyzer={self.chip_analyzer is not None}, use_choice={self.use_choice_data.get()}")
-                                    
-                                    if self.chip_analyzer and not self.use_choice_data.get():
-                                        chip_result = self.chip_analyzer.analyze_stock(code)
-                                        if chip_result and not chip_result.get('error'):
-                                            chip_score = chip_result.get('health_score', 0)
-                                            chip_level = chip_result.get('health_level', '未知')
-                                            print(f"[CHIP] {code} 筹码健康度: {chip_score:.1f}/10 ({chip_level})")
-                                    else:
-                                        if i == 0:
-                                            if not self.chip_analyzer:
-                                                print("[CHIP-DEBUG] 跳过筹码分析: 筹码分析器未初始化")
-                                            elif self.use_choice_data.get():
-                                                print("[CHIP-DEBUG] 跳过筹码分析: 使用了Choice数据源")
-                                except Exception as chip_err:
-                                    if i == 0:
-                                        print(f"[CHIP-DEBUG] 筹码分析异常: {chip_err}")
-
-                                # 存储包含三个时间段评分的批量评分结果，保留原始加权和归一化分
-                                self.batch_scores[code] = {
-                                    'name': stock_name,
-                                    'overall_score': float(weighted),
-                                    'score': float(normalized),  # 展示用的1-10分制
-                                    'short_term_score': float(short_score),    # 短期评分
-                                    'medium_term_score': float(medium_score),  # 中期评分 
-                                    'long_term_score': float(long_score),      # 长期评分
-                                    'industry': industry,
-                                    'timestamp': datetime.now().strftime('%H:%M:%S'),
-                                    'chip_score': chip_score,  # 筹码健康度评分
-                                    'chip_level': chip_level   # 筹码健康度等级
-                                }
-                                success_count += 1
-                            else:
-                                failed_count += 1
-                                
-                        except Exception as score_error:
-                            print(f"评分失败 {code}: {score_error}")
-                            failed_count += 1
-                        
-                        # 定期保存和内存清理
-                        if (i + 1) % batch_save_interval == 0:
-                            try:
-                                self.save_batch_scores()
-                                self.save_comprehensive_data()
-                                gc.collect()
-                                # 仅更新文字，不重置进度条
-                                self.root.after(0, lambda idx=i, t=total_stocks: self.progress_msg_var.set(f"💾 已保存进度 ({idx+1}/{t})"))
-                            except Exception as save_error:
-                                print(f"保存进度失败: {save_error}")
-                            
-                        time.sleep(0.2)
-                        
-                    except Exception as e:
-                        print(f"处理股票 {code} 时发生异常: {e}")
-                        failed_count += 1
-                        continue
-                
-                # 最终保存
-                try:
-                    self.save_batch_scores()
-                    self.save_comprehensive_data()
-                    gc.collect()
-                except Exception as final_save_error:
-                    print(f"最终保存失败: {final_save_error}")
-                
-                # 更新批量评分进度条完成状态
-                def finish_batch_progress():
-                    if hasattr(self, 'batch_scoring_status_label'):
-                        self.batch_scoring_status_label.config(text="完成")
-                    if hasattr(self, 'batch_scoring_detail_label'):
-                        self.batch_scoring_detail_label.config(text=f"{stock_type}评分完成！成功: {success_count}, 失败: {failed_count}")
-                    if hasattr(self, 'batch_scoring_progress'):
-                        self.batch_scoring_progress['value'] = 100
-                self.root.after(0, finish_batch_progress)
-                
-                # 显示完成信息和统计
-                print(f"\n{'='*80}")
-                print(f"{stock_type}评分统计")
-                print(f"{'='*80}")
-                print(f"成功: {success_count} 只")
-                print(f"失败: {failed_count} 只")
-                print(f"全部重新计算: {recalculated_count} 只")
-                if use_llm_mode:
-                    print(f"AI模式: 使用{self.llm_model}大模型评分")
-                else:
-                    print(f"快速模式: 使用本地规则引擎评分")
-                print(f"{'='*80}\n")
-                
-                self.show_progress(f"SUCCESS: {stock_type}评分完成！成功:{success_count} 失败:{failed_count} 缓存:{cache_hit_count} 计算:{recalculated_count}")
-                
-                # 显示缓存未命中统计
-                if hasattr(self, '_current_batch_cache_miss') and self._current_batch_cache_miss:
-                    self.show_cache_miss_summary(self._current_batch_cache_miss, stock_type)
-                
-                # 显示失败汇总（数据获取失败 + 评分失败）
-                self.show_failed_real_data_summary()  # 显示网络问题导致的数据获取失败
-                self.show_failed_scoring_summary()     # 显示数据不完整导致的评分失败
-                
-                # 更新排行榜
-                try:
-                    self.update_ranking_display()
-                except Exception as ranking_error:
-                    print(f"更新排行榜失败: {ranking_error}")
-                
-                # 3秒后清除进度信息
-                threading.Timer(3.0, lambda: self.show_progress("")).start()
-                
-            except Exception as e:
-                error_msg = f"ERROR: {stock_type}评分异常: {str(e)}"
-                self.show_progress(error_msg)
-                print(error_msg)
-                import traceback
-                traceback.print_exc()
-            finally:
-                self._batch_running = False
-                if hasattr(self, '_stop_batch'):
-                    delattr(self, '_stop_batch')
-                if hasattr(self, '_current_batch_cache_miss'):
-                    delattr(self, '_current_batch_cache_miss')
-        
-        # 启动后台线程
-        try:
-            thread = threading.Thread(target=batch_scoring_thread)
-            thread.daemon = True
-            thread.start()
-            print("[DEBUG] 批量评分线程已启动")
-        except Exception as e:
-            self.show_progress(f"ERROR: 启动{stock_type}评分失败: {e}")
-            self._batch_running = False
     
     def get_stock_score_for_batch(self, stock_code, use_cache=True):
         """为批量评分获取单只股票的评分
@@ -3800,25 +3459,28 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     def _check_stock_delisting_status(self, stock_code):
         """检查股票是否已退市"""
         try:
-            # 使用现有的退市检测系统
-            if hasattr(self, 'delisting_protection_enabled') and self.delisting_protection_enabled:
-                from stock_status_checker import StockStatusChecker
-                checker = StockStatusChecker()
-                status = checker.check_single_stock(stock_code)
-                
-                if status['status'] in ['delisted', 'invalid']:
-                    reason = f"{status['status']}"
-                    if status.get('delisting_date'):
-                        reason += f" (退市日期: {status['delisting_date']})"
-                    return {
-                        'is_delisted': True,
-                        'status': status['status'], 
-                        'reason': reason,
-                        'delisting_date': status.get('delisting_date')
-                    }
+            # 🔴 改进：使用单例 StockStatusChecker 进行准确检测
+            try:
+                checker = self._get_status_checker()
+                if checker:
+                    status = checker.check_single_stock(stock_code)
+                    
+                    if status['status'] in ['delisted', 'invalid']:
+                        return {
+                            'is_delisted': True,
+                            'status': status['status'], 
+                            'reason': f"状态检测: {status['status']}"
+                        }
+                    elif status['status'] in ['active', 'st', 'suspended']:
+                        return {
+                            'is_delisted': False,
+                            'status': status['status'],
+                            'reason': None
+                        }
+            except Exception as e:
+                print(f"[DEBUG] StockStatusChecker 检查失败: {e}")
             
-            # 如果退市保护未启用，进行简单检查
-            # 检查是否为明显的无效代码
+            # 备选方案：检查是否为明显的无效代码
             if stock_code.startswith(('999', '888', '777')):
                 return {
                     'is_delisted': True,
@@ -3846,12 +3508,11 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         filtered_count = 0
         
         try:
-            # 如果启用了退市保护，使用批量检测
-            if hasattr(self, 'delisting_protection_enabled') and self.delisting_protection_enabled:
-                try:
-                    from stock_status_checker import StockStatusChecker
-                    checker = StockStatusChecker()
-                    
+            # 🔴 改进：使用单例 StockStatusChecker 进行批量检测
+            try:
+                checker = self._get_status_checker()
+                
+                if checker:
                     # 批量检测股票状态（更高效）
                     print(f"[OPTIMIZE] 批量检测 {len(stock_codes)} 只股票的退市状态...")
                     batch_results = checker.batch_check_stocks(stock_codes)
@@ -3866,9 +3527,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         active_codes.append(code)
                     
                     return active_codes, filtered_count
-                    
-                except Exception as e:
-                    print(f"[WARN] 批量退市检测失败，使用简单过滤: {e}")
+                
+            except Exception as e:
+                print(f"[WARN] 批量退市检测失败，使用简单过滤: {e}")
             
             # 简单过滤：跳过明显无效的代码
             for code in stock_codes:
@@ -5227,17 +4888,17 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                              command=self._on_choice_data_toggle)
         choice_data_checkbox.pack(side="left", padx=5)
         
-        # 漫长分析按钮（数据收集 + 主板评分）
-        long_analysis_btn = tk.Button(data_score_frame, 
-                                     text="漫长分析", 
+        # 数据检查按钮（检查缺失数据）
+        data_check_btn = tk.Button(data_score_frame, 
+                                     text="数据检查", 
                                      font=("微软雅黑", 11),
                                      bg="#2c3e50", 
                                      fg="white",
                                      activebackground="#34495e",
-                                     command=self.start_long_analysis,
+                                     command=self.start_data_check,
                                      cursor="hand2",
                                      width=12)
-        long_analysis_btn.pack(side="left", padx=5)
+        data_check_btn.pack(side="left", padx=5)
         
         # 获取Choice数据按钮
         get_choice_btn = tk.Button(data_score_frame, 
@@ -5626,7 +5287,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         """获取数据收集器实例"""
         try:
             from comprehensive_data_collector import ComprehensiveDataCollector
-            return ComprehensiveDataCollector()
+
+            # 传入GUI的Choice勾选状态
+            use_choice = self.use_choice_data.get() if hasattr(self, 'use_choice_data') else None
+            return ComprehensiveDataCollector(use_choice=use_choice)
         except ImportError:
             self.show_progress("ERROR: 未找到综合数据收集器模块")
             return None
@@ -5929,7 +5593,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         try:
             import json
             import os
-            
+
             # 使用共享数据目录
             shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
             choice_file = os.path.join(shared_data_dir, "comprehensive_stock_data.json")
@@ -6771,54 +6435,195 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             traceback.print_exc()
             self.show_progress(traceback.format_exc())
     
-    def start_long_analysis(self):
-        """开始漫长分析：先获取全部数据，然后获取主板评分"""
+    def start_data_check(self):
+        """开始数据检查：检查本地缓存数据是否完整"""
         try:
-            # 显示开始信息
-            self.show_progress("🚀 开始漫长分析：数据收集 + 主板评分")
-            
-            # 启动漫长分析线程
+            self.show_progress("🔍 开始检查本地数据完整性...")
             import threading
-            analysis_thread = threading.Thread(target=self._long_analysis_worker, daemon=True)
-            analysis_thread.start()
-            
+            check_thread = threading.Thread(target=self._data_check_worker, daemon=True)
+            check_thread.start()
         except Exception as e:
-            self.show_progress(f"ERROR: 启动漫长分析失败: {e}")
-            
-    def _long_analysis_worker(self):
-        """漫长分析工作线程"""
+            self.show_progress(f"ERROR: 启动数据检查失败: {e}")
+
+    def _data_check_worker(self):
+        """数据检查工作线程"""
         try:
-            # 第一步：获取全部数据
-            self.show_progress("第一步：开始获取全部数据...")
+            # 确保数据已加载
+            if not getattr(self, 'comprehensive_data_loaded', False):
+                self.show_progress("📂 正在加载本地缓存数据...")
+                self.load_comprehensive_stock_data()
             
-            # 调用现有的获取全部数据功能
-            self.root.after(0, self.start_comprehensive_data_collection)
+            # 获取主板股票列表进行对比 - 使用与评分按钮完全一致的逻辑
+            self.show_progress("📡 正在获取主板股票列表...")
+            all_codes = self._get_optimized_stock_codes("主板")
             
-            # 等待数据收集完成
-            import time
-            while hasattr(self, 'data_collection_active') and self.data_collection_active:
-                time.sleep(1)
+            if not all_codes:
+                self.show_progress("❌ 无法获取股票列表")
+                return
+
+            # 应用与评分按钮一致的过滤逻辑 (ST, 创业板, 科创板, 退市)
+            self.show_progress("🔍 正在应用过滤条件 (ST/创业板/科创板/退市)...")
             
-            # 额外等待一段时间确保数据收集完全完成
-            time.sleep(3)
+            # 🔴 核心改进：使用单例 StockStatusChecker 进行统一过滤
+            try:
+                checker = self._get_status_checker()
+                if checker:
+                    exclude_st = self.filter_st_var.get() if hasattr(self, 'filter_st_var') else True
+                    # 过滤掉退市、ST(如果勾选)和停牌
+                    all_codes = checker.filter_codes(all_codes, exclude_st=exclude_st, exclude_suspended=True)
+                    print(f"[INFO] 数据检查过滤后剩余 {len(all_codes)} 只股票")
+            except Exception as e:
+                print(f"[WARN] 数据检查使用 StockStatusChecker 过滤失败: {e}")
+
+            filtered_codes = []
+            for code in all_codes:
+                # 排除创业板/科创板 (主板模式下)
+                if code.startswith('300') or code.startswith('688'):
+                    continue
+                
+                filtered_codes.append(code)
             
-            # 第二步：获取主板评分
-            data_source = "Choice" if self.use_choice_data.get() else "常规"
-            self.show_progress(f"🎯 第二步：开始获取主板评分（{data_source}数据源）...")
+            all_mainboard_codes = filtered_codes
+            total_to_check = len(all_mainboard_codes)
             
-            # 调用现有的获取主板评分功能
-            self.root.after(0, lambda: self.start_batch_scoring_by_type("主板"))
+            missing_kline = []
+            missing_financial = []
+            total_checked = 0
             
-            # 等待评分完成
-            time.sleep(5)  # 给评分一些时间启动
+            self.show_progress(f"📊 正在检查 {total_to_check} 只符合条件的股票数据...")
             
-            # 显示完成信息
-            self.show_progress("漫长分析完成！数据收集和主板评分均已启动")
+            for code in all_mainboard_codes:
+                total_checked += 1
+                if not hasattr(self, 'comprehensive_stock_data') or code not in self.comprehensive_stock_data:
+                    missing_kline.append(code)
+                    missing_financial.append(code)
+                    continue
+                
+                stock_data = self.comprehensive_stock_data[code]
+                
+                # 严格检查K线数据 (筹码分析和技术指标都需要它)
+                has_kline = False
+                kline_obj = stock_data.get('kline_data')
+                if isinstance(kline_obj, dict):
+                    # 结构1: {'daily': [...], ...}
+                    daily_data = kline_obj.get('daily', [])
+                    if isinstance(daily_data, list) and len(daily_data) > 0:
+                        has_kline = True
+                elif isinstance(kline_obj, list) and len(kline_obj) > 0:
+                    # 结构2: 直接是列表
+                    has_kline = True
+                
+                if not has_kline:
+                    missing_kline.append(code)
+                
+                # 严格检查财务数据
+                has_financial = False
+                fin_obj = stock_data.get('financial_data') or stock_data.get('fund_data')
+                if isinstance(fin_obj, dict) and len(fin_obj) > 5: # 简单判断是否有实际内容
+                    # 排除只有 code 或 source 的情况
+                    if any(key in fin_obj for key in ['pe_ratio', 'pb_ratio', 'roe', 'net_profit']):
+                        has_financial = True
+                
+                if not has_financial:
+                    missing_financial.append(code)
+
+            # 合并所有缺失数据的股票（去重）
+            all_missing = list(set(missing_kline + missing_financial))
             
+            result_msg = (
+                f"📊 数据检查完成！\n\n"
+                f"符合评分条件的股票总数: {total_to_check}\n"
+                f"缺失K线数据: {len(missing_kline)} 只 (影响筹码分析和技术指标)\n"
+                f"缺失财务数据: {len(missing_financial)} 只 (影响基本面评分)\n"
+                f"总计不完整股票: {len(all_missing)} 只\n\n"
+            )
+            
+            if not all_missing:
+                self.root.after(0, lambda: messagebox.showinfo("数据检查", result_msg + "✅ 所有数据均已完整，可以进行准确评分！"))
+                self.show_progress("✅ 数据检查完成：所有数据完整")
+            else:
+                result_msg += "注意：缺失K线会导致「筹码健康度」无法计算。\n是否立即获取这些缺失的数据？"
+                
+                def ask_to_fetch():
+                    if messagebox.askyesno("数据检查", result_msg):
+                        self.start_specific_data_collection(all_missing)
+                
+                self.root.after(0, ask_to_fetch)
+                self.show_progress(f"⚠️ 数据检查完成：发现 {len(all_missing)} 只股票数据不完整")
+
         except Exception as e:
-            self.show_progress(f"ERROR: 漫长分析失败: {e}")
+            self.show_progress(f"ERROR: 数据检查失败: {e}")
             import traceback
             traceback.print_exc()
+
+    def start_specific_data_collection(self, codes):
+        """针对特定股票列表进行数据收集"""
+        if self.data_collection_active:
+            messagebox.showinfo("提示", "数据收集正在进行中，请等待完成")
+            return
+            
+        try:
+            self.data_collection_active = True
+            self.data_collection_status_label.config(text=f"正在补充 {len(codes)} 只股票的数据...", fg="#e67e22")
+            
+            import threading
+            self.data_collection_thread = threading.Thread(target=self._run_specific_data_collection, args=(codes,))
+            self.data_collection_thread.daemon = True
+            self.data_collection_thread.start()
+            
+        except Exception as e:
+            print(f"启动特定数据收集失败: {e}")
+            self.data_collection_active = False
+            self.data_collection_status_label.config(text="启动失败", fg="#e74c3c")
+
+    def _run_specific_data_collection(self, codes):
+        """后台运行特定股票的数据收集"""
+        try:
+            from comprehensive_data_collector import ComprehensiveDataCollector
+            collector = ComprehensiveDataCollector(use_choice=self.use_choice_data.get())
+            
+            total_stocks = len(codes)
+            batch_size = 15
+            needed_batches = (total_stocks + batch_size - 1) // batch_size
+            
+            for batch_num in range(needed_batches):
+                batch_start = batch_num * batch_size
+                batch_end = min(batch_start + batch_size, total_stocks)
+                batch_codes = codes[batch_start:batch_end]
+                
+                progress_pct = (batch_end / total_stocks) * 100
+                
+                # 更新进度
+                msg = f"补充采集中 ({batch_end}/{total_stocks})"
+                detail = f"第{batch_num+1}/{needed_batches}批 - {', '.join(batch_codes[:3])}..."
+                self.root.after(0, lambda m=msg, p=progress_pct, d=detail: self.data_collection_status_label.config(text=m))
+                self.root.after(0, lambda p=progress_pct: self.data_collection_progress.config(value=p))
+                self.root.after(0, lambda d=detail: self.data_collection_detail_label.config(text=d))
+                
+                try:
+                    batch_data = collector.collect_comprehensive_data(
+                        batch_codes, 
+                        batch_size,
+                        exclude_st=self.filter_st_var.get() if hasattr(self, 'filter_st_var') else True
+                    )
+                    if batch_data:
+                        collector.save_data(batch_data)
+                except Exception as e:
+                    print(f"批次 {batch_num+1} 采集失败: {e}")
+                
+                import time
+                time.sleep(1)
+            
+            self.root.after(0, lambda: self.data_collection_status_label.config(text="补充采集完成", fg="#27ae60"))
+            self.root.after(0, lambda: messagebox.showinfo("数据收集", f"成功完成 {total_stocks} 只股票的数据补充！"))
+            
+            # 重新加载数据
+            self.load_comprehensive_stock_data()
+            
+        except Exception as e:
+            print(f"特定数据收集异常: {e}")
+        finally:
+            self.data_collection_active = False
     
     def start_quick_scoring(self):
         """开始快速评分：先筛选股票，然后使用完整评分逻辑（与常规评分完全相同）"""
@@ -17759,10 +17564,12 @@ WARNING: 重要声明:
                 try:
                     # 导入Choice相关模块
                     print(f"[DEBUG] About to import TradingShared.api.get_choice_data")
-                    from TradingShared.api.get_choice_data import get_kline_data_css
+                    from TradingShared.api.get_choice_data import \
+                        get_kline_data_css
                     print(f"[DEBUG] Import successful")
-                    from datetime import datetime, timedelta
                     import json
+                    from datetime import datetime, timedelta
+
                     import pandas as pd
                     
                 except ImportError as import_error:
@@ -17770,9 +17577,9 @@ WARNING: 重要声明:
                     print(f"[DEBUG] Attempting to fix path...")
                     # 尝试重新设置路径
                     try:
+                        import importlib.util
                         import os
                         import sys
-                        import importlib.util
                         
                         script_dir = os.path.dirname(os.path.abspath(__file__))
                         tradingshared_root = os.path.join(os.path.dirname(script_dir), 'TradingShared')
@@ -17799,8 +17606,9 @@ WARNING: 重要声明:
                         get_kline_data_css = get_choice_data_module.get_kline_data_css
                         print(f"[DEBUG] Direct importlib import successful")
                         
-                        from datetime import datetime, timedelta
                         import json
+                        from datetime import datetime, timedelta
+
                         import pandas as pd
                     except Exception as retry_error:
                         print(f"[DEBUG] Direct importlib import also failed: {retry_error}")
@@ -17935,16 +17743,18 @@ WARNING: 重要声明:
                 
                 # 导入数据收集器
                 try:
-                    from delisting_protection import enable_delisting_protection
+                    from delisting_protection import \
+                        enable_delisting_protection
                     delisting_protection_available = True
                 except ImportError:
                     print("[WARN] delisting_protection 模块未找到，跳过退市保护功能")
                     delisting_protection_available = False
 
-                from comprehensive_data_collector import ComprehensiveDataCollector
+                from comprehensive_data_collector import \
+                    ComprehensiveDataCollector
 
-                # 创建收集器实例
-                collector = ComprehensiveDataCollector()
+                # 创建收集器实例，明确禁用Choice（因为在else分支中）
+                collector = ComprehensiveDataCollector(use_choice=False)
                 
                 # 启用退市股票保护功能（如果可用）
                 if delisting_protection_available:
@@ -17958,7 +17768,8 @@ WARNING: 重要声明:
                     batch_size=20,
                     total_batches=None,
                     stock_type="主板",
-                    progress_callback=update_status
+                    progress_callback=update_status,
+                    exclude_st=self.filter_st_var.get() if hasattr(self, 'filter_st_var') else True
                 )
             
             # 更新完成
@@ -18108,8 +17919,8 @@ WARNING: 重要声明:
 
             from comprehensive_data_collector import ComprehensiveDataCollector
 
-            # 创建收集器实例
-            collector = ComprehensiveDataCollector()
+            # 创建收集器实例，传入GUI的Choice勾选状态
+            collector = ComprehensiveDataCollector(use_choice=self.use_choice_data.get())
             
             # 启用退市股票保护功能（如果可用）
             if delisting_protection_available:
@@ -18220,7 +18031,11 @@ WARNING: 重要声明:
                     
                     try:
                         # 采集当前批次的数据
-                        batch_data = collector.collect_comprehensive_data(batch_codes, batch_size)
+                        batch_data = collector.collect_comprehensive_data(
+                            batch_codes, 
+                            batch_size,
+                            exclude_st=self.filter_st_var.get() if hasattr(self, 'filter_st_var') else True
+                        )
                         
                         # 保存数据
                         if batch_data:
@@ -18630,7 +18445,7 @@ WARNING: 重要声明:
                     f"⚠️ 筹码健康度警告\n\n"
                     f"有 {missing_count} 只股票因缺少K线缓存数据，未能计算筹码健康度。\n\n"
                     f"建议：\n"
-                    f"1. 点击「更新K线数据」按钮更新本地K线数据\n"
+                    f"1. 点击「数据检查」按钮检查并补全缺失的K线数据\n"
                     f"2. 然后重新运行批量评分\n\n"
                     f"注意：批量评分仅使用本地缓存数据，不会从网络实时获取。"
                 )
@@ -18684,8 +18499,16 @@ WARNING: 重要声明:
             # 1. 优先从缓存获取
             if hasattr(self, 'comprehensive_stock_data') and code in self.comprehensive_stock_data:
                 cached = self.comprehensive_stock_data[code]
-                tech_data = cached.get('tech_data')
-                fund_data = cached.get('fund_data')
+                # 兼容新旧两种缓存键名
+                tech_data = cached.get('tech_data') or cached.get('technical_indicators')
+                fund_data = cached.get('fund_data') or cached.get('financial_data')
+                
+                # 如果还是没有，尝试从 basic_info 中提取（有些旧数据可能混在一起）
+                if not tech_data and 'basic_info' in cached:
+                    bi = cached['basic_info']
+                    if 'rsi' in bi or 'macd' in bi:
+                        tech_data = bi
+                
                 if tech_data and fund_data:
                     print(f"[CACHE-HIT] {code} 使用缓存数据（技术+基本面）")
                 elif tech_data:
@@ -18702,7 +18525,9 @@ WARNING: 重要声明:
                     if not fund_data:
                         fund_data = self._get_choice_fundamental_data_realtime(code)
                 else:
-                    print(f"[REALTIME-CACHE] {code} 缓存缺失，从本地数据源实时获取...")
+                    # 批量评分模式下，如果缓存没有，通常意味着数据收集器没跑完
+                    # 我们尝试从本地其他缓存获取，但不建议在这里进行耗时的网络请求
+                    print(f"[REALTIME-CACHE] {code} 缓存缺失，尝试从本地数据源获取...")
                     if not tech_data:
                         tech_data = self._get_cached_technical_data(code) or self.get_real_technical_indicators(code)
                     if not fund_data:
@@ -18875,15 +18700,25 @@ WARNING: 重要声明:
                     technical_indicators = cached_data.get('technical_indicators', {})
                     industry_concept = cached_data.get('industry_concept', {})
                     
-                    # 支持两种数据结构
+                    # 兼容性处理：如果 basic_info 为空，尝试直接从 cached_data 获取
+                    if not basic_info and 'name' in cached_data:
+                        basic_info = cached_data
+                    
                     if basic_info:
                         # 结构1：有完整的 basic_info 字段
                         result = {
                             'name': basic_info.get('name', ''),
                             'industry': industry_concept.get('industry', basic_info.get('industry', '')),
                             'concept': ', '.join(industry_concept.get('concepts', [])) if industry_concept.get('concepts') else '',
-                            'price': technical_indicators.get('current_price', 0)
+                            'price': technical_indicators.get('current_price', basic_info.get('current_price', 0))
                         }
+                        
+                        # 确保 name 不为空
+                        if not result['name'] and 'name' in cached_data:
+                            result['name'] = cached_data['name']
+                            
+                        if result['name']:
+                            return result
                     else:
                         # 结构2：扁平化结构，直接有 name 字段
                         result = {
@@ -18892,8 +18727,7 @@ WARNING: 重要声明:
                             'concept': cached_data.get('concept', ''),
                             'price': technical_indicators.get('current_price', cached_data.get('price', 0))
                         }
-                    
-                    return result
+                        return result
             
             # 2. 尝试从batch_scores获取（兼容旧格式）
             if hasattr(self, 'batch_scores') and self.batch_scores and code in self.batch_scores:
@@ -19123,8 +18957,15 @@ WARNING: 重要声明:
         try:
             import json
             import os
+
+            # 优先使用共享数据目录
+            shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
+            index_file = os.path.join(shared_data_dir, 'stock_file_index.json')
             
-            index_file = 'data/stock_file_index.json'
+            if not os.path.exists(index_file):
+                # 回退到当前目录下的 data
+                index_file = 'data/stock_file_index.json'
+            
             if not os.path.exists(index_file):
                 print(f"[WARN] 索引文件不存在: {index_file}")
                 self.stock_file_index = {}

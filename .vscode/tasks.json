@@ -38,6 +38,9 @@
             "args": [
                 "a_share_gui_compatible.py"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/TradingAgent"
+            },
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -53,8 +56,11 @@
             "command": "python",
             "args": [
                 "-c",
-                "from minimax_integration import MiniMaxCodingPlan; client = MiniMaxCodingPlan(); print('📊 启动代码质量分析...'); print('请在MiniMax Agent中输入: 分析项目代码质量并提供改进建议')"
+                "import sys; sys.path.append('.'); from minimax_integration import MiniMaxCodingPlan; client = MiniMaxCodingPlan(); print('📊 启动代码质量分析...'); print('请在MiniMax Agent中输入: 分析项目代码质量并提供改进建议')"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/TradingAgent"
+            },
             "group": "test",
             "presentation": {
                 "echo": true,
@@ -162,6 +168,9 @@
                 "-c",
                 "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('📊 4396只股票数据处理优化'); print('=' * 50); print(ext.generate_trading_data_optimization_prompt())"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/TradingAgent"
+            },
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -180,6 +189,9 @@
                 "-c",
                 "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('🚨 智能预警系统设计'); print('=' * 50); print(ext.generate_smart_alert_system_prompt())"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/TradingAgent"
+            },
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -198,6 +210,9 @@
                 "-c",
                 "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('📈 技术指标算法优化'); print('=' * 50); print(ext.generate_technical_indicators_optimization_prompt())"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/TradingAgent"
+            },
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -216,6 +231,9 @@
                 "-c",
                 "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('🛡️ 风险控制系统优化'); print('=' * 50); print(ext.generate_risk_management_optimization_prompt())"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/TradingAgent"
+            },
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -234,6 +252,9 @@
                 "-c",
                 "from minimax_feature_extensions import MiniMaxFeatureExtensions; ext = MiniMaxFeatureExtensions(); print('🏗️ 微服务架构现代化'); print('=' * 50); print(ext.generate_microservices_architecture_prompt())"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/TradingAgent"
+            },
             "group": "build",
             "presentation": {
                 "echo": true,

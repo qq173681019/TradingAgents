@@ -489,7 +489,16 @@ class ChipHealthAnalyzer:
             
             # 确保日期格式（支持ISO8601格式）
             if df['日期'].dtype == 'object':
-                df['日期'] = pd.to_datetime(df['日期'], format='ISO8601').dt.strftime('%Y-%m-%d')
+                # 统一日期格式，处理 20251218 和 2025-12-18 混合的情况
+                def normalize_date(d):
+                    d_str = str(d).split(' ')[0].replace('-', '').replace('/', '')
+                    if len(d_str) >= 8:
+                        return f"{d_str[:4]}-{d_str[4:6]}-{d_str[6:8]}"
+                    return str(d)
+                df['日期'] = df['日期'].apply(normalize_date)
+            
+            # 排序，确保最后一条是最新日期
+            df = df.sort_values(by='日期')
             
             # 获取当前价格（最后一条数据的收盘价）
             current_price = float(df['收盘'].iloc[-1])
