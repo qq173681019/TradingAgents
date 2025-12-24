@@ -1,17 +1,24 @@
 import os
+import subprocess
 import sys
+import threading
 import tkinter as tk
 from tkinter import messagebox
-import pandas as pd
-import numpy as np
-import mplfinance as mpf
+
+# ==================== 重要：强制使用TkAgg后端（必须在导入matplotlib.pyplot之前） ====================
+import matplotlib
+
+matplotlib.use('TkAgg')
+
 import matplotlib.pyplot as plt
+import mplfinance as mpf
+import numpy as np
+import pandas as pd
+import requests
 from matplotlib import font_manager
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-import threading
-import subprocess
-import requests
+
 
 # ==================== 0. 智能中文修复 (核心修改) ====================
 def get_chinese_font():
@@ -55,6 +62,7 @@ ChoiceAPI = None
 
 try:
     import EmQuantAPI
+
     # [补丁] 强制修改 EmQuantAPI 寻找 DLL 的逻辑
     def custom_get_dll_path():
         is_64bits = sys.maxsize > 2**32
@@ -241,6 +249,8 @@ class StockMonitorApp:
         self.current_code = "000001" 
         self.df = None
         self.last_signal_time = None
+        self.buy_signal_times = []  # 存储买入信号时间点
+        self.sell_signal_times = []  # 存储卖出信号时间点
         self.kline_options = [30, 60, 120, 'D']
         self.kline_idx = 1
         
@@ -279,6 +289,8 @@ class StockMonitorApp:
         self.canvas.mpl_connect('scroll_event', self._on_scroll)
 
     def _start_timer(self):
+        from datetime import datetime
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 🔄 定时器触发 - 开始获取数据")
         self.update_data()
         self.root.after(60000, self._start_timer)
 
@@ -287,9 +299,14 @@ class StockMonitorApp:
         if code:
             self.current_code = code
             self.last_signal_time = None
+            # 清空历史信号（换股票时重置）
+            self.buy_signal_times = []
+            self.sell_signal_times = []
             self.update_data()
 
     def update_data(self):
+        from datetime import datetime
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] 📡 开始获取股票 {self.current_code} 数据...")
         use_choice = self.use_choice_var.get()
         def task():
             self.root.after(0, lambda: self.lbl_status.config(text=f"获取 {self.current_code}...", fg="blue"))
@@ -298,13 +315,16 @@ class StockMonitorApp:
         threading.Thread(target=task, daemon=True).start()
 
     def handle_data_update(self, df, source):
+        from datetime import datetime
         if df.empty:
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] ❌ 数据获取失败 - 所有数据源不可用")
             self.lbl_status.config(text=f"获取失败: 数据源不可用 (Choice错误/新浪无数据)", fg="red")
             return
             
         self.df = df
         latest_price = df.iloc[-1]['Close']
         latest_time = df.index[-1].strftime('%H:%M')
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] ✅ 数据获取成功 - 来源: {source} | 现价: {latest_price:.2f} | 数据时间: {latest_time}")
         self.lbl_status.config(text=f"✅ 来源: {source} | 现价: {latest_price:.2f} | 更新: {latest_time}", fg="green")
         
         self.check_and_trigger_signal(df)
@@ -322,9 +342,15 @@ class StockMonitorApp:
             
             signal_triggered = False
             if prev_bar <= 0 and curr_bar > 0:
-                print(f"【买入信号】{current_time_idx}"); self.run_bat_script("buy.bat"); signal_triggered = True
+                print(f"【买入信号】{current_time_idx}")
+                self.buy_signal_times.append(current_time_idx)
+                self.run_bat_script("buy.bat")
+                signal_triggered = True
             elif prev_bar >= 0 and curr_bar < 0:
-                print(f"【卖出信号】{current_time_idx}"); self.run_bat_script("sell.bat"); signal_triggered = True
+                print(f"【卖出信号】{current_time_idx}")
+                self.sell_signal_times.append(current_time_idx)
+                self.run_bat_script("sell.bat")
+                signal_triggered = True
             
             if signal_triggered: self.last_signal_time = current_time_idx
         except Exception as e: print(f"信号检测错误: {e}")
@@ -345,6 +371,10 @@ class StockMonitorApp:
     def redraw_chart(self):
         if self.df is None or self.df.empty: return
         try:
+            # 先在完整数据上计算MACD（保证一致性）
+            full_close_prices = self.df['Close'].values
+            full_dif, full_dea, full_macd_bar = MACD(full_close_prices)
+            
             opt = self.kline_options[self.kline_idx]
             plot_df = self.df.copy()
             title_suffix = ""
@@ -356,15 +386,19 @@ class StockMonitorApp:
                 plot_df = plot_df.tail(int(opt))
                 title_suffix = f"模式: 最近{opt}分钟"
 
+            # 使用截断数据重新计算MACD用于显示
             close_prices = plot_df['Close'].values
             dif, dea, macd_bar = MACD(close_prices)
-            buy_signals = [np.nan]*len(plot_df); sell_signals = [np.nan]*len(plot_df)
             
-            for i in range(1, len(macd_bar)):
-                if i >= len(macd_bar): break
-                if np.isnan(macd_bar[i-1]) or np.isnan(macd_bar[i]): continue
-                if macd_bar[i-1] <= 0 and macd_bar[i] > 0: buy_signals[i] = plot_df['Low'].iloc[i] * 0.999 
-                elif macd_bar[i-1] >= 0 and macd_bar[i] < 0: sell_signals[i] = plot_df['High'].iloc[i] * 1.001
+            # 根据保存的信号时间点在当前显示窗口中标记
+            buy_signals = [np.nan]*len(plot_df)
+            sell_signals = [np.nan]*len(plot_df)
+            
+            for i, time_idx in enumerate(plot_df.index):
+                if time_idx in self.buy_signal_times:
+                    buy_signals[i] = plot_df['Low'].iloc[i] * 0.999
+                if time_idx in self.sell_signal_times:
+                    sell_signals[i] = plot_df['High'].iloc[i] * 1.001
 
             self.ax_kline.clear(); self.ax_vol.clear(); self.ax_macd.clear()
             
