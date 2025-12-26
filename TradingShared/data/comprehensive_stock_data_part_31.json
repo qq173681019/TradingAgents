@@ -5944,8 +5944,8 @@
         ],
         "latest_price": 10.12,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:37:19.412252"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:38.697981"
       },
       "financial_data": {
         "code": "000406",
@@ -5958,8 +5958,8 @@
         "ma20": 10.205,
         "ma60": 9.311166666666667,
         "rsi": 33.33333333333333,
-        "macd": 0.13921757913701605,
-        "signal": 0.1965386429326288,
+        "macd": 0.13922121763787487,
+        "signal": 0.19654390935154462,
         "volume_ratio": 0.6625426104847006,
         "status": "calculated"
       },
@@ -5999,7 +5999,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:37:17.541846",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:38.697991"
     },
     "000412": {
       "code": "000412",
@@ -8547,8 +8548,8 @@
         ],
         "latest_price": 57.39,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:38:37.643921"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:38.714063"
       },
       "financial_data": {
         "code": "000418",
@@ -8561,8 +8562,8 @@
         "ma20": 58.0415,
         "ma60": 53.573499999999996,
         "rsi": 50.19624945486264,
-        "macd": 0.43492310724262495,
-        "signal": 1.0160941242656842,
+        "macd": 0.4405454078915838,
+        "signal": 1.0243562388261789,
         "volume_ratio": 1.9023138827947326,
         "status": "calculated"
       },
@@ -8602,7 +8603,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:38:37.242126",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:38.714071"
     },
     "000424": {
       "code": "000424",
@@ -14356,8 +14358,8 @@
         ],
         "latest_price": 23.49,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:39:47.516369"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:38.728500"
       },
       "financial_data": {
         "code": "000508",
@@ -14365,13 +14367,13 @@
       },
       "technical_indicators": {
         "current_price": 23.49,
-        "ma5": 24.356,
+        "ma5": 24.355999999999998,
         "ma10": 23.186,
         "ma20": 23.462,
-        "ma60": 20.694333333333336,
+        "ma60": 20.69433333333333,
         "rsi": 49.87341772151898,
-        "macd": 0.8823667381953193,
-        "signal": 0.8712553619925737,
+        "macd": 0.8750363631702065,
+        "signal": 0.8604797159212596,
         "volume_ratio": 5.228273451566104,
         "status": "calculated"
       },
@@ -14411,7 +14413,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:39:45.370740",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:38.728509"
     },
     "000511": {
       "code": "000511",
@@ -15749,8 +15752,8 @@
         ],
         "latest_price": 15.29,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:37:51.223756"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:38.742430"
       },
       "financial_data": {
         "code": "000515",
@@ -15758,13 +15761,13 @@
       },
       "technical_indicators": {
         "current_price": 15.29,
-        "ma5": 15.402000000000001,
-        "ma10": 15.197,
+        "ma5": 15.401999999999997,
+        "ma10": 15.197000000000003,
         "ma20": 14.926499999999999,
         "ma60": 14.302333333333333,
         "rsi": 67.83625730994146,
-        "macd": 0.2767311612798764,
-        "signal": 0.24835540067465411,
+        "macd": 0.277320780638302,
+        "signal": 0.24922133153132767,
         "volume_ratio": 1.1821511964622136,
         "status": "calculated"
       },
@@ -15804,7 +15807,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:37:48.951653",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:38.742437"
     },
     "000522": {
       "code": "000522",
@@ -16473,8 +16477,8 @@
         ],
         "latest_price": 23.27,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:40:33.720143"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:38.757804"
       },
       "financial_data": {
         "code": "000522",
@@ -16484,11 +16488,11 @@
         "current_price": 23.27,
         "ma5": 24.044,
         "ma10": 25.05,
-        "ma20": 24.941499999999998,
+        "ma20": 24.9415,
         "ma60": 21.5665,
         "rsi": 38.908246225319395,
-        "macd": 0.4886272330701047,
-        "signal": 0.9287667863778607,
+        "macd": 0.48914010105581696,
+        "signal": 0.9295210996344065,
         "volume_ratio": 0.7377597700805583,
         "status": "calculated"
       },
@@ -16528,7 +16532,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:40:29.282967",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:38.757822"
     },
     "000527": {
       "code": "000527",
@@ -17197,8 +17202,8 @@
         ],
         "latest_price": 14.02,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:38:37.643699"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:38.773829"
       },
       "financial_data": {
         "code": "000527",
@@ -17209,10 +17214,10 @@
         "ma5": 14.187999999999999,
         "ma10": 13.936000000000002,
         "ma20": 13.3495,
-        "ma60": 13.222000000000001,
+        "ma60": 13.222,
         "rsi": 74.0181268882175,
-        "macd": 0.36653806137884004,
-        "signal": 0.28028703038147074,
+        "macd": 0.359514097076735,
+        "signal": 0.2699675377905057,
         "volume_ratio": 1.223409516833176,
         "status": "calculated"
       },
@@ -17252,7 +17257,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:38:33.271854",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:38.773837"
     },
     "000535": {
       "code": "000535",
@@ -19131,8 +19137,8 @@
         ],
         "latest_price": 27.34,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:39:47.516265"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.221651"
       },
       "financial_data": {
         "code": "000542",
@@ -19141,12 +19147,12 @@
       "technical_indicators": {
         "current_price": 27.34,
         "ma5": 25.076,
-        "ma10": 24.426000000000002,
+        "ma10": 24.426,
         "ma20": 23.9955,
         "ma60": 22.296666666666667,
         "rsi": 84.0840840840841,
-        "macd": 0.8122310256767875,
-        "signal": 0.6131420496663558,
+        "macd": 0.8116543559191456,
+        "signal": 0.6122938714678332,
         "volume_ratio": 22.322203900935587,
         "status": "calculated"
       },
@@ -19186,7 +19192,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:39:43.231917",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.221661"
     },
     "000549": {
       "code": "000549",
@@ -19855,8 +19862,8 @@
         ],
         "latest_price": 8.9,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:37:51.223708"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.238014"
       },
       "financial_data": {
         "code": "000549",
@@ -19865,12 +19872,12 @@
       "technical_indicators": {
         "current_price": 8.9,
         "ma5": 8.508,
-        "ma10": 8.207,
+        "ma10": 8.206999999999999,
         "ma20": 7.694,
         "ma60": 6.433000000000001,
         "rsi": 76.94300518134716,
-        "macd": 0.5822168712490781,
-        "signal": 0.5190563967172418,
+        "macd": 0.5824642626266883,
+        "signal": 0.519419640290438,
         "volume_ratio": 2.591785861644359,
         "status": "calculated"
       },
@@ -19910,7 +19917,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:37:48.340955",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.238020"
     },
     "000556": {
       "code": "000556",
@@ -20579,8 +20587,8 @@
         ],
         "latest_price": 1.5,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:39:47.516352"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.253303"
       },
       "financial_data": {
         "code": "000556",
@@ -20589,12 +20597,12 @@
       "technical_indicators": {
         "current_price": 1.5,
         "ma5": 3.7159999999999997,
-        "ma10": 3.8050000000000006,
+        "ma10": 3.8049999999999997,
         "ma20": 3.9545000000000003,
-        "ma60": 4.8518333333333326,
+        "ma60": 4.851833333333333,
         "rsi": 25.100401606425706,
-        "macd": -0.38348279122659523,
-        "signal": -0.29902175005739,
+        "macd": -0.38244326167788545,
+        "signal": -0.2974935862952235,
         "volume_ratio": 0.7892656359803233,
         "status": "calculated"
       },
@@ -20634,7 +20642,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:39:45.065774",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.253314"
     },
     "000562": {
       "code": "000562",
@@ -21303,8 +21312,8 @@
         ],
         "latest_price": 30.5,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:39:47.516401"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.269664"
       },
       "financial_data": {
         "code": "000562",
@@ -21313,12 +21322,12 @@
       "technical_indicators": {
         "current_price": 30.5,
         "ma5": 25.660000000000004,
-        "ma10": 21.736,
+        "ma10": 21.735999999999997,
         "ma20": 18.636499999999998,
         "ma60": 14.806166666666666,
         "rsi": 97.6857490864799,
-        "macd": 3.2977009125961523,
-        "signal": 1.976693181484591,
+        "macd": 3.290759639302017,
+        "signal": 1.9664941194843872,
         "volume_ratio": 1.7570906814614433,
         "status": "calculated"
       },
@@ -21358,7 +21367,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:39:46.290170",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.269675"
     },
     "000569": {
       "code": "000569",
@@ -22027,8 +22037,8 @@
         ],
         "latest_price": 7.05,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:37:19.412216"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.285068"
       },
       "financial_data": {
         "code": "000569",
@@ -22041,8 +22051,8 @@
         "ma20": 6.883000000000001,
         "ma60": 6.5858333333333325,
         "rsi": 67.99999999999997,
-        "macd": 0.13203947415396033,
-        "signal": 0.11844712649317476,
+        "macd": 0.13221561969301288,
+        "signal": 0.1187058114465663,
         "volume_ratio": 1.4706918347108162,
         "status": "calculated"
       },
@@ -22082,7 +22092,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:37:16.625483",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.285077"
     },
     "000574": {
       "code": "000574",
@@ -22943,8 +22954,8 @@
         ],
         "latest_price": 24.44,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:39:47.516384"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.298567"
       },
       "financial_data": {
         "code": "000578",
@@ -22953,12 +22964,12 @@
       "technical_indicators": {
         "current_price": 24.44,
         "ma5": 24.956,
-        "ma10": 24.767000000000003,
+        "ma10": 24.767,
         "ma20": 23.7155,
         "ma60": 25.104666666666667,
         "rsi": 58.57933579335795,
-        "macd": 0.05550881087987847,
-        "signal": -0.22190714210877852,
+        "macd": 0.05275388226435851,
+        "signal": -0.22595825759569263,
         "volume_ratio": 1.7787457277429632,
         "status": "calculated"
       },
@@ -22998,7 +23009,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:39:45.675590",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.298578"
     },
     "000579": {
       "code": "000579",
@@ -26224,8 +26236,8 @@
         ],
         "latest_price": 4.37,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:39:14.933938"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.313827"
       },
       "financial_data": {
         "code": "000588",
@@ -26236,10 +26248,10 @@
         "ma5": 4.734,
         "ma10": 5.068,
         "ma20": 5.365,
-        "ma60": 5.658666666666666,
+        "ma60": 5.658666666666667,
         "rsi": 15.300546448087417,
-        "macd": -0.28026221555455866,
-        "signal": -0.1694572326080999,
+        "macd": -0.27961210069779163,
+        "signal": -0.16850208502704545,
         "volume_ratio": 2.3199131428848245,
         "status": "calculated"
       },
@@ -26279,7 +26291,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:39:11.157710",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.313834"
     },
     "000594": {
       "code": "000594",
@@ -27553,8 +27566,8 @@
         ],
         "latest_price": 13.41,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:37:19.412305"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.328210"
       },
       "financial_data": {
         "code": "000602",
@@ -27567,8 +27580,8 @@
         "ma20": 13.3055,
         "ma60": 12.489166666666668,
         "rsi": 60.37735849056603,
-        "macd": 0.11171375907389347,
-        "signal": 0.1538168555373749,
+        "macd": 0.1128645530018968,
+        "signal": 0.15550854120903512,
         "volume_ratio": 2.041300700086708,
         "status": "calculated"
       },
@@ -27608,7 +27621,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:37:18.761175",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.328218"
     },
     "000604": {
       "code": "000604",
@@ -30825,8 +30839,8 @@
         ],
         "latest_price": 5.24,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:40:33.720110"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:52.341871"
       },
       "financial_data": {
         "code": "000618",
@@ -30835,12 +30849,12 @@
       "technical_indicators": {
         "current_price": 5.24,
         "ma5": 5.232,
-        "ma10": 5.226999999999999,
-        "ma20": 5.215999999999999,
-        "ma60": 5.152333333333333,
+        "ma10": 5.227,
+        "ma20": 5.216,
+        "ma60": 5.152333333333334,
         "rsi": 80.00000000000036,
-        "macd": 0.02303333849035294,
-        "signal": 0.025550176290606293,
+        "macd": 0.023102310515019653,
+        "signal": 0.02565087575941645,
         "volume_ratio": 0.9037614674140964,
         "status": "calculated"
       },
@@ -30880,7 +30894,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:40:28.972486",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:52.341880"
     },
     "000621": {
       "code": "000621",
@@ -34089,6 +34104,6 @@
       "last_kline_update": "2025-12-23T09:45:51.011340"
     }
   },
-  "last_updated": "2025-12-24T02:40:33.728396",
+  "last_updated": "2025-12-26T01:51:03.678344",
   "total_stocks": 200
 }

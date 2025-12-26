@@ -12821,8 +12821,8 @@
         ],
         "latest_price": 29.98,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2025-12-24T02:40:33.720168"
+        "source": "incremental_update",
+        "update_time": "2025-12-26T01:50:38.623908"
       },
       "financial_data": {
         "code": "601299",
@@ -12831,12 +12831,12 @@
       "technical_indicators": {
         "current_price": 29.98,
         "ma5": 31.972,
-        "ma10": 32.802,
+        "ma10": 32.80200000000001,
         "ma20": 31.517000000000003,
-        "ma60": 19.797833333333333,
+        "ma60": 19.797833333333337,
         "rsi": 46.91780821917808,
-        "macd": 3.259232350771825,
-        "signal": 4.19266767236483,
+        "macd": 3.25776708022234,
+        "signal": 4.190514520769285,
         "volume_ratio": 0.9509888480414923,
         "status": "calculated"
       },
@@ -12876,7 +12876,8 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2025-12-24T02:40:30.206255",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2025-12-26T01:50:38.623915"
     },
     "601300": {
       "code": "601300",
@@ -15080,6 +15081,6 @@
       }
     }
   },
-  "last_updated": "2025-12-24T02:40:33.832485",
+  "last_updated": "2025-12-26T01:51:03.538580",
   "total_stocks": 200
 }
