@@ -635,7 +635,7 @@ class AShareAnalyzerGUI:
 
 
 
-                
+
                 print(f"性能优化系统初始化失败: {e}")
                 self.high_performance_cache = None
                 self.async_processor = None
@@ -919,6 +919,8 @@ class AShareAnalyzerGUI:
                 ("batch_stock_scores_minimax.json", "MiniMax AI"),
                 ("batch_stock_scores_openai.json", "OpenAI"),
                 ("batch_stock_scores_openrouter.json", "OpenRouter"),
+                ("batch_stock_scores_gemini.json", "Gemini AI"),
+                ("batch_stock_scores_none.json", "本地算法"),
                 ("batch_stock_scores.json", "本地算法"),
             ]
             
@@ -4919,6 +4921,18 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                     width=12)
         get_choice_btn.pack(side="left", padx=5)
         
+        # 竞价排行按钮
+        auction_ranking_btn = tk.Button(data_score_frame, 
+                                       text="竞价排行", 
+                                       font=("微软雅黑", 11),
+                                       bg="#f39c12", 
+                                       fg="white",
+                                       activebackground="#e67e22",
+                                       command=self.run_call_auction_ranking,
+                                       cursor="hand2",
+                                       width=12)
+        auction_ranking_btn.pack(side="left", padx=5)
+        
         # 断点续传控制区域
         resume_frame = tk.Frame(self.root, bg="#f0f0f0")
         resume_frame.pack(fill="x", padx=20, pady=5)
@@ -6229,6 +6243,59 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
         except Exception as e:
             self.show_progress(f"ERROR: 启动数据采集失败: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def run_call_auction_ranking(self):
+        """运行竞价排行分析"""
+        import os
+        import subprocess
+        import sys
+        from datetime import datetime
+        
+        try:
+            # 检查当前时间是否在竞价时段
+            now = datetime.now()
+            is_weekend = now.weekday() >= 5
+            
+            if is_weekend:
+                msg = "⚠️  当前是周末，市场未开盘。\n\n竞价排行在交易日 9:15 - 9:30 运行效果最佳。\n是否仍要启动分析？"
+                if not messagebox.askyesno("时间提示", msg):
+                    return
+            elif now.hour < 9 or (now.hour == 9 and now.minute < 15):
+                msg = "⚠️  当前尚未进入竞价时段（9:15开始）。\n\n是否仍要启动分析？"
+                if not messagebox.askyesno("时间提示", msg):
+                    return
+            
+            self.show_progress("🚀 启动竞价排行分析...")
+            
+            # 获取脚本路径
+            script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                                     'TradingShared', 'api', 'get_call_auction_ranking.py')
+            
+            if not os.path.exists(script_path):
+                self.show_progress(f"ERROR: 找不到脚本文件: {script_path}")
+                return
+            
+            # 使用 veighna_studio 的 python (如果存在)
+            python_exe = r"C:\veighna_studio\python.exe"
+            if not os.path.exists(python_exe):
+                python_exe = sys.executable
+            
+            print(f"[INFO] 运行竞价排行脚本: {script_path}")
+            
+            # 在新窗口中运行（不阻塞GUI）
+            subprocess.Popen(
+                ['cmd', '/k', python_exe, script_path],
+                shell=True,
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+            
+            self.show_progress("✅ 竞价排行分析已在独立窗口启动")
+            self.root.after(3000, self.hide_progress)
+            
+        except Exception as e:
+            self.show_progress(f"ERROR: 启动竞价排行分析失败: {e}")
             import traceback
             traceback.print_exc()
     
@@ -18322,8 +18389,13 @@ WARNING: 重要声明:
             with open(self.batch_score_file, 'w', encoding='utf-8') as f:
                 json.dump(save_data, f, ensure_ascii=False, indent=2)
             
-            # 创建优化专用备份
-            optimized_file = f"batch_stock_scores_optimized_{stock_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            # 创建优化专用备份 (保存到共享数据目录)
+            shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "TradingShared", "data")
+            if not os.path.exists(shared_data_dir):
+                os.makedirs(shared_data_dir)
+            optimized_filename = f"batch_stock_scores_optimized_{stock_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            optimized_file = os.path.join(shared_data_dir, optimized_filename)
+            
             with open(optimized_file, 'w', encoding='utf-8') as f:
                 json.dump(save_data, f, ensure_ascii=False, indent=2)
             
