@@ -32,6 +32,23 @@
             "problemMatcher": []
         },
         {
+            "label": "交易系统 - 竞价排行分析",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "TradingShared/api/get_call_auction_ranking.py"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "detail": "获取当前A股竞价排行数据"
+        },
+        {
             "label": "启动主应用程序",
             "type": "shell",
             "command": "python",

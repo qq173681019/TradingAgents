@@ -629,6 +629,13 @@ class AShareAnalyzerGUI:
                 print(f"   - 异步处理器: {self.async_processor.max_workers} 并发")
                 print(f"   - 批量处理: 优化后批次大小")
             except Exception as e:
+
+
+
+
+
+
+                
                 print(f"性能优化系统初始化失败: {e}")
                 self.high_performance_cache = None
                 self.async_processor = None

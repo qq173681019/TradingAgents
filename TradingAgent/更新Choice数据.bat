@@ -7,7 +7,7 @@ echo.
 echo 正在启动数据采集...
 echo.
 
-python get_choice_data.py
+python ..\TradingShared\api\get_choice_data.py
 
 echo.
 echo ======================================

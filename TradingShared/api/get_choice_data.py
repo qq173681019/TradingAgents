@@ -10,6 +10,11 @@ tradingshared_root = os.path.dirname(script_dir)
 if tradingshared_root not in sys.path:
     sys.path.insert(0, tradingshared_root)
 
+# 定义数据目录 (TradingShared/data)
+DATA_DIR = os.path.join(tradingshared_root, 'data')
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR, exist_ok=True)
+
 try:
     from config import CHOICE_PASSWORD, CHOICE_USERNAME
 except ImportError:
@@ -333,7 +338,7 @@ def calculate_technical_indicators_from_kline(kline_data):
 
 def check_cache_date():
     """检查缓存数据日期，如果是今天的数据则返回True"""
-    cache_file = "data/choice_all_stocks.json"
+    cache_file = os.path.join(DATA_DIR, "choice_all_stocks.json")
     if not os.path.exists(cache_file):
         return False
     
@@ -892,12 +897,7 @@ def main():
                 print(f"    {key}: {value}")
     
     # 7. 保存到文件，格式与全量数据保持一致
-    # 使用相对于脚本位置的共享数据目录
-    import os
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    shared_data_dir = os.path.join(os.path.dirname(script_dir), 'data')
-    os.makedirs(shared_data_dir, exist_ok=True)
-    output_file = os.path.join(shared_data_dir, "comprehensive_stock_data.json")
+    output_file = os.path.join(DATA_DIR, "comprehensive_stock_data.json")
     
     # 转换数据格式为系统标准格式（与comprehensive_stock_data.json一致）
     compatible_stocks_data = {}
@@ -1006,7 +1006,7 @@ def main():
     
     # 保存失败记录
     if failed_stocks:
-        failed_file = "data/choice_failed_stocks.json"
+        failed_file = os.path.join(DATA_DIR, "choice_failed_stocks.json")
         failed_data = {
             "total_failed": len(failed_stocks),
             "timestamp": datetime.now().isoformat(),
