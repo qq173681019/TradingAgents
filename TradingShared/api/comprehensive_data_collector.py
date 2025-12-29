@@ -4725,6 +4725,8 @@ class ComprehensiveDataCollector:
                                 }
                                 existing_data[code]['technical_indicators'] = tech_indicators
                                 existing_data[code]['last_kline_update'] = datetime.now().isoformat()
+                                # 同步更新顶层时间戳，确保 GUI 合并逻辑能识别这是最新数据
+                                existing_data[code]['timestamp'] = datetime.now().isoformat()
                             else:
                                 # 如果是新股票，创建基本结构
                                 existing_data[code] = {

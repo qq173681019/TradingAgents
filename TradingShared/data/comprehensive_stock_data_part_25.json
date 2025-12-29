@@ -668,7 +668,7 @@
         "latest_price": 0.5,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.115898"
+        "update_time": "2025-12-29T18:15:16.945523"
       },
       "financial_data": {
         "code": "600321",
@@ -723,7 +723,7 @@
         "timestamp": "2025-12-24T02:38:34.493047",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.115907"
+      "last_kline_update": "2025-12-29T18:15:16.945537"
     },
     "600324": {
       "code": "600324",
@@ -1841,7 +1841,7 @@
         "latest_price": 7.4,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.132767"
+        "update_time": "2025-12-29T18:15:16.960982"
       },
       "financial_data": {
         "code": "600357",
@@ -1896,7 +1896,7 @@
         "timestamp": "2025-12-24T02:37:47.119853",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.132778"
+      "last_kline_update": "2025-12-29T18:15:16.961006"
     },
     "600364": {
       "code": "600364",
@@ -8876,7 +8876,7 @@
         "latest_price": 51.82,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.148699"
+        "update_time": "2025-12-29T18:15:16.975368"
       },
       "financial_data": {
         "code": "600472",
@@ -8931,7 +8931,7 @@
         "timestamp": "2025-12-24T02:37:18.152014",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.148706"
+      "last_kline_update": "2025-12-29T18:15:16.975379"
     },
     "600473": {
       "code": "600473",
@@ -11579,7 +11579,7 @@
         "latest_price": 14.98,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.162584"
+        "update_time": "2025-12-29T18:15:16.989955"
       },
       "financial_data": {
         "code": "600553",
@@ -11634,7 +11634,7 @@
         "timestamp": "2025-12-24T02:37:15.404740",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.162591"
+      "last_kline_update": "2025-12-29T18:15:16.989964"
     },
     "600554": {
       "code": "600554",
@@ -14311,7 +14311,7 @@
         "latest_price": 23.52,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.177896"
+        "update_time": "2025-12-29T18:15:16.999972"
       },
       "financial_data": {
         "code": "600607",
@@ -14366,7 +14366,7 @@
         "timestamp": "2025-12-24T02:37:16.014576",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.177905"
+      "last_kline_update": "2025-12-29T18:15:16.999983"
     },
     "600614": {
       "code": "600614",
@@ -15641,7 +15641,7 @@
         "latest_price": 4.8,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.192860"
+        "update_time": "2025-12-29T18:15:17.008701"
       },
       "financial_data": {
         "code": "600625",
@@ -15696,7 +15696,7 @@
         "timestamp": "2025-12-24T02:38:36.931728",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.192869"
+      "last_kline_update": "2025-12-29T18:15:17.008709"
     },
     "600627": {
       "code": "600627",
@@ -16366,7 +16366,7 @@
         "latest_price": 28.73,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.206475"
+        "update_time": "2025-12-29T18:15:17.017915"
       },
       "financial_data": {
         "code": "600627",
@@ -16421,7 +16421,7 @@
         "timestamp": "2025-12-24T02:39:44.147571",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.206483"
+      "last_kline_update": "2025-12-29T18:15:17.017925"
     },
     "600631": {
       "code": "600631",
@@ -17091,7 +17091,7 @@
         "latest_price": 15.68,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.220131"
+        "update_time": "2025-12-29T18:15:17.029706"
       },
       "financial_data": {
         "code": "600631",
@@ -17146,7 +17146,7 @@
         "timestamp": "2025-12-24T02:37:17.846280",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.220138"
+      "last_kline_update": "2025-12-29T18:15:17.029721"
     },
     "600632": {
       "code": "600632",
@@ -17816,7 +17816,7 @@
         "latest_price": 9.53,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.234361"
+        "update_time": "2025-12-29T18:15:17.045687"
       },
       "financial_data": {
         "code": "600632",
@@ -17871,7 +17871,7 @@
         "timestamp": "2025-12-24T02:37:50.172109",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.234370"
+      "last_kline_update": "2025-12-29T18:15:17.045695"
     },
     "600634": {
       "code": "600634",
@@ -27616,7 +27616,7 @@
         "latest_price": 3.47,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:25.247325"
+        "update_time": "2025-12-29T18:15:17.055924"
       },
       "financial_data": {
         "code": "600705",
@@ -27680,7 +27680,7 @@
         "timestamp": "2025-12-16T03:20:11.646487",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:25.247335"
+      "last_kline_update": "2025-12-29T18:15:17.055933"
     },
     "600709": {
       "code": "600709",
@@ -28955,7 +28955,7 @@
         "latest_price": 8.93,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.494876"
+        "update_time": "2025-12-29T18:15:30.698766"
       },
       "financial_data": {
         "code": "600723",
@@ -29010,7 +29010,7 @@
         "timestamp": "2025-12-24T02:37:19.065721",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.494885"
+      "last_kline_update": "2025-12-29T18:15:30.698804"
     },
     "600747": {
       "code": "600747",
@@ -33915,7 +33915,7 @@
         "latest_price": 82.2,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.508472"
+        "update_time": "2025-12-29T18:15:30.717465"
       },
       "financial_data": {
         "code": "600786",
@@ -33970,7 +33970,7 @@
         "timestamp": "2025-12-24T02:38:35.713639",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.508479"
+      "last_kline_update": "2025-12-29T18:15:30.717478"
     },
     "600788": {
       "code": "600788",
@@ -38902,7 +38902,7 @@
         "latest_price": 23.18,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.522764"
+        "update_time": "2025-12-29T18:15:30.732682"
       },
       "financial_data": {
         "code": "600832",
@@ -38957,7 +38957,7 @@
         "timestamp": "2025-12-24T02:39:42.926153",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.522776"
+      "last_kline_update": "2025-12-29T18:15:30.732697"
     },
     "600836": {
       "code": "600836",
@@ -40232,7 +40232,7 @@
         "latest_price": 10.41,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.537257"
+        "update_time": "2025-12-29T18:15:30.755310"
       },
       "financial_data": {
         "code": "600837",
@@ -40296,7 +40296,7 @@
         "timestamp": "2025-12-16T03:30:03.481779",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.537264"
+      "last_kline_update": "2025-12-29T18:15:30.755323"
     },
     "600840": {
       "code": "600840",
@@ -40966,7 +40966,7 @@
         "latest_price": 23.8,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.552664"
+        "update_time": "2025-12-29T18:15:30.777982"
       },
       "financial_data": {
         "code": "600840",
@@ -41021,7 +41021,7 @@
         "timestamp": "2025-12-24T02:37:47.730319",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.552674"
+      "last_kline_update": "2025-12-29T18:15:30.777996"
     },
     "600842": {
       "code": "600842",
@@ -41691,7 +41691,7 @@
         "latest_price": 13.96,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.568248"
+        "update_time": "2025-12-29T18:15:30.802014"
       },
       "financial_data": {
         "code": "600842",
@@ -41746,7 +41746,7 @@
         "timestamp": "2025-12-24T02:37:46.814668",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.568255"
+      "last_kline_update": "2025-12-29T18:15:30.802027"
     },
     "600849": {
       "code": "600849",
@@ -42416,7 +42416,7 @@
         "latest_price": 14.73,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.582195"
+        "update_time": "2025-12-29T18:15:30.822487"
       },
       "financial_data": {
         "code": "600849",
@@ -42471,7 +42471,7 @@
         "timestamp": "2025-12-24T02:39:42.621827",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.582203"
+      "last_kline_update": "2025-12-29T18:15:30.822501"
     },
     "600852": {
       "code": "600852",
@@ -51504,7 +51504,7 @@
         "latest_price": 17.82,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.596560"
+        "update_time": "2025-12-29T18:15:30.850603"
       },
       "financial_data": {
         "code": "600991",
@@ -51559,7 +51559,7 @@
         "timestamp": "2025-12-24T02:37:48.646203",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.596569"
+      "last_kline_update": "2025-12-29T18:15:30.850638"
     },
     "600994": {
       "code": "600994",
@@ -52805,7 +52805,7 @@
         "latest_price": 12.83,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.609717"
+        "update_time": "2025-12-29T18:15:30.878246"
       },
       "financial_data": {
         "code": "601028",
@@ -52869,7 +52869,7 @@
         "timestamp": "2025-12-16T04:01:29.524535",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.609724"
+      "last_kline_update": "2025-12-29T18:15:30.878259"
     },
     "601029": {
       "code": "601029",
@@ -54664,6 +54664,6 @@
       }
     }
   },
-  "last_updated": "2025-12-26T01:51:03.467917",
+  "last_updated": "2025-12-29T18:15:57.722140",
   "total_stocks": 200
 }

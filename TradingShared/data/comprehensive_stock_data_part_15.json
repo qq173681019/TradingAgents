@@ -375,12 +375,28 @@
             "low": 6.91,
             "close": 6.95,
             "volume": 74203.0
+          },
+          {
+            "date": "2025-12-26",
+            "open": 7.12,
+            "high": 7.15,
+            "low": 6.91,
+            "close": 6.92,
+            "volume": 162748.0
+          },
+          {
+            "date": "2025-12-29",
+            "open": 6.88,
+            "high": 6.91,
+            "low": 6.75,
+            "close": 6.85,
+            "volume": 133326.0
           }
         ],
-        "latest_price": 6.95,
-        "data_points": 44,
+        "latest_price": 6.85,
+        "data_points": 46,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:49:56.889781"
+        "update_time": "2025-12-29T18:15:03.010295"
       },
       "financial_data": {
         "code": "603999",
@@ -396,15 +412,15 @@
         "debt_ratio": 0.093363
       },
       "technical_indicators": {
-        "current_price": 6.95,
-        "ma5": 6.99,
-        "ma10": 7.004,
-        "ma20": 7.275,
-        "ma60": 6.95,
-        "rsi": 37.60000000000003,
-        "macd": -0.045809322730762325,
-        "signal": 0.006171511506366533,
-        "volume_ratio": 0.7036554465660726,
+        "current_price": 6.85,
+        "ma5": 6.9239999999999995,
+        "ma10": 6.958,
+        "ma20": 7.169499999999999,
+        "ma60": 6.85,
+        "rsi": 20.720720720720735,
+        "macd": -0.06475175125395083,
+        "signal": -0.017583329752592497,
+        "volume_ratio": 1.3435543131473349,
         "status": "calculated"
       },
       "industry_concept": {
@@ -444,7 +460,7 @@
         "timestamp": "2025-12-19T14:09:41.452524",
         "success_rate": 1.0
       },
-      "last_kline_update": "2025-12-26T01:49:56.889788"
+      "last_kline_update": "2025-12-29T18:15:03.010305"
     },
     "605001": {
       "code": "605001",
@@ -36790,6 +36806,6 @@
       }
     }
   },
-  "last_updated": "2025-12-26T01:51:03.334146",
+  "last_updated": "2025-12-29T18:15:57.564644",
   "total_stocks": 112
 }

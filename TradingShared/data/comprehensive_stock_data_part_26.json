@@ -12822,7 +12822,7 @@
         "latest_price": 29.98,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.623908"
+        "update_time": "2025-12-29T18:15:30.894646"
       },
       "financial_data": {
         "code": "601299",
@@ -12877,7 +12877,7 @@
         "timestamp": "2025-12-24T02:40:30.206255",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.623915"
+      "last_kline_update": "2025-12-29T18:15:30.894657"
     },
     "601300": {
       "code": "601300",
@@ -15081,6 +15081,6 @@
       }
     }
   },
-  "last_updated": "2025-12-26T01:51:03.538580",
+  "last_updated": "2025-12-29T18:15:57.813276",
   "total_stocks": 200
 }

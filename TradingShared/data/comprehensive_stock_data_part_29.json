@@ -9372,7 +9372,7 @@
         "latest_price": 5.1,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.639217"
+        "update_time": "2025-12-29T18:15:30.905936"
       },
       "financial_data": {
         "code": "601989",
@@ -9436,7 +9436,7 @@
         "timestamp": "2025-12-16T09:02:26.760947",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.639225"
+      "last_kline_update": "2025-12-29T18:15:30.905945"
     },
     "601993": {
       "code": "601993",
@@ -10234,7 +10234,7 @@
         "latest_price": 2.71,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.653904"
+        "update_time": "2025-12-29T18:15:30.920338"
       },
       "financial_data": {
         "code": "000003",
@@ -10289,7 +10289,7 @@
         "timestamp": "2025-12-24T02:37:18.456115",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.653913"
+      "last_kline_update": "2025-12-29T18:15:30.920350"
     },
     "000005": {
       "code": "000005",
@@ -12169,7 +12169,7 @@
         "latest_price": 6.85,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.668077"
+        "update_time": "2025-12-29T18:15:30.931739"
       },
       "financial_data": {
         "code": "000015",
@@ -12224,7 +12224,7 @@
         "timestamp": "2025-12-24T02:39:46.594277",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.668084"
+      "last_kline_update": "2025-12-29T18:15:30.931753"
     },
     "000018": {
       "code": "000018",
@@ -14709,7 +14709,7 @@
         "latest_price": 40.5,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:38.683750"
+        "update_time": "2025-12-29T18:15:30.944855"
       },
       "financial_data": {
         "code": "000024",
@@ -14764,7 +14764,7 @@
         "timestamp": "2025-12-24T02:37:45.900189",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:38.683759"
+      "last_kline_update": "2025-12-29T18:15:30.944863"
     },
     "000033": {
       "code": "000033",
@@ -22452,6 +22452,6 @@
       }
     }
   },
-  "last_updated": "2025-12-26T01:51:03.607242",
+  "last_updated": "2025-12-29T18:15:57.904178",
   "total_stocks": 200
 }

@@ -21767,12 +21767,28 @@
             "low": 25.58,
             "close": 26.42,
             "volume": 317694.0
+          },
+          {
+            "date": "2025-12-26",
+            "open": 25.52,
+            "high": 27.8,
+            "low": 24.91,
+            "close": 26.08,
+            "volume": 286332.0
+          },
+          {
+            "date": "2025-12-29",
+            "open": 25.19,
+            "high": 26.3,
+            "low": 24.68,
+            "close": 24.85,
+            "volume": 232674.0
           }
         ],
-        "latest_price": 26.42,
-        "data_points": 3,
+        "latest_price": 24.85,
+        "data_points": 5,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:51:00.141437"
+        "update_time": "2025-12-29T18:15:53.774946"
       },
       "financial_data": {
         "code": "603248",
@@ -21784,14 +21800,14 @@
         "net_profit": null
       },
       "technical_indicators": {
-        "current_price": 26.42,
-        "ma5": 26.42,
-        "ma10": 26.42,
-        "ma20": 26.42,
-        "ma60": 26.42,
+        "current_price": 24.85,
+        "ma5": 28.034000000000002,
+        "ma10": 24.85,
+        "ma20": 24.85,
+        "ma60": 24.85,
         "rsi": 50.0,
-        "macd": -1.4940083278544876,
-        "signal": -0.43664781941705205,
+        "macd": -2.4711040512767397,
+        "signal": -1.0936162023756686,
         "volume_ratio": 1.0,
         "status": "calculated"
       },
@@ -21832,7 +21848,7 @@
         "timestamp": "2025-12-23T22:10:19.882072",
         "success_rate": 1.0
       },
-      "last_kline_update": "2025-12-26T01:51:00.141444"
+      "last_kline_update": "2025-12-29T18:15:53.774958"
     },
     "002762": {
       "code": "002762",
@@ -29161,12 +29177,28 @@
             "low": 3.62,
             "close": 3.7,
             "volume": 227140.0
+          },
+          {
+            "date": "2025-12-26",
+            "open": 3.68,
+            "high": 3.7,
+            "low": 3.62,
+            "close": 3.63,
+            "volume": 203405.0
+          },
+          {
+            "date": "2025-12-29",
+            "open": 3.63,
+            "high": 3.63,
+            "low": 3.49,
+            "close": 3.49,
+            "volume": 242669.0
           }
         ],
-        "latest_price": 3.7,
-        "data_points": 44,
+        "latest_price": 3.49,
+        "data_points": 46,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:51:00.156119"
+        "update_time": "2025-12-29T18:15:53.791841"
       },
       "financial_data": {
         "code": "002425",
@@ -29182,15 +29214,15 @@
         "debt_ratio": -0.317471
       },
       "technical_indicators": {
-        "current_price": 3.7,
-        "ma5": 3.7119999999999997,
-        "ma10": 3.7380000000000004,
-        "ma20": 3.8940000000000006,
-        "ma60": 3.7,
-        "rsi": 37.254901960784316,
-        "macd": -0.10223492732395911,
-        "signal": -0.08056694915236386,
-        "volume_ratio": 1.2559579762233894,
+        "current_price": 3.49,
+        "ma5": 3.6340000000000003,
+        "ma10": 3.6759999999999997,
+        "ma20": 3.8400000000000007,
+        "ma60": 3.49,
+        "rsi": 24.107142857142847,
+        "macd": -0.12057631822122428,
+        "signal": -0.09278856581808922,
+        "volume_ratio": 1.2979853250619657,
         "status": "calculated"
       },
       "industry_concept": {
@@ -29230,7 +29262,7 @@
         "timestamp": "2025-12-23T22:10:55.654906",
         "success_rate": 1.0
       },
-      "last_kline_update": "2025-12-26T01:51:00.156129"
+      "last_kline_update": "2025-12-29T18:15:53.791851"
     },
     "002789": {
       "code": "002789",
@@ -39103,12 +39135,28 @@
             "low": 9.99,
             "close": 11.1,
             "volume": 544855.0
+          },
+          {
+            "date": "2025-12-26",
+            "open": 10.8,
+            "high": 11.17,
+            "low": 10.47,
+            "close": 10.5,
+            "volume": 565914.0
+          },
+          {
+            "date": "2025-12-29",
+            "open": 10.53,
+            "high": 10.75,
+            "low": 10.33,
+            "close": 10.44,
+            "volume": 271571.0
           }
         ],
-        "latest_price": 11.1,
-        "data_points": 44,
+        "latest_price": 10.44,
+        "data_points": 46,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:51:00.174544"
+        "update_time": "2025-12-29T18:15:53.807604"
       },
       "financial_data": {
         "code": "002197",
@@ -39124,15 +39172,15 @@
         "debt_ratio": -0.053539
       },
       "technical_indicators": {
-        "current_price": 11.1,
-        "ma5": 9.974,
-        "ma10": 9.895999999999999,
-        "ma20": 10.2055,
-        "ma60": 11.1,
-        "rsi": 60.26785714285713,
-        "macd": -0.015242974275711418,
-        "signal": -0.04541073023922411,
-        "volume_ratio": 2.4726012788338925,
+        "current_price": 10.44,
+        "ma5": 10.368,
+        "ma10": 9.99,
+        "ma20": 10.2015,
+        "ma60": 10.44,
+        "rsi": 46.72489082969432,
+        "macd": 0.038773589584813806,
+        "signal": -0.018453432518211608,
+        "volume_ratio": 0.721684798408935,
         "status": "calculated"
       },
       "industry_concept": {
@@ -39172,7 +39220,7 @@
         "timestamp": "2025-12-23T22:11:54.795896",
         "success_rate": 1.0
       },
-      "last_kline_update": "2025-12-26T01:51:00.174554"
+      "last_kline_update": "2025-12-29T18:15:53.807613"
     },
     "600636": {
       "code": "600636",
@@ -53355,6 +53403,6 @@
       }
     }
   },
-  "last_updated": "2025-12-26T01:51:03.848446",
+  "last_updated": "2025-12-29T18:15:58.175552",
   "total_stocks": 125
 }

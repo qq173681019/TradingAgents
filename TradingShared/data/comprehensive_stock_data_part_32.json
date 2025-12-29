@@ -2611,7 +2611,7 @@
         "latest_price": 8.97,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.356070"
+        "update_time": "2025-12-29T18:15:45.508186"
       },
       "financial_data": {
         "code": "000666",
@@ -2666,7 +2666,7 @@
         "timestamp": "2025-12-24T02:38:34.188636",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.356078"
+      "last_kline_update": "2025-12-29T18:15:45.508200"
     },
     "000667": {
       "code": "000667",
@@ -10492,7 +10492,7 @@
         "latest_price": 20.31,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.370602"
+        "update_time": "2025-12-29T18:15:45.532181"
       },
       "financial_data": {
         "code": "000748",
@@ -10547,7 +10547,7 @@
         "timestamp": "2025-12-24T02:40:32.046602",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.370610"
+      "last_kline_update": "2025-12-29T18:15:45.532195"
     },
     "000749": {
       "code": "000749",
@@ -11950,7 +11950,7 @@
         "latest_price": 4.22,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.382617"
+        "update_time": "2025-12-29T18:15:45.550529"
       },
       "financial_data": {
         "code": "000763",
@@ -12005,7 +12005,7 @@
         "timestamp": "2025-12-24T02:38:36.321292",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.382623"
+      "last_kline_update": "2025-12-29T18:15:45.550543"
     },
     "000764": {
       "code": "000764",
@@ -17480,7 +17480,7 @@
         "latest_price": 8.75,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.398841"
+        "update_time": "2025-12-29T18:15:45.568523"
       },
       "financial_data": {
         "code": "000817",
@@ -17535,7 +17535,7 @@
         "timestamp": "2025-12-24T02:37:49.257490",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.398851"
+      "last_kline_update": "2025-12-29T18:15:45.568534"
     },
     "000824": {
       "code": "000824",
@@ -23005,7 +23005,7 @@
         "latest_price": 0.62,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.412980"
+        "update_time": "2025-12-29T18:15:45.590585"
       },
       "financial_data": {
         "code": "000861",
@@ -23060,7 +23060,7 @@
         "timestamp": "2025-12-24T02:39:44.759166",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.412988"
+      "last_kline_update": "2025-12-29T18:15:45.590601"
     },
     "000864": {
       "code": "000864",
@@ -23858,7 +23858,7 @@
         "latest_price": 13.84,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.427878"
+        "update_time": "2025-12-29T18:15:45.614942"
       },
       "financial_data": {
         "code": "000866",
@@ -23913,7 +23913,7 @@
         "timestamp": "2025-12-24T02:37:14.795176",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.427884"
+      "last_kline_update": "2025-12-29T18:15:45.614957"
     },
     "000867": {
       "code": "000867",
@@ -25479,7 +25479,7 @@
         "latest_price": 8.82,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.441454"
+        "update_time": "2025-12-29T18:15:45.636293"
       },
       "financial_data": {
         "code": "000916",
@@ -25534,7 +25534,7 @@
         "timestamp": "2025-12-24T02:40:31.742176",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.441462"
+      "last_kline_update": "2025-12-29T18:15:45.636303"
     },
     "000918": {
       "code": "000918",
@@ -28118,7 +28118,7 @@
         "latest_price": 11.91,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.454189"
+        "update_time": "2025-12-29T18:15:45.653378"
       },
       "financial_data": {
         "code": "000956",
@@ -28173,7 +28173,7 @@
         "timestamp": "2025-12-24T02:38:35.101055",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.454196"
+      "last_kline_update": "2025-12-29T18:15:45.653389"
     },
     "000961": {
       "code": "000961",
@@ -31400,7 +31400,7 @@
         "latest_price": 0.18,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.467297"
+        "update_time": "2025-12-29T18:15:45.663543"
       },
       "financial_data": {
         "code": "000982",
@@ -31464,7 +31464,7 @@
         "timestamp": "2025-12-16T10:59:08.501710",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.467303"
+      "last_kline_update": "2025-12-29T18:15:45.663551"
     },
     "000984": {
       "code": "000984",
@@ -33664,7 +33664,7 @@
         "latest_price": 10.78,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.481932"
+        "update_time": "2025-12-29T18:15:45.673581"
       },
       "financial_data": {
         "code": "002013",
@@ -33719,7 +33719,7 @@
         "timestamp": "2025-12-24T02:39:14.223701",
         "success_rate": 0.8
       },
-      "last_kline_update": "2025-12-26T01:50:52.481942"
+      "last_kline_update": "2025-12-29T18:15:45.673590"
     },
     "002018": {
       "code": "002018",
@@ -53213,7 +53213,7 @@
         "latest_price": 0.36,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2025-12-26T01:50:52.496372"
+        "update_time": "2025-12-29T18:15:45.683202"
       },
       "financial_data": {
         "code": "002505",
@@ -53268,7 +53268,7 @@
         "timestamp": "2025-12-24T02:40:42.938968",
         "success_rate": 0.6
       },
-      "last_kline_update": "2025-12-26T01:50:52.496379"
+      "last_kline_update": "2025-12-29T18:15:45.683210"
     },
     "002509": {
       "code": "002509",
@@ -65101,6 +65101,6 @@
       }
     }
   },
-  "last_updated": "2025-12-26T01:51:03.748112",
+  "last_updated": "2025-12-29T18:15:58.058789",
   "total_stocks": 200
 }

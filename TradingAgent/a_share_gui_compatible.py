@@ -1784,41 +1784,14 @@ class AShareAnalyzerGUI:
         shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
         data_dir = shared_data_dir
         
-        # 1. 首先加载单文件 (作为基础数据)
-        candidates = [
-            os.path.join(shared_data_dir, 'comprehensive_stock_data.json'),
-            self.comprehensive_data_file
-        ]
-        
-        for path in candidates:
-            if os.path.exists(path):
-                print(f"\033[1;33m[DEBUG] 正在从单体文件加载基础数据: {path}\033[0m")
-                try:
-                    with open(path, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                    
-                    loaded = {}
-                    if isinstance(data, dict):
-                        if 'data' in data and isinstance(data['data'], dict):
-                            loaded = data['data']
-                        elif 'stocks' in data and isinstance(data['stocks'], dict):
-                            loaded = data['stocks']
-                        else:
-                            loaded = data
-                    
-                    self.comprehensive_stock_data.update(loaded)
-                    print(f"\033[1;32m[INFO] 从单体文件加载了 {len(loaded)} 条数据\033[0m")
-                except Exception as e:
-                    print(f"\033[1;31m[ERROR] 加载单体文件 {path} 失败: {e}\033[0m")
-
-        # 2. 然后加载分卷数据 (覆盖/补充单体文件中的数据)
+        # 1. 首先加载分卷数据 (作为基础/历史补充)
         base_name = os.path.basename(self.comprehensive_data_file).replace('.json', '')
         part_pattern = os.path.join(data_dir, f"{base_name}_part_*.json")
         part_files = glob.glob(part_pattern)
         
         if part_files:
-            print(f"\033[1;33m[DEBUG] 发现 {len(part_files)} 个分卷数据文件，正在合并...\033[0m")
-            # 按编号排序确保加载顺序一致
+            print(f"\033[1;33m[DEBUG] 发现 {len(part_files)} 个分卷数据文件，正在加载基础数据...\033[0m")
+            # 按编号排序
             try:
                 part_files.sort(key=lambda x: int(x.split('_part_')[-1].replace('.json', '')))
             except:
@@ -1839,12 +1812,76 @@ class AShareAnalyzerGUI:
                             loaded_part = data
                     
                     self.comprehensive_stock_data.update(loaded_part)
-                    print(f"\033[1;32m[INFO] 已合并分卷: {os.path.basename(path)} ({len(loaded_part)} 条)\033[0m")
                 except Exception as e:
                     print(f"\033[1;31m[ERROR] 加载分卷 {path} 失败: {e}\033[0m")
             
-            # 建立 stock_file_index 映射
+            # 建立初步索引
             self._build_stock_file_index(part_files)
+            print(f"\033[1;32m[INFO] 已从分卷文件加载了 {len(self.comprehensive_stock_data)} 条基础数据\033[0m")
+
+        # 2. 然后加载单体主文件 (用最新的数据进行覆盖/更新)
+        candidates = [
+            os.path.join(shared_data_dir, 'comprehensive_stock_data.json'),
+            self.comprehensive_data_file
+        ]
+        
+        for path in candidates:
+            if os.path.exists(path):
+                print(f"\033[1;33m[DEBUG] 正在从主文件更新最新数据: {path}\033[0m")
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    loaded = {}
+                    if isinstance(data, dict):
+                        if 'data' in data and isinstance(data['data'], dict):
+                            loaded = data['data']
+                        elif 'stocks' in data and isinstance(data['stocks'], dict):
+                            loaded = data['stocks']
+                        else:
+                            loaded = data
+                    
+                    # 智能合并：优先使用最新数据，但如果最新数据缺失关键字段，则从旧数据中补全
+                    update_count = 0
+                    for code, new_info in loaded.items():
+                        if code not in self.comprehensive_stock_data:
+                            self.comprehensive_stock_data[code] = new_info
+                            update_count += 1
+                        else:
+                            old_info = self.comprehensive_stock_data[code]
+                            old_ts = old_info.get('timestamp', '')
+                            new_ts = new_info.get('timestamp', '')
+                            
+                            # 准备合并后的数据
+                            merged_info = new_info.copy() if new_ts >= old_ts else old_info.copy()
+                            source_info = old_info if new_ts >= old_ts else new_info
+                            
+                            # 检查并补全关键字段 (K线、基本面、技术指标)
+                            # 如果目标数据缺失某项，或者另一方的数据更完整/更新，则进行合并或补全
+                            for field in ['kline_data', 'fund_data', 'tech_data', 'financial_data', 'technical_indicators']:
+                                target_val = merged_info.get(field)
+                                source_val = source_info.get(field)
+                                
+                                if not target_val and source_val:
+                                    merged_info[field] = source_val
+                                elif target_val and source_val:
+                                    # 特殊处理 K 线数据：比较数据量
+                                    if field == 'kline_data':
+                                        target_points = target_val.get('data_points', 0)
+                                        source_points = source_val.get('data_points', 0)
+                                        # 如果 source 的 K 线数据点更多，或者 target 的 K 线数据为空，则使用 source 的
+                                        if source_points > target_points:
+                                            merged_info[field] = source_val
+                                    # 特殊处理技术指标：如果 target 缺失但 source 有，则补全
+                                    elif field == 'technical_indicators' and not target_val and source_val:
+                                        merged_info[field] = source_val
+                            
+                            self.comprehensive_stock_data[code] = merged_info
+                            update_count += 1
+                    
+                    print(f"\033[1;32m[INFO] 已完成 {update_count} 只股票的数据智能合并（含缺失字段补全）\033[0m")
+                except Exception as e:
+                    print(f"\033[1;31m[ERROR] 加载主文件 {path} 失败: {e}\033[0m")
 
         loaded_count = len(self.comprehensive_stock_data)
         if loaded_count > 0:
@@ -2789,7 +2826,11 @@ class AShareAnalyzerGUI:
                                 self.batch_scores[code] = {
                                     'name': stock_name,
                                     'overall_score': float(weighted_score),
-                                    'score': float(normalized_score),
+                                    'score': float(weighted_score), # V2已经是1-10分制，直接使用
+                                    'short_term_score': comprehensive_data.get('short_term', {}).get('score'),
+                                    'long_term_score': comprehensive_data.get('long_term', {}).get('score'),
+                                    'chip_score': comprehensive_data.get('chip_score'),
+                                    'chip_level': comprehensive_data.get('chip_level'),
                                     'industry': industry,
                                     'timestamp': datetime.now().strftime('%H:%M:%S')
                                 }
@@ -3854,18 +3895,43 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     'risk_level': long_score_data.get('risk_level', '中等')
                 },
                 
-                # 综合评分 (使用统一函数计算，保持一致性)
-                'overall_score': float(self.calculate_comprehensive_score(
-                    short_score_data.get('score', 0),
-                    medium_score_data.get('score', 0),
-                    long_score_data.get('score', 0),
-                    input_type='normalized'
-                )),
-                
-                # 时间戳
-                'timestamp': datetime.now().isoformat(),
-                'data_source': 'comprehensive_batch'
+                # 5. 计算筹码健康度 (新增)
+                'chip_score': None,
+                'chip_level': '未知',
             }
+            
+            # 执行筹码分析
+            if self.chip_analyzer:
+                try:
+                    # 优先使用缓存的K线数据进行筹码分析
+                    kline_daily = cached.get('kline_data', {}).get('daily')
+                    
+                    # 如果当前缓存中没有，尝试从全局缓存中获取（可能刚刚由Choice API更新）
+                    if not kline_daily and hasattr(self, 'comprehensive_stock_data'):
+                        kline_daily = self.comprehensive_stock_data.get(stock_code, {}).get('kline_data', {}).get('daily')
+                    
+                    # 调用筹码分析（如果无缓存则尝试实时获取）
+                    chip_result = self.get_or_compute_chip_result(stock_code, cached_kline_data=kline_daily)
+                    
+                    if chip_result and not chip_result.get('error'):
+                        comprehensive_data['chip_score'] = chip_result.get('health_score')
+                        comprehensive_data['chip_level'] = chip_result.get('health_level', '未知')
+                    else:
+                        error_msg = chip_result.get('error') if chip_result else 'None'
+                        print(f"[BATCH] {stock_code} 筹码分析未获得有效结果: {error_msg}")
+                except Exception as e:
+                    print(f"[BATCH] 筹码分析异常 {stock_code}: {e}")
+
+            # 6. 综合评分 (使用V2版本计算，包含筹码)
+            comprehensive_data['overall_score'] = float(self.calculate_comprehensive_score_v2(
+                comprehensive_data['short_term']['score'],
+                comprehensive_data['long_term']['score'],
+                comprehensive_data['chip_score']
+            ))
+            
+            # 时间戳
+            comprehensive_data['timestamp'] = datetime.now().isoformat()
+            comprehensive_data['data_source'] = 'comprehensive_batch'
             
             # 记录缓存未命中
             if is_cache_miss and hasattr(self, '_current_batch_cache_miss'):
@@ -4665,6 +4731,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         # 初始化Choice数据源选择变量
         self.use_choice_data = tk.BooleanVar(value=False)
         
+        # 初始化K线天数变量
+        self.kline_days_var = tk.IntVar(value=90)
+        
         # 进度条相关属性初始化（必须在所有分析操作前定义）
         self.progress_msg_var = tk.StringVar()
         self.progress_val_var = tk.DoubleVar()
@@ -4764,12 +4833,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         self.period_var = tk.StringVar(value="综合")
         try:
             period_menu = ttk.Combobox(recommend_frame, textvariable=self.period_var, 
-                                       values=["短期", "中期", "长期", "综合", "技术面", "基础面"], 
+                                       values=["短期", "中期", "长期", "综合", "技术面", "基础面", "筹码面"], 
                                        width=8, state='readonly', font=("微软雅黑", 11))
             period_menu.pack(side="left", padx=(0, 15))
         except Exception:
             # 如果 ttk 不可用，回退为普通 OptionMenu
-            tk.OptionMenu(recommend_frame, self.period_var, "短期", "中期", "长期", "综合", "技术面", "基础面").pack(side="left", padx=(0, 15))
+            tk.OptionMenu(recommend_frame, self.period_var, "短期", "中期", "长期", "综合", "技术面", "基础面", "筹码面").pack(side="left", padx=(0, 15))
         
         # 股票类型选择
         tk.Label(recommend_frame, text="类型:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(0, 5))
@@ -4781,11 +4850,16 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             # 如果 ttk 不可用，回退为普通 OptionMenu
             tk.OptionMenu(recommend_frame, self.stock_type_var, "主板", "创业板", "科创板", "全部").pack(side="left", padx=(0, 15))
 
+        # K线天数选择
+        tk.Label(recommend_frame, text="分析天数:", font=("微软雅黑", 12), bg="#f0f0f0").pack(side="left", padx=(0, 5))
+        self.kline_days_spin = tk.Spinbox(recommend_frame, from_=30, to=730, textvariable=self.kline_days_var, width=5, font=("微软雅黑", 11))
+        self.kline_days_spin.pack(side="left", padx=(0, 15))
+
         # 显示当前选中股票的评分组成（综合/技术/基础）
         # 创建一个专用的标签供 update_scoring_rule_display 使用
         try:
             self.scoring_rule_label = tk.Label(recommend_frame,
-                                              text="综合: - | 技术: - | 基础: -",
+                                              text="综合: - | 技术: - | 基本: -",
                                               font=("微软雅黑", 10),
                                               fg="#7f8c8d",
                                               bg="#f0f0f0")
@@ -4874,18 +4948,6 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                         width=12)
             get_etf_score_btn.pack(side="left", padx=5)
         
-        # 快速评分按钮
-        quick_score_btn = tk.Button(data_score_frame, 
-                                   text="快速评分", 
-                                   font=("微软雅黑", 11),
-                                   bg="#8e44ad", 
-                                   fg="white",
-                                   activebackground="#7d3c98",
-                                   command=self.start_quick_scoring,
-                                   cursor="hand2",
-                                   width=12)
-        quick_score_btn.pack(side="left", padx=5)
-        
         # Choice数据源复选框
         choice_data_checkbox = tk.Checkbutton(data_score_frame,
                                              text="使用Choice数据",
@@ -4920,18 +4982,6 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                     cursor="hand2",
                                     width=12)
         get_choice_btn.pack(side="left", padx=5)
-        
-        # 竞价排行按钮
-        auction_ranking_btn = tk.Button(data_score_frame, 
-                                       text="竞价排行", 
-                                       font=("微软雅黑", 11),
-                                       bg="#f39c12", 
-                                       fg="white",
-                                       activebackground="#e67e22",
-                                       command=self.run_call_auction_ranking,
-                                       cursor="hand2",
-                                       width=12)
-        auction_ranking_btn.pack(side="left", padx=5)
         
         # 断点续传控制区域
         resume_frame = tk.Frame(self.root, bg="#f0f0f0")
@@ -4971,6 +5021,62 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 font=("微软雅黑", 9), 
                 fg="#7f8c8d", 
                 bg="#f0f0f0").pack(side="left", padx=(10, 0))
+        
+        # 权重设置区域
+        weight_frame = tk.Frame(self.root, bg="#f0f0f0")
+        weight_frame.pack(fill="x", padx=20, pady=5)
+        
+        tk.Label(weight_frame, text="加权比例:", font=("微软雅黑", 12, "bold"), bg="#f0f0f0").pack(side="left", padx=(0, 10))
+        
+        # 标记位，防止权重调整时产生递归调用
+        self._is_adjusting_weights = False
+        
+        # 技术面权重
+        tk.Label(weight_frame, text="技术面:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
+        self.tech_weight_var = tk.DoubleVar(value=45.0)
+        self.tech_scale = tk.Scale(weight_frame, from_=0, to=100, resolution=1, orient=tk.HORIZONTAL, 
+                                  variable=self.tech_weight_var, length=100, bg="#f0f0f0",
+                                  command=lambda v: self._balance_weights('tech'))
+        self.tech_scale.pack(side="left", padx=5)
+        
+        # 基本面权重
+        tk.Label(weight_frame, text="基本面:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
+        self.fund_weight_var = tk.DoubleVar(value=35.0)
+        self.fund_scale = tk.Scale(weight_frame, from_=0, to=100, resolution=1, orient=tk.HORIZONTAL, 
+                                  variable=self.fund_weight_var, length=100, bg="#f0f0f0",
+                                  command=lambda v: self._balance_weights('fund'))
+        self.fund_scale.pack(side="left", padx=5)
+        
+        # 筹码权重
+        tk.Label(weight_frame, text="筹码面:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
+        self.chip_weight_var = tk.DoubleVar(value=20.0)
+        self.chip_scale = tk.Scale(weight_frame, from_=0, to=100, resolution=1, orient=tk.HORIZONTAL, 
+                                  variable=self.chip_weight_var, length=100, bg="#f0f0f0",
+                                  command=lambda v: self._balance_weights('chip'))
+        self.chip_scale.pack(side="left", padx=5)
+        
+        # 权重百分比显示
+        self.weight_label = tk.Label(weight_frame, text="45% : 35% : 20%", font=("微软雅黑", 10, "bold"), fg="#2980b9", bg="#f0f0f0")
+        self.weight_label.pack(side="left", padx=10)
+        
+        # 绑定权重变化事件
+        self.tech_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
+        self.fund_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
+        self.chip_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
+        
+        # 初始化权重显示
+        self._update_weight_label()
+        
+        # 重算综合分按钮
+        recalc_btn = tk.Button(weight_frame, 
+                              text="重算综合分", 
+                              font=("微软雅黑", 10),
+                              bg="#34495e", 
+                              fg="white",
+                              command=self.recalculate_all_comprehensive_scores,
+                              cursor="hand2",
+                              width=10)
+        recalc_btn.pack(side="left", padx=10)
         
         # 数据状态提示区域 - 重新设计布局
         data_status_main_frame = tk.Frame(self.root, bg="#ecf0f1", relief="ridge", bd=1)
@@ -5088,6 +5194,18 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                    cursor="hand2",
                                    width=12)
         hot_sectors_btn.pack(side="left", padx=5)
+        
+        # 竞价排行按钮
+        auction_ranking_btn = tk.Button(analysis_button_frame, 
+                                       text="竞价排行", 
+                                       font=("微软雅黑", 11),
+                                       bg="#f39c12", 
+                                       fg="white",
+                                       activebackground="#e67e22",
+                                       command=self.run_call_auction_ranking,
+                                       cursor="hand2",
+                                       width=12)
+        auction_ranking_btn.pack(side="left", padx=5)
         
         # --- 通用进度显示区域（所有操作共用） ---
         universal_progress_frame = tk.Frame(self.root, bg="#ecf0f1", relief="sunken", bd=1)
@@ -5324,11 +5442,141 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         """更新评分标签显示"""
         score = self.min_score_var.get()
         self.score_label.config(text=f"≥{score:.1f}分")
+
+    def _update_weight_label(self, event=None):
+        """更新权重显示标签"""
+        try:
+            tw = self.tech_weight_var.get()
+            fw = self.fund_weight_var.get()
+            cw = self.chip_weight_var.get()
+            total = tw + fw + cw
+            if abs(total - 100) > 0.1:
+                # 如果总和不是100，显示实际比例
+                if total > 0:
+                    p_tw = (tw / total) * 100
+                    p_fw = (fw / total) * 100
+                    p_cw = (cw / total) * 100
+                    self.weight_label.config(text=f"{p_tw:.0f}% : {p_fw:.0f}% : {p_cw:.0f}%")
+                else:
+                    self.weight_label.config(text="0% : 0% : 0%")
+            else:
+                self.weight_label.config(text=f"{tw:.0f}% : {fw:.0f}% : {cw:.0f}%")
+        except:
+            pass
+
+    def _balance_weights(self, changed_slider):
+        """自动平衡三个滑动条的权重，使总和保持为100%"""
+        if self._is_adjusting_weights:
+            return
+        
+        try:
+            self._is_adjusting_weights = True
+            
+            # 获取当前值 (Scale组件返回的是字符串或浮点数，统一转为float)
+            tw = float(self.tech_weight_var.get())
+            fw = float(self.fund_weight_var.get())
+            cw = float(self.chip_weight_var.get())
+            
+            if changed_slider == 'tech':
+                remaining = 100.0 - tw
+                other_sum = fw + cw
+                if other_sum > 0.1:
+                    new_fw = round(remaining * (fw / other_sum))
+                    self.fund_weight_var.set(new_fw)
+                    self.chip_weight_var.set(100.0 - tw - new_fw)
+                else:
+                    half = round(remaining / 2.0)
+                    self.fund_weight_var.set(half)
+                    self.chip_weight_var.set(100.0 - tw - half)
+            
+            elif changed_slider == 'fund':
+                remaining = 100.0 - fw
+                other_sum = tw + cw
+                if other_sum > 0.1:
+                    new_tw = round(remaining * (tw / other_sum))
+                    self.tech_weight_var.set(new_tw)
+                    self.chip_weight_var.set(100.0 - fw - new_tw)
+                else:
+                    half = round(remaining / 2.0)
+                    self.tech_weight_var.set(half)
+                    self.chip_weight_var.set(100.0 - fw - half)
+            
+            elif changed_slider == 'chip':
+                remaining = 100.0 - cw
+                other_sum = tw + fw
+                if other_sum > 0.1:
+                    new_tw = round(remaining * (tw / other_sum))
+                    self.tech_weight_var.set(new_tw)
+                    self.fund_weight_var.set(100.0 - cw - new_tw)
+                else:
+                    half = round(remaining / 2.0)
+                    self.tech_weight_var.set(half)
+                    self.fund_weight_var.set(100.0 - cw - half)
+            
+            # 更新标签
+            self._update_weight_label()
+            
+        except Exception as e:
+            print(f"[DEBUG] 权重平衡异常: {e}")
+        finally:
+            self._is_adjusting_weights = False
+
+    def recalculate_all_comprehensive_scores(self, silent=False):
+        """根据当前权重重新计算所有已加载股票的综合评分"""
+        try:
+            if not silent:
+                self.show_progress("🔄 正在根据新权重重算综合分...")
+            
+            self.load_batch_scores()
+            if not self.batch_scores:
+                if not silent:
+                    messagebox.showinfo("提示", "没有已加载的评分数据")
+                return
+            
+            count = 0
+            for code, data in self.batch_scores.items():
+                # 提取各维度分数
+                tech_score = data.get('short_term_score')
+                fund_score = data.get('long_term_score')
+                chip_score = data.get('chip_score')
+                
+                if tech_score is not None and fund_score is not None:
+                    # 使用 V2 权重重新计算
+                    new_score = self.calculate_comprehensive_score_v2(
+                        tech_score=tech_score,
+                        fund_score=fund_score,
+                        chip_score=chip_score
+                    )
+                    data['overall_score'] = round(new_score, 2)
+                    data['score'] = round(new_score, 2)
+                    count += 1
+            
+            if count > 0:
+                # 保存更新后的评分
+                self.save_batch_scores()
+                if not silent:
+                    self.hide_progress()
+                    messagebox.showinfo("成功", f"已根据新权重重新计算 {count} 只股票的综合评分")
+                else:
+                    self.show_progress(f"✅ 已重算 {count} 只股票评分")
+                    # 1.5秒后隐藏提示
+                    self.root.after(1500, self.hide_progress)
+            else:
+                if not silent:
+                    self.hide_progress()
+                    messagebox.showinfo("提示", "未找到可重新计算的数据")
+                
+        except Exception as e:
+            if not silent:
+                self.hide_progress()
+                messagebox.showerror("错误", f"重新计算失败: {e}")
+            else:
+                print(f"重新计算失败: {e}")
     
     def update_scoring_rule_display(self, ticker=None):
         """更新评分规则显示框
         
-        显示：综合评分、技术面评分、基本面评分
+        显示：综合评分、技术面评分、基本面评分、筹码评分
         如果三者都为0，使用综合评分作为替代
         
         优先顺序：
@@ -5338,12 +5586,13 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         """
         try:
             if not ticker:
-                self.scoring_rule_label.config(text="综合: - | 技术: - | 基础: -", fg="#7f8c8d")
+                self.scoring_rule_label.config(text="综合: - | 技术: - | 基本: - | 筹码: -", fg="#7f8c8d")
                 return
             
             comprehensive = 0
             short_term = 0
             long_term = 0
+            chip_score = 0
             
             # 优先从 batch_scores 获取
             if hasattr(self, 'batch_scores') and ticker in self.batch_scores:
@@ -5351,7 +5600,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 comprehensive = score_data.get('score', 0)
                 short_term = score_data.get('short_term_score', 0)
                 long_term = score_data.get('long_term_score', 0)
-                print(f"[评分规则] {ticker} 从batch_scores加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}")
+                chip_score = score_data.get('chip_score', 0)
+                print(f"[评分规则] {ticker} 从batch_scores加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}, 筹码={chip_score:.1f}")
             
             # 如果batch_scores中没有，尝试从comprehensive_data获取
             elif hasattr(self, 'comprehensive_data') and ticker in self.comprehensive_data:
@@ -5360,21 +5610,21 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 short_term = cached_data.get('short_term', {}).get('score', 0)
                 long_term = cached_data.get('long_term', {}).get('score', 0)
                 medium_term = cached_data.get('medium_term', {}).get('score', 0)
+                chip_score = cached_data.get('chip_score', 0)
                 
                 # 计算综合评分
                 if short_term != 0 or medium_term != 0 or long_term != 0:
-                    comprehensive = self.calculate_comprehensive_score(short_term, medium_term, long_term, input_type='normalized')
-                print(f"[评分规则] {ticker} 从comprehensive_data加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}")
+                    comprehensive = self.calculate_comprehensive_score_v2(short_term, long_term, chip_score)
+                print(f"[评分规则] {ticker} 从comprehensive_data加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}, 筹码={chip_score:.1f}")
             
             else:
                 # 没有数据，显示占位符
-                self.scoring_rule_label.config(text="综合: - | 技术: - | 基础: - | 筹码: -", fg="#7f8c8d")
+                self.scoring_rule_label.config(text="综合: - | 技术: - | 基本: - | 筹码: -", fg="#7f8c8d")
                 return
             
-            # 获取筹码健康度评分（仅一次调用）
-            chip_score = 0
-            chip_display = "-"
-            if self.chip_analyzer:
+            # 获取筹码健康度评分（如果之前没获取到）
+            chip_display = f"{chip_score:.1f}" if chip_score > 0 else "-"
+            if chip_score == 0 and self.chip_analyzer:
                 try:
                     # 检查是否使用Choice数据源
                     if self.use_choice_data.get():
@@ -5400,14 +5650,14 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 color = "#3498db"  # 蓝色表示正常值
             
             # 格式化显示
-            display_text = f"综合: {comprehensive:.1f} | 技术: {tech_display} | 基础: {fund_display} | 筹码: {chip_display}"
+            display_text = f"综合: {comprehensive:.1f} | 技术: {tech_display} | 基本: {fund_display} | 筹码: {chip_display}"
             self.scoring_rule_label.config(text=display_text, fg=color)
             
         except Exception as e:
             print(f"[错误] 更新评分规则显示失败: {e}")
             import traceback
             traceback.print_exc()
-            self.scoring_rule_label.config(text="综合: - | 技术: - | 基础: - | 筹码: -", fg="#e74c3c")
+            self.scoring_rule_label.config(text="综合: - | 技术: - | 基本: - | 筹码: -", fg="#e74c3c")
     
     def calculate_period_weighted_score(self, short_score, medium_score, long_score, period_type='overall'):
         """根据选择的时间段计算加权评分
@@ -6802,6 +7052,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
             self.show_progress(f"🎯 快速评分：筛选出 {total_count} 只候选股票 (ST筛选: {st_filtered_count} → 低分筛选: {total_count}) - {data_source_label}")
             
+            # 如果勾选了"仅重算权重"，则直接执行重算逻辑并返回
+            if hasattr(self, 'only_recalc_var') and self.only_recalc_var.get():
+                self.show_progress("🔄 正在根据新权重重算综合分...")
+                threading.Thread(target=self.recalculate_all_comprehensive_scores).start()
+                return
+
             # 保存筛选后的股票列表，供批量评分使用
             self._quick_score_filtered_codes = list(filtered_stocks.keys())
             self._is_quick_scoring_mode = True  # 标记为快速评分模式
@@ -8700,7 +8956,9 @@ K线更新后快速评分完成！
         # 使用更稳定的日期范围和参数
         from datetime import datetime, timedelta
         end_date = datetime.now().strftime('%Y%m%d')
-        start_date = (datetime.now() - timedelta(days=90)).strftime('%Y%m%d')
+        # 使用GUI设置的K线天数
+        days_to_fetch = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
+        start_date = (datetime.now() - timedelta(days=days_to_fetch)).strftime('%Y%m%d')
         
         # 尝试多种数据源
         stock_hist = None
@@ -8741,10 +8999,12 @@ K线更新后快速评分完成！
             
             # 计算MACD
             if len(stock_hist) >= 26:
-                ema12 = stock_hist['收盘'].ewm(span=12).mean().iloc[-1]
-                ema26 = stock_hist['收盘'].ewm(span=26).mean().iloc[-1]
-                macd = float(ema12 - ema26)
-                signal = float(stock_hist['收盘'].ewm(span=9).mean().iloc[-1])
+                ema12 = stock_hist['收盘'].ewm(span=12, adjust=False).mean()
+                ema26 = stock_hist['收盘'].ewm(span=26, adjust=False).mean()
+                macd_line = ema12 - ema26  # DIF快线
+                signal_line = macd_line.ewm(span=9, adjust=False).mean()  # DEA信号线（9日EMA）
+                macd = float(macd_line.iloc[-1])
+                signal = float(signal_line.iloc[-1])
             else:
                 macd = 0
                 signal = 0
@@ -8826,7 +9086,7 @@ K线更新后快速评分完成！
                             
                             # 尝试获取更长的时间范围，防止因停牌或假期导致数据为空
                             rs = bs.query_history_k_data_plus(bs_code,
-                                "close,volume",
+                                "date,open,high,low,close,volume",
                                 start_date=start_date[:4]+"-"+start_date[4:6]+"-"+start_date[6:], 
                                 end_date=end_date[:4]+"-"+end_date[4:6]+"-"+end_date[6:],
                                 frequency="d", adjustflag="3")
@@ -8838,6 +9098,28 @@ K线更新后快速评分完成！
                             if data_list:
                                 import pandas as pd
                                 df = pd.DataFrame(data_list, columns=rs.fields)
+                                
+                                # 保存完整K线数据供筹码分析使用
+                                try:
+                                    kline_list = []
+                                    for _, row in df.iterrows():
+                                        kline_list.append({
+                                            'date': str(row['date']),
+                                            'open': float(row['open']),
+                                            'high': float(row['high']),
+                                            'low': float(row['low']),
+                                            'close': float(row['close']),
+                                            'volume': float(row['volume'])
+                                        })
+                                    
+                                    if not hasattr(self, 'comprehensive_stock_data'):
+                                        self.comprehensive_stock_data = {}
+                                    if ticker not in self.comprehensive_stock_data:
+                                        self.comprehensive_stock_data[ticker] = {}
+                                    self.comprehensive_stock_data[ticker]['kline_data'] = {'daily': kline_list}
+                                except Exception as e_save:
+                                    print(f"⚠ 保存Baostock K线数据失败: {e_save}")
+
                                 stock_hist = pd.DataFrame({
                                     '收盘': df['close'].astype(float).values,
                                     '成交量': df['volume'].astype(float).values
@@ -8880,15 +9162,47 @@ K线更新后快速评分完成！
                     
                     tencent_kline = TencentKlineAPI()
                     end_date_str = datetime.now().strftime('%Y-%m-%d')
-                    start_date_str = (datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')
+                    # 使用GUI设置的K线天数
+                    days_to_fetch = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
+                    start_date_str = (datetime.now() - timedelta(days=days_to_fetch)).strftime('%Y-%m-%d')
                     
                     df = tencent_kline.get_stock_kline(ticker, start_date_str, end_date_str, period='day')
                     if df is not None and not df.empty:
                         # 转换为统一格式
                         import pandas as pd
+
+                        # 保存完整K线数据供筹码分析使用
+                        try:
+                            kline_list = []
+                            # 腾讯API返回的列名可能是中文或英文，需要兼容处理
+                            c_open = 'open' if 'open' in df.columns else '开盘'
+                            c_high = 'high' if 'high' in df.columns else '最高'
+                            c_low = 'low' if 'low' in df.columns else '最低'
+                            c_close = 'close' if 'close' in df.columns else '收盘'
+                            c_vol = 'volume' if 'volume' in df.columns else '成交量'
+                            c_date = 'date' if 'date' in df.columns else '日期'
+                            
+                            for _, row in df.iterrows():
+                                kline_list.append({
+                                    'date': str(row[c_date]) if c_date in df.columns else '',
+                                    'open': float(row[c_open]),
+                                    'high': float(row[c_high]),
+                                    'low': float(row[c_low]),
+                                    'close': float(row[c_close]),
+                                    'volume': float(row[c_vol])
+                                })
+                            
+                            if not hasattr(self, 'comprehensive_stock_data'):
+                                self.comprehensive_stock_data = {}
+                            if ticker not in self.comprehensive_stock_data:
+                                self.comprehensive_stock_data[ticker] = {}
+                            self.comprehensive_stock_data[ticker]['kline_data'] = {'daily': kline_list}
+                        except Exception as e_save:
+                            print(f"⚠ 保存腾讯K线数据失败: {e_save}")
+
                         stock_hist = pd.DataFrame({
-                            '收盘': df['close'].values if 'close' in df.columns else df['收盘'].values,
-                            '成交量': df['volume'].values if 'volume' in df.columns else df['成交量'].values
+                            '收盘': df[c_close].values,
+                            '成交量': df[c_vol].values
                         })
                         print(f"\033[92m✓ {ticker} 腾讯K线API获取成功，{len(stock_hist)}条记录\033[0m")
                     else:
@@ -9963,14 +10277,6 @@ K线更新后快速评分完成！
         
         Returns:
             综合评分 (1-10分制)
-        
-        权重分配策略：
-        - 标准权重（真实数据）:
-          * 有筹码: 技术面45% + 基本面35% + 筹码20%
-          * 无筹码: 技术面56% + 基本面44%
-        - 调整权重（默认值数据）:
-          * 有筹码: 技术面55% + 基本面15% + 筹码30%
-          * 无筹码: 技术面78% + 基本面22%
         """
         try:
             tech_score = float(tech_score) if tech_score is not None else 5.0
@@ -9980,47 +10286,61 @@ K线更新后快速评分完成！
             tech_score = max(1.0, min(10.0, tech_score))
             fund_score = max(1.0, min(10.0, fund_score))
             
+            # 获取UI权重（如果存在）
+            ui_tech_w = 45.0
+            ui_fund_w = 35.0
+            ui_chip_w = 20.0
+            
+            if hasattr(self, 'tech_weight_var'):
+                ui_tech_w = self.tech_weight_var.get()
+                ui_fund_w = self.fund_weight_var.get()
+                ui_chip_w = self.chip_weight_var.get()
+                
+                # 归一化权重
+                total_w = ui_tech_w + ui_fund_w + ui_chip_w
+                if total_w > 0:
+                    ui_tech_w = ui_tech_w / total_w
+                    ui_fund_w = ui_fund_w / total_w
+                    ui_chip_w = ui_chip_w / total_w
+                else:
+                    # 如果权重全为0，回退到默认
+                    ui_tech_w, ui_fund_w, ui_chip_w = 0.45, 0.35, 0.20
+            else:
+                ui_tech_w, ui_fund_w, ui_chip_w = 0.45, 0.35, 0.20
+
             # 根据基本面数据质量调整权重
             if fund_data_quality == 'default':
                 # 使用默认估算值时，大幅降低基本面权重
-                print("⚠️ 检测到基本面使用默认值，降低基本面权重: 35%→15% (有筹码) 或 44%→22% (无筹码)")
-                if chip_score is not None and chip_score > 0:
-                    # 有筹码评分：技术面55% + 基本面15% + 筹码30%
-                    chip_score = max(1.0, min(10.0, float(chip_score)))
-                    comprehensive_score = (
-                        tech_score * 0.55 +   # 技术面 55% (↑10%)
-                        fund_score * 0.15 +   # 基本面 15% (↓20%)
-                        chip_score * 0.30     # 筹码健康度 30% (↑10%)
-                    )
-                    print(f"   权重调整: 技术{tech_score:.1f}×0.55 + 基本面{fund_score:.1f}×0.15 + 筹码{chip_score:.1f}×0.30")
-                else:
-                    # 无筹码评分：技术面78% + 基本面22%
-                    comprehensive_score = (
-                        tech_score * 0.78 +   # 技术面 78%
-                        fund_score * 0.22     # 基本面 22%
-                    )
-                    print(f"   权重调整: 技术{tech_score:.1f}×0.78 + 基本面{fund_score:.1f}×0.22")
+                # 简单处理：将基本面权重的一半分配给技术面和筹码面
+                half_fund = ui_fund_w / 2
+                ui_tech_w += half_fund / 2
+                ui_chip_w += half_fund / 2
+                ui_fund_w = half_fund
+
+            if chip_score is not None and chip_score > 0:
+                chip_score = max(1.0, min(10.0, float(chip_score)))
+                comprehensive_score = (
+                    tech_score * ui_tech_w +
+                    fund_score * ui_fund_w +
+                    chip_score * ui_chip_w
+                )
             else:
-                # 使用真实数据时，采用标准权重
-                if chip_score is not None and chip_score > 0:
-                    # 有筹码评分：三维度加权
-                    chip_score = max(1.0, min(10.0, float(chip_score)))
-                    comprehensive_score = (
-                        tech_score * 0.45 +   # 技术面 45%
-                        fund_score * 0.35 +   # 基本面 35%
-                        chip_score * 0.20     # 筹码健康度 20%
-                    )
+                # 无筹码评分：将筹码权重按比例分配给技术和基本面
+                if ui_tech_w + ui_fund_w > 0:
+                    norm_tech_w = ui_tech_w / (ui_tech_w + ui_fund_w)
+                    norm_fund_w = ui_fund_w / (ui_tech_w + ui_fund_w)
                 else:
-                    # 无筹码评分：二维度加权 (保持45:35的相对比例)
-                    comprehensive_score = (
-                        tech_score * 0.5625 +   # 技术面 56.25% (45/80)
-                        fund_score * 0.4375     # 基本面 43.75% (35/80)
-                    )
+                    norm_tech_w, norm_fund_w = 0.5625, 0.4375
+                
+                comprehensive_score = (
+                    tech_score * norm_tech_w +
+                    fund_score * norm_fund_w
+                )
             
             # 确保结果在1-10范围内
             comprehensive_score = max(1.0, min(10.0, comprehensive_score))
             
-            return comprehensive_score
+            return round(comprehensive_score, 2)
             
         except Exception as e:
             print(f"[ERROR] 综合评分V2计算失败: {e}")
@@ -11370,8 +11690,10 @@ WARNING:  风险提示:
             short_score = stock.get('short_score') or stock.get('short_term_score')
             medium_score = stock.get('medium_score') or stock.get('medium_term_score')
             long_score = stock.get('long_score') or stock.get('long_term_score')
+            chip_score = stock.get('chip_score')
+            
             # 如果当前列表中没有分项评分，尝试从 batch_scores 中查询
-            if (short_score is None or medium_score is None or long_score is None) and hasattr(self, 'batch_scores'):
+            if (short_score is None or medium_score is None or long_score is None or chip_score is None) and hasattr(self, 'batch_scores'):
                 code = stock.get('code')
                 bs = self.batch_scores.get(code, {}) if getattr(self, 'batch_scores', None) else {}
                 if short_score is None:
@@ -11380,6 +11702,8 @@ WARNING:  风险提示:
                     medium_score = bs.get('medium_term_score') or bs.get('medium_score')
                 if long_score is None:
                     long_score = bs.get('long_term_score') or bs.get('long_score')
+                if chip_score is None:
+                    chip_score = bs.get('chip_score')
             
             # 根据评分生成评级
             if score >= 9.0:
@@ -11393,48 +11717,57 @@ WARNING:  风险提示:
             else:
                 rating = "观望 ⭐"
             
+            # 获取筹码健康度信息
+            chip_level = stock.get('chip_level')
+            if chip_score is None and hasattr(self, 'batch_scores'):
+                bs = self.batch_scores.get(stock['code'], {})
+                chip_score = bs.get('chip_score')
+                chip_level = bs.get('chip_level')
+            
             # 构建括号内的分项显示
             parts = []
-            # 短期/技术
+            # 技术面
             if short_score is not None:
                 try:
-                    parts.append(f"短:{float(short_score):.1f}")
+                    parts.append(f"技术:{float(short_score):.1f}")
                 except:
                     pass
-            # 中期
-            if medium_score is not None:
-                try:
-                    parts.append(f"中:{float(medium_score):.1f}")
-                except:
-                    pass
-            # 长期/基本面
+            else:
+                parts.append("技术:N/A")
+
+            # 基本面
             if long_score is not None:
                 try:
-                    parts.append(f"长:{float(long_score):.1f}")
+                    parts.append(f"基本:{float(long_score):.1f}")
                 except:
                     pass
-            # 综合
-            try:
-                parts.append(f"综:{float(score):.1f}")
-            except:
-                pass
-            
-            # 别名显示 (技术=短期, 基本面=长期)
-            if short_score is not None:
+            else:
+                parts.append("基本:N/A")
+
+            # 筹码面
+            if chip_score is not None:
                 try:
-                    parts.append(f"技:{float(short_score):.1f}")
+                    parts.append(f"筹码:{float(chip_score):.1f}")
                 except:
                     pass
-            if long_score is not None:
-                try:
-                    parts.append(f"基:{float(long_score):.1f}")
-                except:
-                    pass
+            else:
+                parts.append("筹码:N/A")
 
             extra = f" ({', '.join(parts)})" if parts else ""
 
+            chip_info = ""
+            if chip_score is not None:
+                chip_emoji_map = {
+                    '极度健康': '🟢', '非常健康': '🟢', '健康': '🟡',
+                    '一般': '🟠', '不健康': '🔴', '危险': '🔴'
+                }
+                chip_emoji = chip_emoji_map.get(chip_level, '⚪')
+                chip_info = f" | 筹码:{chip_emoji}{float(chip_score):.1f}"
+            else:
+                chip_info = " | 筹码:⚪N/A"
+
             report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}
-    📊 长期评分：{score:.2f}/10.0{extra}  📊 {rating.split(' ')[0]}
+    📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  📊 {rating.split(' ')[0]}
     📈 趋势判断：{stock.get('trend', '未知')}
 
 """
@@ -16601,7 +16934,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
         else:
             return "极高位（高于90%筹码）🔥"
 
-    def get_or_compute_chip_result(self, ticker, force=False):
+    def get_or_compute_chip_result(self, ticker, force=False, cached_kline_data=None):
         """获取或计算筹码分析结果，结果会被缓存到 `self.comprehensive_stock_data[ticker]['chip_result']`。
 
         如果 `force=True` 则强制重新计算。
@@ -16620,7 +16953,11 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
             # 未缓存或强制重新计算
             if not self.chip_analyzer:
                 return None
-            chip_result = self.chip_analyzer.analyze_stock(ticker)
+            
+            # 如果是批量模式（提供了缓存K线），则传入缓存
+            is_batch = cached_kline_data is not None
+            chip_result = self.chip_analyzer.analyze_stock(ticker, cached_kline_data=cached_kline_data, is_batch_mode=is_batch)
+            
             # 仅在成功时缓存
             if chip_result and not chip_result.get('error'):
                 self.comprehensive_stock_data[ticker]['chip_result'] = chip_result
@@ -16853,7 +17190,8 @@ WARNING: 重要声明:
                 "长期": "long",
                 "综合": "overall",
                 "技术面": "technical",
-                "基础面": "fundamental"
+                "基础面": "fundamental",
+                "筹码面": "chip"
             }
             period_type = period_mapping.get(period, "overall")
             
@@ -16902,7 +17240,8 @@ WARNING: 重要声明:
                 'long': '长期',
                 'overall': '综合',
                 'technical': '技术面',
-                'fundamental': '基础面'
+                'fundamental': '基础面',
+                'chip': '筹码面'
             }
             period_name = period_map.get(period_type, period_type)
             
@@ -16973,11 +17312,12 @@ WARNING: 重要声明:
                 else:
                     print(f"[DEBUG] ⚠️ 筛选后000001被移除！总共{len(filtered_stocks)}只股票")
             
-            elif period_type in ['technical', 'fundamental']:
-                # 技术面或基础面：直接使用对应的单一评分
+            elif period_type in ['technical', 'fundamental', 'chip']:
+                # 技术面、基础面或筹码面：直接使用对应的单一评分
                 score_key_map = {
                     'technical': 'short_term_score',  # 技术面用短期评分
-                    'fundamental': 'long_term_score'   # 基础面用长期评分
+                    'fundamental': 'long_term_score',   # 基础面用长期评分
+                    'chip': 'chip_score'              # 筹码面用筹码评分
                 }
                 score_key = score_key_map.get(period_type, 'score')
                 
@@ -17367,6 +17707,13 @@ WARNING: 重要声明:
 • 风险等级: 中低风险
 • 适合对象: 价值投资者
 """
+        elif period_name == "筹码面":
+            strategy_desc = """
+• 筹码面推荐: 深度筹码分布分析+主力动向评估
+• 投资周期: 灵活配置
+• 风险等级: 中等风险
+• 适合对象: 关注主力资金动向的投资者
+"""
         else:
             strategy_desc = """
 • 综合推荐: 平衡技术面和基本面分析
@@ -17392,61 +17739,29 @@ WARNING: 重要声明:
             short_score = stock.get('short_score') or stock.get('short_term_score')
             medium_score = stock.get('medium_score') or stock.get('medium_term_score')
             long_score = stock.get('long_score') or stock.get('long_term_score')
+            chip_score = stock.get('chip_score')
+            
             # 如果没有，从 batch_scores 或 comprehensive_data 中查找
-            if (short_score is None or medium_score is None or long_score is None):
+            if (short_score is None or medium_score is None or long_score is None or chip_score is None):
                 # 优先从 batch_scores
                 if hasattr(self, 'batch_scores'):
                     bs = self.batch_scores.get(code, {})
                     short_score = short_score or bs.get('short_term_score') or bs.get('short_score')
                     medium_score = medium_score or bs.get('medium_term_score') or bs.get('medium_score')
                     long_score = long_score or bs.get('long_term_score') or bs.get('long_score')
+                    chip_score = chip_score or bs.get('chip_score')
                 # 再尝试从 comprehensive_data
-                if (short_score is None or medium_score is None or long_score is None) and hasattr(self, 'comprehensive_data'):
+                if (short_score is None or medium_score is None or long_score is None or chip_score is None) and hasattr(self, 'comprehensive_data'):
                     cd = self.comprehensive_data.get(code, {})
                     short_score = short_score or cd.get('short_term', {}).get('score')
                     medium_score = medium_score or cd.get('medium_term', {}).get('score')
                     long_score = long_score or cd.get('long_term', {}).get('score')
-            parts = []
-            # 短期/技术
-            try:
-                if short_score is not None:
-                    parts.append(f"短:{float(short_score):.1f}")
-            except:
-                pass
-            # 中期
-            try:
-                if medium_score is not None:
-                    parts.append(f"中:{float(medium_score):.1f}")
-            except:
-                pass
-            # 长期/基本面
-            try:
-                if long_score is not None:
-                    parts.append(f"长:{float(long_score):.1f}")
-            except:
-                pass
-            # 综合
-            try:
-                parts.append(f"综:{float(score):.1f}")
-            except:
-                pass
-            # 别名显示 (技术=短期, 基本面=长期)
-            try:
-                if short_score is not None:
-                    parts.append(f"技:{float(short_score):.1f}")
-            except:
-                pass
-            try:
-                if long_score is not None:
-                    parts.append(f"基:{float(long_score):.1f}")
-            except:
-                pass
-            extra = f" ({', '.join(parts)})" if parts else ""
-            
+                    chip_score = chip_score or cd.get('chip_score')
             # 获取筹码健康度信息（优先从推荐数据中获取）
             chip_info = ""
             chip_detail_line = ""
-            chip_score = stock.get('chip_score')
+            if chip_score is None:
+                chip_score = stock.get('chip_score')
             chip_level = stock.get('chip_level')
             
             # 如果推荐数据中没有，则尝试实时获取
@@ -17458,6 +17773,34 @@ WARNING: 重要声明:
                         chip_level = chip_result.get('health_level', '未知')
                 except Exception:
                     pass
+
+            parts = []
+            # 技术面
+            try:
+                if short_score is not None:
+                    parts.append(f"技术:{float(short_score):.1f}")
+                else:
+                    parts.append("技术:N/A")
+            except:
+                pass
+            # 基本面
+            try:
+                if long_score is not None:
+                    parts.append(f"基本:{float(long_score):.1f}")
+                else:
+                    parts.append("基本:N/A")
+            except:
+                pass
+            # 筹码面
+            try:
+                if chip_score is not None:
+                    parts.append(f"筹码:{float(chip_score):.1f}")
+                else:
+                    parts.append("筹码:N/A")
+            except:
+                pass
+            
+            extra = f" ({', '.join(parts)})" if parts else ""
             
             # 生成筹码显示信息（始终显示，即使没有数据）
             if chip_score is not None and chip_level:
@@ -17493,7 +17836,7 @@ WARNING: 重要声明:
             
             stock_info = f"""
 {score_color} 第 {i} 名：{code} {name}
-    📊 {period_name}评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
+    📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
     📈 趋势判断：{trend}
 """
             
@@ -17712,11 +18055,17 @@ WARNING: 重要声明:
                     total = len(main_board_codes)
                     print(f"[INFO] 找到 {total} 只主板股票，使用Choice更新K线数据")
                     
-                    # 计算日期范围（最近50天）
+                    # 计算日期范围 (从 GUI 变量获取，默认 90 天)
+                    try:
+                        kline_days = int(self.kline_days_var.get())
+                    except:
+                        kline_days = 90
+                    
                     end_date = datetime.now()
-                    start_date = end_date - timedelta(days=50)
+                    start_date = end_date - timedelta(days=kline_days)
                     start_str = start_date.strftime('%Y-%m-%d')
                     end_str = end_date.strftime('%Y-%m-%d')
+                    print(f"[INFO] Choice 更新范围: {start_str} ~ {end_str} ({kline_days} 天)")
                     
                     # 批量处理
                     batch_size = 20
@@ -17829,6 +18178,14 @@ WARNING: 重要声明:
 
                 # 创建收集器实例，明确禁用Choice（因为在else分支中）
                 collector = ComprehensiveDataCollector(use_choice=False)
+                
+                # 设置 K 线天数 (从 GUI 变量获取)
+                try:
+                    kline_days = int(self.kline_days_var.get())
+                    collector.kline_days = kline_days
+                    print(f"[INFO] 设置采集器 K 线天数为: {kline_days}")
+                except:
+                    pass
                 
                 # 启用退市股票保护功能（如果可用）
                 if delisting_protection_available:
@@ -18686,8 +19043,8 @@ WARNING: 重要声明:
             chip_score = None
             chip_level = None
             
-            # 只有在不使用Choice数据时才计算筹码健康度（因为Choice数据时使用本地K线）
-            if self.chip_analyzer and not self.use_choice_data.get():
+            # 🔴 改进：无论是否使用Choice数据，只要有K线缓存就计算筹码健康度
+            if self.chip_analyzer:
                 try:
                     print(f"[CHIP-START] {code} 开始计算筹码健康度...")
                     
@@ -18697,7 +19054,7 @@ WARNING: 重要声明:
                         stock_cache = self.comprehensive_stock_data[code]
                         if 'kline_data' in stock_cache and stock_cache['kline_data']:
                             # 支持两种K线数据结构
-                            if 'daily' in stock_cache['kline_data']:
+                            if isinstance(stock_cache['kline_data'], dict) and 'daily' in stock_cache['kline_data']:
                                 cached_kline = stock_cache['kline_data']['daily']
                             else:
                                 cached_kline = stock_cache['kline_data']
@@ -18734,9 +19091,20 @@ WARNING: 重要声明:
                     import traceback
                     traceback.print_exc()
             else:
-                skip_reason = "使用Choice数据" if self.use_choice_data.get() else "筹码分析器未初始化"
-                print(f"[CHIP-SKIP] {code} 跳过筹码分析 - 原因: {skip_reason}")
+                print(f"[CHIP-SKIP] {code} 跳过筹码分析 - 原因: 筹码分析器未初始化")
             
+            # === 综合评分更新 (包含筹码分) ===
+            # 如果有筹码分，使用 V2 权重重新计算综合分
+            if chip_score is not None:
+                # 映射：短期->技术面, 长期->基本面
+                overall_score = self.calculate_comprehensive_score_v2(
+                    tech_score=short_score,
+                    fund_score=long_score,
+                    chip_score=chip_score,
+                    fund_data_quality='normal' # 批量模式通常使用已收集的真实数据
+                )
+                print(f"[CALC] {code} 综合评分已更新(含筹码): {overall_score:.2f}")
+
             # 构建返回结果，包含筹码健康度字段
             result = {
                 'name': stock_info.get('name', ''),
@@ -18745,7 +19113,8 @@ WARNING: 重要声明:
                 'medium_term_score': round(medium_score, 2),
                 'long_term_score': round(long_score, 2),
                 'overall_score': round(overall_score, 2),
-                'analysis_reason': f"基于本地缓存数据的三时间段预测分析（短期{short_score:.1f}、中期{medium_score:.1f}、长期{long_score:.1f}）",
+                'score': round(overall_score, 2), # 兼容性字段，推荐系统使用 'score'
+                'analysis_reason': f"基于本地缓存数据的三维度综合分析（技术{short_score:.1f}、基本面{long_score:.1f}、筹码{chip_score if chip_score else 'N/A'}）",
                 'recommendation': self._generate_algorithmic_recommendation(overall_score),
                 'timestamp': datetime.now().isoformat(),
                 'analysis_type': 'algorithmic_with_real_data',
@@ -19242,9 +19611,11 @@ def main():
                 print(f"❌ Choice登录失败: {result.ErrorMsg}")
                 return None
             
-            # 获取K线数据（60天足够计算MA60）
+            # 获取K线数据（250天足够计算筹码分布）
             end_date = datetime.now().strftime("%Y-%m-%d")
-            start_date = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")  # 约60个交易日
+            # 使用GUI设置的K线天数
+            days_to_fetch = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
+            start_date = (datetime.now() - timedelta(days=days_to_fetch)).strftime("%Y-%m-%d")
             
             print(f"[DEBUG-CSD] 调用CSD接口...")
             print(f"[DEBUG-CSD] 参数: stock_code={stock_code}, indicators=OPEN,HIGH,LOW,CLOSE,VOLUME")
@@ -19346,9 +19717,35 @@ def main():
                     return None
             
             # 按照Indicators顺序提取：OPEN, HIGH, LOW, CLOSE, VOLUME
+            opens = stock_values[0]
+            highs = stock_values[1]
+            lows = stock_values[2]
             closes = stock_values[3]  # CLOSE是第4个指标（索引3）
             volumes = stock_values[4] if len(stock_values) > 4 else [0] * len(closes)
             
+            # 保存K线数据到缓存，供筹码分析使用
+            try:
+                kline_list = []
+                for i in range(len(dates)):
+                    kline_list.append({
+                        'date': dates[i],
+                        'open': float(opens[i]),
+                        'high': float(highs[i]),
+                        'low': float(lows[i]),
+                        'close': float(closes[i]),
+                        'volume': float(volumes[i])
+                    })
+                
+                if not hasattr(self, 'comprehensive_stock_data'):
+                    self.comprehensive_stock_data = {}
+                if ticker not in self.comprehensive_stock_data:
+                    self.comprehensive_stock_data[ticker] = {}
+                
+                self.comprehensive_stock_data[ticker]['kline_data'] = {'daily': kline_list}
+                print(f"[DEBUG-CSD] 已保存 {len(kline_list)} 条K线数据到缓存")
+            except Exception as e:
+                print(f"[DEBUG-CSD] 保存K线数据失败: {e}")
+
             if not closes or len(closes) < 20:
                 print(f"⚠️  K线数据不足: {len(closes)}条")
                 
