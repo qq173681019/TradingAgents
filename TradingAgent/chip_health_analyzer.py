@@ -295,10 +295,59 @@ class ChipHealthAnalyzer:
         result['signals'] = signals
         result['health_level'] = self._get_health_level(health_score)
         
+        # 12. 识别主力动向 (主力拉升 vs 散户跟风)
+        print("")
+        step_log("识别主力动向...")
+        main_force_status = self._identify_main_force_status(result)
+        result['main_force_status'] = main_force_status
+        print(f"✓ 主力动向: {main_force_status}")
+        
         # 打印结果
         self._print_result(result)
         
         return result
+
+    def _identify_main_force_status(self, result):
+        """识别主力动向：主力拉升 vs 散户跟风"""
+        scr = result.get('scr', 100)
+        profit_ratio = result.get('profit_ratio', 0)
+        turnover = result.get('turnover_rate', 0)
+        bottom_locked = result.get('bottom_locked', False)
+        peak_type = result.get('peak_type', '')
+        chip_bias = result.get('chip_bias', 0)
+        
+        # 1. 主力拉升识别逻辑：
+        # - 筹码高度集中 (SCR < 20)
+        # - 底部筹码锁定 (bottom_locked)
+        # - 获利盘比例高 (profit_ratio > 70%)
+        # - 换手率适中 (2% < turnover < 10%)，说明主力控盘稳健
+        if scr < 20 and bottom_locked and profit_ratio > 70:
+            if 2 <= turnover <= 10:
+                return "主力拉升"
+            elif turnover > 10:
+                return "主力出货?" # 高换手可能是主力在派发
+        
+        # 2. 散户跟风识别逻辑：
+        # - 筹码分散 (SCR > 25)
+        # - 获利盘比例极高 (profit_ratio > 85%)
+        # - 换手率极高 (turnover > 12%)
+        # - 乖离率过大 (chip_bias > 15%)
+        if scr > 25 and profit_ratio > 85 and turnover > 12:
+            return "散户跟风"
+            
+        # 3. 主力吸筹
+        if scr < 20 and profit_ratio < 30 and '底部' in peak_type:
+            return "主力吸筹"
+            
+        # 4. 震荡洗盘
+        if 20 <= scr <= 30 and 40 <= profit_ratio <= 75:
+            return "震荡洗盘"
+            
+        # 5. 高位派发
+        if '高位' in peak_type or (profit_ratio > 90 and turnover > 15):
+            return "高位派发"
+            
+        return "状态不明"
     
     def _get_price_and_history(self, stock_code):
         """获取当前价格和历史数据（带重试机制和超时控制）"""

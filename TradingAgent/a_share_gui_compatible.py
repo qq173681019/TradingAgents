@@ -610,6 +610,8 @@ class AShareAnalyzerGUI:
         # 新增：数据收集相关属性
         self.data_collection_active = False  # 数据收集是否正在进行
         self.status_checker = None           # 股票状态检测器 (单例)
+        self.last_recommendations = []       # 新增：保存最后一次生成的推荐结果
+        self.last_batch_results = []         # 新增：保存最后一次批量分析的结果
         
         # ST股票筛选关键字
         self.st_keywords = ['ST', '*ST', 'ST*', 'S*ST', 'SST', '退', '停牌']
@@ -4023,6 +4025,17 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 # 清空之前的失败记录
                 self.failed_real_data_stocks = []
                 
+                # 如果勾选了Choice，先尝试登录一次，避免后续重复登录开销
+                if self.use_choice_data.get():
+                    try:
+                        from config import CHOICE_PASSWORD, CHOICE_USERNAME
+                        from EmQuantAPI import c
+                        login_options = f"username={CHOICE_USERNAME},password={CHOICE_PASSWORD}"
+                        c.start(login_options)
+                        print("[CSV-BATCH] Choice API 已预先启动")
+                    except Exception as e:
+                        print(f"[CSV-BATCH] Choice API 预启动失败: {e}")
+
                 # 初始化进度条
                 results = []
                 total = len(stock_codes)
@@ -4084,6 +4097,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                             # ========== 添加筹码健康度分析（与单只分析完全相同）==========
                             chip_score = None
                             chip_health_level = "未分析"
+                            main_force_status = "未分析"
                             scr_value = None
 
                             if self.chip_analyzer:
@@ -4092,8 +4106,9 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                     if chip_result and not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
                                         chip_score = chip_result.get('health_score', 0)
                                         chip_health_level = chip_result.get('health_level', '未知')
+                                        main_force_status = chip_result.get('main_force_status', '状态不明')
                                         scr_value = chip_result.get('scr', 0)
-                                        print(f"[CSV-CHIP] {code} 筹码评分: {chip_score:.1f}/10, 等级: {chip_health_level}, SCR: {scr_value:.2f}%")
+                                        print(f"[CSV-CHIP] {code} 筹码评分: {chip_score:.1f}/10, 等级: {chip_health_level}, 动向: {main_force_status}")
                                 except Exception as e:
                                     print(f"[CSV-CHIP] {code} 筹码分析失败: {e}")
 
@@ -4107,6 +4122,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                 '基本面评分': round(fund_score, 1) if fund_score else 0,
                                 '筹码健康度': round(chip_score, 1) if chip_score is not None else None,
                                 '筹码等级': chip_health_level,
+                                '主力动向': main_force_status,
                                 'SCR集中度': f"{scr_value:.2f}%" if scr_value is not None else None,
                                 'RSI状态': rsi_status,
                                 '趋势': trend,
@@ -4137,6 +4153,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 
                 # 批量分析完成 - 显示统计摘要（不包含逐行明细）
                 if results:
+                    self.last_batch_results = results  # 保存结果供导出使用
                     self.update_progress_with_bar(f"SUCCESS: CSV批量分析完成！成功分析 {len(results)} 只股票", progress_percent=100, detail="100%")
                     # 显示统计摘要
                     self.display_csv_summary_only(results)
@@ -4338,11 +4355,14 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             self.overview_text.tag_config("下跌", foreground="blue")
             self.overview_text.tag_config("上涨", foreground="orange")
             self.overview_text.tag_config("震荡", foreground="black")
+            self.overview_text.tag_config("主力拉升", foreground="red", font=("微软雅黑", 9, "bold"))
+            self.overview_text.tag_config("主力吸筹", foreground="purple", font=("微软雅黑", 9, "bold"))
+            self.overview_text.tag_config("散户跟风", foreground="gray")
             
             report += pad_string("代码", 10) + pad_string("名称", 16) + pad_string("综合", 8) + \
                       pad_string("技术", 8) + pad_string("基本", 8) + pad_string("筹码", 8) + \
-                      pad_string("RSI", 10) + pad_string("趋势", 14) + pad_string("行业", 14) + "\n"
-            report += "=" * 100 + "\n"
+                      pad_string("主力动向", 12) + pad_string("RSI", 10) + pad_string("趋势", 14) + "\n"
+            report += "=" * 110 + "\n"
             
             # 先插入表头部分
             self.overview_text.insert(tk.END, report)
@@ -4350,14 +4370,14 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             # 逐行插入股票数据并应用颜色
             for stock in results:
                 code = stock['股票代码']
-                name = stock['股票名称'][:7]
+                name = stock['股票名称'][:10]  # 增加长度以容纳 "股票000821"
                 综合 = f"{stock['综合评分']:.1f}" if stock['综合评分'] else "N/A"
                 技术 = f"{stock['技术面评分']:.1f}" if stock['技术面评分'] else "N/A"
                 基本 = f"{stock['基本面评分']:.1f}" if stock['基本面评分'] else "N/A"
                 筹码 = f"{stock.get('筹码健康度', 0):.1f}" if stock.get('筹码健康度') else "-"
+                动向 = stock.get('主力动向', '未分析')
                 rsi = stock['RSI状态'][:4]
                 trend_raw = stock['趋势']
-                industry = stock['所属行业'][:6]
                 
                 # 确定颜色标签
                 if '强势下跌' in trend_raw:
@@ -4376,13 +4396,23 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 # 构建行文本
                 line_text = pad_string(code, 10) + pad_string(name, 16) + pad_string(综合, 8) + \
                            pad_string(技术, 8) + pad_string(基本, 8) + pad_string(筹码, 8) + \
-                           pad_string(rsi, 10) + pad_string(trend_raw[:6], 14) + pad_string(industry, 14) + "\n"
+                           pad_string(动向, 12) + pad_string(rsi, 10) + pad_string(trend_raw[:8], 14) + "\n"
                 
-                # 插入带颜色的行
+                # 插入文本
+                start_index = self.overview_text.index(tk.END)
+                self.overview_text.insert(tk.END, line_text)
+                
+                # 应用趋势颜色
                 if color_tag:
-                    self.overview_text.insert(tk.END, line_text, color_tag)
-                else:
-                    self.overview_text.insert(tk.END, line_text)
+                    line_start = start_index.split('.')[0]
+                    # 趋势列在第 10+16+8+8+8+8+12+10 = 80 字符左右
+                    self.overview_text.tag_add(color_tag, f"{line_start}.80", f"{line_start}.94")
+                
+                # 应用主力动向颜色
+                if 动向 in ["主力拉升", "主力吸筹", "散户跟风"]:
+                    line_start = start_index.split('.')[0]
+                    # 动向列在第 10+16+8+8+8+8 = 58 字符左右
+                    self.overview_text.tag_add(动向, f"{line_start}.58", f"{line_start}.70")
             
             # 继续构建统计报告
             report = ""
@@ -4880,6 +4910,19 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                      width=12)
         main_recommend_btn.pack(side="left", padx=5)
         
+        # 导出CSV按钮
+        self.export_csv_btn = tk.Button(recommend_frame, 
+                                      text="导出成CSV", 
+                                      font=("微软雅黑", 11),
+                                      bg="#3498db", 
+                                      fg="white",
+                                      activebackground="#2980b9",
+                                      command=self.export_last_recommendations_to_csv,
+                                      cursor="hand2",
+                                      width=12,
+                                      state="disabled") # 初始禁用，生成推荐后启用
+        self.export_csv_btn.pack(side="left", padx=5)
+        
         # 推荐ETF按钮 - 根据全局开关决定是否显示
         if ENABLE_ETF_BUTTONS:
             etf_recommend_btn = tk.Button(recommend_frame, 
@@ -5173,6 +5216,18 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                        cursor="hand2",
                        width=12)
         csv_analysis_btn.pack(side="left", padx=5)
+
+        # 新增：导出批量分析结果按钮
+        export_batch_btn = tk.Button(analysis_button_frame, 
+                       text="导出分析结果", 
+                       font=("微软雅黑", 11),
+                       bg="#27ae60", 
+                       fg="white",
+                       activebackground="#2ecc71",
+                       command=self.export_batch_results_to_csv,
+                       cursor="hand2",
+                       width=12)
+        export_batch_btn.pack(side="left", padx=5)
 
         # 新增：批量分析结果排序勾选框
         self.sort_csv_var = tk.BooleanVar(value=False)
@@ -8171,27 +8226,28 @@ K线更新后快速评分完成！
 
         # 方案6: Tushare (日线收盘价作为兜底)
         try:
-            import tushare as ts
-            if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
-                ts.set_token(TUSHARE_TOKEN)
-                pro = ts.pro_api()
-                if ticker.startswith('6'):
-                    ts_code = f"{ticker}.SH"
-                else:
-                    ts_code = f"{ticker}.SZ"
-                
-                # 获取最近交易日数据
-                import datetime
-                end_date = datetime.datetime.now().strftime('%Y%m%d')
-                start_date = (datetime.datetime.now() - datetime.timedelta(days=10)).strftime('%Y%m%d')
-                
-                df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
-                if not df.empty:
-                    real_price = float(df.iloc[0]['close'])
-                    self.log_price_with_score(ticker, real_price)
-                    return real_price
-                else:
-                    failed_sources.append("Tushare")
+            if TUSHARE_AVAILABLE:
+                import tushare as ts
+                if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
+                    ts.set_token(TUSHARE_TOKEN)
+                    pro = ts.pro_api()
+                    if ticker.startswith('6'):
+                        ts_code = f"{ticker}.SH"
+                    else:
+                        ts_code = f"{ticker}.SZ"
+                    
+                    # 获取最近交易日数据
+                    import datetime
+                    end_date = datetime.datetime.now().strftime('%Y%m%d')
+                    start_date = (datetime.datetime.now() - datetime.timedelta(days=10)).strftime('%Y%m%d')
+                    
+                    df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+                    if not df.empty:
+                        real_price = float(df.iloc[0]['close'])
+                        self.log_price_with_score(ticker, real_price)
+                        return real_price
+                    else:
+                        failed_sources.append("Tushare")
         except Exception:
             failed_sources.append("Tushare")
 
@@ -8693,36 +8749,37 @@ K线更新后快速评分完成！
                 # 1. 尝试Tushare基础数据
                 try:
                     print(f"{ticker} 尝试Tushare基础数据...")
-                    import tushare as ts
-                    if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
-                        ts.set_token(TUSHARE_TOKEN)
-                        pro = ts.pro_api()
-                        if ticker.startswith('6'):
-                            ts_code = f"{ticker}.SH"
+                    if TUSHARE_AVAILABLE:
+                        import tushare as ts
+                        if 'TUSHARE_TOKEN' in globals() and TUSHARE_TOKEN:
+                            ts.set_token(TUSHARE_TOKEN)
+                            pro = ts.pro_api()
+                            if ticker.startswith('6'):
+                                ts_code = f"{ticker}.SH"
+                            else:
+                                ts_code = f"{ticker}.SZ"
+                            
+                            df = pro.daily_basic(ts_code=ts_code, fields='pe_ttm,pb,total_mv')
+                            if not df.empty:
+                                # 获取财务指标
+                                fina = pro.fina_indicator(ts_code=ts_code, period='20231231', fields='roe,debt_to_assets')
+                                roe = 0.1
+                                if not fina.empty:
+                                    roe = float(fina.iloc[0]['roe']) / 100 if fina.iloc[0]['roe'] else 0.1
+                                    
+                                print(f"\033[92m✓ {ticker} Tushare基础数据获取成功\033[0m")
+                                return {
+                                    'pe_ratio': float(df.iloc[0]['pe_ttm']) if df.iloc[0]['pe_ttm'] else 15.0,
+                                    'pb_ratio': float(df.iloc[0]['pb']) if df.iloc[0]['pb'] else 2.0,
+                                    'roe': roe,
+                                    'market_cap': float(df.iloc[0]['total_mv']) * 10000, # Tushare单位是万
+                                    'revenue_growth': 5.0,  # 百分比形式
+                                    'profit_growth': 5.0    # 百分比形式，与Choice保持一致
+                                }
+                            else:
+                                print(f"⚠ {ticker} Tushare基础数据为空")
                         else:
-                            ts_code = f"{ticker}.SZ"
-                        
-                        df = pro.daily_basic(ts_code=ts_code, fields='pe_ttm,pb,total_mv')
-                        if not df.empty:
-                            # 获取财务指标
-                            fina = pro.fina_indicator(ts_code=ts_code, period='20231231', fields='roe,debt_to_assets')
-                            roe = 0.1
-                            if not fina.empty:
-                                roe = float(fina.iloc[0]['roe']) / 100 if fina.iloc[0]['roe'] else 0.1
-                                
-                            print(f"\033[92m✓ {ticker} Tushare基础数据获取成功\033[0m")
-                            return {
-                                'pe_ratio': float(df.iloc[0]['pe_ttm']) if df.iloc[0]['pe_ttm'] else 15.0,
-                                'pb_ratio': float(df.iloc[0]['pb']) if df.iloc[0]['pb'] else 2.0,
-                                'roe': roe,
-                                'market_cap': float(df.iloc[0]['total_mv']) * 10000, # Tushare单位是万
-                                'revenue_growth': 5.0,  # 百分比形式
-                                'profit_growth': 5.0    # 百分比形式，与Choice保持一致
-                            }
-                        else:
-                            print(f"⚠ {ticker} Tushare基础数据为空")
-                    else:
-                        print(f"⚠ {ticker} Tushare Token未配置，跳过")
+                            print(f"⚠ {ticker} Tushare Token未配置，跳过")
                 except Exception as e_ts:
                     error_str = str(e_ts)
                     if "没有接口访问权限" in error_str:
@@ -8945,7 +9002,6 @@ K线更新后快速评分完成！
         import socket
         import urllib.request
 
-        import akshare as ak
         import pandas as pd
         import requests
         from requests.adapters import HTTPAdapter
@@ -9525,31 +9581,54 @@ K线更新后快速评分完成！
 
     # REMOVED: _generate_smart_mock_technical_data - 不再使用模拟数据
     def _try_get_netease_data(self, ticker):
-        """NetEase data fallback: prefer yfinance if available, else None"""
+        """NetEase data fallback: try to use SinaKLineAPI as a reliable alternative"""
         try:
-            if YFINANCE_AVAILABLE:
-                return self._try_get_yfinance_data(ticker)
+            from sina_kline_api import SinaKLineAPI
+            sina_api = SinaKLineAPI()
+            days = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
+            df = sina_api.get_stock_kline(ticker, days=days)
+            if df is not None and not df.empty:
+                # 转换为统一格式
+                return pd.DataFrame({
+                    '收盘': df['close'].values,
+                    '成交量': df['volume'].values
+                })
         except Exception:
             return None
         return None
 
     def _try_get_sina_data(self, ticker):
-        """Sina data fallback: try yfinance as a simple replacement"""
+        """Sina data fallback: use SinaKLineAPI"""
         try:
-            if YFINANCE_AVAILABLE:
-                return self._try_get_yfinance_data(ticker)
+            from sina_kline_api import SinaKLineAPI
+            sina_api = SinaKLineAPI()
+            days = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
+            df = sina_api.get_stock_kline(ticker, days=days)
+            if df is not None and not df.empty:
+                return pd.DataFrame({
+                    '收盘': df['close'].values,
+                    '成交量': df['volume'].values
+                })
         except Exception:
             return None
         return None
 
     def _try_get_qq_finance_data(self, ticker):
-        """QQ/Tencent finance fallback: try to synthesize from current price if available"""
+        """QQ/Tencent finance fallback: use TencentKlineAPI"""
         try:
-            # try yfinance first
-            if YFINANCE_AVAILABLE:
-                df = self._try_get_yfinance_data(ticker)
-                if df is not None and not df.empty:
-                    return df
+            from tencent_kline_api import TencentKlineAPI
+            tencent_api = TencentKlineAPI()
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            days = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
+            start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
+            
+            df = tencent_api.get_stock_kline(ticker, start_date, end_date)
+            if df is not None and not df.empty:
+                return pd.DataFrame({
+                    '收盘': df['close'].values,
+                    '成交量': df['volume'].values
+                })
+            
             # fallback: build a simple DataFrame from current price
             current_price = self.get_stock_price(ticker)
             if current_price:
@@ -9852,14 +9931,25 @@ K线更新后快速评分完成！
         financial_data = None
         
         # 0. 如果勾选了Choice数据，优先从Choice数据获取
-        if self.use_choice_data.get() and ticker in getattr(self, 'comprehensive_stock_data', {}):
-            cached = self.comprehensive_stock_data.get(ticker, {})
-            if cached.get('tech_data'):
-                technical_data = cached['tech_data']
-                print(f"[CHOICE-DATA] 使用Choice技术数据: {ticker}")
-            if cached.get('fund_data'):
-                financial_data = cached['fund_data']
-                print(f"[CHOICE-DATA] 使用Choice基本面数据: {ticker}")
+        if self.use_choice_data.get():
+            # 先尝试从缓存获取
+            if ticker in getattr(self, 'comprehensive_stock_data', {}):
+                cached = self.comprehensive_stock_data.get(ticker, {})
+                if cached.get('tech_data'):
+                    technical_data = cached['tech_data']
+                    print(f"[CHOICE-DATA] 使用Choice技术数据缓存: {ticker}")
+                if cached.get('fund_data'):
+                    financial_data = cached['fund_data']
+                    print(f"[CHOICE-DATA] 使用Choice基本面数据缓存: {ticker}")
+            
+            # 如果缓存中没有，且强制刷新模式(use_cache=False)，则尝试实时调用Choice API
+            if not use_cache:
+                if technical_data is None:
+                    print(f"[CHOICE-FRESH] {ticker} 尝试实时获取Choice技术数据...")
+                    technical_data = self._get_choice_technical_data_realtime(ticker)
+                if financial_data is None:
+                    print(f"[CHOICE-FRESH] {ticker} 尝试实时获取Choice基本面数据...")
+                    financial_data = self._get_choice_fundamental_data_realtime(ticker)
         
         # 1. 尝试从原始缓存获取 (仅当use_cache=True时且未使用Choice数据)
         if technical_data is None and use_cache and getattr(self, 'comprehensive_data_loaded', False) and ticker in self.comprehensive_stock_data:
@@ -9923,11 +10013,13 @@ K线更新后快速评分完成！
                 if isinstance(fund, dict) and ('pe_ratio' in fund or 'pb_ratio' in fund):
                     financial_data = fund
         
-        # 3. 尝试实时获取缺失数据 (补全逻辑) - 如果使用Choice数据则跳过实时获取
+        # 3. 尝试实时获取缺失数据 (补全逻辑)
         if technical_data is None:
-            if self.use_choice_data.get():
+            if self.use_choice_data.get() and use_cache:
+                # 如果是使用缓存模式且勾选了Choice，但缓存中没有，则跳过（避免混合数据）
                 print(f"[CHOICE-DATA] {ticker} Choice数据中无技术数据，跳过该股票")
             else:
+                # 如果是非缓存模式（强制刷新）或者没勾选Choice，则尝试实时获取
                 print(f"[ADVICE] {ticker} 缺少技术数据，尝试实时获取...")
                 technical_data = self.get_real_technical_indicators(ticker)
                 # 更新缓存
@@ -9937,9 +10029,11 @@ K线更新后快速评分完成！
                     self.comprehensive_stock_data[ticker]['tech_data'] = technical_data
 
         if financial_data is None:
-            if self.use_choice_data.get():
+            if self.use_choice_data.get() and use_cache:
+                # 如果是使用缓存模式且勾选了Choice，但缓存中没有，则跳过
                 print(f"[CHOICE-DATA] {ticker} Choice数据中无基本面数据，跳过该股票")
             else:
+                # 如果是非缓存模式（强制刷新）或者没勾选Choice，则尝试实时获取
                 print(f"[ADVICE] {ticker} 缺少基本面数据，尝试实时获取...")
                 financial_data = self.get_real_fundamental_indicators(ticker)
                 # 更新缓存
@@ -9950,7 +10044,7 @@ K线更新后快速评分完成！
 
         # ========== 数据获取失败则返回失败 - 不使用模拟数据和默认值 ==========
         if technical_data is None:
-            failure_reason = f"所有数据源（Tushare/Baostock/akshare/yfinance）均无法获取技术数据"
+            failure_reason = f"所有数据源（Tushare/Baostock/akshare/yfinance/Tencent/Sina）均无法获取技术数据"
             print(f"❌ {ticker} {failure_reason}")
             return ({
                 'technical_score': 0,
@@ -13158,8 +13252,18 @@ CSV批量分析使用方法:
             self.update_progress(f"获取 {ticker} 筹码数据...")
             time.sleep(0.1)
             
+            # 检查是否有足够的 K 线数据，如果没有则尝试实时获取
+            stock_info = self.comprehensive_stock_data.get(ticker, {})
+            kline_daily = stock_info.get('kline_data', {}).get('daily', [])
+            
+            if not kline_daily or len(kline_daily) < 60:
+                self.update_progress(f"本地数据不足，正在从数据源获取 {ticker} 实时数据...")
+                fetched_kline = self._fetch_kline_data_on_demand(ticker)
+                if fetched_kline:
+                    kline_daily = fetched_kline
+            
             # 强制计算并缓存结果（后台线程触发）
-            result = self.get_or_compute_chip_result(ticker, force=True)
+            result = self.get_or_compute_chip_result(ticker, force=True, cached_kline_data=kline_daily)
             
             # 检查是否有错误
             if result.get('error'):
@@ -13191,6 +13295,97 @@ CSV批量分析使用方法:
             self.root.after(0, self.chip_btn.config, {"state": "normal"})
             self.root.after(0, self.analyze_btn.config, {"state": "normal"})
             self.root.after(0, self.hide_progress)
+    
+    def _fetch_kline_data_on_demand(self, ticker):
+        """实时从数据源获取单只股票的 K 线数据"""
+        try:
+            import os
+            import sys
+            from datetime import datetime, timedelta
+
+            import pandas as pd
+
+            # 设置路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            tradingshared_path = os.path.join(os.path.dirname(current_dir), 'TradingShared')
+            api_path = os.path.join(tradingshared_path, 'api')
+            if api_path not in sys.path:
+                sys.path.insert(0, api_path)
+            if tradingshared_path not in sys.path:
+                sys.path.insert(0, tradingshared_path)
+
+            # 1. 优先尝试 Choice (如果勾选)
+            if hasattr(self, 'use_choice_data') and self.use_choice_data.get():
+                try:
+                    from TradingShared.api.get_choice_data import \
+                        get_kline_data_css
+                    choice_code = f"{ticker}.SH" if ticker.startswith('6') else f"{ticker}.SZ"
+                    end_date = datetime.now()
+                    start_date = end_date - timedelta(days=90)
+                    
+                    kline_data = get_kline_data_css(choice_code, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+                    if kline_data and 'dates' in kline_data and kline_data['dates']:
+                        daily = []
+                        for j, date in enumerate(kline_data['dates']):
+                            day_data = {'date': date}
+                            for indicator in kline_data['indicators']:
+                                if indicator in kline_data['data']:
+                                    day_data[indicator.lower()] = kline_data['data'][indicator][j]
+                            daily.append(day_data)
+                        
+                        # 更新缓存
+                        if ticker not in self.comprehensive_stock_data:
+                            self.comprehensive_stock_data[ticker] = {'code': ticker}
+                        
+                        if 'kline_data' not in self.comprehensive_stock_data[ticker]:
+                            self.comprehensive_stock_data[ticker]['kline_data'] = {}
+                            
+                        self.comprehensive_stock_data[ticker]['kline_data']['daily'] = daily
+                        self.comprehensive_stock_data[ticker]['kline_data']['source'] = 'choice_on_demand'
+                        self.comprehensive_stock_data[ticker]['kline_data']['update_time'] = datetime.now().isoformat()
+                        self.comprehensive_stock_data[ticker]['timestamp'] = datetime.now().isoformat()
+                        
+                        print(f"[FETCH-ON-DEMAND] Choice 成功获取 {ticker} {len(daily)} 天数据")
+                        return daily
+                except Exception as e:
+                    print(f"[FETCH-ON-DEMAND] Choice 失败: {e}")
+
+            # 2. 尝试使用 ComprehensiveDataCollector (Tushare/AKShare/腾讯)
+            try:
+                from comprehensive_data_collector import \
+                    ComprehensiveDataCollector
+                collector = ComprehensiveDataCollector(use_choice=False)
+                # 设置获取天数
+                collector.kline_days = 90
+                
+                batch_data = collector.collect_batch_kline_data([ticker], source='auto')
+                if ticker in batch_data:
+                    df = batch_data[ticker]
+                    if df is not None and not df.empty:
+                        # 转换为 daily 格式
+                        daily = df.to_dict('records')
+                        
+                        # 更新缓存
+                        if ticker not in self.comprehensive_stock_data:
+                            self.comprehensive_stock_data[ticker] = {'code': ticker}
+                        
+                        if 'kline_data' not in self.comprehensive_stock_data[ticker]:
+                            self.comprehensive_stock_data[ticker]['kline_data'] = {}
+                            
+                        self.comprehensive_stock_data[ticker]['kline_data']['daily'] = daily
+                        self.comprehensive_stock_data[ticker]['kline_data']['source'] = 'collector_on_demand'
+                        self.comprehensive_stock_data[ticker]['kline_data']['update_time'] = datetime.now().isoformat()
+                        self.comprehensive_stock_data[ticker]['timestamp'] = datetime.now().isoformat()
+                        
+                        print(f"[FETCH-ON-DEMAND] Collector 成功获取 {ticker} {len(daily)} 天数据")
+                        return daily
+            except Exception as e:
+                print(f"[FETCH-ON-DEMAND] Collector 失败: {e}")
+                
+        except Exception as e:
+            print(f"[FETCH-ON-DEMAND] 异常: {e}")
+        
+        return None
     
     def _format_chip_result(self, ticker, result):
         """格式化筹码分析结果"""
@@ -13509,16 +13704,12 @@ CSV批量分析使用方法:
                 chip_result = None  # 初始化以避免后续 NameError
                 if self.chip_analyzer:
                     try:
-                        chip_result = self.chip_analyzer.analyze_stock(ticker)
-                        if not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
+                        # 使用统一的获取/计算函数，支持实时补全数据
+                        chip_result = self.get_or_compute_chip_result(ticker, force=True)
+                        
+                        if chip_result and not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
                             chip_score = chip_result.get('health_score', 0)
                             print(f"[CHIP] {ticker} 筹码评分: {chip_score:.1f}/10, 等级: {chip_result.get('health_level', '未知')}")
-                            # 立即缓存结果，避免后续 UI 更新时重复计算
-                            if not hasattr(self, 'comprehensive_stock_data'):
-                                self.comprehensive_stock_data = {}
-                            if ticker not in self.comprehensive_stock_data:
-                                self.comprehensive_stock_data[ticker] = {}
-                            self.comprehensive_stock_data[ticker]['chip_result'] = chip_result
                     except Exception as e:
                         print(f"[CHIP] {ticker} 筹码分析失败: {e}")
                 
@@ -15397,6 +15588,93 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             
         except Exception as e:
             print(f"❌ CSV导出失败: {str(e)}")
+
+    def export_last_recommendations_to_csv(self):
+        """手动导出最近一次推荐的股票代码到CSV"""
+        if not self.last_recommendations:
+            messagebox.showwarning("导出提示", "当前没有可导出的推荐结果，请先生成推荐。")
+            return
+            
+        import csv
+        from datetime import datetime
+        from tkinter import filedialog
+        
+        try:
+            # 默认文件名
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            default_filename = f"推荐股票代码_{timestamp}.csv"
+            
+            # 弹出保存对话框
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".csv",
+                filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")],
+                initialfile=default_filename,
+                title="导出推荐股票代码"
+            )
+            
+            if not file_path:
+                return
+                
+            # 导出股票代码
+            with open(file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                writer = csv.writer(csvfile)
+                # 只写入股票代码
+                for stock in self.last_recommendations:
+                    writer.writerow([stock['code']])
+            
+            messagebox.showinfo("导出成功", f"已成功导出 {len(self.last_recommendations)} 只股票代码到：\n{file_path}")
+            print(f"✅ 手动导出成功: {file_path}")
+            
+        except Exception as e:
+            messagebox.showerror("导出失败", f"导出过程中发生错误：\n{str(e)}")
+            print(f"❌ 手动导出失败: {str(e)}")
+
+    def export_batch_results_to_csv(self):
+        """导出批量分析结果到CSV文件"""
+        if not self.last_batch_results:
+            messagebox.showwarning("导出提示", "当前没有可导出的批量分析结果，请先执行批量分析。")
+            return
+            
+        import csv
+        from datetime import datetime
+        from tkinter import filedialog
+        
+        try:
+            # 默认文件名
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            default_filename = f"批量分析结果_{timestamp}.csv"
+            
+            # 弹出保存对话框
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".csv",
+                filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")],
+                initialfile=default_filename,
+                title="导出批量分析结果"
+            )
+            
+            if not file_path:
+                return
+                
+            # 导出结果
+            with open(file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                # 定义表头
+                fieldnames = ['股票代码', '股票名称', '综合评分', '技术面评分', '基本面评分', 
+                             '筹码健康度', '筹码等级', '主力动向', 'SCR集中度', 'RSI状态', '趋势', '所属行业', '分析时间']
+                
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                
+                for result in self.last_batch_results:
+                    # 过滤掉DictWriter不需要的字段
+                    row = {k: v for k, v in result.items() if k in fieldnames}
+                    writer.writerow(row)
+            
+            messagebox.showinfo("导出成功", f"已成功导出 {len(self.last_batch_results)} 只股票的分析结果到：\n{file_path}")
+            print(f"✅ 批量分析结果导出成功: {file_path}")
+            
+        except Exception as e:
+            messagebox.showerror("导出失败", f"导出过程中发生错误：\n{str(e)}")
+            print(f"❌ 批量分析结果导出失败: {str(e)}")
     
     def show_detailed_analysis(self, ticker):
         """显示股票详细分析（在新窗口中）"""
@@ -16954,7 +17232,19 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
             if not self.chip_analyzer:
                 return None
             
-            # 如果是批量模式（提供了缓存K线），则传入缓存
+            # 智能补全：如果没有提供缓存，尝试从本地大缓存获取
+            if cached_kline_data is None:
+                stock_info = self.comprehensive_stock_data.get(ticker, {})
+                cached_kline_data = stock_info.get('kline_data', {}).get('daily')
+            
+            # 实时补全：如果数据不足且是强制模式（通常是单只股票分析），尝试从数据源实时获取
+            if (not cached_kline_data or len(cached_kline_data) < 60) and force:
+                print(f"[CHIP] {ticker} 本地数据不足 ({len(cached_kline_data) if cached_kline_data else 0}天)，尝试从数据源实时获取...")
+                fetched_kline = self._fetch_kline_data_on_demand(ticker)
+                if fetched_kline:
+                    cached_kline_data = fetched_kline
+
+            # 如果是批量模式（提供了缓存K线），则传入缓存 
             is_batch = cached_kline_data is not None
             chip_result = self.chip_analyzer.analyze_stock(ticker, cached_kline_data=cached_kline_data, is_batch_mode=is_batch)
             
@@ -17575,6 +17865,9 @@ WARNING: 重要声明:
             qualified_stocks.sort(key=lambda x: x['score'], reverse=True)
             top_recommendations = qualified_stocks[:10]
             
+            # 保存到类属性供导出使用
+            self.last_recommendations = top_recommendations
+            
             print(f"符合评分条件的股票数: {len(qualified_stocks)} 只 (≥{min_score_threshold:.1f}分)")
             print(f"推荐股票数: {len(top_recommendations)}")
             
@@ -17615,7 +17908,9 @@ WARNING: 重要声明:
             
             # 在主线程中显示结果（仅在GUI模式下）
             if self.root:
-                self.root.after(0, self._display_recommendations, recommendation_report)
+                self.root.after(0, lambda: self._display_recommendations(recommendation_report))
+                # 启用导出按钮
+                self.root.after(0, lambda: self.export_csv_btn.config(state="normal"))
             else:
                 print("无GUI模式，跳过界面显示")
             

@@ -1502,6 +1502,12 @@ class ComprehensiveDataCollector:
                     temp_remaining = []
                     for code in remaining_codes:
                         try:
+                            # 🔴 改进：Alpha Vantage 对 A 股支持极差且频率限制严，跳过 A 股
+                            if self._detect_market(code) == 'cn':
+                                # print(f"[SKIP] {code}: A股跳过 Alpha Vantage")
+                                temp_remaining.append(code)
+                                continue
+
                             # 🔴 改进：直接使用 Alpha Vantage，不再轮换 Polygon
                             api_name = 'alpha_vantage'
                             api_instance = self.alpha_vantage
@@ -1777,7 +1783,7 @@ class ComprehensiveDataCollector:
         still_failed = [code for code in codes if code not in result]
         # 过滤A股代码，Alpha Vantage主要支持美股/ADR
         alpha_candidate_codes = [code for code in still_failed 
-                               if not (code.startswith(('00', '30', '60', '68')) and code.isdigit())]
+                               if self._detect_market(code) != 'cn']
         a_stock_codes = [code for code in still_failed if code not in alpha_candidate_codes]
         
         alpha_success = []

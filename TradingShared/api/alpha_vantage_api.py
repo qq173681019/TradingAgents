@@ -3,11 +3,13 @@ Alpha Vantage API集成模块
 提供股票数据获取功能，主要支持美股和部分国际股票
 """
 
-import requests
-import pandas as pd
-import time
-from typing import Dict, Any, Optional
 import json
+import time
+from typing import Any, Dict, Optional
+
+import pandas as pd
+import requests
+
 
 class AlphaVantageAPI:
     def __init__(self, api_key: str):
@@ -29,6 +31,7 @@ class AlphaVantageAPI:
         params['apikey'] = self.api_key
         
         try:
+            self._last_error = None
             response = requests.get(self.base_url, params=params, timeout=30)
             self.last_request_time = time.time()
             
@@ -37,18 +40,22 @@ class AlphaVantageAPI:
                 
                 # 检查错误信息
                 if "Error Message" in data:
-                    print(f"[ERROR] Alpha Vantage API错误: {data['Error Message']}")
+                    self._last_error = data['Error Message']
+                    print(f"[ERROR] Alpha Vantage API错误: {self._last_error}")
                     return None
                 elif "Note" in data:
-                    print(f"[WARN] Alpha Vantage 请求频率限制: {data['Note']}")
+                    self._last_error = data['Note']
+                    print(f"[WARN] Alpha Vantage 请求频率限制: {self._last_error}")
                     return None
                 
                 return data
             else:
+                self._last_error = f"HTTP {response.status_code}"
                 print(f"[ERROR] Alpha Vantage HTTP错误: {response.status_code}")
                 return None
                 
         except Exception as e:
+            self._last_error = str(e)
             print(f"[ERROR] Alpha Vantage 请求失败: {e}")
             return None
     
@@ -74,6 +81,10 @@ class AlphaVantageAPI:
             
             data = self._make_request(params)
             if not data:
+                # 如果是无效 API 调用，通常意味着该股票在 Alpha Vantage 上不可用，跳过后续格式尝试
+                if hasattr(self, '_last_error') and "Invalid API call" in str(self._last_error):
+                    print(f"[INFO] Alpha Vantage 识别到无效代码格式，停止尝试该股票的其他格式")
+                    break
                 continue
             
             # 检查是否有时间序列数据
@@ -115,6 +126,12 @@ class AlphaVantageAPI:
             }
             
             data = self._make_request(params)
+            if not data:
+                # 如果是无效 API 调用，停止尝试该股票的其他格式
+                if hasattr(self, '_last_error') and self._last_error and "Invalid API call" in str(self._last_error):
+                    break
+                continue
+            
             if data and 'Symbol' in data and data['Symbol']:
                 print(f"[SUCCESS] Alpha Vantage 成功获取 {test_symbol} 公司信息")
                 return {
