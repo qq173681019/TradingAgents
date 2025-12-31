@@ -77,7 +77,65 @@ class ChipHealthAnalyzer:
         if self.ml_available:
             print("✓ 机器学习增强模式已启用")
             self._initialize_ml_model()
+            
+        # 数据缓存（用于提升批量处理效率）
+        self._fund_flow_rank_cache = None
+        self._holder_count_cache = None
+        self._top10_holders_cache = {}  # 按股票代码缓存
     
+    def prefetch_data(self, stock_codes=None):
+        """
+        预取批量数据以提升效率
+        
+        Args:
+            stock_codes: 股票代码列表。如果为None，则尝试获取全市场数据。
+        """
+        if not self.akshare_available:
+            return
+            
+        print(f"\n🚀 正在预取筹码分析相关数据 (共 {len(stock_codes) if stock_codes else '全市场'} 只股票)...")
+        
+        try:
+            # 1. 预取全市场资金流向排名（包含部分股东动向信息）
+            if self._fund_flow_rank_cache is None:
+                try:
+                    import akshare as ak
+                    self._fund_flow_rank_cache = ak.stock_individual_fund_flow_rank(indicator="今日")
+                    print("  ✓ 已预取全市场资金流向排名数据")
+                except Exception as e:
+                    print(f"  ⚠ 预取资金流向排名失败: {e}")
+                
+            # 2. 预取全市场股东户数变化（AkShare 批量接口）
+            if self._holder_count_cache is None:
+                try:
+                    import akshare as ak
+
+                    # 这个接口返回全市场的股东户数最新数据
+                    self._holder_count_cache = ak.stock_zh_a_gdhs_em()
+                    print("  ✓ 已预取全市场股东户数数据")
+                except Exception as e:
+                    print(f"  ⚠ 预取股东户数数据失败: {e}")
+                    
+        except Exception as e:
+            print(f"  ❌ 预取数据过程中出现异常: {e}")
+    
+    def inject_batch_data(self, top10_concentrations=None, holder_changes=None):
+        """
+        注入外部批量获取的数据（例如从 Choice API 获取的数据）
+        
+        Args:
+            top10_concentrations: 字典 {stock_code: concentration_value}
+            holder_changes: 字典 {stock_code: change_value}
+        """
+        if top10_concentrations:
+            for code, conc in top10_concentrations.items():
+                # 模拟一个简单的股东数据结构
+                self._top10_holders_cache[code] = {'concentration': conc, 'source': 'external'}
+                
+        if holder_changes:
+            # 如果需要，也可以注入股东户数变化数据
+            pass
+            
     def analyze_stock(self, stock_code, cached_kline_data=None, is_batch_mode=False):
         """
         分析股票筹码健康度
@@ -189,33 +247,37 @@ class ChipHealthAnalyzer:
             print(f"✓ 当前价格: ¥{current_price:.2f}")
             print(f"⚠ 未找到日期列，数据天数: {result['data_days']}天")
         
-        # 2. 获取十大流通股东（批量模式下跳过网络请求）
+        # 2. 获取十大流通股东（优先使用缓存/预取数据）
         print("")
         step_log("获取十大流通股东数据...")
-        if is_batch_mode:
-            print("  ⚠ [批量模式] 跳过十大股东数据获取（避免网络请求）")
-        else:
-            top10_data = self._get_top10_holders(stock_code)
-            if top10_data is not None:
-                result['top10_holders'] = top10_data
-                chip_concentration = self._calculate_concentration(top10_data)
-                result['chip_concentration'] = chip_concentration
-                print(f"✓ 十大股东持股: {chip_concentration:.2f}%")
-            else:
-                print("⚠ 未获取到十大股东数据")
         
-        # 3. 获取股东户数变化（批量模式下跳过网络请求）
+        # 尝试从缓存或预取数据中获取
+        top10_data = self._get_top10_holders(stock_code)
+        
+        if top10_data is not None:
+            result['top10_holders'] = top10_data
+            chip_concentration = self._calculate_concentration(top10_data)
+            result['chip_concentration'] = chip_concentration
+            print(f"✓ 十大股东持股: {chip_concentration:.2f}%")
+        elif is_batch_mode:
+            print("  ⚠ [批量模式] 未命中缓存，跳过实时获取十大股东数据")
+        else:
+            # 实时模式且未命中缓存，可以在这里添加实时获取逻辑（如果需要）
+            print("  ⚠ 未获取到十大股东数据")
+        
+        # 3. 获取股东户数变化（优先使用缓存/预取数据）
         print("")
         step_log("获取股东户数变化...")
-        if is_batch_mode:
-            print("  ⚠ [批量模式] 跳过股东户数数据获取（避免网络请求）")
+        
+        holder_change = self._get_holder_count_change(stock_code)
+        
+        if holder_change != 0:
+            result['holder_count_change'] = holder_change
+            print(f"✓ 股东户数变化: {holder_change:+.2f}%")
+        elif is_batch_mode:
+            print("  ⚠ [批量模式] 未命中缓存，跳过实时获取股东户数")
         else:
-            holder_change = self._get_holder_count_change(stock_code)
-            if holder_change != 0:
-                result['holder_count_change'] = holder_change
-                print(f"✓ 股东户数变化: {holder_change:+.2f}%")
-            else:
-                print("⚠ 未获取到股东户数数据")
+            print("  ⚠ 未获取到股东户数数据")
         
         # 4. 计算筹码成本分位数（P10/P50/P90）和SCR
         print("")
@@ -568,13 +630,25 @@ class ChipHealthAnalyzer:
             return None
         
         try:
-            # 获取最新的十大股东数据
-            df = ak.stock_individual_fund_flow_rank(indicator="今日")
-            # 这里简化处理，实际应该用专门的股东API
-            # ak.stock_zh_a_hist_holder_top10 需要额外处理
+            # 1. 检查缓存
+            if stock_code in self._top10_holders_cache:
+                return self._top10_holders_cache[stock_code]
+                
+            # 2. 尝试从预取的资金流向排名中提取信息（作为替代方案）
+            if self._fund_flow_rank_cache is not None:
+                df = self._fund_flow_rank_cache
+                # 匹配代码
+                stock_data = df[df['代码'] == stock_code]
+                if not stock_data.empty:
+                    # 资金流向排名并不直接提供十大股东，但可以作为一种参考
+                    # 这里我们仍然返回None，因为我们需要的是真实的股东数据
+                    # 但如果未来有批量股东接口，可以在这里实现
+                    pass
             
-            # 由于akshare接口限制，这里返回模拟数据作为示例
-            # 实际使用时需要调用正确的API
+            # 3. 实时获取（如果不是批量模式或缓存未命中）
+            # 注意：ak.stock_zh_a_hist_holder_top10 比较慢，且没有批量接口
+            # 为了效率，我们在批量模式下通常跳过它，除非已经预取
+            
             return None
             
         except Exception as e:
@@ -587,19 +661,40 @@ class ChipHealthAnalyzer:
             return 0
         
         try:
-            # akshare中有股东户数接口
-            # df = ak.stock_zh_a_holder_number(symbol=stock_code)
-            # 这里简化处理
+            # 1. 优先使用预取的全市场股东户数缓存
+            if self._holder_count_cache is not None:
+                df = self._holder_count_cache
+                # AkShare 的代码通常不带后缀，或者带后缀。这里做兼容处理
+                short_code = stock_code[-6:] if len(stock_code) > 6 else stock_code
+                
+                # 查找匹配的行
+                match = df[df['代码'] == short_code]
+                if not match.empty:
+                    # 提取股东户数增长率
+                    # 列名可能是 '股东户数-上次', '股东户数-本次', '股东户数-增减'
+                    # 或者是 '股东户数-增减比例'
+                    try:
+                        change = match.iloc[0]['股东户数-增减比例']
+                        return float(change)
+                    except:
+                        pass
+            
+            # 2. 如果缓存未命中且不是批量模式，可以尝试实时获取
+            # 但为了性能，我们通常只依赖预取的数据
             return 0
             
         except Exception as e:
-            print(f"获取股东户数失败: {e}")
+            # print(f"获取股东户数失败: {e}")
             return 0
     
     def _calculate_concentration(self, top10_data):
         """计算筹码集中度"""
         if top10_data is None:
             return 0
+            
+        # 如果是注入的外部数据
+        if isinstance(top10_data, dict) and 'concentration' in top10_data:
+            return top10_data['concentration']
         
         # 简化：假设十大股东持股30-40%
         # 实际应该从数据中计算

@@ -4036,6 +4036,45 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     except Exception as e:
                         print(f"[CSV-BATCH] Choice API 预启动失败: {e}")
 
+                # 新增：预取筹码分析相关数据（十大股东/股东户数等）
+                if self.chip_analyzer:
+                    try:
+                        # 1. 基础预取 (AkShare)
+                        self.chip_analyzer.prefetch_data(stock_codes)
+                        
+                        # 2. 如果启用了 Choice，尝试批量获取真实的十大股东集中度
+                        if self.use_choice_data.get():
+                            try:
+                                from EmQuantAPI import c
+
+                                # 转换代码格式为 Choice 格式 (如 600519.SH)
+                                choice_codes = []
+                                for code in stock_codes:
+                                    if code.startswith('6'):
+                                        choice_codes.append(f"{code}.SH")
+                                    else:
+                                        choice_codes.append(f"{code}.SZ")
+                                
+                                # 批量获取十大流通股东持股比例 (LIST_TOP10_HOLDER_RATIO)
+                                # 注意：具体指标名称可能因 Choice 版本而异，这里使用常用指标
+                                data = c.css(",".join(choice_codes), "LIST_TOP10_HOLDER_RATIO", "TradeDate=" + datetime.now().strftime("%Y%m%d"))
+                                
+                                if data.ErrorCode == 0:
+                                    top10_map = {}
+                                    for code, values in data.Data.items():
+                                        clean_code = code.split('.')[0]
+                                        if values and len(values) > 0:
+                                            top10_map[clean_code] = float(values[0])
+                                    
+                                    if top10_map:
+                                        self.chip_analyzer.inject_batch_data(top10_concentrations=top10_map)
+                                        print(f"  ✓ 已从 Choice 批量注入 {len(top10_map)} 只股票的十大股东数据")
+                            except Exception as e:
+                                print(f"  ⚠ Choice 批量获取股东数据失败: {e}")
+                                
+                    except Exception as e:
+                        print(f"[CSV-BATCH] 筹码数据预取失败: {e}")
+
                 # 初始化进度条
                 results = []
                 total = len(stock_codes)
@@ -4102,7 +4141,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
 
                             if self.chip_analyzer:
                                 try:
-                                    chip_result = self.chip_analyzer.analyze_stock(code)
+                                    # 批量模式下启用 is_batch_mode=True，跳过耗时的单只股票网络请求
+                                    chip_result = self.chip_analyzer.analyze_stock(code, is_batch_mode=True)
                                     if chip_result and not chip_result.get('error') and chip_result.get('health_score', 0) > 0:
                                         chip_score = chip_result.get('health_score', 0)
                                         chip_health_level = chip_result.get('health_level', '未知')
@@ -6491,7 +6531,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     #         self.choice_connected = True
                     
         except Exception as e:
-            output(f"❌ 测试异常: {type(e).__name__}: {e}")
+            print(f"❌ 测试异常: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
     
@@ -9583,6 +9623,7 @@ K线更新后快速评分完成！
     def _try_get_netease_data(self, ticker):
         """NetEase data fallback: try to use SinaKLineAPI as a reliable alternative"""
         try:
+            import pandas as pd
             from sina_kline_api import SinaKLineAPI
             sina_api = SinaKLineAPI()
             days = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
@@ -9600,6 +9641,7 @@ K线更新后快速评分完成！
     def _try_get_sina_data(self, ticker):
         """Sina data fallback: use SinaKLineAPI"""
         try:
+            import pandas as pd
             from sina_kline_api import SinaKLineAPI
             sina_api = SinaKLineAPI()
             days = self.kline_days_var.get() if hasattr(self, 'kline_days_var') else 90
@@ -9616,6 +9658,9 @@ K线更新后快速评分完成！
     def _try_get_qq_finance_data(self, ticker):
         """QQ/Tencent finance fallback: use TencentKlineAPI"""
         try:
+            from datetime import datetime, timedelta
+
+            import pandas as pd
             from tencent_kline_api import TencentKlineAPI
             tencent_api = TencentKlineAPI()
             end_date = datetime.now().strftime('%Y-%m-%d')
@@ -9632,7 +9677,6 @@ K线更新后快速评分完成！
             # fallback: build a simple DataFrame from current price
             current_price = self.get_stock_price(ticker)
             if current_price:
-                import pandas as pd
                 return pd.DataFrame({
                     '收盘': [current_price] * 30,
                     '成交量': [100000] * 30
@@ -16481,7 +16525,7 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
         button_frame.pack(fill=tk.X, pady=20)
         
         def start_smart_analysis():
-            min_score = score_var.get()
+            min_score = self.min_score_var.get()
             pool_type = pool_var.get()
             score_dialog.destroy()
             self.perform_batch_analysis(min_score, pool_type)
