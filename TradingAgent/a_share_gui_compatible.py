@@ -598,6 +598,9 @@ class AShareAnalyzerGUI:
         # 新增：完整推荐数据存储
         self.comprehensive_data_file = os.path.join(shared_data_dir, 'comprehensive_stock_data.json')
         self.comprehensive_data = {}     # 完整的三时间段推荐数据
+        
+        # 状态标志
+        self.warning_shown = False       # 是否已显示过数据过期警告
         # 新增：内存缓存（分离收集/评分/推荐）
         self.comprehensive_stock_data = {}  # 从收集器加载的原始完整数据（供评分/推荐复用）
         self.scores_cache = {}               # 单只股票评分缓存，优先使用以减少重复请求
@@ -727,9 +730,8 @@ class AShareAnalyzerGUI:
             print(f"⚠️ 加载Choice配置失败: {e}")
         
         # 加载现有数据
-        self.load_batch_scores()         # 加载批量评分数据
+        self.load_batch_scores(silent=True)         # 加载批量评分数据
         self.load_comprehensive_data()   # 加载完整推荐数据
-        self.load_batch_scores()         # 加载批量评分数据
         # 额外尝试加载来自数据收集器的完整数据到内存缓存（优先从data/目录）
         try:
             self.load_comprehensive_stock_data()
@@ -1207,7 +1209,7 @@ class AShareAnalyzerGUI:
         # 实时保存到文件
         self.save_daily_cache()
     
-    def load_batch_scores(self):
+    def load_batch_scores(self, silent=False):
         """加载批量评分数据 - 根据AI模型加载对应文件"""
         import json
         import os
@@ -1238,37 +1240,41 @@ class AShareAnalyzerGUI:
                 model_name = "本地规则"
             
             if not os.path.exists(load_file):
-                print(f"未找到{model_name}历史评分数据: {load_file}")
+                if not silent:
+                    print(f"未找到{model_name}历史评分数据: {load_file}")
                 # 如果是特定模型文件不存在，尝试使用通用文件
                 if load_file != self.batch_score_file:
-                    print(f"尝试使用通用评分文件: {self.batch_score_file}")
+                    if not silent:
+                        print(f"尝试使用通用评分文件: {self.batch_score_file}")
                     load_file = self.batch_score_file
                     model_name = "通用"
                     if not os.path.exists(load_file):
-                        print(f"通用评分文件也不存在: {load_file}")
+                        if not silent:
+                            print(f"通用评分文件也不存在: {load_file}")
                         self.batch_scores = {}
                         return False
                 else:
                     self.batch_scores = {}
                     return False
                     
-            if not getattr(self, 'suppress_console_details', False):
+            if not getattr(self, 'suppress_console_details', False) and not silent:
                 print(f"正在加载{model_name}评分文件: {load_file}")
             
             # 检查文件大小
             file_size = os.path.getsize(load_file)
             if file_size == 0:
-                print(f"{model_name}评分文件为空")
+                if not silent:
+                    print(f"{model_name}评分文件为空")
                 self.batch_scores = {}
                 return False
             
             # 检查文件大小是否合理（超过100MB可能有问题）
             if file_size > 100 * 1024 * 1024:
-                if not getattr(self, 'suppress_console_details', False):
+                if not getattr(self, 'suppress_console_details', False) and not silent:
                     print(f"{model_name}评分文件过大: {file_size / (1024*1024):.1f}MB")
                 # 在静默模式下不创建备份文件，直接放弃加载以避免额外 IO
                 try:
-                    if not getattr(self, 'suppress_console_details', False):
+                    if not getattr(self, 'suppress_console_details', False) and not silent:
                         backup_file = f"{load_file}.large_backup"
                         import shutil
                         shutil.move(load_file, backup_file)
@@ -1276,6 +1282,11 @@ class AShareAnalyzerGUI:
                     self.batch_scores = {}
                     return False
                 except:
+
+
+
+
+                    
                     # 忽略备份失败
                     self.batch_scores = {}
                     return False
@@ -1284,74 +1295,88 @@ class AShareAnalyzerGUI:
                 data = json.load(f)
             
             # 检查数据是否在48小时内
-            if self._is_batch_scores_valid(data):
-                # 兼容两种数据格式：新格式使用'stocks'，旧格式使用'scores'
-                scores = data.get('scores', {})
-                if not scores and 'stocks' in data:
-                    # 新格式：从stocks数组转换为scores字典
-                    stocks_array = data.get('stocks', [])
-                    scores = {}
-                    for stock_item in stocks_array:
-                        if isinstance(stock_item, dict) and 'code' in stock_item:
-                            code = stock_item['code']
-                            score = stock_item.get('score', 0)
-                            if score > 0:  # 只保留有效评分
-                                scores[code] = {
-                                    'score': score,
-                                    'name': stock_item.get('name', ''),
-                                    'recommendation': stock_item.get('recommendation', ''),
-                                    'analysis_time': stock_item.get('analysis_time', ''),
-                                    'model': stock_item.get('model', model_name)
-                                }
-                
-                # 验证并清理无效数据（保留所有字段包括时间段评分）
-                valid_scores = {}
-                invalid_count = 0
-                
-                for code, score_data in scores.items():
-                    if isinstance(score_data, dict):
-                        # 兼容两种格式：'score' 或 'overall_score'
-                        score_value = score_data.get('overall_score') or score_data.get('score', 0)
-                        try:
-                            score = float(score_value)
-                            if 1.0 <= score <= 10.0:  # 评分范围检查
-                                # 完整保留所有字段，包括short_term_score, medium_term_score, long_term_score
-                                # 为了兼容性，如果没有'score'字段，添加一个
-                                if 'score' not in score_data and 'overall_score' in score_data:
-                                    score_data['score'] = score_data['overall_score']
-                                valid_scores[code] = score_data
-                            else:
-                                invalid_count += 1
-                        except (ValueError, TypeError):
+            is_valid = self._is_batch_scores_valid(data)
+            if not is_valid:
+                warn_msg = f"{model_name}批量评分数据已超过48小时，建议重新获取以保证准确性"
+                if not silent:
+                    print(f"⚠️ 警告: {warn_msg}")
+                # 弹出警告（用户要求，但限制弹出频率和静默模式）
+                if not silent and hasattr(self, 'root') and self.root and not getattr(self, 'warning_shown', False):
+                    from tkinter import messagebox
+
+                    # 使用 after 确保在主线程弹出
+                    self.root.after(0, lambda: messagebox.showwarning("数据过期警告", warn_msg))
+                    self.warning_shown = True
+            
+            # 无论是否在48小时内，都尝试加载数据（用户要求即使过期也生成推荐）
+            # 兼容两种数据格式：新格式使用'stocks'，旧格式使用'scores'
+            scores = data.get('scores', {})
+            if not scores and 'stocks' in data:
+                # 新格式：从stocks数组转换为scores字典
+                stocks_array = data.get('stocks', [])
+                scores = {}
+                for stock_item in stocks_array:
+                    if isinstance(stock_item, dict) and 'code' in stock_item:
+                        code = stock_item['code']
+                        score = stock_item.get('score', 0)
+                        if score > 0:  # 只保留有效评分
+                            scores[code] = {
+                                'score': score,
+                                'name': stock_item.get('name', ''),
+                                'recommendation': stock_item.get('recommendation', ''),
+                                'analysis_time': stock_item.get('analysis_time', ''),
+                                'model': stock_item.get('model', model_name)
+                            }
+            
+            # 验证并清理无效数据（保留所有字段包括时间段评分）
+            valid_scores = {}
+            invalid_count = 0
+            
+            for code, score_data in scores.items():
+                if isinstance(score_data, dict):
+                    # 兼容两种格式：'score' 或 'overall_score'
+                    score_value = score_data.get('overall_score') or score_data.get('score', 0)
+                    try:
+                        score = float(score_value)
+                        if 1.0 <= score <= 10.0:  # 评分范围检查
+                            # 完整保留所有字段，包括short_term_score, medium_term_score, long_term_score
+                            # 为了兼容性，如果没有'score'字段，添加一个
+                            if 'score' not in score_data and 'overall_score' in score_data:
+                                score_data['score'] = score_data['overall_score']
+                            valid_scores[code] = score_data
+                        else:
                             invalid_count += 1
-                    else:
+                    except (ValueError, TypeError):
                         invalid_count += 1
-                
-                self.batch_scores = valid_scores
-                
-                if invalid_count > 0:
-                    print(f"清理了 {invalid_count} 条无效评分数据")
-                
-                score_time = data.get('timestamp', data.get('date', '未知'))
-                score_model = data.get('model', model_name)
-                print(f"加载{model_name}批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time}, 模型: {score_model})")
-                
-                # 显示一些示例评分用于调试
-                if self.batch_scores:
-                    sample_codes = list(self.batch_scores.keys())[:3]
-                    print(f"评分数据示例:")
-                    for code in sample_codes:
-                        score_data = self.batch_scores[code]
-                        score = score_data.get('score', 0)
-                        short = score_data.get('short_term_score', 'N/A')
-                        medium = score_data.get('medium_term_score', 'N/A')
-                        long = score_data.get('long_term_score', 'N/A')
-                        print(f"   {code}: 综合={score:.2f}, 短期={short}, 中期={medium}, 长期={long}")
-                        
-                return True
-            else:
-                print(f"{model_name}批量评分数据已超过48小时，将重新获取")
-                self.batch_scores = {}
+                else:
+                    invalid_count += 1
+            
+            self.batch_scores = valid_scores
+            
+            if invalid_count > 0:
+                print(f"清理了 {invalid_count} 条无效评分数据")
+            
+            score_time = data.get('timestamp', data.get('date', '未知'))
+            score_model = data.get('model', model_name)
+            
+            status_msg = f"加载{model_name}批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time}, 模型: {score_model})"
+            if not is_valid:
+                status_msg += " [⚠️ 数据已过期]"
+            print(status_msg)
+            
+            # 显示一些示例评分用于调试
+            if self.batch_scores:
+                sample_codes = list(self.batch_scores.keys())[:3]
+                print(f"评分数据示例:")
+                for code in sample_codes:
+                    score_data = self.batch_scores[code]
+                    score = score_data.get('score', 0)
+                    short = score_data.get('short_term_score', 'N/A')
+                    medium = score_data.get('medium_term_score', 'N/A')
+                    long = score_data.get('long_term_score', 'N/A')
+                    print(f"   {code}: 综合={score:.2f}, 短期={short}, 中期={medium}, 长期={long}")
+                    
+            return True
                 
         except json.JSONDecodeError as e:
             print(f"{model_name}评分文件JSON格式错误: {e}")
@@ -11798,12 +11823,16 @@ WARNING:  风险提示:
             print(f"计算综合评分失败: {e}")
             return 5.0  # 默认返回5.0
 
-    def format_batch_score_recommendations(self, recommendations, stock_type):
+    def format_batch_score_recommendations(self, recommendations, stock_type, hot_sectors=None):
         """格式化基于批量评分的推荐报告"""
         import time
         
         if not recommendations:
             return f"暂无{stock_type}推荐股票"
+        
+        # 提取热门板块名称列表
+        hot_concept_names = [s['name'] for s in hot_sectors.get('concepts', [])] if hot_sectors else []
+        hot_industry_names = [s['name'] for s in hot_sectors.get('industries', [])] if hot_sectors else []
         
         # 确定当前使用的AI模型
         current_model = getattr(self, 'llm_model', 'none')
@@ -11821,7 +11850,15 @@ WARNING:  风险提示:
 =========================================================
 
 """
-        
+        # 添加热门板块信息
+        if hot_sectors:
+            report += "🔥 当前市场热门板块:\n"
+            if hot_industry_names:
+                report += f"• 热门行业: {', '.join(hot_industry_names[:5])}\n"
+            if hot_concept_names:
+                report += f"• 热门概念: {', '.join(hot_concept_names[:5])}\n"
+            report += "\n"
+
         for i, stock in enumerate(recommendations, 1):
             score = stock['score']
             # 尝试获取各个方面的分数（短期/中期/长期 或 技术/基础）以在括号中显示
@@ -11862,6 +11899,23 @@ WARNING:  风险提示:
                 chip_score = bs.get('chip_score')
                 chip_level = bs.get('chip_level')
             
+            # 检查是否属于热门板块
+            hot_label = ""
+            stock_industry = stock.get('industry', '')
+            if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', '']:
+                for hot_ind in hot_industry_names:
+                    if hot_ind in stock_industry or stock_industry in hot_ind:
+                        hot_label = f" [🔥 {hot_ind}]"
+                        break
+            
+            if not hot_label:
+                stock_concept = stock.get('concept', '')
+                if stock_concept and stock_concept not in ['未知', 'δ֪', 'None', '']:
+                    for hot_con in hot_concept_names:
+                        if hot_con in stock_concept or stock_concept in hot_con:
+                            hot_label = f" [🔥 {hot_con}]"
+                            break
+
             # 构建括号内的分项显示
             parts = []
             # 技术面
@@ -11904,7 +11958,7 @@ WARNING:  风险提示:
             else:
                 chip_info = " | 筹码:⚪N/A"
 
-            report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}
+            report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}{hot_label}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  📊 {rating.split(' ')[0]}
     📈 趋势判断：{stock.get('trend', '未知')}
 
@@ -13432,61 +13486,20 @@ CSV批量分析使用方法:
         return None
     
     def _format_chip_result(self, ticker, result):
-        """格式化筹码分析结果"""
-        stock_name = result.get('stock_name', ticker)
-        chip_concentration = result.get('chip_concentration', 0)
-        chip_cost = result.get('chip_cost', 0)
-        profit_ratio = result.get('profit_ratio', 0)
-        loss_ratio = 100 - profit_ratio
-        turnover_rate = result.get('turnover_rate', 0)
-        health_score = result.get('health_score', 0)
-        signals = result.get('signals', [])
-        
-        # 数据时间范围
-        data_start = result.get('data_start_date', '')
-        data_end = result.get('data_end_date', '')
-        data_days = result.get('data_days', 0)
-        
-        # 健康度星级
-        stars = '⭐' * min(int(health_score), 10)
-        
-        # 格式化数据时间信息
-        if data_start and data_end:
-            data_time_info = f"数据时间: {data_start} ~ {data_end} (共{data_days}天)"
-        elif data_days > 0:
-            data_time_info = f"数据天数: {data_days}天"
-        else:
-            data_time_info = ""
-        
-        output = f"""
-{'='*60}
-  筹码健康度分析 - {ticker} ({stock_name})
-{'='*60}
-{data_time_info}
-
-筹码集中度: {chip_concentration:.1f}%
-筹码成本: ¥{chip_cost:.2f}
-获利盘比例: {profit_ratio:.1f}%
-套牢盘比例: {loss_ratio:.1f}%
-换手率: {turnover_rate:.2f}%
-健康度评分: {health_score:.1f}/10 {stars}
-
-关键信号:
-"""
-        for signal in signals:
-            output += f"  {'✓' if '主力' in signal or '获利' in signal or '集中' in signal else '⚠'} {signal}\n"
-        
-        output += f"{'='*60}\n"
-        return output
+        """格式化筹码分析结果 (已升级为详细报告)"""
+        return self._generate_chip_analysis_report(ticker, chip_result=result)
     
     def _display_chip_result(self, output):
         """显示筹码分析结果"""
-        # 清空概览文本框
-        self.overview_text.delete('1.0', tk.END)
+        # 清空筹码分析文本框
+        self.chip_text.delete('1.0', tk.END)
         # 插入结果
-        self.overview_text.insert(tk.END, output)
+        self.chip_text.insert(tk.END, output)
         # 自动滚动到顶部
-        self.overview_text.see("1.0")
+        self.chip_text.see("1.0")
+        # 切换到筹码分析标签页 (索引为 4)
+        if hasattr(self, 'notebook'):
+            self.notebook.select(4)
     
     def start_analysis(self):
         """开始分析"""
@@ -14711,7 +14724,7 @@ TARGET: 请先执行以下步骤:
 IDEA: 优势:
    • 批量评分后推荐速度极快 (秒级响应)
    • 支持灵活的筛选条件
-   • 评分数据48小时内有效，无需重复计算
+   • 建议48小时内更新评分数据，以保证分析的时效性
 
 如果已经运行过批量评分但仍看到此提示，
    请检查 batch_stock_scores.json 文件是否存在。
@@ -14770,14 +14783,29 @@ IDEA: 优势:
             
             # 检查数据是否有效（48小时内）
             if not self._is_batch_scores_valid(data):
-                print("批量评分数据已超过48小时，自动重新获取...")
-                self.show_progress("DATE: 数据已过期，正在重新获取批量评分...")
-                self.start_batch_scoring()
-                return False
+                score_time = data.get('timestamp', data.get('date', '未知'))
+                print(f"⚠️ 警告: 批量评分数据已超过48小时 (评分时间: {score_time})")
+                
+                # 弹出警告对话框，但允许继续（限制弹出频率）
+                from tkinter import messagebox
+                if self.root and not getattr(self, 'warning_shown', False):
+                    self.root.after(0, lambda: messagebox.showwarning(
+                        "数据过期警告", 
+                        f"批量评分数据已超过48小时 (评分时间: {score_time})。\n\n虽然系统将继续生成推荐，但建议您点击'开始获取评分'以更新数据，确保分析的时效性。"
+                    ))
+                    self.warning_shown = True
+                
+                # 不再自动重新获取，而是继续使用旧数据，由用户决定是否更新
+                # self.show_progress("DATE: 数据已过期，正在重新获取批量评分...")
+                # self.start_batch_scoring()
+                # return False
             
-            # 数据有效，继续使用
+            # 数据存在，继续使用
             score_time = data.get('timestamp', data.get('date', '未知'))
-            print(f"批量评分数据有效 (评分时间: {score_time})")
+            if self._is_batch_scores_valid(data):
+                print(f"批量评分数据有效 (评分时间: {score_time})")
+            else:
+                print(f"继续使用过期数据 (评分时间: {score_time})")
             return True
             
         except Exception as e:
@@ -15334,6 +15362,10 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             self.update_progress(f"正在获取{stock_type}股票池...")
             time.sleep(0.3)
             
+            # 获取热门板块数据
+            self.update_progress("正在获取当前热门板块...")
+            hot_sectors = self.get_hot_sectors()
+            
             # 根据股票类型生成股票池
             stock_pool = self.get_stock_pool_by_type(stock_type)
             
@@ -15397,7 +15429,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
             # 生成包含所有股票信息的报告
             report = self.format_complete_analysis_report(
                 all_analyzed_stocks, high_score_stocks, period, analyzed_count, 
-                cached_count, len(stock_pool), score_threshold
+                cached_count, len(stock_pool), score_threshold, hot_sectors
             )
             
             # 导出推荐股票到CSV
@@ -16085,7 +16117,7 @@ WARNING:  风险提示: 评分仅供参考，投资需谨慎
         except Exception as e:
             return f"生成排行榜失败: {e}"
     
-    def format_complete_analysis_report(self, all_stocks, high_score_stocks, period, analyzed_count, cached_count, total_count, score_threshold):
+    def format_complete_analysis_report(self, all_stocks, high_score_stocks, period, analyzed_count, cached_count, total_count, score_threshold, hot_sectors=None):
         """格式化完整分析报告 - 显示所有股票信息"""
         import time
         from datetime import datetime
@@ -16093,6 +16125,10 @@ WARNING:  风险提示: 评分仅供参考，投资需谨慎
         stock_type = self.stock_type_var.get()
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         current_date = datetime.now().strftime("%Y-%m-%d")
+        
+        # 提取热门板块名称列表
+        hot_concept_names = [s['name'] for s in hot_sectors.get('concepts', [])] if hot_sectors else []
+        hot_industry_names = [s['name'] for s in hot_sectors.get('industries', [])] if hot_sectors else []
         
         # 计算分数分布
         score_ranges = {"9-10分": 0, "8-9分": 0, "7-8分": 0, "6-7分": 0, "6分以下": 0}
@@ -16136,6 +16172,15 @@ TARGET: 推荐结果: {len(high_score_stocks)}只股票符合≥{score_threshold
 
 """
         
+        # 添加热门板块信息
+        if hot_sectors:
+            report += "🔥 当前市场热门板块:\n"
+            if hot_industry_names:
+                report += f"• 热门行业: {', '.join(hot_industry_names[:5])}\n"
+            if hot_concept_names:
+                report += f"• 热门概念: {', '.join(hot_concept_names[:5])}\n"
+            report += "\n"
+
         # 显示所有分析的股票（按分数排序）
         report += f"""
 📋 所有分析股票详情 ({len(all_stocks)}只):
@@ -16148,8 +16193,31 @@ TARGET: 推荐结果: {len(high_score_stocks)}只股票符合≥{score_threshold
             score_star = "" if stock['score'] >= 9 else "RATING:" if stock['score'] >= 8 else "📋" if stock['score'] >= 7 else "IDEA:" if stock['score'] >= 6 else "WARNING:"
             recommend_mark = "SUCCESS:推荐" if stock['score'] >= score_threshold else "  观察"
             
+            # 检查是否属于热门板块
+            is_hot = False
+            hot_label = ""
+            
+            # 检查行业
+            stock_industry = stock.get('industry', '')
+            if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', '']:
+                for hot_ind in hot_industry_names:
+                    if hot_ind in stock_industry or stock_industry in hot_ind:
+                        is_hot = True
+                        hot_label = f" [🔥 热门行业: {hot_ind}]"
+                        break
+            
+            # 如果行业没匹配到，检查概念
+            if not is_hot:
+                stock_concept = stock.get('concept', '')
+                if stock_concept and stock_concept not in ['未知', 'δ֪', 'None', '']:
+                    for hot_con in hot_concept_names:
+                        if hot_con in stock_concept or stock_concept in hot_con:
+                            is_hot = True
+                            hot_label = f" [🔥 热门概念: {hot_con}]"
+                            break
+            
             report += f"""
-{i:2d}. {cache_indicator} {stock['code']} - {stock['name']} {recommend_mark}
+{i:2d}. {cache_indicator} {stock['code']} - {stock['name']} {recommend_mark}{hot_label}
     {score_star} 评分: {stock['score']:.2f}/10.0
     🏭 行业: {stock['industry']}
     IDEA: 概念: {stock['concept']}
@@ -16171,23 +16239,36 @@ TARGET: 推荐结果: {len(high_score_stocks)}只股票符合≥{score_threshold
 """
             for i, stock in enumerate(high_score_stocks, 1):
                 cache_indicator = "💾" if stock.get('cache_time') else ""
+                
+                # 再次检查热门标签
+                hot_label = ""
+                stock_industry = stock.get('industry', '')
+                if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', '']:
+                    for hot_ind in hot_industry_names:
+                        if hot_ind in stock_industry or stock_industry in hot_ind:
+                            hot_label = f" [🔥 {hot_ind}]"
+                            break
+                if not hot_label:
+                    stock_concept = stock.get('concept', '')
+                    if stock_concept and stock_concept not in ['未知', 'δ֪', 'None', '']:
+                        for hot_con in hot_concept_names:
+                            if hot_con in stock_concept or stock_concept in hot_con:
+                                hot_label = f" [🔥 {hot_con}]"
+                                break
+
                 report += f"""
-{i}. {cache_indicator} {stock['code']} - {stock['name']}
+{i}. {cache_indicator} {stock['code']} - {stock['name']}{hot_label}
    RATING: 评分: {stock['score']:.2f}/10.0  |  MONEY: 价格: ¥{stock['price']:.2f}
    🏭 {stock['industry']}  |  IDEA: {stock['concept']}
 
 """
         
-        report += f"""
-
-说明：
-• = 实时分析  💾 = 当日缓存  SUCCESS: = 符合推荐标准
-• = 9+分优秀  RATING: = 8+分良好  📋 = 7+分一般  IDEA: = 6+分观察  WARNING: = 6分以下
-• 获取股票总数: {total_count}只，成功分析: {len(all_stocks)}只
-• 双击股票代码查看详细分析
-
-WARNING: 免责声明: 本分析仅供参考，不构成投资建议，投资需谨慎
-"""
+        report += "\n说明：\n"
+        report += "• = 实时分析  💾 = 当日缓存  SUCCESS: = 符合推荐标准\n"
+        report += "• = 9+分优秀  RATING: = 8+分良好  📋 = 7+分一般  IDEA: = 6+分观察  WARNING: = 6分以下\n"
+        report += f"• 获取股票总数: {total_count}只，成功分析: {len(all_stocks)}只\n"
+        report += "• 双击股票代码查看详细分析\n\n"
+        report += "WARNING: 免责声明: 本分析仅供参考，不构成投资建议，投资需谨慎\n"
         
         return report
     
@@ -17129,9 +17210,19 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
 """
             
             # 格式化筹码分析报告
+            periods = chip_result.get('periods', {})
+            scr_60 = periods.get('60d', {}).get('scr', chip_result.get('scr', 0))
+            scr_40 = periods.get('40d', {}).get('scr', 0)
+            
+            pr_60 = periods.get('60d', {}).get('profit_ratio', chip_result.get('profit_ratio', 0))
+            pr_40 = periods.get('40d', {}).get('profit_ratio', 0)
+            
+            bias_60 = periods.get('60d', {}).get('chip_bias', chip_result.get('chip_bias', 0))
+            bias_40 = periods.get('40d', {}).get('chip_bias', 0)
+            
             report = f"""
 ╔════════════════════════════════════════════════════════════════════╗
-║                     💎 筹码健康度分析报告                          ║
+║                     💎 筹码健康度分析报告 (40日 & 60日)            ║
 ╚════════════════════════════════════════════════════════════════════╝
 
 📊 股票信息
@@ -17145,20 +17236,44 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
   综合评分: {chip_result['health_score']:.1f}/10.0
   健康等级: {chip_result['health_level']}
   信号强度: {chip_result['signal_strength']}
+  主力动向: {chip_result.get('main_force_status', '未知')}
 
-📈 核心指标
+💎 筹码结构评价
 ─────────────────────────────────────────────────────────────────
-  SCR筹码集中度: {chip_result['scr']:.2f}%
-    └─ {'🟢 高度集中，主力明显' if chip_result['scr'] > 12 else '⚖️ 适度集中' if chip_result['scr'] > 8 else '🔴 分散，主力不明显'}
-  
-  筹码乖离率: {chip_result['chip_bias']:+.2f}%
-    └─ {'🟢 价格高于筹码峰，上涨动能强' if chip_result['chip_bias'] > 5 else '⚖️ 价格接近筹码峰' if abs(chip_result['chip_bias']) <= 5 else '🔴 价格低于筹码峰，下跌风险'}
-  
-  获利盘比例: {chip_result['profit_ratio']:.1f}%
-    └─ {'🟢 大多数持仓盈利' if chip_result['profit_ratio'] > 70 else '⚖️ 获利盘适中' if chip_result['profit_ratio'] > 40 else '🔴 大量套牢盘'}
-  
-  筹码峰型: {chip_result['peak_type']}
-    └─ {self._get_peak_type_description(chip_result['peak_type'])}
+  • 集中度: {self._get_concentration_desc(chip_result.get('scr', 0))}
+  • 获利盘: {self._get_profit_desc(chip_result.get('profit_ratio', 0))}
+  • 乖离率: {self._get_bias_desc(chip_result.get('chip_bias', 0))}
+  • 稳定性: {self._get_stability_desc(chip_result.get('hhi', 0))}
+
+�📊 基础指标 (60日)
+─────────────────────────────────────────────────────────────────
+  筹码成本(P50): ¥{chip_result.get('chip_cost', 0):.2f}
+  获利盘比例: {chip_result.get('profit_ratio', 0):.1f}%
+  套牢盘比例: {chip_result.get('loss_ratio', 0):.1f}%
+  平均换手率: {chip_result.get('turnover_rate', 0):.2f}%
+  SCR集中度: {chip_result.get('scr', 0):.2f}%
+  HHI集中度: {chip_result.get('hhi', 0):.4f} ({'高度集中' if chip_result.get('hhi', 0) > 0.25 else '分散' if chip_result.get('hhi', 0) < 0.15 else '适中'})
+  基尼系数: {chip_result.get('gini_coefficient', 0):.4f} ({'分布不均' if chip_result.get('gini_coefficient', 0) > 0.6 else '分布均匀' if chip_result.get('gini_coefficient', 0) < 0.4 else '适中'})
+
+�📈📈 核心指标对比 (40日 vs 60日)
+─────────────────────────────────────────────────────────────────
+  SCR筹码集中度:
+    └─ 60日(长期): {scr_60:.2f}% ({'🟢 高' if scr_60 < 10 else '⚖️ 中' if scr_60 < 20 else '🔴 低'})
+    └─ 40日(中期): {scr_40:.2f}% ({'🟢 高' if scr_40 < 10 else '⚖️ 中' if scr_40 < 20 else '🔴 低'})
+    └─ 趋势: {'📈 筹码正在集中' if scr_40 < scr_60 - 0.5 else '📉 筹码正在发散' if scr_40 > scr_60 + 0.5 else '➡️ 筹码结构稳定'}
+
+  获利盘比例:
+    └─ 60日(长期): {pr_60:.1f}%
+    └─ 40日(中期): {pr_40:.1f}%
+    └─ 趋势: {'📈 获利盘增加' if pr_40 > pr_60 + 2 else '📉 获利盘减少' if pr_40 < pr_60 - 2 else '➡️ 获利盘稳定'}
+
+  筹码乖离率:
+    └─ 60日(长期): {bias_60:+.2f}%
+    └─ 40日(中期): {bias_40:+.2f}%
+
+  筹码峰型:
+    └─ 60日: {periods.get('60d', {}).get('peak_type', chip_result.get('peak_type', '未知'))}
+    └─ 40日: {periods.get('40d', {}).get('peak_type', '未知')}
 
 💡 交易建议
 ─────────────────────────────────────────────────────────────────
@@ -17255,6 +17370,28 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
             return "高位（高于50%筹码）📈"
         else:
             return "极高位（高于90%筹码）🔥"
+
+    def _get_concentration_desc(self, scr):
+        if scr < 10: return "🟢 极高集中 (主力高度控盘)"
+        if scr < 20: return "⚖️ 适度集中 (主力初步控盘)"
+        return "🔴 筹码发散 (散户博弈为主)"
+
+    def _get_profit_desc(self, pr):
+        if pr > 80: return "🔴 获利盘极高 (警惕高位派发)"
+        if pr > 60: return "🟢 获利盘充足 (上涨动能强)"
+        if pr < 30: return "⚖️ 套牢盘沉重 (反弹阻力大)"
+        return "⚪ 盈亏平衡 (震荡洗盘中)"
+
+    def _get_bias_desc(self, bias):
+        if 3 <= bias <= 12: return "🟢 健康持股区 (乖离适中)"
+        if bias > 20: return "🔴 风险预警区 (乖离过大)"
+        if bias < -10: return "⚖️ 超跌反弹区 (乖离过负)"
+        return "⚪ 正常波动区"
+
+    def _get_stability_desc(self, hhi):
+        if hhi > 0.25: return "🟢 结构极稳 (筹码锁定良好)"
+        if hhi > 0.15: return "⚖️ 结构尚可 (筹码相对稳定)"
+        return "🔴 结构不稳 (筹码频繁换手)"
 
     def get_or_compute_chip_result(self, ticker, force=False, cached_kline_data=None):
         """获取或计算筹码分析结果，结果会被缓存到 `self.comprehensive_stock_data[ticker]['chip_result']`。
@@ -17567,6 +17704,10 @@ WARNING: 重要声明:
         try:
             print(f"开始生成{stock_type}股票推荐（评分规则: {period_type}）...")
             
+            # 获取热门板块数据
+            self.update_progress("正在获取当前热门板块...")
+            hot_sectors = self.get_hot_sectors()
+            
             # 映射period_type到显示名称
             period_map = {
                 'short': '短期', 
@@ -17626,11 +17767,39 @@ WARNING: 重要声明:
                         chip_score = score_data.get('chip_score')
                         chip_level = score_data.get('chip_level')
                         
+                        # 获取行业和概念信息（优先使用通用信息获取方法）
+                        stock_info = self.get_stock_info_generic(code)
+                        industry = stock_info.get('industry', '未知')
+                        concept = stock_info.get('concept', '未知')
+                        
+                        # 获取趋势信息
+                        trend = '未知'
+                        if hasattr(self, 'comprehensive_data') and code in self.comprehensive_data:
+                            cd_info = self.comprehensive_data.get(code, {})
+                            # 尝试从不同周期的分析中获取趋势
+                            for p_key in ['short_term', 'medium_term', 'long_term']:
+                                if p_key in cd_info and cd_info[p_key].get('trend'):
+                                    trend = cd_info[p_key].get('trend')
+                                    break
+                        
+                        # 如果通用方法返回未知，再尝试从 score_data 或 comprehensive_data 获取
+                        if industry == '未知行业' or industry == '未知':
+                            industry = score_data.get('industry')
+                            concept = score_data.get('concept')
+                            
+                            if (not industry or industry in ['未知', 'δ֪', 'None', '']) and hasattr(self, 'comprehensive_data'):
+                                cd_info = self.comprehensive_data.get(code, {})
+                                basic_info = cd_info.get('basic_info', {})
+                                industry = basic_info.get('industry', industry or '未知')
+                                concept = basic_info.get('concept', concept or '未知')
+
                         filtered_stocks.append({
                             'code': code,
                             'name': stock_name,
                             'score': score_data.get('score', 0),  # 使用综合评分
-                            'industry': score_data.get('industry', '未知'),
+                            'industry': industry,
+                            'concept': concept,
+                            'trend': trend,
                             'timestamp': score_data.get('timestamp', ''),
                             'chip_score': chip_score,
                             'chip_level': chip_level
@@ -17685,11 +17854,37 @@ WARNING: 重要声明:
                             chip_score = score_data.get('chip_score')
                             chip_level = score_data.get('chip_level')
                             
+                            # 获取行业和概念信息
+                            stock_info = self.get_stock_info_generic(code)
+                            industry = stock_info.get('industry', '未知')
+                            concept = stock_info.get('concept', '未知')
+                            
+                            # 获取趋势信息
+                            trend = '未知'
+                            if hasattr(self, 'comprehensive_data') and code in self.comprehensive_data:
+                                cd_info = self.comprehensive_data.get(code, {})
+                                for p_key in ['short_term', 'medium_term', 'long_term']:
+                                    if p_key in cd_info and cd_info[p_key].get('trend'):
+                                        trend = cd_info[p_key].get('trend')
+                                        break
+
+                            if industry == '未知行业' or industry == '未知':
+                                industry = score_data.get('industry')
+                                concept = score_data.get('concept')
+                                
+                                if (not industry or industry in ['未知', 'δ֪', 'None', '']) and hasattr(self, 'comprehensive_data'):
+                                    cd_info = self.comprehensive_data.get(code, {})
+                                    basic_info = cd_info.get('basic_info', {})
+                                    industry = basic_info.get('industry', industry or '未知')
+                                    concept = basic_info.get('concept', concept or '未知')
+
                             filtered_stocks.append({
                                 'code': code,
                                 'name': stock_name,
                                 'score': score,
-                                'industry': score_data.get('industry', '未知'),
+                                'industry': industry,
+                                'concept': concept,
+                                'trend': trend,
                                 'timestamp': score_data.get('timestamp', ''),
                                 'source': period_type,
                                 'chip_score': chip_score,
@@ -17752,11 +17947,24 @@ WARNING: 重要声明:
                             chip_score = score_data.get('chip_score')
                             chip_level = score_data.get('chip_level')
                             
+                            # 获取行业、概念和趋势信息
+                            industry = score_data.get('industry') or score_data.get('sector')
+                            concept = score_data.get('concept') or score_data.get('concepts')
+                            trend = score_data.get('trend') or score_data.get('trend_status') or '未知'
+                            
+                            if not industry or industry in ['未知', 'None', 'δ֪']:
+                                info = self.get_stock_info_generic(code)
+                                industry = info.get('industry', '未知')
+                                if not concept or concept in ['未知', 'None', 'δ֪']:
+                                    concept = info.get('concept', '未知')
+                            
                             filtered_stocks.append({
                                 'code': code,
                                 'name': stock_name,
                                 'score': weighted_score,  # 使用期限加权评分
-                                'industry': score_data.get('industry', '未知'),
+                                'industry': industry,
+                                'concept': concept,
+                                'trend': trend,
                                 'timestamp': score_data.get('timestamp', ''),
                                 'source': f'batch_{period_type}',
                                 'short_score': short_score,
@@ -17836,10 +18044,22 @@ WARNING: 重要声明:
                             except Exception:
                                 pass
                             
+                            # 获取行业和概念信息
+                            stock_info = self.get_stock_info_generic(code)
+                            industry = stock_info.get('industry', '未知')
+                            concept = stock_info.get('concept', '未知')
+                            
+                            if industry == '未知行业' or industry == '未知':
+                                basic_info = stock_data.get('basic_info', {})
+                                industry = basic_info.get('industry', '未知')
+                                concept = basic_info.get('concept', '未知')
+                            
                             filtered_stocks.append({
                                 'code': code,
                                 'name': stock_data.get('name', f'股票{code}'),
                                 'score': score,
+                                'industry': industry,
+                                'concept': concept,
                                 'trend': period_data.get('trend', '未知'),
                                 'strategy': period_data.get('strategy', ''),
                                 'timestamp': stock_data.get('timestamp', ''),
@@ -17909,6 +18129,59 @@ WARNING: 重要声明:
             qualified_stocks.sort(key=lambda x: x['score'], reverse=True)
             top_recommendations = qualified_stocks[:10]
             
+            # 🚀 增强：为前10名推荐股票精准匹配热门板块
+            if AKSHARE_AVAILABLE and hot_sectors:
+                self.update_progress("正在精准匹配热门板块...")
+                try:
+                    # 1. 首先确保前10名股票有真实的行业信息（如果当前是占位符）
+                    for stock in top_recommendations:
+                        if stock.get('industry') in ['未知', '未知行业', 'δ֪', '制造业', '传统行业', '科技创新', '成长企业']:
+                            try:
+                                # 尝试从 akshare 获取真实行业
+                                info = ak.stock_individual_info_em(symbol=stock['code'])
+                                if info is not None and not info.empty:
+                                    real_ind = info[info['item'] == '行业']['value'].values[0]
+                                    if real_ind:
+                                        stock['industry'] = real_ind
+                            except Exception:
+                                pass
+
+                    # 2. 获取热门概念的成分股 (扩大到前10个热门概念)
+                    for concept in hot_sectors.get('concepts', [])[:10]:
+                        concept_name = concept['name']
+                        try:
+                            concept_stocks = ak.stock_board_concept_cons_em(symbol=concept_name)
+                            if concept_stocks is not None and not concept_stocks.empty:
+                                concept_codes = concept_stocks['代码'].tolist()
+                                for stock in top_recommendations:
+                                    if stock['code'] in concept_codes:
+                                        # 如果匹配到，更新该股票的概念信息
+                                        current_concept = stock.get('concept', '')
+                                        if not current_concept or current_concept in ['未知', 'None', '未知概念']:
+                                            stock['concept'] = concept_name
+                                        elif concept_name not in current_concept:
+                                            stock['concept'] = f"{current_concept},{concept_name}"
+                        except Exception as e:
+                            print(f"获取概念 {concept_name} 成分股失败: {e}")
+                    
+                    # 3. 获取热门行业的成分股 (扩大到前10个热门行业)
+                    for industry in hot_sectors.get('industries', [])[:10]:
+                        industry_name = industry['name']
+                        try:
+                            industry_stocks = ak.stock_board_industry_cons_em(symbol=industry_name)
+                            if industry_stocks is not None and not industry_stocks.empty:
+                                industry_codes = industry_stocks['代码'].tolist()
+                                for stock in top_recommendations:
+                                    if stock['code'] in industry_codes:
+                                        # 如果匹配到，更新该股票的行业信息
+                                        current_industry = stock.get('industry', '')
+                                        if not current_industry or current_industry in ['未知', 'None', '未知行业']:
+                                            stock['industry'] = industry_name
+                        except Exception as e:
+                            print(f"获取行业 {industry_name} 成分股失败: {e}")
+                except Exception as e:
+                    print(f"精准匹配热门板块异常: {e}")
+
             # 保存到类属性供导出使用
             self.last_recommendations = top_recommendations
             
@@ -17935,12 +18208,12 @@ WARNING: 重要声明:
             # 根据数据类型格式化推荐报告
             if period_type == 'overall':
                 recommendation_report = self.format_batch_score_recommendations(
-                    top_recommendations, stock_type
+                    top_recommendations, stock_type, hot_sectors
                 )
             else:
                 period_display = period_map.get(period_type, period_type)
                 recommendation_report = self.format_period_recommendations(
-                    top_recommendations, stock_type, period_display
+                    top_recommendations, stock_type, period_display, hot_sectors
                 )
             
             print(f"生成报告长度: {len(recommendation_report)} 字符")
@@ -18005,12 +18278,16 @@ WARNING: 重要声明:
             except:
                 pass
     
-    def format_period_recommendations(self, recommendations, stock_type, period_name):
+    def format_period_recommendations(self, recommendations, stock_type, period_name, hot_sectors=None):
         """格式化时间周期特定的推荐报告"""
         if not recommendations:
             return f"暂无{period_name}{stock_type}推荐股票"
         
         from datetime import datetime
+
+        # 提取热门板块名称列表
+        hot_concept_names = [s['name'] for s in hot_sectors.get('concepts', [])] if hot_sectors else []
+        hot_industry_names = [s['name'] for s in hot_sectors.get('industries', [])] if hot_sectors else []
 
         # 生成报告标题
         report_title = f"""
@@ -18021,8 +18298,17 @@ WARNING: 重要声明:
 🎯 投资期限：{period_name}
 📈 股票类型：{stock_type}
 
-💡 {period_name}投资策略说明：
 """
+        # 添加热门板块信息
+        if hot_sectors:
+            report_title += "🔥 当前市场热门板块:\n"
+            if hot_industry_names:
+                report_title += f"• 热门行业: {', '.join(hot_industry_names[:5])}\n"
+            if hot_concept_names:
+                report_title += f"• 热门概念: {', '.join(hot_concept_names[:5])}\n"
+            report_title += "\n"
+
+        report_title += f"💡 {period_name}投资策略说明：\n"
         
         # 根据时间周期添加策略说明
         if period_name == "短期":
@@ -18113,6 +18399,23 @@ WARNING: 重要声明:
                 except Exception:
                     pass
 
+            # 检查是否属于热门板块
+            hot_label = ""
+            stock_industry = stock.get('industry', '')
+            if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', '']:
+                for hot_ind in hot_industry_names:
+                    if hot_ind in stock_industry or stock_industry in hot_ind:
+                        hot_label = f" [🔥 {hot_ind}]"
+                        break
+            
+            if not hot_label:
+                stock_concept = stock.get('concept', '')
+                if stock_concept and stock_concept not in ['未知', 'δ֪', 'None', '']:
+                    for hot_con in hot_concept_names:
+                        if hot_con in stock_concept or stock_concept in hot_con:
+                            hot_label = f" [🔥 {hot_con}]"
+                            break
+
             parts = []
             # 技术面
             try:
@@ -18174,7 +18477,7 @@ WARNING: 重要声明:
                 score_color = "📈"
             
             stock_info = f"""
-{score_color} 第 {i} 名：{code} {name}
+{score_color} 第 {i} 名：{code} {name}{hot_label}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
     📈 趋势判断：{trend}
 """

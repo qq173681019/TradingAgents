@@ -281,35 +281,57 @@ class ChipHealthAnalyzer:
         
         # 4. 计算筹码成本分位数（P10/P50/P90）和SCR
         print("")
-        step_log("计算筹码成本分位数和SCR...")
-        p10, p50, p90 = self._calculate_chip_cost_percentiles(hist_data)
-        result['chip_cost_p10'] = p10
-        result['chip_cost'] = p50  # P50作为平均成本
-        result['chip_cost_p90'] = p90
+        step_log("计算筹码成本分位数和SCR (40日 & 60日)...")
         
-        # 计算SCR筹码集中度（改进版：增加边界检查）
-        if p50 > 0 and p90 > 0 and p10 >= 0:
-            # 防止除零和异常值
-            scr = ((p90 - p10) / (2 * p50)) * 100
-            # 限制SCR在合理范围内 [0, 100]
-            scr = max(0.0, min(100.0, scr))
-            result['scr'] = scr
-            print(f"✓ 筹码成本: P10=¥{p10:.2f}, P50=¥{p50:.2f}, P90=¥{p90:.2f}")
-            print(f"✓ SCR筹码集中度: {scr:.2f}% {'(高度集中)' if scr < 10 else '(相对集中)' if scr < 20 else '(发散)'}")
-        else:
-            # 异常情况处理
-            result['scr'] = 100.0  # 默认为最发散状态
-            print(f"⚠ 无法计算筹码成本 (P10={p10:.2f}, P50={p50:.2f}, P90={p90:.2f})")
+        # 60日数据 (长期)
+        p10_60, p50_60, p90_60 = self._calculate_chip_cost_percentiles(hist_data, window=60)
+        # 40日数据 (中期)
+        p10_40, p50_40, p90_40 = self._calculate_chip_cost_percentiles(hist_data, window=40)
+        
+        result['chip_cost_p10'] = p10_60
+        result['chip_cost'] = p50_60
+        result['chip_cost_p90'] = p90_60
+        
+        # 存储分位数数据供GUI使用
+        result['percentiles'] = {
+            'p10': p10_60,
+            'p50': p50_60,
+            'p90': p90_60
+        }
+        
+        # 存储多周期数据
+        result['periods'] = {
+            '60d': {'p10': p10_60, 'p50': p50_60, 'p90': p90_60},
+            '40d': {'p10': p10_40, 'p50': p50_40, 'p90': p90_40}
+        }
+        
+        # 计算SCR
+        for period in ['60d', '40d']:
+            p = result['periods'][period]
+            if p['p50'] > 0:
+                scr = ((p['p90'] - p['p10']) / (2 * p['p50'])) * 100
+                result['periods'][period]['scr'] = max(0.0, min(100.0, scr))
+            else:
+                result['periods'][period]['scr'] = 100.0
+        
+        result['scr'] = result['periods']['60d']['scr']
+        print(f"✓ 60日筹码成本: P10=¥{p10_60:.2f}, P50=¥{p50_60:.2f}, P90=¥{p90_60:.2f} (SCR: {result['periods']['60d']['scr']:.2f}%)")
+        print(f"✓ 40日筹码成本: P10=¥{p10_40:.2f}, P50=¥{p50_40:.2f}, P90=¥{p90_40:.2f} (SCR: {result['periods']['40d']['scr']:.2f}%)")
         
         # 5. 计算获利盘/套牢盘比例
         print("")
-        step_log("计算获利盘/套牢盘...")
-        profit_ratio, loss_ratio = self._calculate_profit_loss_ratio(
-            hist_data, current_price
-        )
-        result['profit_ratio'] = profit_ratio
-        result['loss_ratio'] = loss_ratio
-        print(f"✓ 获利盘: {profit_ratio:.1f}%, 套牢盘: {loss_ratio:.1f}%")
+        step_log("计算获利盘/套牢盘 (40日 & 60日)...")
+        pr_60, lr_60 = self._calculate_profit_loss_ratio(hist_data, current_price, window=60)
+        pr_40, lr_40 = self._calculate_profit_loss_ratio(hist_data, current_price, window=40)
+        
+        result['periods']['60d']['profit_ratio'] = pr_60
+        result['periods']['60d']['loss_ratio'] = lr_60
+        result['periods']['40d']['profit_ratio'] = pr_40
+        result['periods']['40d']['loss_ratio'] = lr_40
+        
+        result['profit_ratio'] = pr_60
+        result['loss_ratio'] = lr_60
+        print(f"✓ 60日获利盘: {pr_60:.1f}%, 40日获利盘: {pr_40:.1f}%")
         
         # 6. 计算换手率
         print("")
@@ -321,10 +343,14 @@ class ChipHealthAnalyzer:
         # 7. 计算筹码乖离率
         print("")
         step_log("计算筹码乖离率...")
-        if current_price > 0 and p50 > 0:
-            chip_bias = ((current_price - p50) / p50) * 100
-            result['chip_bias'] = chip_bias
-            print(f"✓ 筹码乖离率: {chip_bias:+.2f}% {'(健康区间)' if 5 <= chip_bias <= 15 else ''}")
+        if current_price > 0:
+            if p50_60 > 0:
+                result['periods']['60d']['chip_bias'] = ((current_price - p50_60) / p50_60) * 100
+            if p50_40 > 0:
+                result['periods']['40d']['chip_bias'] = ((current_price - p50_40) / p50_40) * 100
+            
+            result['chip_bias'] = result['periods']['60d'].get('chip_bias', 0)
+            print(f"✓ 60日乖离率: {result['chip_bias']:+.2f}%, 40日乖离率: {result['periods']['40d'].get('chip_bias', 0):+.2f}%")
         
         # 8. 计算HHI和基尼系数
         print("")
@@ -332,22 +358,27 @@ class ChipHealthAnalyzer:
         hhi, gini = self._calculate_hhi_and_gini(hist_data)
         result['hhi'] = hhi
         result['gini_coefficient'] = gini
-        print(f"✓ 赫芬达尔指数(HHI): {hhi:.4f} {'(高度集中)' if hhi > 0.25 else '(相对分散)' if hhi < 0.15 else '(适中)'}")
-        print(f"✓ 基尼系数: {gini:.4f} {'(分布均匀)' if gini < 0.4 else '(分布不均)' if gini > 0.6 else '(适中)'}")
+        print(f"✓ 赫芬达尔指数(HHI): {hhi:.4f}, 基尼系数: {gini:.4f}")
         
         # 9. 识别筹码峰型
         print("")
-        step_log("识别筹码峰型...")
-        peak_type = self._identify_peak_type(hist_data)
-        result['peak_type'] = peak_type
-        print(f"✓ 筹码峰型: {peak_type}")
+        step_log("识别筹码峰型 (40日 & 60日)...")
+        pt_60 = self._identify_peak_type(hist_data, window=60)
+        pt_40 = self._identify_peak_type(hist_data, window=40)
+        result['periods']['60d']['peak_type'] = pt_60
+        result['periods']['40d']['peak_type'] = pt_40
+        result['peak_type'] = pt_60
+        print(f"✓ 60日峰型: {pt_60}, 40日峰型: {pt_40}")
         
         # 10. 检测底部筹码锁定
         print("")
         step_log("检测底部筹码锁定...")
-        bottom_locked = self._check_bottom_locked(hist_data, current_price)
-        result['bottom_locked'] = bottom_locked
-        print(f"✓ 底部筹码: {'锁定 🔒' if bottom_locked else '未锁定'}")
+        bl_60 = self._check_bottom_locked(hist_data, current_price, long_window=60)
+        bl_40 = self._check_bottom_locked(hist_data, current_price, long_window=40)
+        result['periods']['60d']['bottom_locked'] = bl_60
+        result['periods']['40d']['bottom_locked'] = bl_40
+        result['bottom_locked'] = bl_60
+        print(f"✓ 底部锁定: 60日={'是' if bl_60 else '否'}, 40日={'是' if bl_40 else '否'}")
         
         # 11. 综合评分（新版严格算法）
         print("")
@@ -700,14 +731,14 @@ class ChipHealthAnalyzer:
         # 实际应该从数据中计算
         return 35.6
     
-    def _calculate_chip_cost_percentiles(self, hist_data):
+    def _calculate_chip_cost_percentiles(self, hist_data, window=60):
         """计算筹码成本分位数（P10, P50, P90）- 改进版"""
         if hist_data is None or hist_data.empty:
             return 0, 0, 0
         
         try:
-            # 使用近60日数据计算筹码成本分布
-            recent_data = hist_data.tail(60)
+            # 使用指定周期数据计算筹码成本分布
+            recent_data = hist_data.tail(window)
             
             prices = recent_data['收盘'].astype(float).values
             volumes = recent_data['成交量'].astype(float).values
@@ -756,7 +787,7 @@ class ChipHealthAnalyzer:
             print(f"计算筹码成本分位数失败: {e}")
             # 回退到简单方法
             try:
-                recent_data = hist_data.tail(60)
+                recent_data = hist_data.tail(window)
                 prices = recent_data['收盘'].astype(float)
                 volumes = recent_data['成交量'].astype(float)
                 weighted_price = (prices * volumes).sum() / volumes.sum()
@@ -816,14 +847,14 @@ class ChipHealthAnalyzer:
                 'pattern': 0.20
             }
     
-    def _calculate_profit_loss_ratio_with_time_decay(self, hist_data, current_price):
+    def _calculate_profit_loss_ratio_with_time_decay(self, hist_data, current_price, window=60):
         """计算获利盘和套牢盘比例 - 增强版（带时间衰减权重）"""
         if hist_data is None or hist_data.empty or current_price <= 0:
             return 0, 0
         
         try:
-            # 使用近60日数据
-            recent_data = hist_data.tail(60)
+            # 使用指定周期数据
+            recent_data = hist_data.tail(window)
             
             prices = recent_data['收盘'].astype(float).values
             volumes = recent_data['成交量'].astype(float).values
@@ -860,14 +891,14 @@ class ChipHealthAnalyzer:
         
         return 0, 0
     
-    def _calculate_profit_loss_ratio(self, hist_data, current_price):
+    def _calculate_profit_loss_ratio(self, hist_data, current_price, window=60):
         """计算获利盘和套牢盘比例 - 改进版（增加数据验证）"""
         if hist_data is None or hist_data.empty or current_price <= 0:
             return 0, 0
         
         try:
-            # 使用近60日数据
-            recent_data = hist_data.tail(60)
+            # 使用指定周期数据
+            recent_data = hist_data.tail(window)
             
             prices = recent_data['收盘'].astype(float)
             volumes = recent_data['成交量'].astype(float)
@@ -922,14 +953,14 @@ class ChipHealthAnalyzer:
             print(f"计算换手率失败: {e}")
             return 0
     
-    def _identify_peak_type(self, hist_data):
+    def _identify_peak_type(self, hist_data, window=60):
         """识别筹码峰型：单峰/双峰/多峰 - 改进版（增加强度判断）"""
         if hist_data is None or hist_data.empty:
             return '未知'
         
         try:
-            # 使用近60日数据
-            recent_data = hist_data.tail(60)
+            # 使用指定周期数据
+            recent_data = hist_data.tail(window)
             prices = recent_data['收盘'].astype(float).values
             volumes = recent_data['成交量'].astype(float).values
             
@@ -1016,7 +1047,7 @@ class ChipHealthAnalyzer:
             print(f"识别峰型失败: {e}")
             return '未知'
     
-    def _check_bottom_locked(self, hist_data, current_price):
+    def _check_bottom_locked(self, hist_data, current_price, long_window=60):
         """检测底部筹码是否锁定（主力锁仓）- 改进版"""
         if hist_data is None or hist_data.empty or current_price <= 0:
             return False
@@ -1026,19 +1057,19 @@ class ChipHealthAnalyzer:
             if len(hist_data) < 20:
                 return False
             
-            # 对比近20日和近60日的低位筹码比例
-            data_60d = hist_data.tail(60)
+            # 对比近20日和指定长周期的低位筹码比例
+            data_long = hist_data.tail(long_window)
             data_20d = hist_data.tail(20)
             
-            # 找出60日内的最低价区域（底部20%价格区间）
-            prices_60d = data_60d['收盘'].astype(float).values
-            volumes_60d = data_60d['成交量'].astype(float).values
-            price_min = prices_60d.min()
+            # 找出长周期内的最低价区域（底部20%价格区间）
+            prices_long = data_long['收盘'].astype(float).values
+            volumes_long = data_long['成交量'].astype(float).values
+            price_min = prices_long.min()
             price_20pct = price_min + (current_price - price_min) * 0.2
             
             # 计算底部区域的筹码量
-            bottom_volume_60d = volumes_60d[prices_60d <= price_20pct].sum()
-            total_volume_60d = volumes_60d.sum()
+            bottom_volume_long = volumes_long[prices_long <= price_20pct].sum()
+            total_volume_long = volumes_long.sum()
             
             # 计算近20日在底部区域的成交量
             prices_20d = data_20d['收盘'].astype(float).values
@@ -1046,15 +1077,15 @@ class ChipHealthAnalyzer:
             bottom_volume_20d = volumes_20d[prices_20d <= price_20pct].sum()
             total_volume_20d = volumes_20d.sum()
             
-            if total_volume_60d == 0 or total_volume_20d == 0:
+            if total_volume_long == 0 or total_volume_20d == 0:
                 return False
             
-            # 如果底部筹码占比在60日和20日中保持稳定或增加，说明锁定
-            bottom_ratio_60d = bottom_volume_60d / total_volume_60d
+            # 如果底部筹码占比在长周期和20日中保持稳定或增加，说明锁定
+            bottom_ratio_long = bottom_volume_long / total_volume_long
             bottom_ratio_20d = bottom_volume_20d / total_volume_20d
             
             # 逻辑：如果股价上涨但底部成交量占比下降不多，说明筹码锁定
-            if bottom_ratio_60d > 0.15 and bottom_ratio_20d > bottom_ratio_60d * 0.7:
+            if bottom_ratio_long > 0.15 and bottom_ratio_20d > bottom_ratio_long * 0.7:
                 return True
             
             return False
@@ -1236,11 +1267,16 @@ class ChipHealthAnalyzer:
         }
     
     def _generate_trading_suggestion(self, result, total_score):
-        """生成交易建议和信号强度"""
+        """生成交易建议和信号强度 - 增强版（支持多周期对比）"""
         peak_type = result['peak_type']
         scr = result['scr']
         chip_bias = result['chip_bias']
         bottom_locked = result['bottom_locked']
+        
+        # 获取多周期对比数据
+        periods = result.get('periods', {})
+        scr_40 = periods.get('40d', {}).get('scr', scr)
+        scr_60 = periods.get('60d', {}).get('scr', scr)
         
         # 判断信号强度
         if total_score >= 8.5:
@@ -1250,7 +1286,7 @@ class ChipHealthAnalyzer:
         else:
             signal_strength = '弱'
         
-        # 生成具体建议
+        # 基础建议逻辑
         if '底部单峰' in peak_type and scr < 12:
             suggestion = "🟢 强烈看涨信号！股价在低位横盘，筹码高度集中在当前价位，上方套牢盘已消化，这是经典的吸筹完成信号。建议：积极关注，等待主力点火拉升。"
             signal_strength = '强'
@@ -1275,7 +1311,15 @@ class ChipHealthAnalyzer:
         else:
             suggestion = "⚪ 筹码形态不明确，缺乏明显的主力迹象。建议：观望为主，等待更清晰的信号。"
             signal_strength = '弱'
-        
+            
+        # 添加多周期对比补充建议
+        if scr_40 < scr_60 - 2:
+            suggestion += "\n\n🔍 周期对比：40日筹码集中度优于60日，说明近期筹码正在加速收敛，主力介入迹象增强。"
+        elif scr_40 > scr_60 + 2:
+            suggestion += "\n\n🔍 周期对比：40日筹码集中度弱于60日，说明近期筹码有所发散，可能存在主力派发或散户大规模进场。"
+        else:
+            suggestion += "\n\n🔍 周期对比：40日与60日筹码结构基本一致，筹码状态稳定。"
+            
         return suggestion, signal_strength
     
     def _calculate_pattern_confidence(self, peak_type, scr, chip_bias):
@@ -1379,6 +1423,16 @@ class ChipHealthAnalyzer:
         
         if result['bottom_locked']:
             signals.append("✓✓ 底部筹码锁定 🔒 - 主力志在长远 ⭐⭐⭐⭐⭐")
+            
+        # 添加多周期对比信号
+        periods = result.get('periods', {})
+        if '40d' in periods and '60d' in periods:
+            scr_40 = periods['40d']['scr']
+            scr_60 = periods['60d']['scr']
+            if scr_40 < scr_60 - 1.0:
+                signals.append(f"📈 筹码加速集中: 40日({scr_40:.1f}%) < 60日({scr_60:.1f}%)，主力近期介入明显")
+            elif scr_40 > scr_60 + 1.0:
+                signals.append(f"📉 筹码近期发散: 40日({scr_40:.1f}%) > 60日({scr_60:.1f}%)，需警惕主力派发")
         
         # 确保评分在合理范围内（正常情况下应该已经在0-10之间，这里只是安全保护）
         score = max(0.0, min(10.0, score))
