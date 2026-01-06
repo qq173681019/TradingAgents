@@ -11916,6 +11916,9 @@ WARNING:  风险提示:
                             hot_label = f" [🔥 {hot_con}]"
                             break
 
+            # 确定热门板块显示文本
+            hot_status = hot_label.strip() if hot_label else "未匹配到热门板块"
+
             # 构建括号内的分项显示
             parts = []
             # 技术面
@@ -11949,16 +11952,21 @@ WARNING:  风险提示:
 
             chip_info = ""
             if chip_score is not None:
-                chip_emoji_map = {
-                    '极度健康': '🟢', '非常健康': '🟢', '健康': '🟡',
-                    '一般': '🟠', '不健康': '🔴', '危险': '🔴'
-                }
-                chip_emoji = chip_emoji_map.get(chip_level, '⚪')
+                # 🚀 增强：更灵活的筹码等级匹配
+                chip_emoji = '⚪'
+                if chip_level:
+                    if any(k in chip_level for k in ['极度健康', '非常健康', 'A+']): chip_emoji = '🟢'
+                    elif any(k in chip_level for k in ['优秀', '健康', 'A']): chip_emoji = '🟢'
+                    elif any(k in chip_level for k in ['良好', 'B']): chip_emoji = '🟡'
+                    elif any(k in chip_level for k in ['一般', 'C']): chip_emoji = '🟠'
+                    elif any(k in chip_level for k in ['不健康', '危险', '偏弱', 'D', 'E']): chip_emoji = '🔴'
+                
                 chip_info = f" | 筹码:{chip_emoji}{float(chip_score):.1f}"
             else:
                 chip_info = " | 筹码:⚪N/A"
 
-            report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}{hot_label}
+            report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}
+    🔥 热门板块：{hot_status}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  📊 {rating.split(' ')[0]}
     📈 趋势判断：{stock.get('trend', '未知')}
 
@@ -16216,8 +16224,12 @@ TARGET: 推荐结果: {len(high_score_stocks)}只股票符合≥{score_threshold
                             hot_label = f" [🔥 热门概念: {hot_con}]"
                             break
             
+            # 确定热门板块显示文本
+            hot_status = hot_label.strip() if hot_label else "未匹配到热门板块"
+            
             report += f"""
-{i:2d}. {cache_indicator} {stock['code']} - {stock['name']} {recommend_mark}{hot_label}
+{i:2d}. {cache_indicator} {stock['code']} - {stock['name']} {recommend_mark}
+    🔥 热门板块：{hot_status}
     {score_star} 评分: {stock['score']:.2f}/10.0
     🏭 行业: {stock['industry']}
     IDEA: 概念: {stock['concept']}
@@ -16256,8 +16268,12 @@ TARGET: 推荐结果: {len(high_score_stocks)}只股票符合≥{score_threshold
                                 hot_label = f" [🔥 {hot_con}]"
                                 break
 
+                # 确定热门板块显示文本
+                hot_status = hot_label.strip() if hot_label else "未匹配到热门板块"
+
                 report += f"""
-{i}. {cache_indicator} {stock['code']} - {stock['name']}{hot_label}
+{i}. {cache_indicator} {stock['code']} - {stock['name']}
+   🔥 热门板块：{hot_status}
    RATING: 评分: {stock['score']:.2f}/10.0  |  MONEY: 价格: ¥{stock['price']:.2f}
    🏭 {stock['industry']}  |  IDEA: {stock['concept']}
 
@@ -17782,6 +17798,15 @@ WARNING: 重要声明:
                                     trend = cd_info[p_key].get('trend')
                                     break
                         
+                        # 🚀 增强：如果趋势仍为未知，根据评分自动推断
+                        if trend == '未知':
+                            score = score_data.get('score', 0)
+                            if score >= 9.0: trend = "强势上涨"
+                            elif score >= 8.0: trend = "稳步上涨"
+                            elif score >= 7.0: trend = "震荡向上"
+                            elif score >= 6.0: trend = "震荡"
+                            else: trend = "震荡偏弱"
+                        
                         # 如果通用方法返回未知，再尝试从 score_data 或 comprehensive_data 获取
                         if industry == '未知行业' or industry == '未知':
                             industry = score_data.get('industry')
@@ -17951,6 +17976,14 @@ WARNING: 重要声明:
                             industry = score_data.get('industry') or score_data.get('sector')
                             concept = score_data.get('concept') or score_data.get('concepts')
                             trend = score_data.get('trend') or score_data.get('trend_status') or '未知'
+                            
+                            # 🚀 增强：如果趋势仍为未知，根据评分自动推断
+                            if trend == '未知':
+                                if weighted_score >= 9.0: trend = "强势上涨"
+                                elif weighted_score >= 8.0: trend = "稳步上涨"
+                                elif weighted_score >= 7.0: trend = "震荡向上"
+                                elif weighted_score >= 6.0: trend = "震荡"
+                                else: trend = "震荡偏弱"
                             
                             if not industry or industry in ['未知', 'None', 'δ֪']:
                                 info = self.get_stock_info_generic(code)
@@ -18146,8 +18179,8 @@ WARNING: 重要声明:
                             except Exception:
                                 pass
 
-                    # 2. 获取热门概念的成分股 (扩大到前10个热门概念)
-                    for concept in hot_sectors.get('concepts', [])[:10]:
+                    # 2. 获取热门概念的成分股 (扩大到前20个热门概念)
+                    for concept in hot_sectors.get('concepts', [])[:20]:
                         concept_name = concept['name']
                         try:
                             concept_stocks = ak.stock_board_concept_cons_em(symbol=concept_name)
@@ -18164,8 +18197,8 @@ WARNING: 重要声明:
                         except Exception as e:
                             print(f"获取概念 {concept_name} 成分股失败: {e}")
                     
-                    # 3. 获取热门行业的成分股 (扩大到前10个热门行业)
-                    for industry in hot_sectors.get('industries', [])[:10]:
+                    # 3. 获取热门行业的成分股 (扩大到前20个热门行业)
+                    for industry in hot_sectors.get('industries', [])[:20]:
                         industry_name = industry['name']
                         try:
                             industry_stocks = ak.stock_board_industry_cons_em(symbol=industry_name)
@@ -18415,6 +18448,9 @@ WARNING: 重要声明:
                         if hot_con in stock_concept or stock_concept in hot_con:
                             hot_label = f" [🔥 {hot_con}]"
                             break
+            
+            # 确定热门板块显示文本
+            hot_status = hot_label.strip() if hot_label else "未匹配到热门板块"
 
             parts = []
             # 技术面
@@ -18446,15 +18482,14 @@ WARNING: 重要声明:
             
             # 生成筹码显示信息（始终显示，即使没有数据）
             if chip_score is not None and chip_level:
-                chip_emoji_map = {
-                    '极度健康': '🟢',
-                    '非常健康': '🟢', 
-                    '健康': '🟡',
-                    '一般': '🟠',
-                    '不健康': '🔴',
-                    '危险': '🔴'
-                }
-                chip_emoji = chip_emoji_map.get(chip_level, '⚪')
+                # 🚀 增强：更灵活的筹码等级匹配
+                chip_emoji = '⚪'
+                if any(k in chip_level for k in ['极度健康', '非常健康', 'A+']): chip_emoji = '🟢'
+                elif any(k in chip_level for k in ['优秀', '健康', 'A']): chip_emoji = '🟢'
+                elif any(k in chip_level for k in ['良好', 'B']): chip_emoji = '🟡'
+                elif any(k in chip_level for k in ['一般', 'C']): chip_emoji = '🟠'
+                elif any(k in chip_level for k in ['不健康', '危险', '偏弱', 'D', 'E']): chip_emoji = '🔴'
+                
                 chip_info = f" | 筹码:{chip_emoji}{chip_score:.1f}"
                 chip_detail_line = f"    💎 筹码健康度：{chip_score:.2f}/10.0 ({chip_level})\n"
             else:
@@ -18477,7 +18512,8 @@ WARNING: 重要声明:
                 score_color = "📈"
             
             stock_info = f"""
-{score_color} 第 {i} 名：{code} {name}{hot_label}
+{score_color} 第 {i} 名：{code} {name}
+    🔥 热门板块：{hot_status}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
     📈 趋势判断：{trend}
 """

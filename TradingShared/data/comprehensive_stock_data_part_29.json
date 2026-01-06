@@ -1,0 +1,142 @@
+{
+  "stocks": {
+    "000003": {
+      "code": "000003",
+      "timestamp": "2026-01-05T22:38:30.830121",
+      "collection_time": "2026-01-05 22:38:30",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000003",
+        "name": "PT金田A",
+        "type": "1",
+        "status": "0",
+        "industry": "未知",
+        "listing_date": "1991-07-03",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000003",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000003",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000003",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2026-01-05T22:38:30.830940",
+        "success_rate": 0.6
+      }
+    },
+    "000015": {
+      "code": "000015",
+      "timestamp": "2026-01-05T22:38:33.252106",
+      "collection_time": "2026-01-05 22:38:33",
+      "data_source": "specialized_distribution_v2",
+      "api_strategy": {
+        "kline": "tushare_akshare_rotation",
+        "basic_info": "baostock_tencent_akshare",
+        "financial": "baostock_yfinance_tencent_akshare",
+        "industry": "baostock_akshare_mapping",
+        "fund_flow": "tencent_akshare_realtime",
+        "news": "akshare_realtime"
+      },
+      "basic_info": {
+        "code": "000015",
+        "name": "PT中浩A",
+        "type": "1",
+        "status": "0",
+        "industry": "未知",
+        "listing_date": "1992-06-25",
+        "source": "baostock"
+      },
+      "kline_data": null,
+      "financial_data": {
+        "code": "000015",
+        "source": "fallback"
+      },
+      "technical_indicators": {
+        "status": "no_kline_data"
+      },
+      "industry_concept": {
+        "code": "000015",
+        "source": "baostock_default",
+        "industry": "深圳主板",
+        "industry_name": null,
+        "sector": null,
+        "concepts": []
+      },
+      "fund_flow": {
+        "code": "000015",
+        "source": "default",
+        "main_fund_inflow": null,
+        "super_fund_inflow": null,
+        "large_fund_inflow": null,
+        "medium_fund_inflow": null,
+        "small_fund_inflow": null,
+        "main_fund_inflow_pct": null,
+        "message": "资金流向数据暂无"
+      },
+      "news_announcements": {
+        "recent_announcements": [],
+        "news_sentiment": null,
+        "important_events": [],
+        "source": "akshare"
+      },
+      "data_sources_used": {
+        "basic_info": "baostock",
+        "financial_data": "fallback",
+        "industry_concept": "baostock_default",
+        "fund_flow": "default",
+        "kline_data": "none"
+      },
+      "collection_summary": {
+        "strategy": "specialized_api_distribution",
+        "timestamp": "2026-01-05T22:38:33.252573",
+        "success_rate": 0.6
+      }
+    }
+  },
+  "last_updated": "2026-01-05T22:38:33.877590",
+  "total_stocks": 2
+}
