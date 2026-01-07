@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 class ChoiceAPIWrapper:
     """Choice API包装器，使用独立Python进程避免环境污染"""
     
-    def __init__(self, python_exe=r"C:\veighna_studio\python.exe", timeout=30, use_batch=True, use_powershell=True):
+    def __init__(self, python_exe=r"C:\veighna_studio\python.exe", timeout=300, use_batch=True, use_powershell=True):
         """
         初始化
         

@@ -53,7 +53,7 @@ LLM_MODEL_OPTIONS = ["none", "deepseek", "minimax", "openrouter", "gemini"]
 DEFAULT_LLM_MODEL = "none"
 
 # API超时和参数
-API_TIMEOUT = 30
+API_TIMEOUT = 300
 AI_TEMPERATURE = 0.7
 AI_MAX_TOKENS = 1000
 AI_TOP_P = 0.95

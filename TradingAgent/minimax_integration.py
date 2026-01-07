@@ -5,12 +5,13 @@ MiniMax CodingPlan Integration for Trading Agents
 MiniMax API 集成模块，用于代码生成和智能分析
 """
 
-import os
 import json
-import requests
+import os
 import time
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import requests
 
 
 @dataclass
@@ -89,7 +90,7 @@ class MiniMaxCodingPlan:
                 f"{self.base_url}/v1/text/chatcompletion_v2",
                 headers=headers,
                 json=data,
-                timeout=30
+                timeout=300
             )
             
             if response.status_code == 200:

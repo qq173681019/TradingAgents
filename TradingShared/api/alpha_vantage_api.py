@@ -32,7 +32,7 @@ class AlphaVantageAPI:
         
         try:
             self._last_error = None
-            response = requests.get(self.base_url, params=params, timeout=30)
+            response = requests.get(self.base_url, params=params, timeout=300)
             self.last_request_time = time.time()
             
             if response.status_code == 200:

@@ -6704,7 +6704,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 text=True,
                 encoding='utf-8',
                 errors='replace',
-                timeout=30,
+                timeout=300,
                 cwd=work_dir,  # 使用脚本所在目录
                 env=env        # 使用干净的环境
             )
@@ -13544,12 +13544,12 @@ CSV批量分析使用方法:
             import time
             print(f"开始分析股票: {ticker}")
             
-            # 设置总体超时时间（15秒）
+            # 设置总体超时时间（600秒/10分钟）
             def timeout_handler():
                 print("⏰ 分析超时，强制终止")
                 self.root.after(0, self.show_error, "分析超时，请重试")
             
-            timeout_timer = threading.Timer(60.0, timeout_handler)
+            timeout_timer = threading.Timer(600.0, timeout_handler)
             timeout_timer.start()
             
             # 步骤1: 获取基本信息
