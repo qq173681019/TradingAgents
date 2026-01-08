@@ -2,7 +2,7 @@
   "stocks": {
     "000982": {
       "code": "000982",
-      "timestamp": "2026-01-05T23:00:50.513632",
+      "timestamp": "2026-01-09T05:10:39.152623",
       "collection_time": "2026-01-05 23:00:50",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -667,8 +667,8 @@
         ],
         "latest_price": 0.18,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2026-01-05T23:00:52.068959"
+        "source": "incremental_update",
+        "update_time": "2026-01-09T05:10:39.152616"
       },
       "financial_data": {
         "code": "000982",
@@ -687,11 +687,11 @@
         "current_price": 0.18,
         "ma5": 0.21399999999999997,
         "ma10": 0.288,
-        "ma20": 0.5025000000000001,
-        "ma60": 0.9325,
+        "ma20": 0.5025,
+        "ma60": 0.9324999999999999,
         "rsi": 0.0,
-        "macd": -0.20749535770404715,
-        "signal": -0.18959256808271224,
+        "macd": -0.2075056681641127,
+        "signal": -0.1896075182988111,
         "volume_ratio": 1.5643414917190004,
         "status": "calculated"
       },
@@ -731,9 +731,10 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2026-01-05T23:00:50.517900",
         "success_rate": 1.0
-      }
+      },
+      "last_kline_update": "2026-01-09T05:10:39.152622"
     }
   },
-  "last_updated": "2026-01-06T22:42:13.705613",
+  "last_updated": "2026-01-09T05:33:03.051049",
   "total_stocks": 1
 }
