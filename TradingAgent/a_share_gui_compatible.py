@@ -452,9 +452,9 @@ try:
     import yfinance as yf
     YFINANCE_AVAILABLE = True
     print("yfinance已加载，作为备用数据源")
-except ImportError:
+except (ImportError, TypeError) as e:
     YFINANCE_AVAILABLE = False
-    print("yfinance未安装，仅使用API数据源")
+    print(f"yfinance未安装或不兼容Python版本，仅使用API数据源 (错误: {type(e).__name__})")
 
 # 导入requests用于其他API数据源
 try:

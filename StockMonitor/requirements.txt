@@ -3,5 +3,5 @@ numpy
 matplotlib
 mplfinance
 tushare
-akshare
-tk
+# akshare  # Python 3.8 不兼容最新版本，已在系统中有旧版本或跳过
+# tk  # tkinter 是内置模块，无需安装

@@ -12,5 +12,7 @@
         "*.env*": "dotenv"
     },
     "python.envFile": "${workspaceFolder}/.env.local",
-    "CodeGPT.apiKey": "OpenRouter"
+    "CodeGPT.apiKey": "OpenRouter",
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.pythonProjects": []
 }
