@@ -2,7 +2,7 @@
   "stocks": {
     "000982": {
       "code": "000982",
-      "timestamp": "2026-01-09T05:10:39.152623",
+      "timestamp": "2026-01-09T21:11:29.185359",
       "collection_time": "2026-01-05 23:00:50",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -668,7 +668,7 @@
         "latest_price": 0.18,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-01-09T05:10:39.152616"
+        "update_time": "2026-01-09T21:11:29.185350"
       },
       "financial_data": {
         "code": "000982",
@@ -732,9 +732,9 @@
         "timestamp": "2026-01-05T23:00:50.517900",
         "success_rate": 1.0
       },
-      "last_kline_update": "2026-01-09T05:10:39.152622"
+      "last_kline_update": "2026-01-09T21:11:29.185357"
     }
   },
-  "last_updated": "2026-01-09T05:33:03.051049",
+  "last_updated": "2026-01-12T00:17:16.146043",
   "total_stocks": 1
 }

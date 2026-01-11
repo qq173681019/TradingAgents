@@ -5141,7 +5141,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         
         # 技术面权重
         tk.Label(weight_frame, text="技术面:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
-        self.tech_weight_var = tk.DoubleVar(value=45.0)
+        self.tech_weight_var = tk.DoubleVar(value=40.0)
         self.tech_scale = tk.Scale(weight_frame, from_=0, to=100, resolution=1, orient=tk.HORIZONTAL, 
                                   variable=self.tech_weight_var, length=100, bg="#f0f0f0",
                                   command=lambda v: self._balance_weights('tech'))
@@ -5149,7 +5149,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         
         # 基本面权重
         tk.Label(weight_frame, text="基本面:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
-        self.fund_weight_var = tk.DoubleVar(value=35.0)
+        self.fund_weight_var = tk.DoubleVar(value=20.0)
         self.fund_scale = tk.Scale(weight_frame, from_=0, to=100, resolution=1, orient=tk.HORIZONTAL, 
                                   variable=self.fund_weight_var, length=100, bg="#f0f0f0",
                                   command=lambda v: self._balance_weights('fund'))
@@ -5157,14 +5157,14 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         
         # 筹码权重
         tk.Label(weight_frame, text="筹码面:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
-        self.chip_weight_var = tk.DoubleVar(value=20.0)
+        self.chip_weight_var = tk.DoubleVar(value=40.0)
         self.chip_scale = tk.Scale(weight_frame, from_=0, to=100, resolution=1, orient=tk.HORIZONTAL, 
                                   variable=self.chip_weight_var, length=100, bg="#f0f0f0",
                                   command=lambda v: self._balance_weights('chip'))
         self.chip_scale.pack(side="left", padx=5)
         
         # 权重百分比显示
-        self.weight_label = tk.Label(weight_frame, text="45% : 35% : 20%", font=("微软雅黑", 10, "bold"), fg="#2980b9", bg="#f0f0f0")
+        self.weight_label = tk.Label(weight_frame, text="40% : 20% : 40%", font=("微软雅黑", 10, "bold"), fg="#2980b9", bg="#f0f0f0")
         self.weight_label.pack(side="left", padx=10)
         
         # 绑定权重变化事件
@@ -10450,9 +10450,9 @@ K线更新后快速评分完成！
             fund_score = max(1.0, min(10.0, fund_score))
             
             # 获取UI权重（如果存在）
-            ui_tech_w = 45.0
-            ui_fund_w = 35.0
-            ui_chip_w = 20.0
+            ui_tech_w = 40.0
+            ui_fund_w = 20.0
+            ui_chip_w = 40.0
             
             if hasattr(self, 'tech_weight_var'):
                 ui_tech_w = self.tech_weight_var.get()
@@ -10467,9 +10467,9 @@ K线更新后快速评分完成！
                     ui_chip_w = ui_chip_w / total_w
                 else:
                     # 如果权重全为0，回退到默认
-                    ui_tech_w, ui_fund_w, ui_chip_w = 0.45, 0.35, 0.20
+                    ui_tech_w, ui_fund_w, ui_chip_w = 0.40, 0.20, 0.40
             else:
-                ui_tech_w, ui_fund_w, ui_chip_w = 0.45, 0.35, 0.20
+                ui_tech_w, ui_fund_w, ui_chip_w = 0.40, 0.20, 0.40
 
             # 根据基本面数据质量调整权重
             if fund_data_quality == 'default':
@@ -10493,7 +10493,8 @@ K线更新后快速评分完成！
                     norm_tech_w = ui_tech_w / (ui_tech_w + ui_fund_w)
                     norm_fund_w = ui_fund_w / (ui_tech_w + ui_fund_w)
                 else:
-                    norm_tech_w, norm_fund_w = 0.5625, 0.4375
+                    # 回退权重：技术面40%、基本面20%，按比例分配 = 技术面2/3、基本面1/3
+                    norm_tech_w, norm_fund_w = 0.6667, 0.3333
                 
                 comprehensive_score = (
                     tech_score * norm_tech_w +
@@ -20667,10 +20668,3 @@ if __name__ == "__main__":
             pass
         input("按回车键退出...")
 
-
-#我需要做一个系统
-#1.它要有GUI页面
-#2.它可以每天定时推送或发送消息到我的手机
-#3.它每天会获取当日美股指数，黄金指数，美元兑人民币汇率，日元对人民币汇率
-
-#请仔细思考后告诉我需要应用到什么该怎么做最好帮我做出来

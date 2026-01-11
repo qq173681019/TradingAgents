@@ -26,13 +26,12 @@ except ImportError:
 try:
     import akshare as ak
     AKSHARE_AVAILABLE = True
+    AKSHARE_CONNECTED = True  # 🔴 修复：假设已安装的akshare是可用的
     print("[INFO] akshare 已加载")
 except ImportError:
     AKSHARE_AVAILABLE = False
+    AKSHARE_CONNECTED = False
     print("[WARN] akshare 未安装")
-
-# AKShare连通性测试
-AKSHARE_CONNECTED = False
 
 try:
     import tushare as ts
@@ -44,8 +43,10 @@ except ImportError:
 
 try:
     import yfinance as yf
-    YFINANCE_AVAILABLE = True
-    print("[INFO] yfinance 已加载")
+
+    # 🔴 强制禁用yfinance（中国网络不稳定且频率限制严格）
+    YFINANCE_AVAILABLE = False
+    print("[INFO] yfinance 已禁用（避免频率限制，使用国内数据源）")
 except ImportError:
     YFINANCE_AVAILABLE = False
     print("[WARN] yfinance 未安装")
@@ -114,21 +115,32 @@ except ImportError:
 
 # BaoStock API 支持（免费K线数据兜底）
 try:
-    from baostock_api import BaoStockAPI
+    from TradingShared.api.baostock_api import BaoStockAPI
     BAOSTOCK_AVAILABLE = True
     print("[INFO] BaoStock API 已加载")
 except ImportError:
-    BAOSTOCK_AVAILABLE = False
-    print("[WARN] BaoStock API 未找到，请安装: pip install baostock")
+    try:
+        # 回退到相对导入
+        from baostock_api import BaoStockAPI
+        BAOSTOCK_AVAILABLE = True
+        print("[INFO] BaoStock API 已加载")
+    except ImportError:
+        BAOSTOCK_AVAILABLE = False
+        print("[WARN] BaoStock API 未找到，请安装: pip install baostock")
 
 # 股票状态检测器
 try:
-    from stock_status_checker import StockStatusChecker
+    from TradingShared.api.stock_status_checker import StockStatusChecker
     STOCK_STATUS_CHECKER_AVAILABLE = True
     print("[INFO] 股票状态检测器已加载")
 except ImportError:
-    STOCK_STATUS_CHECKER_AVAILABLE = False
-    print("[WARN] 股票状态检测器未找到")
+    try:
+        from stock_status_checker import StockStatusChecker
+        STOCK_STATUS_CHECKER_AVAILABLE = True
+        print("[INFO] 股票状态检测器已加载")
+    except ImportError:
+        STOCK_STATUS_CHECKER_AVAILABLE = False
+        print("[WARN] 股票状态检测器未找到")
 
 # Choice金融终端
 try:
@@ -312,6 +324,7 @@ class ComprehensiveDataCollector:
 
         # 初始化 Baostock API
         self.bs_login = False
+        self.baostock = None  # 🔴 修复：确保属性始终存在
         if BAOSTOCK_AVAILABLE:
             try:
                 self.baostock = BaoStockAPI()
@@ -323,6 +336,7 @@ class ComprehensiveDataCollector:
                     self.baostock = None
             except Exception as e:
                 print(f"[WARN] BaoStock API 初始化失败: {e}")
+                self.baostock = None
         else:
             print("[INFO] BaoStock 不可用，跳过初始化")
         
@@ -1128,6 +1142,17 @@ class ComprehensiveDataCollector:
         
         # 计算日期范围
         end_date = datetime.now()
+        
+        # 🔴 改进：智能调整到最近的交易日（周一至周五）
+        # 如果今天是周六(5)或周日(6)，回退到上周五
+        weekday = end_date.weekday()
+        if weekday == 5:  # 周六
+            end_date = end_date - timedelta(days=1)  # 回到周五
+            print(f"[INFO] 今天是周六（休市），自动调整到上周五: {end_date.strftime('%Y-%m-%d')}")
+        elif weekday == 6:  # 周日
+            end_date = end_date - timedelta(days=2)  # 回到周五
+            print(f"[INFO] 今天是周日（休市），自动调整到上周五: {end_date.strftime('%Y-%m-%d')}")
+        
         if start_date_override:
             try:
                 # 统一格式为 YYYYMMDD 或 YYYY-MM-DD
@@ -1135,6 +1160,20 @@ class ComprehensiveDataCollector:
                     start_date = datetime.strptime(start_date_override, '%Y-%m-%d')
                 else:
                     start_date = datetime.strptime(start_date_override, '%Y%m%d')
+                
+                # 🔴 修复：如果 start_date_override 也是周末，需要调整
+                start_weekday = start_date.weekday()
+                if start_weekday == 5:  # 周六
+                    start_date = start_date - timedelta(days=1)
+                    print(f"[INFO] 起始日期是周六，自动调整到周五: {start_date.strftime('%Y-%m-%d')}")
+                elif start_weekday == 6:  # 周日
+                    start_date = start_date - timedelta(days=2)
+                    print(f"[INFO] 起始日期是周日，自动调整到周五: {start_date.strftime('%Y-%m-%d')}")
+                    
+                # 确保 start_date 不晚于 end_date
+                if start_date > end_date:
+                    print(f"[WARN] 起始日期 ({start_date.strftime('%Y-%m-%d')}) 晚于结束日期 ({end_date.strftime('%Y-%m-%d')}),自动调整")
+                    start_date = end_date - timedelta(days=self.kline_days)
             except:
                 start_date = end_date - timedelta(days=self.kline_days)
         else:
@@ -1240,6 +1279,7 @@ class ComprehensiveDataCollector:
             primary_source = None
         
         # 使用其他数据源
+        burst_mode = False
         if primary_source is None:
             # 检查上次TUSHARE调用时间，决定使用哪个数据源
             current_time = time.time()
@@ -1249,15 +1289,26 @@ class ComprehensiveDataCollector:
             if can_use_tushare:
                 print(f"[INFO] 距离上次TUSHARE调用已过 {time_since_last_tushare:.1f} 秒，使用TUSHARE获取剩余 {len(primary_codes)} 只")
                 primary_source = 'tushare'
-            elif AKSHARE_AVAILABLE and self.akshare_enabled:
-                wait_time = 60 - time_since_last_tushare
-                print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，使用AKShare获取剩余 {len(primary_codes)} 只")
-                primary_source = 'akshare'
             else:
-                # 如果AKShare不可用，使用腾讯API
+                # 🔴 修复：如果等待时间<60秒且数据量不大，就等待Tushare
                 wait_time = 60 - time_since_last_tushare
-                print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，AKShare不可用，使用腾讯API获取剩余 {len(primary_codes)} 只")
-                primary_source = 'tencent'
+                if len(primary_codes) <= 50 and wait_time < 60:  # 小批量且等待时间合理
+                    print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒（小批量数据，值得等待）...")
+                    time.sleep(wait_time)
+                    print(f"[INFO] 等待完成，使用TUSHARE获取 {len(primary_codes)} 只股票")
+                    primary_source = 'tushare'
+                elif len(primary_codes) > 50:
+                    # 批量较大，启用burst模式：不阻塞等待60s，改为分批快速请求并做短暂节流
+                    print(f"[INFO] TUSHARE上次调用{time_since_last_tushare:.1f}秒前，启用 BURST 模式：分批快速请求 {len(primary_codes)} 只（注意频率限制）")
+                    primary_source = 'tushare'
+                    burst_mode = True
+                elif AKSHARE_AVAILABLE and self.akshare_enabled:
+                    print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，使用AKShare获取剩余 {len(primary_codes)} 只")
+                    primary_source = 'akshare'
+                else:
+                    # 如果AKShare不可用，使用腾讯API
+                    print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，AKShare不可用，使用腾讯API获取剩余 {len(primary_codes)} 只")
+                    primary_source = 'tencent'
         
         print(f"[INFO] 备用数据源: {primary_source.upper()}处理 {len(primary_codes)} 只")
         
@@ -1270,84 +1321,88 @@ class ComprehensiveDataCollector:
             try:
                 pro = ts.pro_api(self.tushare_token)
                 
-                # 更新TUSHARE调用时间
-                self.last_tushare_call = time.time()
+                # 更新TUSHARE调用时间（按批更新以便节流控制）
+                # 如果处于burst_mode，则允许快速连续多批请求，但仍做短暂节流
+                if not burst_mode:
+                    self.last_tushare_call = time.time()
                 
-                # 🔴 改进：使用 Tushare 批量接口，提高效率和成功率
-                ts_code_map = {}
-                for code in primary_codes:
-                    # 提取纯数字部分，防止重复添加后缀
-                    pure_code = code.split('.')[0]
-                    if pure_code.startswith(('000', '001', '002', '300', '301')):
-                        ts_code = f"{pure_code}.SZ"
-                    elif pure_code.startswith(('4', '8', '9')):
-                        ts_code = f"{pure_code}.BJ"
-                    else:
-                        ts_code = f"{pure_code}.SH"
-                    ts_code_map[ts_code] = code
+                # 🔴 优化：根据日期范围计算最优批次大小
+                # 根据是否从 BAT 调用决定策略：BAT 下使用激进策略以最大化吞吐，常规运行使用保守策略
+                bat_mode = os.getenv('TA_RUN_FROM_BAT', '0') == '1'
+                days_count = max(1, self.kline_days)
+                if bat_mode:
+                    # BAT 运行：更激进的估算系数和更高单次记录上限
+                    estimated_records_per_stock = max(1, int(days_count * 0.6))
+                    max_records_per_call = 7800
+                    computed_batch = max_records_per_call // estimated_records_per_stock
+                    safe_batch_size = max(10, min(len(primary_codes), min(1000, computed_batch)))
+                else:
+                    # GUI/交互式运行：保守策略，避免偶发超限导致失败
+                    estimated_records_per_stock = max(1, int(days_count * 0.7))
+                    max_records_per_call = 7000
+                    computed_batch = max_records_per_call // estimated_records_per_stock
+                    safe_batch_size = max(10, min(len(primary_codes), min(100, computed_batch)))
+
+                print(f"[INFO] TUSHARE智能分批 (bat_mode={bat_mode}): 预计每股{estimated_records_per_stock}条数据, 批次大小={safe_batch_size}只/批 (computed={computed_batch})")
                 
-                ts_codes_str = ",".join(ts_code_map.keys())
-                
-                try:
-                    # 批量获取数据
-                    df = pro.daily(ts_code=ts_codes_str, start_date=start_str, end_date=end_str)
+                # 分批处理
+                for batch_idx in range(0, len(primary_codes), safe_batch_size):
+                    batch_codes = primary_codes[batch_idx:batch_idx + safe_batch_size]
+                    print(f"[INFO] TUSHARE处理第{batch_idx//safe_batch_size + 1}批: {len(batch_codes)}只股票")
                     
-                    if df is not None and not df.empty:
-                        # 按股票代码分组处理
-                        for ts_code, group in df.groupby('ts_code'):
-                            orig_code = ts_code_map.get(ts_code)
-                            if orig_code:
-                                standardized_df = self.standardize_kline_columns(group, 'tushare')
-                                result[orig_code] = standardized_df
-                                primary_success.append(orig_code)
+                    # 🔴 改进：使用 Tushare 批量接口，提高效率和成功率
+                    ts_code_map = {}
+                    for code in batch_codes:
+                        # 提取纯数字部分，防止重复添加后缀
+                        pure_code = code.split('.')[0]
+                        if pure_code.startswith(('000', '001', '002', '300', '301')):
+                            ts_code = f"{pure_code}.SZ"
+                        elif pure_code.startswith(('4', '8', '9')):
+                            ts_code = f"{pure_code}.BJ"
+                        else:
+                            ts_code = f"{pure_code}.SH"
+                        ts_code_map[ts_code] = code
+                    
+                    ts_codes_str = ",".join(ts_code_map.keys())
+                    
+                    try:
+                        # 批量获取数据
+                        df = pro.daily(ts_code=ts_codes_str, start_date=start_str, end_date=end_str)
                         
-                        # 检查哪些股票没有获取到数据
-                        for ts_code, orig_code in ts_code_map.items():
-                            if orig_code not in primary_success:
-                                print(f"[WARN] TUSHARE获取{orig_code} ({ts_code}) 返回数据为空，转入后备处理")
-                                fallback_codes.append(orig_code)
-                    else:
-                        # 🔴 改进：如果批量获取返回空，可能是积分不足（<2000点无法批量获取），触发逐个获取
-                        print(f"[WARN] TUSHARE批量获取返回数据为空 (日期范围: {start_str}-{end_str})，尝试逐个获取...")
-                        raise Exception("Batch returned empty, likely insufficient points")
-                except Exception as batch_e:
-                    print(f"[ERROR] TUSHARE 批量获取失败或权限不足: {batch_e}，尝试逐个获取...")
-                    # 兜底：逐个获取
-                    for code in primary_codes:
-                        try:
-                            # 找到对应的 ts_code
-                            ts_code = None
-                            for k, v in ts_code_map.items():
-                                if v == code:
-                                    ts_code = k
-                                    break
+                        if df is not None and not df.empty:
+                            # 按股票代码分组处理
+                            for ts_code, group in df.groupby('ts_code'):
+                                orig_code = ts_code_map.get(ts_code)
+                                if orig_code:
+                                    standardized_df = self.standardize_kline_columns(group, 'tushare')
+                                    result[orig_code] = standardized_df
+                                    primary_success.append(orig_code)
                             
-                            if not ts_code:
-                                fallback_codes.append(code)
-                                continue
-                                
-                            # 🔴 改进：增加诊断信息，如果返回为空，尝试获取股票基本信息判断状态
-                            df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
-                            if df is not None and not df.empty:
-                                df = self.standardize_kline_columns(df, 'tushare')
-                                result[code] = df
-                                primary_success.append(code)
-                                print(f"[SUCCESS] TUSHARE 逐个获取 {code} 成功")
-                            else:
-                                # 尝试诊断：是否因为停牌或代码无效
-                                print(f"[WARN] TUSHARE 逐个获取 {code} ({ts_code}) 仍为空，可能处于停牌期或 Token 权限受限")
-                                
-                                # 🔴 自动标记为疑似停牌，防止后续重复尝试
-                                if hasattr(self, 'status_checker') and self.status_checker:
-                                    clean_code = code.split('.')[0]
-                                    self.status_checker.suspended_stocks.add(clean_code)
-                                    print(f"[DEBUG] 已将 {code} 自动加入临时停牌列表")
-                                    
-                                fallback_codes.append(code)
-                            time.sleep(0.1)
-                        except Exception as single_e:
-                            print(f"[WARN] TUSHARE 逐个获取 {code} 失败: {single_e}")
-                            fallback_codes.append(code)
+                            # 检查哪些股票没有获取到数据
+                            for ts_code, orig_code in ts_code_map.items():
+                                if orig_code not in primary_success:
+                                    print(f"[WARN] TUSHARE获取{orig_code} ({ts_code}) 返回数据为空，转入后备处理")
+                                    fallback_codes.append(orig_code)
+                        else:
+                            # 整批失败，全部转入后备处理
+                            fallback_codes.extend(batch_codes)
+                    
+                    except Exception as batch_e:
+                        print(f"[WARN] TUSHARE 第{batch_idx//safe_batch_size + 1}批获取失败: {batch_e}")
+                        # 整批失败，转入后备处理
+                        fallback_codes.extend(batch_codes)
+
+                    # 批次间延迟（避免频率限制）
+                    if batch_idx + safe_batch_size < len(primary_codes):
+                        # 如果是burst模式，使用较短的节流间隔；否则使用默认短延迟
+                        if burst_mode:
+                            # 极限模式：保守短延迟，尽量推高吞吐
+                            time.sleep(0.6)
+                        else:
+                            time.sleep(1.0)
+
+                    # 每次成功或失败后更新上次调用时间，方便下一次判断
+                    self.last_tushare_call = time.time()
                 
                 print(f"[SUCCESS] TUSHARE 成功: {len(primary_success)}/{len(primary_codes)} 只")
             except Exception as e:
@@ -1652,41 +1707,40 @@ class ComprehensiveDataCollector:
                 # print(f"[SUCCESS] AKShare 替代成功: {len(secondary_success)}/{len(fallback_codes)} 只")
             
             elif secondary_source == 'tushare' and TUSHARE_AVAILABLE and self.tushare_token:
-                # 检查是否需要等待，如果需要等待则跳过TUSHARE，直接进入下一级
+                # 🔴 修复：如果需要等待，就等待（因为yfinance已禁用）
                 current_time = time.time()
                 if current_time - self.last_tushare_call < 60:
                     wait_time = 60 - (current_time - self.last_tushare_call)
-                    print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，跳过直接使用yfinance替代...")
-                    # 不等待，直接将codes加入remaining_codes进入下一级处理
-                    remaining_codes = fallback_codes.copy()
-                else:
-                    print(f"[INFO] TUSHARE 替代处理 {len(remaining_codes)} 只失败股票...")
-                    pro = ts.pro_api(self.tushare_token)
-                    self.last_tushare_call = time.time()
-                    
-                    temp_remaining = []
-                    for code in remaining_codes:
-                        try:
-                            # 优化股票代码后缀逻辑
-                            if code.startswith(('000', '001', '002', '300', '301')):
-                                ts_code = f"{code}.SZ"
-                            elif code.startswith(('4', '8', '9')):
-                                ts_code = f"{code}.BJ"
-                            else:
-                                ts_code = f"{code}.SH"
-                                
-                            df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
-                            if df is not None and not df.empty:
-                                df = self.standardize_kline_columns(df, 'tushare')
-                                result[code] = df
-                                secondary_success.append(code)
-                            else:
-                                temp_remaining.append(code)
-                        except Exception as e:
-                            print(f"[WARN] TUSHARE替代获取{code}失败: {e}")
+                    print(f"[INFO] TUSHARE需等待 {wait_time:.1f} 秒，开始等待...")
+                    time.sleep(wait_time)
+                
+                print(f"[INFO] TUSHARE 替代处理 {len(remaining_codes)} 只失败股票...")
+                pro = ts.pro_api(self.tushare_token)
+                self.last_tushare_call = time.time()
+                
+                temp_remaining = []
+                for code in remaining_codes:
+                    try:
+                        # 优化股票代码后缀逻辑
+                        if code.startswith(('000', '001', '002', '300', '301')):
+                            ts_code = f"{code}.SZ"
+                        elif code.startswith(('4', '8', '9')):
+                            ts_code = f"{code}.BJ"
+                        else:
+                            ts_code = f"{code}.SH"
+                        
+                        df = pro.daily(ts_code=ts_code, start_date=start_str, end_date=end_str)
+                        if df is not None and not df.empty:
+                            df = self.standardize_kline_columns(df, 'tushare')
+                            result[code] = df
+                            secondary_success.append(code)
+                        else:
                             temp_remaining.append(code)
-                    remaining_codes = temp_remaining
-                    print(f"[SUCCESS] TUSHARE 替代成功: {len(secondary_success)}/{len(fallback_codes)} 只")
+                    except Exception as e:
+                        print(f"[WARN] TUSHARE替代获取{code}失败: {e}")
+                        temp_remaining.append(code)
+                remaining_codes = temp_remaining
+                print(f"[SUCCESS] TUSHARE 替代成功: {len(secondary_success)}/{len(fallback_codes)} 只")
             
             # 最后尝试JoinQuant
             final_failed_codes = remaining_codes
@@ -3035,13 +3089,13 @@ class ComprehensiveDataCollector:
         
         print(f"[INFO] 使用yfinance批量获取{len(codes)}只股票基础信息")
         
-        # yfinance频率控制 - 初始等待
-        print(f"[INFO] yfinance频率控制，等待2秒...")
-        time.sleep(2)
+        # yfinance频率控制 - 初始等待（避免Rate Limit）
+        print(f"[INFO] yfinance频率控制，等待5秒...")
+        time.sleep(5)
         
         try:
-            # yfinance批量获取 (15只/批)
-            batch_size = min(15, len(codes))
+            # yfinance批量获取 (10只/批，减少频率限制风险)
+            batch_size = min(10, len(codes))
             for i in range(0, len(codes), batch_size):
                 batch_codes = codes[i:i+batch_size]
                 
@@ -3097,9 +3151,10 @@ class ComprehensiveDataCollector:
                 actual_success = len([c for c in batch_codes if c in result])
                 print(f"[INFO] yfinance批量基础信息: 第{i//batch_size + 1}批完成 ({actual_success}/{len(batch_codes)} 成功)")
                 
-                # yfinance频率限制较严格，增加等待时间
+                # yfinance频率限制较严格，必须等待足够长时间
                 if i + batch_size < len(codes):
-                    time.sleep(3)  # 增加到3秒
+                    print(f"[INFO] yfinance频率控制，等待8秒后继续下一批...")
+                    time.sleep(8)  # 增加到8秒避免Rate Limit
                     
         except Exception as e:
             print(f"[WARN] yfinance批量基础信息采集失败: {e}")
@@ -4629,10 +4684,25 @@ class ComprehensiveDataCollector:
                 # 确定最终使用的开始日期
                 final_start_str = None
                 if min_start_date:
+                    # 🔴 修复：确保 min_start_date 也调整到交易日
+                    weekday = min_start_date.weekday()
+                    if weekday == 5:  # 周六
+                        min_start_date = min_start_date - timedelta(days=1)
+                    elif weekday == 6:  # 周日
+                        min_start_date = min_start_date - timedelta(days=2)
+                    
                     # 如果最早开始日期晚于今天，说明数据已是最新
-                    if min_start_date > datetime.now():
+                    now = datetime.now()
+                    # 同样调整 now 到交易日
+                    now_weekday = now.weekday()
+                    if now_weekday == 5:
+                        now = now - timedelta(days=1)
+                    elif now_weekday == 6:
+                        now = now - timedelta(days=2)
+                    
+                    if min_start_date > now:
                         print(f"[INFO] 本批次股票数据已是最新，仅进行常规检查")
-                        final_start_str = (datetime.now() - timedelta(days=3)).strftime('%Y%m%d')
+                        final_start_str = (now - timedelta(days=3)).strftime('%Y%m%d')
                     else:
                         final_start_str = min_start_date.strftime('%Y%m%d')
                         print(f"[INFO] 本批次将从 {min_start_date.strftime('%Y-%m-%d')} 开始增量获取")
