@@ -62,7 +62,7 @@ echo ============================================
 echo [步骤 3/3] 正在生成推荐并导出CSV到下载文件夹...
 echo.
 
-"%PYTHON_EXE%" -c "import sys, os, json, csv; sys.path.insert(0, '.'); sys.path.insert(0, '..'); from datetime import datetime; data_dir = os.path.join('..', 'TradingShared', 'data'); score_files = sorted([f for f in os.listdir(data_dir) if f.startswith('batch_stock_scores_optimized_主板_') and f.endswith('.json')], reverse=True); latest_score_file = score_files[0] if score_files else None; print(f'使用评分文件: {latest_score_file}'); scores = json.load(open(os.path.join(data_dir, latest_score_file), encoding='utf-8')) if latest_score_file else {}; sorted_stocks = sorted(scores.items(), key=lambda x: x[1].get('综合得分', 0) if isinstance(x[1], dict) else 0, reverse=True)[:100]; download_folder = os.path.join(os.path.expanduser('~'), 'Downloads'); csv_filename = f'主板推荐股票_{datetime.now().strftime(\"%%Y%%m%%d_%%H%%M%%S\")}.csv'; csv_path = os.path.join(download_folder, csv_filename); f = open(csv_path, 'w', encoding='utf-8-sig', newline=''); writer = csv.writer(f); writer.writerow(['股票代码', '股票名称', '综合得分', '短线评分', '长线评分', '筹码评分', '推荐类型']); [writer.writerow([code, data.get('名称', ''), data.get('综合得分', 0), data.get('短线评分', 0), data.get('长线评分', 0), data.get('筹码评分', 0), data.get('推荐类型', '')]) for code, data in sorted_stocks if isinstance(data, dict)]; f.close(); print(f'CSV文件已导出到: {csv_path}')"
+"%PYTHON_EXE%" "%~dp0export_recommendations.py"
 
 if errorlevel 1 (
     echo [错误] CSV导出失败！

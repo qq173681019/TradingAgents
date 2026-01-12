@@ -2,7 +2,7 @@
   "stocks": {
     "603999": {
       "code": "603999",
-      "timestamp": "2026-01-12T00:17:06.993230",
+      "timestamp": "2026-01-13T01:48:15.560618",
       "collection_time": "2026-01-06 00:08:03",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -543,12 +543,20 @@
             "low": 7.21,
             "close": 7.42,
             "volume": 16786946.0
+          },
+          {
+            "date": "2026-01-12",
+            "open": 7.44,
+            "high": 7.84,
+            "low": 7.44,
+            "close": 7.79,
+            "volume": 30154480.0
           }
         ],
-        "latest_price": 7.42,
-        "data_points": 65,
+        "latest_price": 7.79,
+        "data_points": 66,
         "source": "incremental_update",
-        "update_time": "2026-01-12T00:17:06.993221"
+        "update_time": "2026-01-13T01:48:15.560575"
       },
       "financial_data": {
         "code": "603999",
@@ -564,15 +572,15 @@
         "debt_ratio": 0.093363
       },
       "technical_indicators": {
-        "current_price": 7.42,
-        "ma5": 7.186,
-        "ma10": 7.058,
-        "ma20": 7.048,
-        "ma60": 7.017,
-        "rsi": 71.99999999999994,
-        "macd": 0.021307832147873462,
-        "signal": -0.01707527242852499,
-        "volume_ratio": 1.3196234494610422,
+        "current_price": 7.79,
+        "ma5": 7.340000000000001,
+        "ma10": 7.142,
+        "ma20": 7.073,
+        "ma60": 7.0385,
+        "rsi": 77.95275590551176,
+        "macd": 0.0729759493274349,
+        "signal": 0.0009349719226669894,
+        "volume_ratio": 2.279908243206161,
         "status": "calculated"
       },
       "industry_concept": {
@@ -612,7 +620,7 @@
         "timestamp": "2026-01-06T00:08:03.367718",
         "success_rate": 1.0
       },
-      "last_kline_update": "2026-01-12T00:17:06.993229"
+      "last_kline_update": "2026-01-13T01:48:15.560581"
     },
     "605001": {
       "code": "605001",
@@ -46499,6 +46507,6 @@
       }
     }
   },
-  "last_updated": "2026-01-12T00:17:16.088047",
+  "last_updated": "2026-01-13T01:48:32.985407",
   "total_stocks": 112
 }

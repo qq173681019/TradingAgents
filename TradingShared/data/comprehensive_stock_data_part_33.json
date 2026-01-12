@@ -2,7 +2,7 @@
   "stocks": {
     "603248": {
       "code": "603248",
-      "timestamp": "2026-01-12T00:17:13.431746",
+      "timestamp": "2026-01-13T01:48:30.698403",
       "collection_time": "2026-01-05 23:52:27",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -119,12 +119,20 @@
             "low": 22.62,
             "close": 22.95,
             "volume": 10258331.0
+          },
+          {
+            "date": "2026-01-12",
+            "open": 23.1,
+            "high": 23.19,
+            "low": 22.84,
+            "close": 23.09,
+            "volume": 10135628.0
           }
         ],
-        "latest_price": 22.95,
-        "data_points": 12,
+        "latest_price": 23.09,
+        "data_points": 13,
         "source": "incremental_update",
-        "update_time": "2026-01-12T00:17:13.431738"
+        "update_time": "2026-01-13T01:48:30.698352"
       },
       "financial_data": {
         "code": "603248",
@@ -140,15 +148,15 @@
         "debt_ratio": 0.148173
       },
       "technical_indicators": {
-        "current_price": 22.95,
-        "ma5": 22.538,
-        "ma10": 23.468,
-        "ma20": 22.95,
-        "ma60": 22.95,
+        "current_price": 23.09,
+        "ma5": 22.698,
+        "ma10": 23.134999999999998,
+        "ma20": 23.09,
+        "ma60": 23.09,
         "rsi": 50.0,
-        "macd": -3.8492005508020455,
-        "signal": -3.2046806653719004,
-        "volume_ratio": 0.9346714016234695,
+        "macd": -3.740438292922871,
+        "signal": -3.311832190882095,
+        "volume_ratio": 0.9867887733430453,
         "status": "calculated"
       },
       "industry_concept": {
@@ -188,11 +196,11 @@
         "timestamp": "2026-01-05T23:52:27.623417",
         "success_rate": 1.0
       },
-      "last_kline_update": "2026-01-12T00:17:13.431745"
+      "last_kline_update": "2026-01-13T01:48:30.698360"
     },
     "002197": {
       "code": "002197",
-      "timestamp": "2026-01-12T00:17:13.438571",
+      "timestamp": "2026-01-13T01:48:30.704479",
       "collection_time": "2026-01-06 00:31:18",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -709,12 +717,20 @@
             "low": 10.42,
             "close": 10.45,
             "volume": 26935997.0
+          },
+          {
+            "date": "2026-01-12",
+            "open": 10.46,
+            "high": 10.79,
+            "low": 10.46,
+            "close": 10.76,
+            "volume": 32247880.0
           }
         ],
-        "latest_price": 10.45,
-        "data_points": 62,
+        "latest_price": 10.76,
+        "data_points": 63,
         "source": "incremental_update",
-        "update_time": "2026-01-12T00:17:13.438563"
+        "update_time": "2026-01-13T01:48:30.704427"
       },
       "financial_data": {
         "code": "002197",
@@ -730,15 +746,15 @@
         "debt_ratio": -0.053539
       },
       "technical_indicators": {
-        "current_price": 10.45,
-        "ma5": 10.431999999999999,
-        "ma10": 10.488,
-        "ma20": 10.1655,
-        "ma60": 10.109666666666667,
-        "rsi": 56.64621676891613,
-        "macd": 0.09070988553429515,
-        "signal": 0.057699671473559304,
-        "volume_ratio": 0.6943388052561165,
+        "current_price": 10.76,
+        "ma5": 10.602,
+        "ma10": 10.453999999999999,
+        "ma20": 10.175,
+        "ma60": 10.131499999999999,
+        "rsi": 63.63636363636363,
+        "macd": 0.11612902867743458,
+        "signal": 0.06938554291433435,
+        "volume_ratio": 0.85988476061429,
         "status": "calculated"
       },
       "industry_concept": {
@@ -778,11 +794,11 @@
         "timestamp": "2026-01-06T00:31:18.972275",
         "success_rate": 1.0
       },
-      "last_kline_update": "2026-01-12T00:17:13.438570"
+      "last_kline_update": "2026-01-13T01:48:30.704435"
     },
     "002425": {
       "code": "002425",
-      "timestamp": "2026-01-12T00:17:13.445051",
+      "timestamp": "2026-01-13T01:48:30.710458",
       "collection_time": "2026-01-06 00:38:01",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -1299,12 +1315,20 @@
             "low": 3.87,
             "close": 4.08,
             "volume": 51790600.0
+          },
+          {
+            "date": "2026-01-12",
+            "open": 4.15,
+            "high": 4.25,
+            "low": 4.07,
+            "close": 4.22,
+            "volume": 55190811.0
           }
         ],
-        "latest_price": 4.08,
-        "data_points": 62,
+        "latest_price": 4.22,
+        "data_points": 63,
         "source": "incremental_update",
-        "update_time": "2026-01-12T00:17:13.445044"
+        "update_time": "2026-01-13T01:48:30.710412"
       },
       "financial_data": {
         "code": "002425",
@@ -1320,15 +1344,15 @@
         "debt_ratio": -0.317471
       },
       "technical_indicators": {
-        "current_price": 4.08,
-        "ma5": 3.886,
-        "ma10": 3.729,
-        "ma20": 3.7555000000000005,
-        "ma60": 3.9578333333333333,
-        "rsi": 63.49206349206349,
-        "macd": -0.02140263396588038,
-        "signal": -0.07237269022960012,
-        "volume_ratio": 1.4259887954428094,
+        "current_price": 4.22,
+        "ma5": 4.002,
+        "ma10": 3.781,
+        "ma20": 3.7595000000000005,
+        "ma60": 3.9643333333333333,
+        "rsi": 66.42335766423358,
+        "macd": 0.01345958456286489,
+        "signal": -0.05520623527110712,
+        "volume_ratio": 1.282089086984603,
         "status": "calculated"
       },
       "industry_concept": {
@@ -1368,9 +1392,9 @@
         "timestamp": "2026-01-06T00:38:01.954693",
         "success_rate": 1.0
       },
-      "last_kline_update": "2026-01-12T00:17:13.445050"
+      "last_kline_update": "2026-01-13T01:48:30.710416"
     }
   },
-  "last_updated": "2026-01-12T00:17:16.148487",
+  "last_updated": "2026-01-13T01:48:33.040436",
   "total_stocks": 3
 }

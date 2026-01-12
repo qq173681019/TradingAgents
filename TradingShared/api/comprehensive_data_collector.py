@@ -3439,8 +3439,12 @@ class ComprehensiveDataCollector:
                 print(f"[ERROR] Baostock行业分类异常: {e}")
         
         # 2. AKShare补充：热门概念和详细分类
-        concept_codes = codes.copy()  # 所有股票都需要概念补充
-        if concept_codes and AKSHARE_AVAILABLE and len(concept_codes) <= 10: # 限制数量
+        # 🔴 优化：在K线更新场景下，跳过AKShare概念查询（避免大量API调用）
+        # 只有在小批量时才查询概念（<=10只）
+        concept_codes = codes.copy()
+        skip_concepts = len(concept_codes) > 10  # 超过10只股票则跳过概念查询
+        
+        if not skip_concepts and concept_codes and AKSHARE_AVAILABLE:
             print(f"[INFO] AKShare热门概念补充 {len(concept_codes)} 只...")
             try:
                 for code in concept_codes:
@@ -3465,6 +3469,8 @@ class ComprehensiveDataCollector:
                         continue
             except Exception as e:
                 print(f"[ERROR] AKShare概念补充异常: {e}")
+        elif skip_concepts:
+            print(f"[INFO] 批量更新模式：跳过AKShare概念查询（{len(concept_codes)}只股票），仅更新行业信息")
         
         # 3. 默认分类：为无数据股票提供基础分类
         unclassified_codes = [code for code in codes if code not in result or not result[code].get('industry')]
@@ -4711,6 +4717,35 @@ class ComprehensiveDataCollector:
                 batch_kline_data = self.collect_batch_kline_data(batch_codes, 'auto', start_date_override=final_start_str)
                 print(f"[INFO] 本批K线数据采集完成，获得 {len(batch_kline_data)} 只股票")
                 
+                # 🔴 智能采集板块信息：只更新缺失或需要更新的股票
+                print(f"[INFO] 检查板块信息更新需求...")
+                codes_need_industry = []
+                for code in batch_codes:
+                    # 检查是否需要更新板块信息
+                    needs_update = False
+                    if code not in existing_data:
+                        needs_update = True  # 新股票
+                    elif 'industry_concept' not in existing_data[code]:
+                        needs_update = True  # 缺失板块信息
+                    elif not existing_data[code]['industry_concept'].get('industry'):
+                        needs_update = True  # 行业信息为空
+                    elif existing_data[code]['industry_concept'].get('source') in ['default', 'baostock_default']:
+                        needs_update = True  # 使用的是默认值，尝试获取真实数据
+                    
+                    if needs_update:
+                        codes_need_industry.append(code)
+                
+                batch_industry_data = {}
+                if codes_need_industry:
+                    print(f"[INFO] 需要更新板块信息的股票: {len(codes_need_industry)}/{len(batch_codes)} 只")
+                    try:
+                        batch_industry_data = self.collect_batch_industry_concept(codes_need_industry, 'auto')
+                        print(f"[INFO] 板块信息采集完成，获得 {len(batch_industry_data)} 只股票")
+                    except Exception as industry_err:
+                        print(f"[WARN] 板块信息采集失败: {industry_err}，将使用现有数据或默认值")
+                else:
+                    print(f"[INFO] 所有股票板块信息均已存在，跳过采集")
+                
                 # 更新每只股票的K线数据（合并历史数据）
                 for code in batch_codes:
                     if code in batch_kline_data:
@@ -4801,6 +4836,12 @@ class ComprehensiveDataCollector:
                                 }
                                 existing_data[code]['technical_indicators'] = tech_indicators
                                 existing_data[code]['last_kline_update'] = datetime.now().isoformat()
+                                
+                                # 🔴 更新板块信息（如果有新采集的数据）
+                                if code in batch_industry_data:
+                                    existing_data[code]['industry_concept'] = batch_industry_data[code]
+                                    print(f"    + {code}: 更新板块信息 - {batch_industry_data[code].get('industry', '未知')}")
+                                
                                 # 同步更新顶层时间戳，确保 GUI 合并逻辑能识别这是最新数据
                                 existing_data[code]['timestamp'] = datetime.now().isoformat()
                             else:
@@ -4819,6 +4860,10 @@ class ComprehensiveDataCollector:
                                     'last_kline_update': datetime.now().isoformat(),
                                     'timestamp': datetime.now().isoformat()
                                 }
+                                
+                                # 🔴 添加板块信息（如果有新采集的数据）
+                                if code in batch_industry_data:
+                                    existing_data[code]['industry_concept'] = batch_industry_data[code]
                 
                 # 批次保存
                 self.save_data(existing_data)

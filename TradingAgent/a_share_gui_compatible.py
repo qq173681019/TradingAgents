@@ -2661,13 +2661,15 @@ class AShareAnalyzerGUI:
         return report
     
     def calculate_hot_sector_bonus(self, stock_code):
-        """计算热门板块加权分数"""
+        """计算热门板块评分（返回1-10分制）"""
         try:
             # 获取热门板块信息
             hot_sectors = self.get_hot_sectors()
             if not hot_sectors or (not hot_sectors['concepts'] and not hot_sectors['industries']):
-                return 0, "无热门板块数据"
+                return 5.0, "无热门板块数据"
             
+            # 基础分5分
+            base_score = 5.0
             bonus_score = 0
             bonus_details = []
             
@@ -2679,8 +2681,8 @@ class AShareAnalyzerGUI:
                         break
                     concept_stocks = ak.stock_board_concept_cons_em(symbol=concept)
                     if stock_code in list(concept_stocks['代码']):
-                        # 计算概念板块加权：排名越靠前分数越高（最高1.0分）
-                        concept_bonus = (21 - rank) / 20 * 1.0
+                        # 计算概念板块加分：排名越靠前分数越高（最高+2.5分）
+                        concept_bonus = (21 - rank) / 20 * 2.5
                         bonus_score += concept_bonus
                         bonus_details.append(f"概念板块[{concept}]第{rank}名(+{concept_bonus:.2f})")
                         break  # 只取最高排名的概念板块
@@ -2695,25 +2697,26 @@ class AShareAnalyzerGUI:
                         break
                     industry_stocks = ak.stock_board_industry_cons_em(symbol=industry)
                     if stock_code in list(industry_stocks['代码']):
-                        # 计算行业板块加权：排名越靠前分数越高（最高0.8分）
-                        industry_bonus = (21 - rank) / 20 * 0.8
+                        # 计算行业板块加分：排名越靠前分数越高（最高+2.5分）
+                        industry_bonus = (21 - rank) / 20 * 2.5
                         bonus_score += industry_bonus
                         bonus_details.append(f"行业板块[{industry}]第{rank}名(+{industry_bonus:.2f})")
                         break  # 只取最高排名的行业板块
                 except Exception as e:
                     continue
             
-            # 限制最大加权分数为1.5分
-            bonus_score = min(bonus_score, 1.5)
+            # 计算最终得分（限制在1-10分）
+            final_score = min(10.0, max(1.0, base_score + bonus_score))
             
             if bonus_details:
-                return bonus_score, "; ".join(bonus_details)
+                detail_text = f"热门板块评分: {final_score:.2f}/10 | " + "; ".join(bonus_details)
+                return final_score, detail_text
             else:
-                return 0, "不属于热门板块"
+                return base_score, f"不属于热门板块，基础分: {base_score:.2f}/10"
                 
         except Exception as e:
-            print(f"计算热门板块加权失败: {e}")
-            return 0, f"计算失败: {str(e)}"
+            print(f"计算热门板块评分失败: {e}")
+            return 5.0, f"计算失败: {str(e)}"
     
     def start_batch_scoring(self, start_from_index=None):
         """开始批量获取评分 - 增强稳定性版本，支持断点续传"""
@@ -2858,6 +2861,8 @@ class AShareAnalyzerGUI:
                                     'long_term_score': comprehensive_data.get('long_term', {}).get('score'),
                                     'chip_score': comprehensive_data.get('chip_score'),
                                     'chip_level': comprehensive_data.get('chip_level'),
+                                    'hot_sector_score': comprehensive_data.get('hot_sector_score'),
+                                    'hot_sector_detail': comprehensive_data.get('hot_sector_detail'),
                                     'industry': industry,
                                     'timestamp': datetime.now().strftime('%H:%M:%S')
                                 }
@@ -3494,12 +3499,20 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 print(f"  提取的归一化分: 短期={short_score}, 中期={medium_score}, 长期={long_score}")
                 print(f"  筹码健康度分: {chip_score if chip_score else 'N/A'}")
 
-            # 使用新版综合评分算法（包含筹码健康度）
-            # 技术面+基本面+筹码健康度三维度评分
+            # 获取热门板块评分
+            try:
+                hot_sector_score, hot_sector_detail = self.calculate_hot_sector_bonus(stock_code)
+            except Exception as e:
+                print(f"  热门板块评分失败: {e}")
+                hot_sector_score = 5.0
+
+            # 使用新版综合评分算法（包含筹码健康度和热门板块）
+            # 技术面+基本面+筹码健康度+热门板块四维度评分
             final_score = self.calculate_comprehensive_score_v2(
                 tech_score=short_score,
                 fund_score=long_score, 
-                chip_score=chip_score
+                chip_score=chip_score,
+                hot_sector_score=hot_sector_score
             )
             
             # 调试：如果是000001，输出最终分数
@@ -3925,6 +3938,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 # 5. 计算筹码健康度 (新增)
                 'chip_score': None,
                 'chip_level': '未知',
+                
+                # 6. 热门板块评分 (新增)
+                'hot_sector_score': None,
+                'hot_sector_detail': ''
             }
             
             # 执行筹码分析
@@ -3948,12 +3965,21 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         print(f"[BATCH] {stock_code} 筹码分析未获得有效结果: {error_msg}")
                 except Exception as e:
                     print(f"[BATCH] 筹码分析异常 {stock_code}: {e}")
+            
+            # 执行热门板块分析
+            try:
+                hot_sector_score, hot_sector_detail = self.calculate_hot_sector_bonus(stock_code)
+                comprehensive_data['hot_sector_score'] = hot_sector_score
+                comprehensive_data['hot_sector_detail'] = hot_sector_detail
+            except Exception as e:
+                print(f"[BATCH] {stock_code} 热门板块分析异常: {e}")
 
-            # 6. 综合评分 (使用V2版本计算，包含筹码)
+            # 7. 综合评分 (使用V2版本计算，包含筹码和热门板块)
             comprehensive_data['overall_score'] = float(self.calculate_comprehensive_score_v2(
                 comprehensive_data['short_term']['score'],
                 comprehensive_data['long_term']['score'],
-                comprehensive_data['chip_score']
+                comprehensive_data['chip_score'],
+                comprehensive_data['hot_sector_score']
             ))
             
             # 时间戳
@@ -5163,14 +5189,23 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                   command=lambda v: self._balance_weights('chip'))
         self.chip_scale.pack(side="left", padx=5)
         
-        # 权重百分比显示
-        self.weight_label = tk.Label(weight_frame, text="40% : 20% : 40%", font=("微软雅黑", 10, "bold"), fg="#2980b9", bg="#f0f0f0")
+        # 热门板块权重
+        tk.Label(weight_frame, text="热门板块:", font=("微软雅黑", 10), bg="#f0f0f0").pack(side="left")
+        self.hot_sector_bonus_var = tk.DoubleVar(value=0.0)
+        self.hot_sector_scale = tk.Scale(weight_frame, from_=0, to=100, resolution=1, orient=tk.HORIZONTAL, 
+                                        variable=self.hot_sector_bonus_var, length=100, bg="#f0f0f0",
+                                        command=lambda v: self._balance_weights('hot'))
+        self.hot_sector_scale.pack(side="left", padx=5)
+        
+        # 权重百分比显示（4个权重）
+        self.weight_label = tk.Label(weight_frame, text="40% : 20% : 40% : 0%", font=("微软雅黑", 10, "bold"), fg="#2980b9", bg="#f0f0f0")
         self.weight_label.pack(side="left", padx=10)
         
         # 绑定权重变化事件
         self.tech_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
         self.fund_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
         self.chip_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
+        self.hot_sector_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
         
         # 初始化权重显示
         self._update_weight_label()
@@ -5564,28 +5599,30 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         self.score_label.config(text=f"≥{score:.1f}分")
 
     def _update_weight_label(self, event=None):
-        """更新权重显示标签"""
+        """更新权重显示标签（4个权重）"""
         try:
             tw = self.tech_weight_var.get()
             fw = self.fund_weight_var.get()
             cw = self.chip_weight_var.get()
-            total = tw + fw + cw
+            hw = self.hot_sector_bonus_var.get()
+            total = tw + fw + cw + hw
             if abs(total - 100) > 0.1:
                 # 如果总和不是100，显示实际比例
                 if total > 0:
                     p_tw = (tw / total) * 100
                     p_fw = (fw / total) * 100
                     p_cw = (cw / total) * 100
-                    self.weight_label.config(text=f"{p_tw:.0f}% : {p_fw:.0f}% : {p_cw:.0f}%")
+                    p_hw = (hw / total) * 100
+                    self.weight_label.config(text=f"{p_tw:.0f}% : {p_fw:.0f}% : {p_cw:.0f}% : {p_hw:.0f}%")
                 else:
-                    self.weight_label.config(text="0% : 0% : 0%")
+                    self.weight_label.config(text="0% : 0% : 0% : 0%")
             else:
-                self.weight_label.config(text=f"{tw:.0f}% : {fw:.0f}% : {cw:.0f}%")
+                self.weight_label.config(text=f"{tw:.0f}% : {fw:.0f}% : {cw:.0f}% : {hw:.0f}%")
         except:
             pass
 
     def _balance_weights(self, changed_slider):
-        """自动平衡三个滑动条的权重，使总和保持为100%"""
+        """自动平衡四个滑动条的权重，使总和保持为100%"""
         if self._is_adjusting_weights:
             return
         
@@ -5596,42 +5633,59 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             tw = float(self.tech_weight_var.get())
             fw = float(self.fund_weight_var.get())
             cw = float(self.chip_weight_var.get())
+            hw = float(self.hot_sector_bonus_var.get())
             
             if changed_slider == 'tech':
                 remaining = 100.0 - tw
-                other_sum = fw + cw
+                other_sum = fw + cw + hw
                 if other_sum > 0.1:
-                    new_fw = round(remaining * (fw / other_sum))
-                    self.fund_weight_var.set(new_fw)
-                    self.chip_weight_var.set(100.0 - tw - new_fw)
+                    self.fund_weight_var.set(round(remaining * (fw / other_sum)))
+                    self.chip_weight_var.set(round(remaining * (cw / other_sum)))
+                    self.hot_sector_bonus_var.set(round(remaining * (hw / other_sum)))
                 else:
-                    half = round(remaining / 2.0)
-                    self.fund_weight_var.set(half)
-                    self.chip_weight_var.set(100.0 - tw - half)
+                    third = round(remaining / 3.0)
+                    self.fund_weight_var.set(third)
+                    self.chip_weight_var.set(third)
+                    self.hot_sector_bonus_var.set(100.0 - tw - third * 2)
             
             elif changed_slider == 'fund':
                 remaining = 100.0 - fw
-                other_sum = tw + cw
+                other_sum = tw + cw + hw
                 if other_sum > 0.1:
-                    new_tw = round(remaining * (tw / other_sum))
-                    self.tech_weight_var.set(new_tw)
-                    self.chip_weight_var.set(100.0 - fw - new_tw)
+                    self.tech_weight_var.set(round(remaining * (tw / other_sum)))
+                    self.chip_weight_var.set(round(remaining * (cw / other_sum)))
+                    self.hot_sector_bonus_var.set(round(remaining * (hw / other_sum)))
                 else:
-                    half = round(remaining / 2.0)
-                    self.tech_weight_var.set(half)
-                    self.chip_weight_var.set(100.0 - fw - half)
+                    third = round(remaining / 3.0)
+                    self.tech_weight_var.set(third)
+                    self.chip_weight_var.set(third)
+                    self.hot_sector_bonus_var.set(100.0 - fw - third * 2)
             
             elif changed_slider == 'chip':
                 remaining = 100.0 - cw
-                other_sum = tw + fw
+                other_sum = tw + fw + hw
                 if other_sum > 0.1:
-                    new_tw = round(remaining * (tw / other_sum))
-                    self.tech_weight_var.set(new_tw)
-                    self.fund_weight_var.set(100.0 - cw - new_tw)
+                    self.tech_weight_var.set(round(remaining * (tw / other_sum)))
+                    self.fund_weight_var.set(round(remaining * (fw / other_sum)))
+                    self.hot_sector_bonus_var.set(round(remaining * (hw / other_sum)))
                 else:
-                    half = round(remaining / 2.0)
-                    self.tech_weight_var.set(half)
-                    self.fund_weight_var.set(100.0 - cw - half)
+                    third = round(remaining / 3.0)
+                    self.tech_weight_var.set(third)
+                    self.fund_weight_var.set(third)
+                    self.hot_sector_bonus_var.set(100.0 - cw - third * 2)
+            
+            elif changed_slider == 'hot':
+                remaining = 100.0 - hw
+                other_sum = tw + fw + cw
+                if other_sum > 0.1:
+                    self.tech_weight_var.set(round(remaining * (tw / other_sum)))
+                    self.fund_weight_var.set(round(remaining * (fw / other_sum)))
+                    self.chip_weight_var.set(round(remaining * (cw / other_sum)))
+                else:
+                    third = round(remaining / 3.0)
+                    self.tech_weight_var.set(third)
+                    self.fund_weight_var.set(third)
+                    self.chip_weight_var.set(100.0 - hw - third * 2)
             
             # 更新标签
             self._update_weight_label()
@@ -5659,13 +5713,25 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 tech_score = data.get('short_term_score')
                 fund_score = data.get('long_term_score')
                 chip_score = data.get('chip_score')
+                hot_sector_score = data.get('hot_sector_score')
+                
+                # 如果没有热门板块评分，尝试实时计算
+                if hot_sector_score is None:
+                    try:
+                        hot_sector_score, hot_sector_detail = self.calculate_hot_sector_bonus(code)
+                        data['hot_sector_score'] = hot_sector_score
+                        data['hot_sector_detail'] = hot_sector_detail
+                    except Exception as e:
+                        print(f"[重算] {code} 计算热门板块评分失败: {e}")
+                        hot_sector_score = 5.0  # 使用默认分数
                 
                 if tech_score is not None and fund_score is not None:
-                    # 使用 V2 权重重新计算
+                    # 使用 V2 权重重新计算（包含热门板块）
                     new_score = self.calculate_comprehensive_score_v2(
                         tech_score=tech_score,
                         fund_score=fund_score,
-                        chip_score=chip_score
+                        chip_score=chip_score,
+                        hot_sector_score=hot_sector_score
                     )
                     data['overall_score'] = round(new_score, 2)
                     data['score'] = round(new_score, 2)
@@ -5713,6 +5779,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             short_term = 0
             long_term = 0
             chip_score = 0
+            hot_sector_score = 0
             
             # 优先从 batch_scores 获取
             if hasattr(self, 'batch_scores') and ticker in self.batch_scores:
@@ -5721,7 +5788,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 short_term = score_data.get('short_term_score', 0)
                 long_term = score_data.get('long_term_score', 0)
                 chip_score = score_data.get('chip_score', 0)
-                print(f"[评分规则] {ticker} 从batch_scores加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}, 筹码={chip_score:.1f}")
+                hot_sector_score = score_data.get('hot_sector_score', 0)
+                print(f"[评分规则] {ticker} 从batch_scores加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}, 筹码={chip_score:.1f}, 热门={hot_sector_score:.1f}")
             
             # 如果batch_scores中没有，尝试从comprehensive_data获取
             elif hasattr(self, 'comprehensive_data') and ticker in self.comprehensive_data:
@@ -5731,11 +5799,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 long_term = cached_data.get('long_term', {}).get('score', 0)
                 medium_term = cached_data.get('medium_term', {}).get('score', 0)
                 chip_score = cached_data.get('chip_score', 0)
+                hot_sector_score = cached_data.get('hot_sector_score', 0)
                 
                 # 计算综合评分
                 if short_term != 0 or medium_term != 0 or long_term != 0:
-                    comprehensive = self.calculate_comprehensive_score_v2(short_term, long_term, chip_score)
-                print(f"[评分规则] {ticker} 从comprehensive_data加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}, 筹码={chip_score:.1f}")
+                    comprehensive = self.calculate_comprehensive_score_v2(short_term, long_term, chip_score, hot_sector_score)
+                print(f"[评分规则] {ticker} 从comprehensive_data加载: 综合={comprehensive:.1f}, 短期={short_term:.1f}, 长期={long_term:.1f}, 筹码={chip_score:.1f}, 热门={hot_sector_score:.1f}")
             
             else:
                 # 没有数据，显示占位符
@@ -10426,14 +10495,15 @@ K线更新后快速评分完成！
                 'long_score': 0
             }
     
-    def calculate_comprehensive_score_v2(self, tech_score, fund_score, chip_score=None, fund_data_quality='normal'):
+    def calculate_comprehensive_score_v2(self, tech_score, fund_score, chip_score=None, hot_sector_score=None, fund_data_quality='normal'):
         """
-        新版综合评分计算（基于技术面、基本面、筹码健康度三维度）
+        新版综合评分计算（基于技术面、基本面、筹码健康度、热门板块四维度）
         
         Args:
             tech_score: 技术面评分 (1-10分)
             fund_score: 基本面评分 (1-10分)
             chip_score: 筹码健康度评分 (1-10分)，可选
+            hot_sector_score: 热门板块评分 (1-10分)，可选
             fund_data_quality: 基本面数据质量标记
                 - 'normal': 真实数据（默认权重）
                 - 'default': 使用默认估算值（降低权重）
@@ -10449,57 +10519,75 @@ K线更新后快速评分完成！
             tech_score = max(1.0, min(10.0, tech_score))
             fund_score = max(1.0, min(10.0, fund_score))
             
-            # 获取UI权重（如果存在）
+            # 获取UI权重（如果存在）- 4个维度
             ui_tech_w = 40.0
             ui_fund_w = 20.0
             ui_chip_w = 40.0
+            ui_hot_w = 0.0
             
             if hasattr(self, 'tech_weight_var'):
                 ui_tech_w = self.tech_weight_var.get()
                 ui_fund_w = self.fund_weight_var.get()
                 ui_chip_w = self.chip_weight_var.get()
+                ui_hot_w = self.hot_sector_bonus_var.get() if hasattr(self, 'hot_sector_bonus_var') else 0.0
                 
-                # 归一化权重
-                total_w = ui_tech_w + ui_fund_w + ui_chip_w
+                # 归一化权重（4个维度）
+                total_w = ui_tech_w + ui_fund_w + ui_chip_w + ui_hot_w
                 if total_w > 0:
                     ui_tech_w = ui_tech_w / total_w
                     ui_fund_w = ui_fund_w / total_w
                     ui_chip_w = ui_chip_w / total_w
+                    ui_hot_w = ui_hot_w / total_w
                 else:
                     # 如果权重全为0，回退到默认
-                    ui_tech_w, ui_fund_w, ui_chip_w = 0.40, 0.20, 0.40
+                    ui_tech_w, ui_fund_w, ui_chip_w, ui_hot_w = 0.40, 0.20, 0.40, 0.0
             else:
-                ui_tech_w, ui_fund_w, ui_chip_w = 0.40, 0.20, 0.40
+                ui_tech_w, ui_fund_w, ui_chip_w, ui_hot_w = 0.40, 0.20, 0.40, 0.0
 
             # 根据基本面数据质量调整权重
             if fund_data_quality == 'default':
                 # 使用默认估算值时，大幅降低基本面权重
-                # 简单处理：将基本面权重的一半分配给技术面和筹码面
+                # 简单处理：将基本面权重的一半分配给其他维度
                 half_fund = ui_fund_w / 2
-                ui_tech_w += half_fund / 2
-                ui_chip_w += half_fund / 2
+                ui_tech_w += half_fund / 3
+                ui_chip_w += half_fund / 3
+                ui_hot_w += half_fund / 3
                 ui_fund_w = half_fund
 
+            # 计算综合评分
+            comprehensive_score = 0.0
+            used_weights = 0.0
+            
+            # 技术面和基本面始终参与计算
+            comprehensive_score += tech_score * ui_tech_w
+            comprehensive_score += fund_score * ui_fund_w
+            used_weights += ui_tech_w + ui_fund_w
+            
+            # 如果有筹码评分，使用筹码权重
             if chip_score is not None and chip_score > 0:
                 chip_score = max(1.0, min(10.0, float(chip_score)))
-                comprehensive_score = (
-                    tech_score * ui_tech_w +
-                    fund_score * ui_fund_w +
-                    chip_score * ui_chip_w
-                )
+                comprehensive_score += chip_score * ui_chip_w
+                used_weights += ui_chip_w
             else:
                 # 无筹码评分：将筹码权重按比例分配给技术和基本面
                 if ui_tech_w + ui_fund_w > 0:
-                    norm_tech_w = ui_tech_w / (ui_tech_w + ui_fund_w)
-                    norm_fund_w = ui_fund_w / (ui_tech_w + ui_fund_w)
-                else:
-                    # 回退权重：技术面40%、基本面20%，按比例分配 = 技术面2/3、基本面1/3
-                    norm_tech_w, norm_fund_w = 0.6667, 0.3333
-                
-                comprehensive_score = (
-                    tech_score * norm_tech_w +
-                    fund_score * norm_fund_w
-                )
+                    chip_to_tech = ui_chip_w * (ui_tech_w / (ui_tech_w + ui_fund_w))
+                    chip_to_fund = ui_chip_w * (ui_fund_w / (ui_tech_w + ui_fund_w))
+                    comprehensive_score += tech_score * chip_to_tech
+                    comprehensive_score += fund_score * chip_to_fund
+                    used_weights += ui_chip_w
+            
+            # 如果有热门板块评分，使用热门板块权重
+            if hot_sector_score is not None and hot_sector_score > 0 and ui_hot_w > 0:
+                hot_sector_score = max(1.0, min(10.0, float(hot_sector_score)))
+                comprehensive_score += hot_sector_score * ui_hot_w
+                used_weights += ui_hot_w
+            else:
+                # 无热门板块评分或权重为0：将热门板块权重按比例分配给其他维度
+                if used_weights > 0 and ui_hot_w > 0:
+                    # 按已使用的权重比例分配
+                    redistribution_factor = ui_hot_w / used_weights
+                    comprehensive_score += comprehensive_score * redistribution_factor
             
             # 确保结果在1-10范围内
             comprehensive_score = max(1.0, min(10.0, comprehensive_score))
@@ -13779,12 +13867,20 @@ CSV批量分析使用方法:
                     except Exception as e:
                         print(f"[CHIP] {ticker} 筹码分析失败: {e}")
                 
+                # 获取热门板块评分
+                hot_sector_score = 5.0
+                try:
+                    hot_sector_score, hot_sector_detail = self.calculate_hot_sector_bonus(ticker)
+                except Exception as e:
+                    print(f"[HOT] {ticker} 热门板块评分失败: {e}")
+                
                 # 使用V2综合评分算法（与批量分析完全一致）
-                # 技术面(短期) + 基本面(长期) + 筹码健康度
+                # 技术面(短期) + 基本面(长期) + 筹码健康度 + 热门板块
                 final_score = self.calculate_comprehensive_score_v2(
                     tech_score=short_score,  # 短期评分代表技术面
                     fund_score=long_score,   # 长期评分代表基本面
-                    chip_score=chip_score
+                    chip_score=chip_score,
+                    hot_sector_score=hot_sector_score
                 )
                 
                 print(f"开始分析算法调试 - {ticker}:")
@@ -19772,17 +19868,25 @@ WARNING: 重要声明:
             else:
                 print(f"[CHIP-SKIP] {code} 跳过筹码分析 - 原因: 筹码分析器未初始化")
             
-            # === 综合评分更新 (包含筹码分) ===
+            # === 综合评分更新 (包含筹码分和热门板块) ===
             # 如果有筹码分，使用 V2 权重重新计算综合分
+            hot_sector_score = 5.0
             if chip_score is not None:
+                # 获取热门板块评分
+                try:
+                    hot_sector_score, _ = self.calculate_hot_sector_bonus(code)
+                except Exception:
+                    pass
+                
                 # 映射：短期->技术面, 长期->基本面
                 overall_score = self.calculate_comprehensive_score_v2(
                     tech_score=short_score,
                     fund_score=long_score,
                     chip_score=chip_score,
+                    hot_sector_score=hot_sector_score,
                     fund_data_quality='normal' # 批量模式通常使用已收集的真实数据
                 )
-                print(f"[CALC] {code} 综合评分已更新(含筹码): {overall_score:.2f}")
+                print(f"[CALC] {code} 综合评分已更新(含筹码+热门): {overall_score:.2f}")
 
             # 构建返回结果，包含筹码健康度字段
             result = {
