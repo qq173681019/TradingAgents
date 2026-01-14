@@ -2173,8 +2173,19 @@ class AShareAnalyzerGUI:
             print(f"[ERROR] 读取索引文件失败: {e}")
             return []
     
-    def get_hot_sectors(self):
-        """获取当前市场热门板块 - 支持多数据源"""
+    def get_hot_sectors(self, use_cache=True):
+        """获取当前市场热门板块 - 支持多数据源 + 缓存机制
+        
+        Args:
+            use_cache: 是否使用缓存（默认True，缓存5分钟）
+        """
+        # 检查缓存（5分钟有效期）
+        if use_cache and hasattr(self, '_hot_sectors_cache'):
+            cache_time = getattr(self, '_hot_sectors_cache_time', 0)
+            if time.time() - cache_time < 300:  # 5分钟缓存
+                print(f"[热门板块] 使用缓存数据（{int(time.time() - cache_time)}秒前）")
+                return self._hot_sectors_cache
+        
         # 尝试多个数据源
         data_sources = [
             self._get_hot_sectors_from_akshare,
@@ -2188,13 +2199,20 @@ class AShareAnalyzerGUI:
                 result = source_func()
                 if result and (result['concepts'] or result['industries']):
                     print(f"成功从 {source_func.__name__} 获取热门板块数据")
+                    # 保存到缓存
+                    self._hot_sectors_cache = result
+                    self._hot_sectors_cache_time = time.time()
                     return result
             except Exception as e:
                 print(f"{source_func.__name__} 获取失败: {e}")
                 continue
         
         print("所有数据源均失败，使用默认数据")
-        return self._get_default_hot_sectors()
+        result = self._get_default_hot_sectors()
+        # 即使是默认数据也缓存，避免重复尝试
+        self._hot_sectors_cache = result
+        self._hot_sectors_cache_time = time.time()
+        return result
     
     def _get_hot_sectors_from_akshare(self):
         """从akshare获取热门板块"""
@@ -2661,7 +2679,81 @@ class AShareAnalyzerGUI:
         return report
     
     def calculate_hot_sector_bonus(self, stock_code):
-        """计算热门板块评分（返回1-10分制）"""
+        """计算热门板块评分（返回1-10分制）- 优先使用已缓存的板块信息"""
+        try:
+            # 优先从已有数据中获取板块信息（避免重复API调用）
+            stock_industry = None
+            stock_concepts = []
+            
+            # 方法1: 从 comprehensive_stock_data 获取（K线更新时已保存）
+            if hasattr(self, 'comprehensive_stock_data') and stock_code in self.comprehensive_stock_data:
+                stock_data = self.comprehensive_stock_data[stock_code]
+                industry_concept = stock_data.get('industry_concept', {})
+                if industry_concept:
+                    stock_industry = industry_concept.get('industry') or industry_concept.get('industry_name')
+                    stock_concepts = industry_concept.get('concepts', [])
+                    print(f"[热门板块] {stock_code} 使用已缓存的板块信息: 行业={stock_industry}, 概念={stock_concepts[:3]}")
+            
+            # 方法2: 从 batch_stock_scores 获取
+            if not stock_industry and hasattr(self, 'batch_stock_scores') and stock_code in self.batch_stock_scores:
+                score_data = self.batch_stock_scores[stock_code]
+                if 'industry_concept' in score_data:
+                    industry_concept = score_data['industry_concept']
+                    stock_industry = industry_concept.get('industry') or industry_concept.get('industry_name')
+                    stock_concepts = industry_concept.get('concepts', [])
+            
+            # 如果没有缓存数据，才获取热门板块进行API查询（兜底方案）
+            if not stock_industry and not stock_concepts:
+                print(f"[热门板块] {stock_code} 无缓存板块信息，使用API查询")
+                return self._calculate_hot_sector_bonus_by_api(stock_code)
+            
+            # 获取热门板块列表（用于评分，不用于查询股票）
+            hot_sectors = self.get_hot_sectors()
+            if not hot_sectors or (not hot_sectors['concepts'] and not hot_sectors['industries']):
+                return 5.0, "无热门板块数据"
+            
+            # 基础分5分
+            base_score = 5.0
+            bonus_score = 0
+            bonus_details = []
+            
+            # 检查股票的概念是否在热门概念列表中
+            hot_concept_names = [c['name'] for c in hot_sectors['concepts'][:20]]
+            for concept in stock_concepts:
+                if concept in hot_concept_names:
+                    rank = hot_concept_names.index(concept) + 1
+                    concept_bonus = (21 - rank) / 20 * 2.5
+                    bonus_score += concept_bonus
+                    bonus_details.append(f"概念板块[{concept}]第{rank}名(+{concept_bonus:.2f})")
+                    break  # 只取最高排名的概念板块
+            
+            # 检查股票的行业是否在热门行业列表中
+            hot_industry_names = [i['name'] for i in hot_sectors['industries'][:20]]
+            if stock_industry:
+                # 模糊匹配行业名称
+                for hot_industry in hot_industry_names:
+                    if hot_industry in stock_industry or stock_industry in hot_industry:
+                        rank = hot_industry_names.index(hot_industry) + 1
+                        industry_bonus = (21 - rank) / 20 * 2.5
+                        bonus_score += industry_bonus
+                        bonus_details.append(f"行业板块[{hot_industry}]第{rank}名(+{industry_bonus:.2f})")
+                        break  # 只取最高排名的行业板块
+            
+            # 计算最终得分（限制在1-10分）
+            final_score = min(10.0, max(1.0, base_score + bonus_score))
+            
+            if bonus_details:
+                detail_text = f"热门板块评分: {final_score:.2f}/10 | " + "; ".join(bonus_details)
+                return final_score, detail_text
+            else:
+                return base_score, f"不属于热门板块，基础分: {base_score:.2f}/10"
+                
+        except Exception as e:
+            print(f"计算热门板块评分失败: {e}")
+            return 5.0, f"计算失败: {str(e)}"
+    
+    def _calculate_hot_sector_bonus_by_api(self, stock_code):
+        """通过API查询计算热门板块评分（兜底方案）"""
         try:
             # 获取热门板块信息
             hot_sectors = self.get_hot_sectors()
@@ -2715,7 +2807,7 @@ class AShareAnalyzerGUI:
                 return base_score, f"不属于热门板块，基础分: {base_score:.2f}/10"
                 
         except Exception as e:
-            print(f"计算热门板块评分失败: {e}")
+            print(f"API查询热门板块评分失败: {e}")
             return 5.0, f"计算失败: {str(e)}"
     
     def start_batch_scoring(self, start_from_index=None):
@@ -5696,7 +5788,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             self._is_adjusting_weights = False
 
     def recalculate_all_comprehensive_scores(self, silent=False):
-        """根据当前权重重新计算所有已加载股票的综合评分"""
+        """根据当前权重重新计算所有已加载股票的综合评分 - 批量优化版"""
         try:
             if not silent:
                 self.show_progress("🔄 正在根据新权重重算综合分...")
@@ -5707,7 +5799,13 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     messagebox.showinfo("提示", "没有已加载的评分数据")
                 return
             
+            # 🚀 批量优化：预先获取一次热门板块数据（使用缓存）
+            print(f"[批量重算] 预先获取热门板块数据（共{len(self.batch_scores)}只股票）")
+            hot_sectors = self.get_hot_sectors(use_cache=True)
+            
             count = 0
+            start_time = time.time()
+            
             for code, data in self.batch_scores.items():
                 # 提取各维度分数
                 tech_score = data.get('short_term_score')
@@ -5715,7 +5813,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 chip_score = data.get('chip_score')
                 hot_sector_score = data.get('hot_sector_score')
                 
-                # 如果没有热门板块评分，尝试实时计算
+                # 如果没有热门板块评分，尝试实时计算（使用缓存的热门板块数据）
                 if hot_sector_score is None:
                     try:
                         hot_sector_score, hot_sector_detail = self.calculate_hot_sector_bonus(code)
@@ -5737,14 +5835,24 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     data['score'] = round(new_score, 2)
                     count += 1
             
+            elapsed = time.time() - start_time
+            print(f"[批量重算] 完成 {count} 只股票，耗时 {elapsed:.2f}秒")
+            
+            # 🔍 调试：打印前5只股票的分数变化
+            sample_stocks = list(self.batch_scores.items())[:5]
+            print(f"[批量重算] 示例股票分数:")
+            for code, data in sample_stocks:
+                print(f"  {code}: {data.get('name', 'N/A')} - 综合分={data.get('score', 0):.2f}")
+            
             if count > 0:
                 # 保存更新后的评分
+                print(f"[批量重算] 保存评分数据...")
                 self.save_batch_scores()
                 if not silent:
                     self.hide_progress()
-                    messagebox.showinfo("成功", f"已根据新权重重新计算 {count} 只股票的综合评分")
+                    messagebox.showinfo("成功", f"已根据新权重重新计算 {count} 只股票的综合评分\n耗时: {elapsed:.2f}秒")
                 else:
-                    self.show_progress(f"✅ 已重算 {count} 只股票评分")
+                    self.show_progress(f"✅ 已重算 {count} 只股票评分（{elapsed:.1f}秒）")
                     # 1.5秒后隐藏提示
                     self.root.after(1500, self.hide_progress)
             else:
@@ -11988,25 +12096,34 @@ WARNING:  风险提示:
                 chip_score = bs.get('chip_score')
                 chip_level = bs.get('chip_level')
             
-            # 检查是否属于热门板块
-            hot_label = ""
+            # 获取股票所属板块和行业
             stock_industry = stock.get('industry', '')
+            stock_concept = stock.get('concept', '')
+            
+            # 优先显示行业，如果没有则显示概念
+            sector_display = stock_industry if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', ''] else (
+                stock_concept if stock_concept and stock_concept not in ['未知', 'δ֪', 'None', ''] else '未知'
+            )
+            
+            # 检查是否属于热门板块（用于标红）
+            is_hot = False
             if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', '']:
                 for hot_ind in hot_industry_names:
                     if hot_ind in stock_industry or stock_industry in hot_ind:
-                        hot_label = f" [🔥 {hot_ind}]"
+                        is_hot = True
                         break
             
-            if not hot_label:
-                stock_concept = stock.get('concept', '')
-                if stock_concept and stock_concept not in ['未知', 'δ֪', 'None', '']:
-                    for hot_con in hot_concept_names:
-                        if hot_con in stock_concept or stock_concept in hot_con:
-                            hot_label = f" [🔥 {hot_con}]"
-                            break
+            if not is_hot and stock_concept and stock_concept not in ['未知', 'δ֪', 'None', '']:
+                for hot_con in hot_concept_names:
+                    if hot_con in stock_concept or stock_concept in hot_con:
+                        is_hot = True
+                        break
 
-            # 确定热门板块显示文本
-            hot_status = hot_label.strip() if hot_label else "未匹配到热门板块"
+            # 确定板块显示文本（热门板块标红）
+            if is_hot:
+                sector_status = f"\033[91m{sector_display} 🔥热门\033[0m"  # ANSI红色
+            else:
+                sector_status = sector_display
 
             # 构建括号内的分项显示
             parts = []
@@ -12055,7 +12172,7 @@ WARNING:  风险提示:
                 chip_info = " | 筹码:⚪N/A"
 
             report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}
-    🔥 热门板块：{hot_status}
+    � 所属板块：{sector_status}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  📊 {rating.split(' ')[0]}
     📈 趋势判断：{stock.get('trend', '未知')}
 
@@ -14802,6 +14919,16 @@ A股特色分析
                 # 如果数据过期或无效，_check_and_update_batch_scores已经开始重新获取
                 return
             
+            # 🔄 重新加载批量评分数据，确保使用最新的重算结果
+            print("[生成推荐] 重新加载批量评分数据...")
+            self.load_batch_scores(silent=True)
+            
+            # 🔍 调试：打印前5只股票的分数
+            sample_stocks = list(self.batch_scores.items())[:5]
+            print(f"[生成推荐] 加载后的示例股票分数:")
+            for code, data in sample_stocks:
+                print(f"  {code}: {data.get('name', 'N/A')} - 综合分={data.get('score', 0):.2f}")
+            
             # 获取界面上的参数
             stock_type = self.stock_type_var.get()
             period = self.period_var.get()
@@ -14875,15 +15002,29 @@ IDEA: 优势:
         from datetime import datetime
         
         try:
+            # 确定要检查的文件路径（根据当前使用的AI模型）
+            if hasattr(self, 'llm_model') and self.llm_model == "deepseek":
+                check_file = self.batch_score_file_deepseek
+            elif hasattr(self, 'llm_model') and self.llm_model == "minimax":
+                check_file = self.batch_score_file_minimax
+            elif hasattr(self, 'llm_model') and self.llm_model == "openai":
+                check_file = self.batch_score_file_openai
+            elif hasattr(self, 'llm_model') and self.llm_model == "openrouter":
+                check_file = self.batch_score_file_openrouter
+            elif hasattr(self, 'llm_model') and self.llm_model == "gemini":
+                check_file = self.batch_score_file_gemini
+            else:
+                check_file = self.batch_score_file
+            
             # 如果没有批量评分文件，直接开始批量评分
-            if not os.path.exists(self.batch_score_file):
-                print("无批量评分数据，开始获取...")
+            if not os.path.exists(check_file):
+                print(f"无批量评分数据 ({check_file})，开始获取...")
                 self.show_progress("首次使用，正在获取批量评分数据...")
                 self.start_batch_scoring()
                 return False
             
             # 读取批量评分文件检查时间
-            with open(self.batch_score_file, 'r', encoding='utf-8') as f:
+            with open(check_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
             # 检查数据是否有效（48小时内）
@@ -15129,8 +15270,46 @@ DATA: 推荐统计:
         report += f"\n{'='*60}\n"
         report += f"🙏 感谢使用A股智能分析系统！数据更新时间: {datetime.now().strftime('%H:%M:%S')}\n"
         
-        # 显示报告
-        self.recommendation_text.insert(tk.END, report)
+        # 配置红色tag（如果还没有配置）
+        try:
+            self.recommendation_text.tag_config('red', foreground='red')
+        except:
+            pass
+        
+        # 显示报告，处理红色标记
+        self._insert_text_with_colors(self.recommendation_text, report)
+    
+    def _insert_text_with_colors(self, text_widget, content):
+        """插入文本并处理颜色标记
+        
+        支持的标记：
+        - <<RED>>文本<<END>> : 红色文本
+        """
+        import re
+        
+        # 配置红色tag
+        text_widget.tag_config('red', foreground='red', font=('Arial', 10, 'bold'))
+        
+        # 分割文本，识别 <<RED>>...<<END>> 标记
+        pattern = r'(<<RED>>)(.*?)(<<END>>)'
+        parts = re.split(pattern, content)
+        
+        i = 0
+        while i < len(parts):
+            part = parts[i]
+            
+            if part == '<<RED>>' and i + 2 < len(parts):
+                # 找到红色标记，插入红色文本
+                red_text = parts[i + 1]
+                text_widget.insert(tk.END, red_text, 'red')
+                i += 3  # 跳过 <<RED>>, 文本, <<END>>
+            elif part not in ['<<END>>']:
+                # 普通文本
+                if part:
+                    text_widget.insert(tk.END, part)
+                i += 1
+            else:
+                i += 1
     
     def perform_smart_recommendation(self, min_score, pool_type, max_count):
         """执行智能股票推荐"""
@@ -15368,8 +15547,8 @@ SEARCH: 筛选条件:
         report += f"\n{'='*60}\n"
         report += "🙏 感谢使用A股智能分析系统！\n"
         
-        # 显示报告
-        self.recommendation_text.insert(tk.END, report)
+        # 显示报告，处理红色标记
+        self._insert_text_with_colors(self.recommendation_text, report)
     
     def _generate_recommendation_report(self, recommended_stocks, all_analyzed, 
                                        failed_stocks, min_score, pool_type, max_count):
@@ -15450,7 +15629,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
         """在GUI中显示推荐报告"""
         # 在投资建议页面显示报告
         self.recommendation_text.delete(1.0, tk.END)
-        self.recommendation_text.insert(tk.END, report)
+        self._insert_text_with_colors(self.recommendation_text, report)
         
         # 更新状态
         self.status_var.set("智能股票推荐完成")
@@ -15708,63 +15887,55 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
         self.hide_progress()
         
         self.recommendation_text.delete('1.0', tk.END)
-        self.recommendation_text.insert('1.0', report)
+        self._insert_text_with_colors(self.recommendation_text, report)
     
     def export_recommended_stocks_to_csv(self, recommended_stocks, period):
-        """导出推荐股票代码到CSV文件"""
-        import csv
-        import os
-        from datetime import datetime
-        
+        """导出推荐股票到CSV文件 - 使用共享工具"""
         try:
-            # 创建data目录（如果不存在）
-            data_dir = 'data'
-            if not os.path.exists(data_dir):
-                os.makedirs(data_dir)
+            # 导入共享的CSV导出工具
+            from TradingShared.utils.csv_exporter import export_stocks_to_csv
             
-            # 生成文件名：包含时间戳和期间
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            csv_filename = f"{period}_推荐股票_{timestamp}.csv"
-            csv_filepath = os.path.join(data_dir, csv_filename)
+            # 转换为tuple格式 [(code, data), ...]
+            stocks_data = []
+            for stock in recommended_stocks:
+                code = stock.get('ticker') or stock.get('code', '')
+                stocks_data.append((code, stock))
             
-            # 导出股票代码
-            with open(csv_filepath, 'w', newline='', encoding='utf-8-sig') as csvfile:
-                writer = csv.writer(csvfile)
-                # 直接写入股票代码，不写入标题
-                for stock in recommended_stocks:
-                    writer.writerow([stock['ticker']])
+            # 使用共享工具导出（仅导出代码）
+            csv_path = export_stocks_to_csv(
+                stocks_data,
+                filename_prefix=f"{period}_推荐股票",
+                target_dir=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data'),
+                code_only=True
+            )
             
-            print(f"✅ 推荐股票已导出到: {csv_filepath}")
+            print(f"✅ 推荐股票已导出到: {csv_path}")
             print(f"📊 共导出 {len(recommended_stocks)} 只推荐股票")
             
         except Exception as e:
             print(f"❌ CSV导出失败: {str(e)}")
     
     def export_recommended_stocks_to_csv_simple(self, recommended_stocks, period):
-        """导出推荐股票代码到CSV文件（简化版本，适用于stock_type推荐）"""
-        import csv
-        import os
-        from datetime import datetime
-        
+        """导出推荐股票到CSV文件（简化版） - 使用共享工具"""
         try:
-            # 使用共享数据目录
+            # 导入共享的CSV导出工具
+            from TradingShared.utils.csv_exporter import export_stocks_to_csv
+            
+            # 转换为tuple格式
+            stocks_data = [(stock.get('code', ''), stock) for stock in recommended_stocks]
+            
+            # 使用共享目录
             shared_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'TradingShared', 'data')
-            if not os.path.exists(shared_data_dir):
-                os.makedirs(shared_data_dir)
             
-            # 生成文件名：包含时间戳和期间
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            csv_filename = f"{period}_推荐股票_{timestamp}.csv"
-            csv_filepath = os.path.join(shared_data_dir, csv_filename)
+            # 使用共享工具导出（仅导出代码）
+            csv_path = export_stocks_to_csv(
+                stocks_data,
+                filename_prefix=f"{period}_推荐股票",
+                target_dir=shared_data_dir,
+                code_only=True
+            )
             
-            # 导出股票代码
-            with open(csv_filepath, 'w', newline='', encoding='utf-8-sig') as csvfile:
-                writer = csv.writer(csvfile)
-                # 直接写入股票代码，不写入标题
-                for stock in recommended_stocks:
-                    writer.writerow([stock['code']])  # 这里使用'code'而不是'ticker'
-            
-            print(f"✅ 推荐股票已导出到: {csv_filepath}")
+            print(f"✅ 推荐股票已导出到: {csv_path}")
             print(f"📊 共导出 {len(recommended_stocks)} 只推荐股票")
             
         except Exception as e:
@@ -18381,7 +18552,7 @@ WARNING: 重要声明:
             if hasattr(self, 'recommendation_text'):
                 print("找到投资建议文本组件")
                 self.recommendation_text.delete('1.0', tk.END)
-                self.recommendation_text.insert('1.0', recommendation_report)
+                self._insert_text_with_colors(self.recommendation_text, recommendation_report)
                 
                 # 切换到投资建议标签页
                 self.notebook.select(3)  # 投资建议是第4个标签页（索引3）
@@ -18390,7 +18561,7 @@ WARNING: 重要声明:
                 print("未找到投资建议文本组件，使用概览页面")
                 if hasattr(self, 'overview_text'):
                     self.overview_text.delete('1.0', tk.END)
-                    self.overview_text.insert('1.0', recommendation_report)
+                    self._insert_text_with_colors(self.overview_text, recommendation_report)
                     self.notebook.select(0)  # 切换到概览页面
                     
             # 更新状态
@@ -18546,8 +18717,34 @@ WARNING: 重要声明:
                             hot_label = f" [🔥 {hot_con}]"
                             break
             
-            # 确定热门板块显示文本
-            hot_status = hot_label.strip() if hot_label else "未匹配到热门板块"
+            # 获取股票所属板块和行业
+            stock_industry = stock.get('industry', '')
+            stock_concept = stock.get('concept', '')
+            
+            # 优先显示行业，如果没有则显示概念
+            sector_display = stock_industry if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', ''] else (
+                stock_concept if stock_concept and stock_concept not in ['未知', 'δ֪', 'None', ''] else '未知'
+            )
+            
+            # 检查是否属于热门板块（用于标红）
+            is_hot = False
+            if stock_industry and stock_industry not in ['未知', 'δ֪', 'None', '']:
+                for hot_ind in hot_industry_names:
+                    if hot_ind in stock_industry or stock_industry in hot_ind:
+                        is_hot = True
+                        break
+            
+            if not is_hot and stock_concept and stock_concept not in ['未知', 'δ֪', 'None', '']:
+                for hot_con in hot_concept_names:
+                    if hot_con in stock_concept or stock_concept in hot_con:
+                        is_hot = True
+                        break
+
+            # 确定板块显示文本（热门板块用特殊标记）
+            if is_hot:
+                sector_status = f"<<RED>>{sector_display} 🔥热门<<END>>"  # 特殊标记，后续处理
+            else:
+                sector_status = sector_display
 
             parts = []
             # 技术面
@@ -18610,7 +18807,7 @@ WARNING: 重要声明:
             
             stock_info = f"""
 {score_color} 第 {i} 名：{code} {name}
-    🔥 热门板块：{hot_status}
+    � 所属板块：{sector_status}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
     📈 趋势判断：{trend}
 """
@@ -18637,7 +18834,7 @@ WARNING: 重要声明:
             if hasattr(self, 'recommendation_text'):
                 print("找到投资建议文本组件")
                 self.recommendation_text.delete('1.0', tk.END)
-                self.recommendation_text.insert('1.0', recommendation_report)
+                self._insert_text_with_colors(self.recommendation_text, recommendation_report)
                 
                 # 切换到投资建议标签页
                 self.notebook.select(3)  # 投资建议是第4个标签页（索引3）
@@ -18647,7 +18844,7 @@ WARNING: 重要声明:
                 # 如果没有投资建议页面，在概览页面显示
                 try:
                     self.overview_text.delete('1.0', tk.END)
-                    self.overview_text.insert('1.0', recommendation_report)
+                    self._insert_text_with_colors(self.overview_text, recommendation_report)
                     # 切换到概览标签页
                     self.notebook.select(0)
                 except Exception as e:

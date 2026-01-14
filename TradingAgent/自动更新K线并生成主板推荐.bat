@@ -32,24 +32,25 @@ if errorlevel 1 (
     )
 )
 
-echo [步骤 1/3] 正在更新K线数据...
-echo.
+REM echo [步骤 1/3] 正在更新K线数据...
+REM echo.
 REM 增大批次大小以触发 BURST 模式，提升效率（每批 100 只，触发 >50 不等待逻辑）
-"%PYTHON_EXE%" update_kline_batch.py
-
-if errorlevel 1 (
-    echo [错误] K线数据更新失败！
-    pause
-    exit /b 1
-)
+REM "%PYTHON_EXE%" update_kline_batch.py
+REM 
+REM if errorlevel 1 (
+REM     echo [错误] K线数据更新失败！
+REM     pause
+REM     exit /b 1
+REM )
+echo [步骤 1/3] 跳过K线数据更新（已注释）
 
 echo.
 echo ============================================
 echo [步骤 2/3] 正在获取主板评分...
 echo.
 
-REM 这里需要调用主板评分的功能
-"%PYTHON_EXE%" -c "import sys, os, json; sys.path.insert(0, '.'); sys.path.insert(0, '..'); from TradingShared.api.comprehensive_data_collector import ComprehensiveDataCollector; from datetime import datetime; collector = ComprehensiveDataCollector(); data_dir = os.path.join('..', 'TradingShared', 'data'); stock_files = [f for f in os.listdir(data_dir) if f.startswith('comprehensive_stock_data_part_') and f.endswith('.json')]; all_stocks = {}; [all_stocks.update(json.load(open(os.path.join(data_dir, f), encoding='utf-8')).get('stocks', {})) for f in stock_files]; main_board_stocks = {k: v for k, v in all_stocks.items() if k.startswith(('600', '601', '603', '000', '001', '002'))}; print(f'主板股票总数: {len(main_board_stocks)} 只'); output_file = os.path.join(data_dir, f'batch_stock_scores_optimized_主板_{datetime.now().strftime(\"%%Y%%m%%d_%%H%%M%%S\")}.json'); json.dump(main_board_stocks, open(output_file, 'w', encoding='utf-8'), ensure_ascii=False, indent=2); print(f'主板评分数据已保存到: {os.path.basename(output_file)}')"
+REM 使用新的评分脚本（复用 GUI 的评分逻辑）
+"%PYTHON_EXE%" "%~dp0generate_mainboard_scores.py"
 
 if errorlevel 1 (
     echo [错误] 主板评分获取失败！
