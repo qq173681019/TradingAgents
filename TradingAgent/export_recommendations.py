@@ -38,10 +38,11 @@ if __name__ == '__main__':
         last_recommendations = [{'code': code, **data} for code, data in sorted_stocks]
         print(f'已选出前 {len(last_recommendations)} 只推荐股票')
         
-        # 导出CSV - 复用 a_share_gui_compatible.py 中 export_last_recommendations_to_csv 的逻辑
+        # 导出CSV - 导出到桌面
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         csv_filename = f'主板推荐股票_{timestamp}.csv'
-        csv_path = os.path.join(data_dir, csv_filename)
+        desktop_path = os.path.join(os.environ['USERPROFILE'], 'Desktop')
+        csv_path = os.path.join(desktop_path, csv_filename)
         
         # 导出股票代码（与 GUI 的 export_last_recommendations_to_csv 方法完全一致）
         with open(csv_path, 'w', newline='', encoding='utf-8-sig') as csvfile:

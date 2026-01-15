@@ -12121,7 +12121,7 @@ WARNING:  风险提示:
 
             # 确定板块显示文本（热门板块标红）
             if is_hot:
-                sector_status = f"\033[91m{sector_display} 🔥热门\033[0m"  # ANSI红色
+                sector_status = f"<<RED>>{sector_display} 🔥热门<<END>>"  # 使用GUI支持的颜色标记
             else:
                 sector_status = sector_display
 
@@ -12172,7 +12172,7 @@ WARNING:  风险提示:
                 chip_info = " | 筹码:⚪N/A"
 
             report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}
-    � 所属板块：{sector_status}
+    • 所属板块：{sector_status}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  📊 {rating.split(' ')[0]}
     📈 趋势判断：{stock.get('trend', '未知')}
 
@@ -15286,7 +15286,7 @@ DATA: 推荐统计:
         - <<RED>>文本<<END>> : 红色文本
         """
         import re
-        
+
         # 配置红色tag
         text_widget.tag_config('red', foreground='red', font=('Arial', 10, 'bold'))
         
@@ -15894,7 +15894,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
         try:
             # 导入共享的CSV导出工具
             from TradingShared.utils.csv_exporter import export_stocks_to_csv
-            
+
             # 转换为tuple格式 [(code, data), ...]
             stocks_data = []
             for stock in recommended_stocks:
@@ -15920,7 +15920,7 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
         try:
             # 导入共享的CSV导出工具
             from TradingShared.utils.csv_exporter import export_stocks_to_csv
-            
+
             # 转换为tuple格式
             stocks_data = [(stock.get('code', ''), stock) for stock in recommended_stocks]
             
@@ -18807,7 +18807,7 @@ WARNING: 重要声明:
             
             stock_info = f"""
 {score_color} 第 {i} 名：{code} {name}
-    � 所属板块：{sector_status}
+    • 所属板块：{sector_status}
     📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
     📈 趋势判断：{trend}
 """

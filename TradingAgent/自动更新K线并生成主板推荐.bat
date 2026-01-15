@@ -4,7 +4,7 @@ echo ============================================
 echo  TradingAgent 自动化流程
 echo  1. 更新K线数据
 echo  2. 获取主板评分
-echo  3. 生成推荐CSV并导出到下载文件夹
+echo  3. 生成推荐CSV并导出到桌面
 echo ============================================
 echo.
 
@@ -32,17 +32,17 @@ if errorlevel 1 (
     )
 )
 
-REM echo [步骤 1/3] 正在更新K线数据...
-REM echo.
-REM 增大批次大小以触发 BURST 模式，提升效率（每批 100 只，触发 >50 不等待逻辑）
-REM "%PYTHON_EXE%" update_kline_batch.py
-REM 
-REM if errorlevel 1 (
-REM     echo [错误] K线数据更新失败！
-REM     pause
-REM     exit /b 1
-REM )
-echo [步骤 1/3] 跳过K线数据更新（已注释）
+echo [步骤 1/3] 正在更新K线数据...
+echo.
+echo 增大批次大小以触发 BURST 模式，提升效率...
+"%PYTHON_EXE%" update_kline_batch.py
+ 
+if errorlevel 1 (
+     echo [错误] K线数据更新失败！
+     pause
+     exit /b 1
+ )
+echo [步骤 1/3] K线数据更新完成。
 
 echo.
 echo ============================================
@@ -60,7 +60,7 @@ if errorlevel 1 (
 
 echo.
 echo ============================================
-echo [步骤 3/3] 正在生成推荐并导出CSV到下载文件夹...
+echo [步骤 3/3] 正在生成推荐并导出CSV到桌面...
 echo.
 
 "%PYTHON_EXE%" "%~dp0export_recommendations.py"
@@ -77,7 +77,7 @@ echo  全部流程执行完成！
 echo ============================================
 echo  - K线数据已更新
 echo  - 主板评分已获取
-echo  - 推荐CSV已导出到下载文件夹
+echo  - 推荐CSV已导出到桌面
 echo ============================================
 echo.
 echo 按任意键退出...
