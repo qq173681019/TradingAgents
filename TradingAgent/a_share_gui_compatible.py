@@ -3156,6 +3156,13 @@ class AShareAnalyzerGUI:
     def analyze_stock_with_llm(self, code, stock_data):
         """使用LLM分析单只股票"""
         try:
+            # 获取用户额外提示
+            extra_msg = ""
+            if hasattr(self, 'extra_words_var'):
+                user_msg = self.extra_words_var.get().strip()
+                if user_msg:
+                    extra_msg = f"\n额外注意事项：{user_msg}\n"
+
             # 构建分析提示
             prompt = f"""
 请基于以下股票数据进行全面分析：
@@ -3164,7 +3171,7 @@ class AShareAnalyzerGUI:
 股票名称: {stock_data.get('name', 'N/A')}
 当前价格: {stock_data.get('current_price', 'N/A')}
 行业: {stock_data.get('industry', 'N/A')}
-
+{extra_msg}
 技术指标：
 {self._format_technical_data(stock_data)}
 
@@ -5298,6 +5305,17 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         self.fund_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
         self.chip_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
         self.hot_sector_scale.bind("<ButtonRelease-1>", lambda e: threading.Thread(target=self.recalculate_all_comprehensive_scores, args=(True,)).start())
+        
+        # --- 新增：分析备注/额外要说的话 ---
+        remark_frame = tk.Frame(self.root, bg="#f0f0f0")
+        remark_frame.pack(fill="x", padx=20, pady=5)
+        
+        tk.Label(remark_frame, text="额外要说的话(AI):", font=("微软雅黑", 12, "bold"), bg="#f0f0f0", fg="#e67e22").pack(side="left")
+        self.extra_words_var = tk.StringVar(value="")
+        self.extra_words_entry = tk.Entry(remark_frame, textvariable=self.extra_words_var, font=("微软雅黑", 11), fg="#2c3e50")
+        self.extra_words_entry.pack(side="left", padx=8, fill="x", expand=True)
+        # 添加一个提示标签
+        tk.Label(remark_frame, text="💡 这里的文字将作为补充信息发送给AI", font=("微软雅黑", 9), fg="#7f8c8d", bg="#f0f0f0").pack(side="left", padx=5)
         
         # 初始化权重显示
         self._update_weight_label()

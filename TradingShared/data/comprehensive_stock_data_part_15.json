@@ -2,7 +2,7 @@
   "stocks": {
     "603999": {
       "code": "603999",
-      "timestamp": "2026-01-15T20:16:44.907758",
+      "timestamp": "2026-01-19T23:24:22.073837",
       "collection_time": "2026-01-06 00:08:03",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -575,12 +575,28 @@
             "low": 7.54,
             "close": 7.61,
             "volume": 18521238.0
+          },
+          {
+            "date": "2026-01-16",
+            "open": 7.62,
+            "high": 7.68,
+            "low": 7.29,
+            "close": 7.34,
+            "volume": 15050600.0
+          },
+          {
+            "date": "2026-01-19",
+            "open": 7.3,
+            "high": 7.39,
+            "low": 7.26,
+            "close": 7.36,
+            "volume": 9907400.0
           }
         ],
-        "latest_price": 7.61,
-        "data_points": 69,
+        "latest_price": 7.36,
+        "data_points": 71,
         "source": "incremental_update",
-        "update_time": "2026-01-15T20:16:44.907726"
+        "update_time": "2026-01-19T23:24:22.073726"
       },
       "financial_data": {
         "code": "603999",
@@ -596,15 +612,15 @@
         "debt_ratio": 0.093363
       },
       "technical_indicators": {
-        "current_price": 7.61,
-        "ma5": 7.656000000000001,
-        "ma10": 7.382000000000001,
-        "ma20": 7.167,
-        "ma60": 7.101166666666667,
-        "rsi": 69.27710843373492,
-        "macd": 0.14475685475508904,
-        "signal": 0.06393108010710052,
-        "volume_ratio": 0.8140859417564135,
+        "current_price": 7.36,
+        "ma5": 7.554,
+        "ma10": 7.447,
+        "ma20": 7.207000000000001,
+        "ma60": 7.123500000000001,
+        "rsi": 61.57894736842105,
+        "macd": 0.11612741955600026,
+        "signal": 0.08472243224001588,
+        "volume_ratio": 0.41786618564437283,
         "status": "calculated"
       },
       "industry_concept": {
@@ -644,7 +660,7 @@
         "timestamp": "2026-01-06T00:08:03.367718",
         "success_rate": 1.0
       },
-      "last_kline_update": "2026-01-15T20:16:44.907730"
+      "last_kline_update": "2026-01-19T23:24:22.073733"
     },
     "605001": {
       "code": "605001",
@@ -46531,6 +46547,6 @@
       }
     }
   },
-  "last_updated": "2026-01-15T20:17:18.201818",
+  "last_updated": "2026-01-19T23:24:48.636535",
   "total_stocks": 112
 }

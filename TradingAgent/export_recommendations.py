@@ -39,8 +39,7 @@ if __name__ == '__main__':
         print(f'已选出前 {len(last_recommendations)} 只推荐股票')
         
         # 导出CSV - 导出到桌面
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        csv_filename = f'主板推荐股票_{timestamp}.csv'
+        csv_filename = '今日推荐.csv'
         desktop_path = os.path.join(os.environ['USERPROFILE'], 'Desktop')
         csv_path = os.path.join(desktop_path, csv_filename)
         
