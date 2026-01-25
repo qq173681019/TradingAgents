@@ -2,7 +2,7 @@
   "stocks": {
     "000003": {
       "code": "000003",
-      "timestamp": "2026-01-11T20:28:58.449940",
+      "timestamp": "2026-01-24T22:50:26.059456",
       "collection_time": "2026-01-11 20:28:58",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -667,8 +667,8 @@
         ],
         "latest_price": 2.71,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2026-01-11T20:28:59.413633"
+        "source": "incremental_update",
+        "update_time": "2026-01-24T22:50:26.059281"
       },
       "financial_data": {
         "code": "000003",
@@ -679,20 +679,21 @@
         "ma5": 2.4639999999999995,
         "ma10": 2.195,
         "ma20": 2.9125,
-        "ma60": 5.501666666666666,
+        "ma60": 5.501666666666667,
         "rsi": 35.11705685618729,
-        "macd": -0.8945240612001397,
-        "signal": -1.0459836851338207,
+        "macd": -0.8936566639525614,
+        "signal": -1.0447090144805495,
         "volume_ratio": 6.601823081191583,
         "status": "calculated"
       },
       "industry_concept": {
         "code": "000003",
-        "source": "baostock_default",
+        "source": "default",
         "industry": "深圳主板",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
+        "industry_name": "深圳主板",
+        "sector": "其他",
+        "concepts": [],
+        "message": "使用默认行业分类"
       },
       "fund_flow": {
         "code": "000003",
@@ -722,11 +723,12 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2026-01-11T20:28:58.456305",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2026-01-24T22:50:26.059289"
     },
     "000015": {
       "code": "000015",
-      "timestamp": "2026-01-11T20:28:58.756746",
+      "timestamp": "2026-01-24T22:50:26.071341",
       "collection_time": "2026-01-11 20:28:58",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -1391,8 +1393,8 @@
         ],
         "latest_price": 6.85,
         "data_points": 80,
-        "source": "batch_rotation",
-        "update_time": "2026-01-11T20:28:59.413667"
+        "source": "incremental_update",
+        "update_time": "2026-01-24T22:50:26.071195"
       },
       "financial_data": {
         "code": "000015",
@@ -1401,22 +1403,23 @@
       "technical_indicators": {
         "current_price": 6.85,
         "ma5": 6.454000000000001,
-        "ma10": 5.858,
+        "ma10": 5.8580000000000005,
         "ma20": 5.7035,
         "ma60": 5.8116666666666665,
         "rsi": 85.07462686567163,
-        "macd": 0.0746280894629825,
-        "signal": -0.12246005702724896,
+        "macd": 0.07349384489529953,
+        "signal": -0.12412648387556165,
         "volume_ratio": 0.9955406313093299,
         "status": "calculated"
       },
       "industry_concept": {
         "code": "000015",
-        "source": "baostock_default",
+        "source": "default",
         "industry": "深圳主板",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
+        "industry_name": "深圳主板",
+        "sector": "其他",
+        "concepts": [],
+        "message": "使用默认行业分类"
       },
       "fund_flow": {
         "code": "000015",
@@ -1446,9 +1449,10 @@
         "strategy": "specialized_api_distribution",
         "timestamp": "2026-01-11T20:28:58.760763",
         "success_rate": 0.8
-      }
+      },
+      "last_kline_update": "2026-01-24T22:50:26.071203"
     }
   },
-  "last_updated": "2026-01-19T23:24:48.692659",
+  "last_updated": "2026-01-24T22:51:24.793311",
   "total_stocks": 2
 }

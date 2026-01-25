@@ -21,31 +21,22 @@ if errorlevel 1 (
 )
 
 REM ------------------------------------------------------------------------------
-REM  Main Execution Flow
+REM  Main Execution Flow - Step 2 Only
 REM ------------------------------------------------------------------------------
 cls
 echo ============================================   
-echo  TradingAgent 自动化流程   
-echo  1. 更新K线数据   
-echo  2. 获取主板评分   
-echo  3. 生成推荐CSV并导出到桌面   
+echo  TradingAgent - 仅生成主板评分   
+echo  步骤 2/3: 计算主板股票评分   
 echo ============================================   
 echo. 
-
-echo [步骤 1/3] 正在更新K线数据...   
-echo.
-echo 增大批次大小以触发 BURST 模式，提升效率...   
-"%PYTHON_EXE%" "%~dp0update_kline_batch.py"
- 
-if errorlevel 1 (
-     echo [错误] K线数据更新失败！   
-     pause
-     exit /b 1
- )
-echo [步骤 1/3] K线数据更新完成。   
-
-echo.
+echo 说明：此脚本仅执行第2步（生成评分）   
+echo 前提：需要已存在 batch_stock_scores_none.json   
+echo 输出：   
+echo   - 4个不同权重的CSV文件   
+echo   - 1个JSON评分文件   
 echo ============================================   
+echo.
+
 echo [步骤 2/3] 正在获取主板评分...   
 echo.
 
@@ -53,33 +44,30 @@ echo.
 
 if errorlevel 1 (
     echo [错误] 主板评分获取失败！   
+    echo.
+    echo 可能原因：   
+    echo   1. 未找到 batch_stock_scores_none.json 文件   
+    echo   2. 数据格式错误   
+    echo   3. Python环境问题   
+    echo.
     pause
     exit /b 1
 )
 
 echo.
 echo ============================================   
-echo [步骤 3/3] 正在生成推荐并导出CSV到桌面...   
-echo.
-
-"%PYTHON_EXE%" "%~dp0export_recommendations.py"
-
-if errorlevel 1 (
-    echo [错误] CSV导出失败！   
-    pause
-    exit /b 1
-)
-
-echo.
+echo  评分生成完成！   
 echo ============================================   
-echo  全部流程执行完成！   
-echo ============================================   
-echo  - K线数据已更新   
-echo  - 主板评分已获取   
-echo  - 推荐CSV已导出到桌面：   
-echo    1. 推荐_综合.csv   
-echo    2. 推荐_筹码.csv   
-echo    3. 推荐_技术.csv   
+echo  已生成以下文件（位于 TradingShared\data\）：   
+echo.
+echo  CSV文件：   
+echo    - 主板推荐_综合_[时间戳].csv   
+echo    - 主板推荐_基本_[时间戳].csv   
+echo    - 主板推荐_筹码_[时间戳].csv   
+echo    - 主板推荐_技术_[时间戳].csv   
+echo.
+echo  JSON文件：   
+echo    - batch_stock_scores_optimized_主板_[时间戳].json   
 echo ============================================   
 echo.
 echo 按任意键退出...   

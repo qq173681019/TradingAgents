@@ -31,27 +31,34 @@ if __name__ == '__main__':
         with open(file_path, 'r', encoding='utf-8') as f:
             scores = json.load(f)
         
-        # 按综合评分排序，取前10只
-        sorted_stocks = sorted(scores.items(), key=lambda x: x[1].get('score', 0), reverse=True)[:10]
-        
-        # 转换为推荐格式
-        last_recommendations = [{'code': code, **data} for code, data in sorted_stocks]
-        print(f'已选出前 {len(last_recommendations)} 只推荐股票')
-        
-        # 导出CSV - 导出到桌面
-        csv_filename = '今日推荐.csv'
         desktop_path = os.path.join(os.environ['USERPROFILE'], 'Desktop')
-        csv_path = os.path.join(desktop_path, csv_filename)
         
-        # 导出股票代码（与 GUI 的 export_last_recommendations_to_csv 方法完全一致）
-        with open(csv_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
-            writer = csv.writer(csvfile)
-            # 只写入股票代码
-            for stock in last_recommendations:
-                writer.writerow([stock['code']])
+        # 定义导出配置：(文件名, 排序字段, 显示名称)
+        export_configs = [
+            ('推荐_综合.csv', 'score', '综合评分'),
+            ('推荐_筹码.csv', 'chip_score', '筹码评分'),
+            ('推荐_技术.csv', 'short_term_score', '技术面评分')
+        ]
         
-        print(f'✅ CSV文件已导出到: {csv_path}')
-        print(f'📊 共导出 {len(last_recommendations)} 只推荐股票')
+        for filename, sort_key, display_name in export_configs:
+            print(f'正在导出: {display_name}...')
+            
+            # 按对应字段排序，取前10只
+            sorted_stocks = sorted(scores.items(), key=lambda x: x[1].get(sort_key, 0), reverse=True)[:10]
+            
+            # 转换为推荐格式
+            recommendations = [{'code': code, **data} for code, data in sorted_stocks]
+            
+            # 导出CSV
+            csv_path = os.path.join(desktop_path, filename)
+            with open(csv_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                writer = csv.writer(csvfile)
+                for stock in recommendations:
+                    writer.writerow([stock['code']])
+            
+            print(f'  ✅ {display_name}已导出到: {filename} (共 {len(recommendations)} 只)')
+        
+        print('\n全部导出任务完成！')
         
     except Exception as e:
         print(f'❌ 导出失败: {e}')

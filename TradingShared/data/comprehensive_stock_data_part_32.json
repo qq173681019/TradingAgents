@@ -2,7 +2,7 @@
   "stocks": {
     "000982": {
       "code": "000982",
-      "timestamp": "2026-01-09T21:11:29.185359",
+      "timestamp": "2026-01-24T22:51:21.713525",
       "collection_time": "2026-01-05 23:00:50",
       "data_source": "specialized_distribution_v2",
       "api_strategy": {
@@ -668,7 +668,7 @@
         "latest_price": 0.18,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-01-09T21:11:29.185350"
+        "update_time": "2026-01-24T22:51:21.713334"
       },
       "financial_data": {
         "code": "000982",
@@ -697,11 +697,12 @@
       },
       "industry_concept": {
         "code": "000982",
-        "source": "baostock_default",
+        "source": "default",
         "industry": "深圳主板",
-        "industry_name": null,
-        "sector": null,
-        "concepts": []
+        "industry_name": "深圳主板",
+        "sector": "其他",
+        "concepts": [],
+        "message": "使用默认行业分类"
       },
       "fund_flow": {
         "code": "000982",
@@ -732,9 +733,9 @@
         "timestamp": "2026-01-05T23:00:50.517900",
         "success_rate": 1.0
       },
-      "last_kline_update": "2026-01-09T21:11:29.185357"
+      "last_kline_update": "2026-01-24T22:51:21.713343"
     }
   },
-  "last_updated": "2026-01-19T23:24:48.696529",
+  "last_updated": "2026-01-24T22:51:24.795949",
   "total_stocks": 1
 }
