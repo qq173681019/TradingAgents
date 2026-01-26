@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingAgents - 交易分析仪表盘</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fira Sans', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(30, 58, 138, 0.1);
+        }
+
+        nav h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 0;
+        }
+
+        nav p {
+            font-size: 0.875rem;
+            color: #475569;
+        }
+
+        /* 主容器 */
+        .container {
+            margin-top: 80px;
+            padding: 1.5rem;
+            max-width: 1440px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* KPI卡片网格 */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(30, 58, 138, 0.12);
+            border-color: #3b82f6;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-change {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .kpi-change.positive {
+            color: #10b981;
+        }
+
+        .kpi-change.negative {
+            color: #ef4444;
+        }
+
+        /* 数据密集型部分 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .widget {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .widget:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f0f4f8;
+        }
+
+        .widget-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        .widget-subtitle {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        .widget-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: #f0f4f8;
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .legend-item:hover {
+            background: #f0f4f8;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* 数据表格 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table th {
+            background: #f0f4f8;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .data-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f0f4f8;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .data-table tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .stock-ticker {
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        .price-up {
+            color: #10b981;
+        }
+
+        .price-down {
+            color: #ef4444;
+        }
+
+        /* 实时指标 */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            background: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e40af;
+        }
+
+        /* 筛选条 */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        select,
+        input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 0.875rem;
+            background: white;
+            color: #1e3a8a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        select:hover,
+        input:hover {
+            border-color: #3b82f6;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-family: 'Fira Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-color: #1e40af;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f4f8;
+        }
+
+        .btn-cta {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            border-color: #f59e0b;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f0f4f8;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                top: 2px;
+                left: 2px;
+                right: 2px;
+                padding: 0.75rem 1rem;
+            }
+
+            nav h1 {
+                font-size: 1.25rem;
+            }
+
+            .container {
+                margin-top: 70px;
+                padding: 1rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            select,
+            input {
+                width: 100%;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 375px) {
+            nav h1 {
+                font-size: 1rem;
+            }
+
+            .kpi-value {
+                font-size: 1.25rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .data-table {
+                font-size: 0.75rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* 动画效果 */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 数据行高亮 */
+        .data-row-highlight {
+            background: #f0f9ff;
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* 工具提示 */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a8a;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+            z-index: 1000;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+                color: #e2e8f0;
+            }
+
+            nav,
+            .widget,
+            .kpi-card {
+                background: rgba(15, 23, 42, 0.95);
+                border-color: #334155;
+                color: #e2e8f0;
+            }
+
+            .widget-title,
+            .kpi-label {
+                color: #93c5fd;
+            }
+
+            .kpi-value {
+                color: #dbeafe;
+            }
+
+            .data-table th {
+                background: #1e293b;
+                color: #cbd5e1;
+            }
+
+            .data-table tbody tr:hover {
+                background: #1e293b;
+            }
+
+            .metric {
+                background: #1e293b;
+                border-left-color: #60a5fa;
+            }
+
+            select,
+            input {
+                background: #1e293b;
+                color: #e2e8f0;
+                border-color: #334155;
+            }
+
+            select:hover,
+            input:hover {
+                border-color: #60a5fa;
+            }
+
+            .btn-secondary {
+                color: #60a5fa;
+                border-color: #60a5fa;
+            }
+
+            .btn-secondary:hover {
+                background: #1e293b;
+            }
+        }
+
+        /* 焦点样式（无障碍） */
+        :focus-visible {
+            outline: 2px solid #1e40af;
+            outline-offset: 2px;
+        }
+
+        /* 减少动画支持 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <h1>📊 TradingAgents</h1>
+        <p>实时交易分析仪表盘</p>
+    </nav>
+
+    <div class="container">
+        <!-- KPI 指标卡片 -->
+        <section class="kpi-grid fade-in">
+            <div class="kpi-card" data-tooltip="今日上涨股票数量">
+                <div class="kpi-label">涨跌家数</div>
+                <div class="kpi-value">2,847</div>
+                <div class="kpi-change positive">↑ 12.5%</div>
+            </div>
+
+            <div class="kpi-card" data-tooltip="当前市场成交量">
+                <div class="kpi-label">成交总额</div>
+                <div class="kpi-value">¥825.4B</div>
+                <div class="kpi-change positive">↑ 8.3%</div>
+            </div>
+
+            <div class="kpi-card" data-tooltip="当前市场平均涨幅">
+                <div class="kpi-label">平均涨幅</div>
+                <div class="kpi-value">+2.34%</div>
+                <div class="kpi-change positive">↑ 强势</div>
+            </div>
+
+            <div class="kpi-card" data-tooltip="主力资金净流入">
+                <div class="kpi-label">主力资金</div>
+                <div class="kpi-value">¥12.3B</div>
+                <div class="kpi-change positive">↑ 净流入</div>
+            </div>
+        </section>
+
+        <!-- 筛选条 -->
+        <section class="filters fade-in">
+            <div class="filter-group">
+                <label class="filter-label">股票类型:</label>
+                <select id="stockType">
+                    <option value="all">全部</option>
+                    <option value="mainboard">主板</option>
+                    <option value="cyb">创业板</option>
+                    <option value="kcb">科创板</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">涨跌排序:</label>
+                <select id="sortBy">
+                    <option value="change">涨幅排序</option>
+                    <option value="volume">成交量</option>
+                    <option value="price">价格</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">最小涨幅:</label>
+                <input type="number" id="minChange" placeholder="输入涨幅" min="-100" max="100" value="0">
+            </div>
+
+            <button class="btn btn-primary" id="applyFilters">应用筛选</button>
+            <button class="btn btn-secondary" id="exportData">导出数据</button>
+        </section>
+
+        <!-- 仪表盘网格 -->
+        <section class="dashboard-grid fade-in">
+            <!-- 实时行情图表 -->
+            <div class="widget">
+                <div class="widget-header">
+                    <div>
+                        <div class="widget-title">大盘实时走势</div>
+                        <div class="widget-subtitle">上证指数 | 深证成指 | 创业板指</div>
+                    </div>
+                    <div class="widget-actions">
+                        <button class="icon-btn" data-tooltip="刷新数据">🔄</button>
+                        <button class="icon-btn" data-tooltip="全屏显示">⛶</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="indexChart"></canvas>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-label">上证指数</div>
+                        <div class="metric-value">3,564.20</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">深证成指</div>
+                        <div class="metric-value">10,825.47</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">创业板指</div>
+                        <div class="metric-value">2,134.56</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 板块热力分析 -->
+            <div class="widget">
+                <div class="widget-header">
+                    <div>
+                        <div class="widget-title">板块热力分析</div>
+                        <div class="widget-subtitle">实时板块涨跌排行</div>
+                    </div>
+                    <div class="widget-actions">
+                        <button class="icon-btn" data-tooltip="刷新数据">🔄</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="sectorChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #10b981;"></span>
+                        <span>高涨幅板块</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #ef4444;"></span>
+                        <span>下跌板块</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #f59e0b;"></span>
+                        <span>平稳板块</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 股票排行榜 -->
+        <section class="widget fade-in">
+            <div class="widget-header">
+                <div>
+                    <div class="widget-title">今日涨幅排行榜</div>
+                    <div class="widget-subtitle">实时更新 | 前50只股票</div>
+                </div>
+                <div class="widget-actions">
+                    <button class="icon-btn" data-tooltip="刷新">🔄</button>
+                    <button class="icon-btn" data-tooltip="筛选">⚙️</button>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th>现价</th>
+                            <th>涨幅 %</th>
+                            <th>成交量</th>
+                            <th>市值</th>
+                            <th>PE</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                        <tr class="data-row-highlight">
+                            <td>1</td>
+                            <td><span class="stock-ticker">600519</span></td>
+                            <td>贵州茅台</td>
+                            <td><span class="price-up">¥2,850.50</span></td>
+                            <td><span class="price-up">↑ 5.23%</span></td>
+                            <td>1.2M</td>
+                            <td>¥2.4T</td>
+                            <td>85.5</td>
+                            <td>
+                                <button class="btn btn-cta"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">分析</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><span class="stock-ticker">000858</span></td>
+                            <td>五粮液</td>
+                            <td><span class="price-up">¥298.75</span></td>
+                            <td><span class="price-up">↑ 4.85%</span></td>
+                            <td>3.5M</td>
+                            <td>¥1.2T</td>
+                            <td>62.3</td>
+                            <td>
+                                <button class="btn btn-cta"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">分析</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><span class="stock-ticker">000651</span></td>
+                            <td>格力电器</td>
+                            <td><span class="price-up">¥45.20</span></td>
+                            <td><span class="price-down">↓ -2.15%</span></td>
+                            <td>5.8M</td>
+                            <td>¥980B</td>
+                            <td>28.5</td>
+                            <td>
+                                <button class="btn btn-cta"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">分析</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><span class="stock-ticker">601888</span></td>
+                            <td>中国国旅</td>
+                            <td><span class="price-up">¥156.80</span></td>
+                            <td><span class="price-up">↑ 3.42%</span></td>
+                            <td>2.2M</td>
+                            <td>¥780B</td>
+                            <td>45.2</td>
+                            <td>
+                                <button class="btn btn-cta"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">分析</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td><span class="stock-ticker">600036</span></td>
+                            <td>招商银行</td>
+                            <td><span class="price-up">¥48.95</span></td>
+                            <td><span class="price-up">↑ 2.18%</span></td>
+                            <td>8.9M</td>
+                            <td>¥2.1T</td>
+                            <td>12.3</td>
+                            <td>
+                                <button class="btn btn-cta"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">分析</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 1rem; text-align: center;">
+                <button class="btn btn-secondary">加载更多</button>
+            </div>
+        </section>
+
+        <!-- 技术指标分析 -->
+        <section class="dashboard-grid fade-in" style="margin-top: 1.5rem;">
+            <div class="widget">
+                <div class="widget-header">
+                    <div>
+                        <div class="widget-title">MACD 指标分布</div>
+                        <div class="widget-subtitle">全市场股票分析</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="macdChart"></canvas>
+                </div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-header">
+                    <div>
+                        <div class="widget-title">RSI 强弱指数</div>
+                        <div class="widget-subtitle">超买超卖分析</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="rsiChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 资金流向分析 -->
+        <section class="widget fade-in">
+            <div class="widget-header">
+                <div>
+                    <div class="widget-title">主力资金流向分析</div>
+                    <div class="widget-subtitle">近7日累计 | 按净流入排序</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="moneyFlowChart"></canvas>
+            </div>
+            <div class="metrics-grid" style="margin-top: 1rem;">
+                <div class="metric" style="border-left-color: #10b981;">
+                    <div class="metric-label">资金净流入</div>
+                    <div class="metric-value">¥523.2B</div>
+                </div>
+                <div class="metric" style="border-left-color: #ef4444;">
+                    <div class="metric-label">资金净流出</div>
+                    <div class="metric-value">¥187.5B</div>
+                </div>
+                <div class="metric" style="border-left-color: #3b82f6;">
+                    <div class="metric-label">日均成交额</div>
+                    <div class="metric-value">¥825.4B</div>
+                </div>
+                <div class="metric" style="border-left-color: #f59e0b;">
+                    <div class="metric-label">涨停家数</div>
+                    <div class="metric-value">156</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 图表配置
+        const chartDefaults = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        font: { family: "'Fira Sans', sans-serif", size: 12 },
+                        color: '#475569',
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    grid: { color: '#f0f4f8', drawBorder: false },
+                    ticks: { color: '#64748b', font: { family: "'Fira Code', monospace" } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b', font: { family: "'Fira Code', monospace" } }
+                }
+            }
+        };
+
+        // 大盘走势图
+        const indexCtx = document.getElementById('indexChart').getContext('2d');
+        new Chart(indexCtx, {
+            type: 'line',
+            data: {
+                labels: ['09:30', '10:00', '10:30', '11:00', '11:30', '13:00', '13:30', '14:00', '14:30', '15:00'],
+                datasets: [
+                    {
+                        label: '上证指数',
+                        data: [3520, 3535, 3548, 3540, 3555, 3560, 3558, 3565, 3570, 3564],
+                        borderColor: '#1e40af',
+                        backgroundColor: 'rgba(30, 64, 175, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#1e40af',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2,
+                        fill: true
+                    },
+                    {
+                        label: '深证成指',
+                        data: [10750, 10780, 10810, 10800, 10830, 10840, 10835, 10850, 10860, 10825],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                ...chartDefaults,
+                interaction: { mode: 'index', intersect: false }
+            }
+        });
+
+        // 板块热力分析
+        const sectorCtx = document.getElementById('sectorChart').getContext('2d');
+        new Chart(sectorCtx, {
+            type: 'bar',
+            data: {
+                labels: ['计算机', '电子', '医药生物', '电气设备', '机械设备', '金融', '房地产', '消费'],
+                datasets: [{
+                    label: '涨幅 %',
+                    data: [6.2, 5.8, 4.5, 4.2, 3.8, 2.5, 1.2, 0.8],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(16, 185, 129, 0.6)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(245, 158, 11, 0.6)',
+                        'rgba(239, 68, 68, 0.5)',
+                        'rgba(239, 68, 68, 0.4)',
+                        'rgba(239, 68, 68, 0.3)'
+                    ],
+                    borderColor: 'transparent',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                indexAxis: 'y',
+                scales: {
+                    ...chartDefaults.scales,
+                    x: {
+                        ...chartDefaults.scales.x,
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // MACD 指标分布
+        const macdCtx = document.getElementById('macdChart').getContext('2d');
+        new Chart(macdCtx, {
+            type: 'bar',
+            data: {
+                labels: ['强烈看多', '看多', '平衡', '看空', '强烈看空'],
+                datasets: [{
+                    label: '股票数量',
+                    data: [285, 680, 1240, 520, 180],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.9)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(239, 68, 68, 0.9)'
+                    ],
+                    borderColor: 'transparent',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                scales: {
+                    ...chartDefaults.scales,
+                    y: {
+                        ...chartDefaults.scales.y,
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // RSI 强弱指数
+        const rsiCtx = document.getElementById('rsiChart').getContext('2d');
+        new Chart(rsiCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['超买区 (>70)', '正常区', '超卖区 (<30)'],
+                datasets: [{
+                    data: [340, 2180, 276],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)'
+                    ],
+                    borderColor: 'rgba(255, 255, 255, 0.95)',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: "'Fira Sans', sans-serif", size: 12 },
+                            color: '#475569',
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // 资金流向分析
+        const moneyFlowCtx = document.getElementById('moneyFlowChart').getContext('2d');
+        new Chart(moneyFlowCtx, {
+            type: 'line',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '今日'],
+                datasets: [
+                    {
+                        label: '净流入 (亿元)',
+                        data: [185, 225, 180, 240, 205, 230],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '净流出 (亿元)',
+                        data: [45, 35, 60, 32, 48, 38],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                ...chartDefaults,
+                interaction: { mode: 'index', intersect: false }
+            }
+        });
+
+        // 事件处理
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            const stockType = document.getElementById('stockType').value;
+            const sortBy = document.getElementById('sortBy').value;
+            const minChange = document.getElementById('minChange').value;
+            console.log('筛选条件:', { stockType, sortBy, minChange });
+            // 这里添加实际筛选逻辑
+        });
+
+        document.getElementById('exportData').addEventListener('click', () => {
+            alert('导出功能已触发 - 将导出当前数据到CSV文件');
+            // 这里添加实际导出逻辑
+        });
+
+        // 实时更新模拟
+        setInterval(() => {
+            const cells = document.querySelectorAll('.metric-value');
+            cells.forEach(cell => {
+                if (cell.textContent.includes('¥')) {
+                    const value = parseFloat(cell.textContent.replace('¥', ''));
+                    const change = (Math.random() - 0.48) * 10;
+                    cell.textContent = '¥' + (value + change).toFixed(2);
+                }
+            });
+        }, 3000);
+
+        // 行点击事件
+        document.querySelectorAll('.data-table tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                document.querySelectorAll('.data-table tbody tr').forEach(r => r.classList.remove('data-row-highlight'));
+                row.classList.add('data-row-highlight');
+            });
+        });
+    </script>
+</body>
+
+</html>

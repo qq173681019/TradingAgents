@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A股智能分析系统 - Web版</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1E40AF;
+            --secondary: #3B82F6;
+            --accent: #F59E0B;
+            --success: #10B981;
+            --danger: #EF4444;
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text: #1F2937;
+            --text-light: #6B7280;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* 导航栏 */
+        nav {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        nav h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        nav a.active {
+            background: var(--accent);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 面板 */
+        .panel {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e3a8a;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: #d97706;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 1024px) {
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .grid-3,
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* 信息卡片 */
+        .card {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* 评分显示 */
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .score-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            border-radius: 4px;
+        }
+
+        /* 表格 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        thead {
+            background: var(--bg);
+            border-bottom: 2px solid var(--border);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--bg);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #D97706;
+        }
+
+        /* 进度条 */
+        .progress {
+            width: 100%;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 提示框 */
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--success);
+            color: #065F46;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--danger);
+            color: #7F1D1D;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left-color: #D97706;
+            color: #78350F;
+        }
+
+        /* 结果面板 */
+        .result-panel {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 2px solid var(--border);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .result-header h3 {
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 2rem 0;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            nav .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <h1>📈 A股智能分析系统 - Web版</h1>
+        <div class="nav-links">
+            <a onclick="switchTab('analyze')" class="nav-link active">单股分析</a>
+            <a onclick="switchTab('batch')" class="nav-link">批量评分</a>
+            <a onclick="switchTab('recommendations')" class="nav-link">投资推荐</a>
+            <a onclick="switchTab('about')" class="nav-link">关于</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- 单股分析 Tab -->
+        <div id="analyze" class="tab-content active">
+            <div class="panel">
+                <h2>📊 单只股票深度分析</h2>
+
+                <div class="form-group">
+                    <label for="ticker">股票代码 (如: 600519, 000002)</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" id="ticker" placeholder="输入股票代码" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="analyzeStock()">
+                            <span>🔍</span> 分析
+                        </button>
+                    </div>
+                </div>
+
+                <div id="analyze-result" style="display: none;">
+                    <div id="analyze-content"></div>
+                </div>
+
+                <div id="analyze-loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>正在分析股票，请稍候...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 批量评分 Tab -->
+        <div id="batch" class="tab-content">
+            <div class="panel">
+                <h2>⚡ 批量股票评分</h2>
+
+                <div class="form-group">
+                    <label for="batch-stocks">股票代码列表 (每行一个)</label>
+                    <textarea id="batch-stocks" placeholder="600519&#10;600036&#10;000002&#10;300750&#10;600887"
+                        rows="8"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="use-llm"> 使用LLM智能分析 (需配置)
+                    </label>
+                </div>
+
+                <button class="btn btn-secondary" onclick="batchScore()"
+                    style="width: 100%; justify-content: center; padding: 1rem;">
+                    <span>⚡</span> 开始批量评分
+                </button>
+
+                <div id="batch-progress" style="display: none; margin-top: 2rem;">
+                    <p id="batch-status">进度: 0/0</p>
+                    <div class="progress">
+                        <div id="batch-progress-bar" class="progress-bar" style="width: 0%;">0%</div>
+                    </div>
+                </div>
+
+                <div id="batch-result" style="display: none; margin-top: 2rem;">
+                    <h3>✅ 评分结果</h3>
+                    <p id="batch-summary"></p>
+                    <div id="batch-table"></div>
+                </div>
+
+                <div id="batch-loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>正在评分，请稍候...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 投资推荐 Tab -->
+        <div id="recommendations" class="tab-content">
+            <div class="panel">
+                <h2>💡 投资推荐</h2>
+
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="min-score">最低评分</label>
+                        <input type="number" id="min-score" value="6.0" min="0" max="10" step="0.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stock-type">股票类型</label>
+                        <select id="stock-type">
+                            <option value="all">全部</option>
+                            <option value="mainboard">主板</option>
+                            <option value="growth">创业板</option>
+                            <option value="science">科创板</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-accent" onclick="getRecommendations()"
+                    style="width: 100%; justify-content: center; padding: 1rem;">
+                    <span>🚀</span> 获取推荐
+                </button>
+
+                <div id="recommendations-result" style="display: none; margin-top: 2rem;">
+                    <h3>📋 推荐列表</h3>
+                    <div id="recommendations-table"></div>
+                </div>
+
+                <div id="recommendations-loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>正在生成推荐，请稍候...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于 Tab -->
+        <div id="about" class="tab-content">
+            <div class="panel">
+                <h2>📖 关于本系统</h2>
+
+                <h3>功能特点</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 2rem;">
+                    <li>✅ 单只股票深度分析 (技术面+基本面+LLM建议)</li>
+                    <li>✅ 4396只股票批量评分和排名</li>
+                    <li>✅ 智能投资推荐系统</li>
+                    <li>✅ 实时数据更新</li>
+                    <li>✅ 筹码分析 (可选)</li>
+                    <li>✅ 多数据源支持 (Tencent, Sina, Yahoo Finance, Baostock, Choice)</li>
+                </ul>
+
+                <h3>技术架构</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 2rem;">
+                    <li><strong>后端:</strong> Flask + Python 3.7+</li>
+                    <li><strong>前端:</strong> HTML5 + CSS3 + JavaScript</li>
+                    <li><strong>数据源:</strong> 多API集成</li>
+                    <li><strong>分析引擎:</strong> 原有GUI分析逻辑 + LLM扩展</li>
+                </ul>
+
+                <h3>使用建议</h3>
+                <ul style="margin-left: 2rem;">
+                    <li>🔍 先用单股分析了解分析逻辑</li>
+                    <li>⚡ 批量评分用于快速筛选优质股票</li>
+                    <li>💡 根据推荐和自己的判断做决策</li>
+                    <li>⚠️ 投资有风险，仅供参考</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+        function switchTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // 显示选中标签页
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function analyzeStock() {
+            const ticker = document.getElementById('ticker').value.trim();
+            if (!ticker) {
+                alert('请输入股票代码');
+                return;
+            }
+
+            document.getElementById('analyze-loading').style.display = 'block';
+            document.getElementById('analyze-result').style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/analyze/${ticker}`);
+                const data = await response.json();
+
+                document.getElementById('analyze-loading').style.display = 'none';
+
+                if (data.error) {
+                    document.getElementById('analyze-content').innerHTML = `
+                        <div class="alert alert-error">
+                            <strong>分析失败:</strong> ${data.error}
+                        </div>
+                    `;
+                } else {
+                    const stock = data.data;
+                    const scores = stock.scores;
+
+                    document.getElementById('analyze-content').innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ 分析成功: ${data.name} (${ticker})
+                        </div>
+
+                        <div class="grid grid-3">
+                            <div class="card">
+                                <div class="card-label">技术评分</div>
+                                <div class="card-value">${scores.technical.toFixed(1)}</div>
+                            </div>
+                            <div class="card">
+                                <div class="card-label">基本面评分</div>
+                                <div class="card-value">${scores.fundamental.toFixed(1)}</div>
+                            </div>
+                            <div class="card">
+                                <div class="card-label">综合评分</div>
+                                <div class="card-value" style="color: var(--accent);">${scores.comprehensive.toFixed(1)}</div>
+                            </div>
+                        </div>
+
+                        <div class="result-panel">
+                            <div class="result-header">
+                                <h3>💰 价格信息</h3>
+                            </div>
+                            <p><strong>当前价格:</strong> ¥${stock.tech_data.current_price.toFixed(2)}</p>
+                            <p><strong>行业:</strong> ${data.industry}</p>
+                            <p><strong>更新时间:</strong> ${new Date(stock.timestamp).toLocaleString('zh-CN')}</p>
+                        </div>
+
+                        <div class="result-panel">
+                            <div class="result-header">
+                                <h3>📊 技术指标</h3>
+                            </div>
+                            <p><strong>RSI:</strong> ${stock.tech_data.rsi.toFixed(2)} (${stock.tech_data.rsi_status})</p>
+                            <p><strong>MACD:</strong> ${stock.tech_data.macd.toFixed(4)}</p>
+                            <p><strong>MA5:</strong> ¥${stock.tech_data.ma5.toFixed(2)}</p>
+                            <p><strong>MA20:</strong> ¥${stock.tech_data.ma20.toFixed(2)}</p>
+                            <p><strong>动量:</strong> ${stock.tech_data.momentum}</p>
+                        </div>
+
+                        <div class="result-panel">
+                            <div class="result-header">
+                                <h3>📈 基本面指标</h3>
+                            </div>
+                            <p><strong>PE:</strong> ${stock.fund_data.pe_ratio.toFixed(2)}</p>
+                            <p><strong>PB:</strong> ${stock.fund_data.pb_ratio.toFixed(2)}</p>
+                            <p><strong>ROE:</strong> ${stock.fund_data.roe.toFixed(2)}%</p>
+                            <p><strong>营收增长:</strong> ${stock.fund_data.revenue_growth.toFixed(2)}%</p>
+                            <p><strong>利润增长:</strong> ${stock.fund_data.profit_growth.toFixed(2)}%</p>
+                        </div>
+
+                        <div class="result-panel">
+                            <div class="result-header">
+                                <h3>💡 投资建议</h3>
+                            </div>
+                            <p>${stock.advice}</p>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('analyze-result').style.display = 'block';
+            } catch (error) {
+                document.getElementById('analyze-loading').style.display = 'none';
+                document.getElementById('analyze-content').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>连接失败:</strong> ${error.message}<br>
+                        请确保后端服务运行在 http://localhost:5000
+                    </div>
+                `;
+                document.getElementById('analyze-result').style.display = 'block';
+            }
+        }
+
+        async function batchScore() {
+            const stocksText = document.getElementById('batch-stocks').value.trim();
+            if (!stocksText) {
+                alert('请输入股票代码列表');
+                return;
+            }
+
+            const stocks = stocksText.split('\n').map(s => s.trim()).filter(s => s);
+            if (stocks.length === 0) {
+                alert('请输入有效的股票代码');
+                return;
+            }
+
+            document.getElementById('batch-loading').style.display = 'block';
+            document.getElementById('batch-progress').style.display = 'block';
+            document.getElementById('batch-result').style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/batch-score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stocks, use_llm: document.getElementById('use-llm').checked })
+                });
+                const data = await response.json();
+
+                document.getElementById('batch-loading').style.display = 'none';
+                document.getElementById('batch-progress').style.display = 'none';
+
+                if (data.error) {
+                    alert('批量评分失败: ' + data.error);
+                } else {
+                    const results = Object.entries(data.results).map(([code, values]) => ({
+                        code,
+                        ...values
+                    }));
+
+                    let tableHtml = '<table><thead><tr><th>代码</th><th>技术</th><th>基本面</th><th>综合</th><th>价格</th></tr></thead><tbody>';
+                    results.forEach(r => {
+                        tableHtml += `<tr>
+                            <td><strong>${r.code}</strong></td>
+                            <td>${r.technical_score.toFixed(1)}</td>
+                            <td>${r.fundamental_score.toFixed(1)}</td>
+                            <td><span class="badge ${r.comprehensive_score >= 7 ? 'badge-success' : 'badge-warning'}">${r.comprehensive_score.toFixed(1)}</span></td>
+                            <td>¥${r.price.toFixed(2)}</td>
+                        </tr>`;
+                    });
+                    tableHtml += '</tbody></table>';
+
+                    document.getElementById('batch-summary').innerText = `已评分 ${data.scored}/${data.total} 只股票`;
+                    document.getElementById('batch-table').innerHTML = tableHtml;
+                    document.getElementById('batch-result').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('batch-loading').style.display = 'none';
+                alert('连接失败: ' + error.message);
+            }
+        }
+
+        async function getRecommendations() {
+            const minScore = document.getElementById('min-score').value;
+            const stockType = document.getElementById('stock-type').value;
+
+            document.getElementById('recommendations-loading').style.display = 'block';
+            document.getElementById('recommendations-result').style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/recommendations?min_score=${minScore}&type=${stockType}`);
+                const data = await response.json();
+
+                document.getElementById('recommendations-loading').style.display = 'none';
+
+                if (data.error) {
+                    alert('获取推荐失败: ' + data.error);
+                } else {
+                    let tableHtml = '<table><thead><tr><th>代码</th><th>名称</th><th>评分</th><th>建议</th></tr></thead><tbody>';
+                    // 这里应该遍历推荐列表
+                    tableHtml += '</tbody></table>';
+
+                    document.getElementById('recommendations-table').innerHTML = tableHtml;
+                    document.getElementById('recommendations-result').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('recommendations-loading').style.display = 'none';
+                alert('连接失败: ' + error.message);
+            }
+        }
+
+        // Enter键支持
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('ticker').addEventListener('keypress', e => {
+                if (e.key === 'Enter') analyzeStock();
+            });
+        });
+    </script>
+</body>
+
+</html>
