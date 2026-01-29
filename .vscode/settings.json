@@ -16,7 +16,11 @@
     "python-envs.defaultEnvManager": "ms-python.python:system",
     "python-envs.pythonProjects": [],
     "chat.tools.terminal.autoApprove": {
+<<<<<<< Updated upstream
         "/^python test_trading_dashboard\\.py 2>&1 \\| head -100$/": {
+=======
+        "/^C:/Users/ext\\.jgu/AppData/Local/Programs/Python/Python39/python\\.exe \"c:\\\\Users\\\\ext\\.jgu\\\\Documents\\\\GitHub\\\\TradingAgents\\\\TradingAgent\\\\ui_modern\\.py\"$/": {
+>>>>>>> Stashed changes
             "approve": true,
             "matchCommandLine": true
         }
