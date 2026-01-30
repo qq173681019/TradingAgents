@@ -25,19 +25,19 @@ REM  Main Execution Flow - Step 2 Only
 REM ------------------------------------------------------------------------------
 cls
 echo ============================================   
-echo  TradingAgent - 仅生成主板评分   
-echo  步骤 2/3: 计算主板股票评分   
+echo  TradingAgent - 仅整理主板基础评分   
+echo  步骤 2/3: 整理主板股票基础评分数据   
 echo ============================================   
 echo. 
-echo 说明：此脚本仅执行第2步（生成评分）   
+echo 说明：此脚本仅执行第2步（整理基础评分）   
 echo 前提：需要已存在 batch_stock_scores_none.json   
 echo 输出：   
-echo   - 4个不同权重的CSV文件   
-echo   - 1个JSON评分文件   
+echo   - 1个包含基础评分的JSON文件   
+echo   - 不计算权重，不导出CSV   
 echo ============================================   
 echo.
 
-echo [步骤 2/3] 正在获取主板评分...   
+echo [步骤 2/3] 正在整理主板基础评分数据...   
 echo.
 
 "%PYTHON_EXE%" "%~dp0generate_mainboard_scores.py"
@@ -56,18 +56,15 @@ if errorlevel 1 (
 
 echo.
 echo ============================================   
-echo  评分生成完成！   
+echo  基础评分数据整理完成！   
 echo ============================================   
 echo  已生成以下文件（位于 TradingShared\data\）：   
 echo.
-echo  CSV文件：   
-echo    - 主板推荐_综合_[时间戳].csv   
-echo    - 主板推荐_基本_[时间戳].csv   
-echo    - 主板推荐_筹码_[时间戳].csv   
-echo    - 主板推荐_技术_[时间戳].csv   
-echo.
 echo  JSON文件：   
 echo    - batch_stock_scores_optimized_主板_[时间戳].json   
+echo.
+echo  下一步：运行「仅导出推荐到桌面.bat」   
+echo  将根据4种权重配置计算并导出CSV   
 echo ============================================   
 echo.
 echo 按任意键退出...   
