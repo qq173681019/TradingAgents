@@ -2,7 +2,7 @@
   "stocks": {
     "002197": {
       "code": "002197",
-      "timestamp": "2026-01-28T23:52:09.330384",
+      "timestamp": "2026-01-30T23:34:59.732920",
       "collection_time": "2025-12-28 22:39:07",
       "data_source": "choice_api",
       "basic_info": {
@@ -16,22 +16,6 @@
       },
       "kline_data": {
         "daily": [
-          {
-            "date": "2025-10-21",
-            "open": 9.51,
-            "high": 9.6,
-            "low": 9.47,
-            "close": 9.49,
-            "volume": 5167760.0
-          },
-          {
-            "date": "2025-10-22",
-            "open": 9.48,
-            "high": 9.56,
-            "low": 9.45,
-            "close": 9.54,
-            "volume": 6789000.0
-          },
           {
             "date": "2025-10-23",
             "open": 9.58,
@@ -655,12 +639,28 @@
             "low": 9.26,
             "close": 9.28,
             "volume": 17819499.0
+          },
+          {
+            "date": "2026-01-29",
+            "open": 9.18,
+            "high": 9.33,
+            "low": 8.67,
+            "close": 8.7,
+            "volume": 30021160.0
+          },
+          {
+            "date": "2026-01-30",
+            "open": 8.69,
+            "high": 8.75,
+            "low": 8.37,
+            "close": 8.51,
+            "volume": 29100064.0
           }
         ],
-        "latest_price": 9.28,
+        "latest_price": 8.51,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-01-28T23:52:09.328381"
+        "update_time": "2026-01-30T23:34:59.732878"
       },
       "financial_data": {
         "pe_ratio": -17.02319,
@@ -685,18 +685,18 @@
         "data_source": "choice_calculated"
       },
       "technical_indicators": {
-        "current_price": 9.28,
-        "ma5": 9.47,
-        "ma10": 9.713,
-        "ma20": 10.03,
-        "ma60": 10.172500000000001,
-        "rsi": 32.537313432835845,
-        "macd": -0.23782379093957928,
-        "signal": -0.11470589710998749,
-        "volume_ratio": 0.8672167324313156,
+        "current_price": 8.51,
+        "ma5": 9.03,
+        "ma10": 9.346,
+        "ma20": 9.937999999999999,
+        "ma60": 10.112,
+        "rsi": 20.47244094488191,
+        "macd": -0.36529544399845015,
+        "signal": -0.19489900248605985,
+        "volume_ratio": 1.228961087655368,
         "status": "calculated"
       },
-      "last_kline_update": "2026-01-28T23:52:09.328391",
+      "last_kline_update": "2026-01-30T23:34:59.732882",
       "industry_concept": {
         "code": "002197",
         "source": "baostock_default",
@@ -708,7 +708,7 @@
     },
     "002425": {
       "code": "002425",
-      "timestamp": "2026-01-28T23:52:50.359917",
+      "timestamp": "2026-01-30T23:35:25.936997",
       "collection_time": "2025-12-28 22:39:07",
       "data_source": "choice_api",
       "basic_info": {
@@ -722,22 +722,6 @@
       },
       "kline_data": {
         "daily": [
-          {
-            "date": "2025-10-21",
-            "open": 3.81,
-            "high": 3.88,
-            "low": 3.8,
-            "close": 3.87,
-            "volume": 7347900.0
-          },
-          {
-            "date": "2025-10-22",
-            "open": 3.86,
-            "high": 3.97,
-            "low": 3.85,
-            "close": 3.93,
-            "volume": 11343400.0
-          },
           {
             "date": "2025-10-23",
             "open": 3.92,
@@ -1361,12 +1345,28 @@
             "low": 3.99,
             "close": 4.06,
             "volume": 37565228.0
+          },
+          {
+            "date": "2026-01-29",
+            "open": 4.0,
+            "high": 4.16,
+            "low": 3.92,
+            "close": 3.97,
+            "volume": 37930300.0
+          },
+          {
+            "date": "2026-01-30",
+            "open": 3.95,
+            "high": 4.01,
+            "low": 3.91,
+            "close": 3.94,
+            "volume": 25516101.0
           }
         ],
-        "latest_price": 4.06,
+        "latest_price": 3.94,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-01-28T23:52:50.359849"
+        "update_time": "2026-01-30T23:35:25.936954"
       },
       "financial_data": {
         "pe_ratio": -6.581315,
@@ -1391,18 +1391,18 @@
         "data_source": "choice_calculated"
       },
       "technical_indicators": {
-        "current_price": 4.06,
-        "ma5": 4.024,
-        "ma10": 4.047,
-        "ma20": 4.029999999999999,
-        "ma60": 3.9663333333333335,
-        "rsi": 61.904761904761905,
-        "macd": 0.015151643739993226,
-        "signal": 0.026041044598724288,
-        "volume_ratio": 1.60589692888109,
+        "current_price": 3.94,
+        "ma5": 3.992,
+        "ma10": 4.0120000000000005,
+        "ma20": 4.0255,
+        "ma60": 3.9636666666666667,
+        "rsi": 26.666666666666615,
+        "macd": 0.0003364609756006942,
+        "signal": 0.017813342762353364,
+        "volume_ratio": 0.8266158748922409,
         "status": "calculated"
       },
-      "last_kline_update": "2026-01-28T23:52:50.359856",
+      "last_kline_update": "2026-01-30T23:35:25.936960",
       "industry_concept": {
         "code": "002425",
         "source": "baostock_default",
@@ -1414,7 +1414,7 @@
     },
     "600200": {
       "code": "600200",
-      "timestamp": "2026-01-28T23:52:50.366219",
+      "timestamp": "2026-01-30T23:35:25.942805",
       "collection_time": "2025-12-28 22:39:09",
       "data_source": "choice_api",
       "basic_info": {
@@ -1920,7 +1920,7 @@
         "latest_price": 0.95,
         "data_points": 61,
         "source": "incremental_update",
-        "update_time": "2026-01-28T23:52:50.366158"
+        "update_time": "2026-01-30T23:35:25.942732"
       },
       "financial_data": {
         "pe_ratio": 3.227444,
@@ -1956,7 +1956,7 @@
         "volume_ratio": 0.13918337698021296,
         "status": "calculated"
       },
-      "last_kline_update": "2026-01-28T23:52:50.366163",
+      "last_kline_update": "2026-01-30T23:35:25.942739",
       "industry_concept": {
         "code": "600200",
         "source": "baostock_default",
@@ -1967,6 +1967,6 @@
       }
     }
   },
-  "last_updated": "2026-01-28T23:52:54.706461",
+  "last_updated": "2026-01-30T23:35:29.197809",
   "total_stocks": 3
 }
