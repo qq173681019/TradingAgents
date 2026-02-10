@@ -17,12 +17,12 @@ MINIMAX_API_URL = "https://api.minimax.chat/v1/text/chatcompletion_v2"
 MINIMAX_MODEL_NAME = "abab6.5s-chat"
 
 # OpenAI API
-OPENAI_API_KEY = ""
+OPENAI_API_KEY = "sk-AzpYpTOIRyuWsU7XE3VGO3KMlHNYsqmkBl8bFtoeZvBs3efm"
 OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 OPENAI_MODEL_NAME = "gpt-3.5-turbo"
 
 # OpenRouter API
-OPENROUTER_API_KEY = ""
+OPENROUTER_API_KEY = "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"
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL_NAME = "openai/gpt-3.5-turbo"
 
@@ -31,10 +31,21 @@ GEMINI_API_KEY = "AIzaSyAkNFSx_OiKA9VVdUcXFU64GCPc1seXxvQ"
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
 GEMINI_MODEL_NAME = "gemini-2.0-flash-exp"
 
+# GOOGLE API
+GOOGLE_API_KEY="77802de1555ea0e29ef1c9b7a9f2a0a5467608c8fb081cfd54876d03e4ddadff"
+
 # Alpha Vantage API
 ALPHA_VANTAGE_API_KEY = ""
 
+
+# 阿里百炼（Qwen）
+BAILIAN_API_KEY = "sk-7ad9f69c693e4284a2384a920591113d"
+BAILIAN_ID = "3314360"
+BAILIAN_ACCOUNT = "1778470174535081"
+
 # ==================== 数据源配置 ====================
+FINNHUB_API_KEY="d3s9411r01qs1apro6ugd3s9411r01qs1apro6v0"
+ALPHA_VANTAGE_API_KEY="52N6YLT15MUAA46B"
 
 # Choice金融终端
 ENABLE_CHOICE = True  # 后台数据收集器是否使用Choice（GUI复选框独立控制）
