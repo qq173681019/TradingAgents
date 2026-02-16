@@ -1,0 +1,1883 @@
+{
+  "600200": {
+    "code": "600200",
+    "name": "600200",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 3.0,
+    "hot_sector_score": 5.0,
+    "industry": "未知"
+  },
+  "600603": {
+    "code": "600603",
+    "name": "广汇物流",
+    "short_term_score": 6.0,
+    "long_term_score": 6.3,
+    "chip_score": 8.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600604": {
+    "code": "600604",
+    "name": "市北高新",
+    "short_term_score": 8.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600605": {
+    "code": "600605",
+    "name": "汇通能源",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600606": {
+    "code": "600606",
+    "name": "绿地控股",
+    "short_term_score": 6.5,
+    "long_term_score": 6.3,
+    "chip_score": 9.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600609": {
+    "code": "600609",
+    "name": "金杯汽车",
+    "short_term_score": 7.5,
+    "long_term_score": 5.4,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600610": {
+    "code": "600610",
+    "name": "中毅达",
+    "short_term_score": 4.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600611": {
+    "code": "600611",
+    "name": "大众交通",
+    "short_term_score": 8.0,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600612": {
+    "code": "600612",
+    "name": "老凤祥",
+    "short_term_score": 7.0,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600613": {
+    "code": "600613",
+    "name": "神奇制药",
+    "short_term_score": 3.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600615": {
+    "code": "600615",
+    "name": "鑫源智造",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600616": {
+    "code": "600616",
+    "name": "金枫酒业",
+    "short_term_score": 4.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600617": {
+    "code": "600617",
+    "name": "国新能源",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600618": {
+    "code": "600618",
+    "name": "氯碱化工",
+    "short_term_score": 1.5,
+    "long_term_score": 5.4,
+    "chip_score": 6.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600619": {
+    "code": "600619",
+    "name": "海立股份",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600620": {
+    "code": "600620",
+    "name": "天宸股份",
+    "short_term_score": 3.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600621": {
+    "code": "600621",
+    "name": "华鑫股份",
+    "short_term_score": 7.0,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600622": {
+    "code": "600622",
+    "name": "光大嘉宝",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600623": {
+    "code": "600623",
+    "name": "华谊集团",
+    "short_term_score": 7.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600626": {
+    "code": "600626",
+    "name": "申达股份",
+    "short_term_score": 4.25,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600628": {
+    "code": "600628",
+    "name": "新世界",
+    "short_term_score": 2.0,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600629": {
+    "code": "600629",
+    "name": "华建集团",
+    "short_term_score": 6.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600630": {
+    "code": "600630",
+    "name": "龙头股份",
+    "short_term_score": 4.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600633": {
+    "code": "600633",
+    "name": "浙数文化",
+    "short_term_score": 8.0,
+    "long_term_score": 5.4,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600635": {
+    "code": "600635",
+    "name": "大众公用",
+    "short_term_score": 2.0,
+    "long_term_score": 5.4,
+    "chip_score": 6.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600637": {
+    "code": "600637",
+    "name": "东方明珠",
+    "short_term_score": 8.5,
+    "long_term_score": 3.1,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600638": {
+    "code": "600638",
+    "name": "新黄浦",
+    "short_term_score": 9.0,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600639": {
+    "code": "600639",
+    "name": "浦东金桥",
+    "short_term_score": 7.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600640": {
+    "code": "600640",
+    "name": "国脉文化",
+    "short_term_score": 9.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600641": {
+    "code": "600641",
+    "name": "先导基电",
+    "short_term_score": 6.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600642": {
+    "code": "600642",
+    "name": "申能股份",
+    "short_term_score": 2.0,
+    "long_term_score": 6.3,
+    "chip_score": 6.3,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600643": {
+    "code": "600643",
+    "name": "爱建集团",
+    "short_term_score": 8.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600644": {
+    "code": "600644",
+    "name": "乐山电力",
+    "short_term_score": 6.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600645": {
+    "code": "600645",
+    "name": "中源协和",
+    "short_term_score": 2.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600648": {
+    "code": "600648",
+    "name": "外高桥",
+    "short_term_score": 8.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600649": {
+    "code": "600649",
+    "name": "城投控股",
+    "short_term_score": 7.0,
+    "long_term_score": 6.3,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600650": {
+    "code": "600650",
+    "name": "锦江在线",
+    "short_term_score": 8.0,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600651": {
+    "code": "600651",
+    "name": "飞乐音响",
+    "short_term_score": 8.5,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600653": {
+    "code": "600653",
+    "name": "申华控股",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600654": {
+    "code": "600654",
+    "name": "中安科",
+    "short_term_score": 1.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600655": {
+    "code": "600655",
+    "name": "豫园股份",
+    "short_term_score": 7.5,
+    "long_term_score": 6.3,
+    "chip_score": 9.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600657": {
+    "code": "600657",
+    "name": "信达地产",
+    "short_term_score": 8.0,
+    "long_term_score": 6.3,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600658": {
+    "code": "600658",
+    "name": "电子城",
+    "short_term_score": 6.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600660": {
+    "code": "600660",
+    "name": "福耀玻璃",
+    "short_term_score": 7.0,
+    "long_term_score": 6.3,
+    "chip_score": 9.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600661": {
+    "code": "600661",
+    "name": "昂立教育",
+    "short_term_score": 4.25,
+    "long_term_score": 6.3,
+    "chip_score": 6.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600662": {
+    "code": "600662",
+    "name": "外服控股",
+    "short_term_score": 5.25,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600663": {
+    "code": "600663",
+    "name": "陆家嘴",
+    "short_term_score": 7.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600664": {
+    "code": "600664",
+    "name": "哈药股份",
+    "short_term_score": 5.25,
+    "long_term_score": 6.3,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600665": {
+    "code": "600665",
+    "name": "天地源",
+    "short_term_score": 4.25,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600666": {
+    "code": "600666",
+    "name": "奥瑞德",
+    "short_term_score": 4.75,
+    "long_term_score": 3.1,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600667": {
+    "code": "600667",
+    "name": "太极实业",
+    "short_term_score": 6.25,
+    "long_term_score": 5.4,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600668": {
+    "code": "600668",
+    "name": "尖峰集团",
+    "short_term_score": 9.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.3,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600671": {
+    "code": "600671",
+    "name": "天目药业",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600673": {
+    "code": "600673",
+    "name": "东阳光",
+    "short_term_score": 9.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600674": {
+    "code": "600674",
+    "name": "川投能源",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600675": {
+    "code": "600675",
+    "name": "中华企业",
+    "short_term_score": 7.5,
+    "long_term_score": 5.4,
+    "chip_score": 6.8,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600676": {
+    "code": "600676",
+    "name": "交运股份",
+    "short_term_score": 9.0,
+    "long_term_score": 6.3,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600678": {
+    "code": "600678",
+    "name": "四川金顶",
+    "short_term_score": 1.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600679": {
+    "code": "600679",
+    "name": "上海凤凰",
+    "short_term_score": 1.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600681": {
+    "code": "600681",
+    "name": "百川能源",
+    "short_term_score": 2.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600682": {
+    "code": "600682",
+    "name": "南京新百",
+    "short_term_score": 1.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600683": {
+    "code": "600683",
+    "name": "京投发展",
+    "short_term_score": 2.0,
+    "long_term_score": 6.3,
+    "chip_score": 5.8,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600684": {
+    "code": "600684",
+    "name": "珠江股份",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 6.3,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600685": {
+    "code": "600685",
+    "name": "中船防务",
+    "short_term_score": 4.25,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600686": {
+    "code": "600686",
+    "name": "金龙汽车",
+    "short_term_score": 3.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600688": {
+    "code": "600688",
+    "name": "上海石化",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600689": {
+    "code": "600689",
+    "name": "上海三毛",
+    "short_term_score": 4.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600690": {
+    "code": "600690",
+    "name": "海尔智家",
+    "short_term_score": 2.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600691": {
+    "code": "600691",
+    "name": "潞化科技",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600692": {
+    "code": "600692",
+    "name": "亚通股份",
+    "short_term_score": 7.5,
+    "long_term_score": 6.3,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600693": {
+    "code": "600693",
+    "name": "东百集团",
+    "short_term_score": 1.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600694": {
+    "code": "600694",
+    "name": "大商股份",
+    "short_term_score": 4.25,
+    "long_term_score": 6.3,
+    "chip_score": 7.3,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600697": {
+    "code": "600697",
+    "name": "欧亚集团",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600698": {
+    "code": "600698",
+    "name": "湖南天雁",
+    "short_term_score": 7.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600699": {
+    "code": "600699",
+    "name": "均胜电子",
+    "short_term_score": 8.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600702": {
+    "code": "600702",
+    "name": "舍得酒业",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600703": {
+    "code": "600703",
+    "name": "三安光电",
+    "short_term_score": 7.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600704": {
+    "code": "600704",
+    "name": "物产中大",
+    "short_term_score": 7.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600706": {
+    "code": "600706",
+    "name": "曲江文旅",
+    "short_term_score": 2.75,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600707": {
+    "code": "600707",
+    "name": "彩虹股份",
+    "short_term_score": 1.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600708": {
+    "code": "600708",
+    "name": "光明地产",
+    "short_term_score": 7.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600710": {
+    "code": "600710",
+    "name": "苏美达",
+    "short_term_score": 2.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600711": {
+    "code": "600711",
+    "name": "盛屯矿业",
+    "short_term_score": 1.5,
+    "long_term_score": 5.4,
+    "chip_score": 6.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600712": {
+    "code": "600712",
+    "name": "南宁百货",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600713": {
+    "code": "600713",
+    "name": "南京医药",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600714": {
+    "code": "600714",
+    "name": "金瑞矿业",
+    "short_term_score": 2.5,
+    "long_term_score": 3.1,
+    "chip_score": 5.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600715": {
+    "code": "600715",
+    "name": "文投控股",
+    "short_term_score": 9.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600716": {
+    "code": "600716",
+    "name": "凤凰股份",
+    "short_term_score": 3.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600717": {
+    "code": "600717",
+    "name": "天津港",
+    "short_term_score": 7.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600718": {
+    "code": "600718",
+    "name": "东软集团",
+    "short_term_score": 7.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600719": {
+    "code": "600719",
+    "name": "大连热电",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600720": {
+    "code": "600720",
+    "name": "中交设计",
+    "short_term_score": 7.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600721": {
+    "code": "600721",
+    "name": "百花医药",
+    "short_term_score": 2.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600722": {
+    "code": "600722",
+    "name": "金牛化工",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 5.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600724": {
+    "code": "600724",
+    "name": "宁波富达",
+    "short_term_score": 1.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600725": {
+    "code": "600725",
+    "name": "云维股份",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600726": {
+    "code": "600726",
+    "name": "华电能源",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600727": {
+    "code": "600727",
+    "name": "鲁北化工",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600728": {
+    "code": "600728",
+    "name": "佳都科技",
+    "short_term_score": 8.0,
+    "long_term_score": 3.1,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600729": {
+    "code": "600729",
+    "name": "重庆百货",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "600730": {
+    "code": "600730",
+    "name": "中国高科",
+    "short_term_score": 3.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.0,
+    "hot_sector_score": 5.0,
+    "industry": "传统制造业"
+  },
+  "603092": {
+    "code": "603092",
+    "name": "德力佳",
+    "short_term_score": 1.0,
+    "long_term_score": 5.4,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603175": {
+    "code": "603175",
+    "name": "超颖电子",
+    "short_term_score": 1.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603248": {
+    "code": "603248",
+    "name": "锡华科技",
+    "short_term_score": 2.5,
+    "long_term_score": 3.1,
+    "chip_score": 5.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603334": {
+    "code": "603334",
+    "name": "丰倍生物",
+    "short_term_score": 8.0,
+    "long_term_score": 3.1,
+    "chip_score": 5.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603376": {
+    "code": "603376",
+    "name": "大明电子",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 9.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603810": {
+    "code": "603810",
+    "name": "丰山集团",
+    "short_term_score": 6.25,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603811": {
+    "code": "603811",
+    "name": "诚意药业",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603815": {
+    "code": "603815",
+    "name": "交建股份",
+    "short_term_score": 7.75,
+    "long_term_score": 5.4,
+    "chip_score": 5.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603816": {
+    "code": "603816",
+    "name": "顾家家居",
+    "short_term_score": 6.75,
+    "long_term_score": 6.3,
+    "chip_score": 6.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603817": {
+    "code": "603817",
+    "name": "海峡环保",
+    "short_term_score": 6.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603818": {
+    "code": "603818",
+    "name": "曲美家居",
+    "short_term_score": 6.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603819": {
+    "code": "603819",
+    "name": "神力股份",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603823": {
+    "code": "603823",
+    "name": "百合花",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603826": {
+    "code": "603826",
+    "name": "坤彩科技",
+    "short_term_score": 9.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603829": {
+    "code": "603829",
+    "name": "洛凯股份",
+    "short_term_score": 2.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603833": {
+    "code": "603833",
+    "name": "欧派家居",
+    "short_term_score": 8.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603836": {
+    "code": "603836",
+    "name": "海程邦达",
+    "short_term_score": 7.0,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603839": {
+    "code": "603839",
+    "name": "安正时尚",
+    "short_term_score": 6.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603848": {
+    "code": "603848",
+    "name": "好太太",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603855": {
+    "code": "603855",
+    "name": "华荣股份",
+    "short_term_score": 5.25,
+    "long_term_score": 6.3,
+    "chip_score": 6.8,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603856": {
+    "code": "603856",
+    "name": "东宏股份",
+    "short_term_score": 8.0,
+    "long_term_score": 5.4,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603858": {
+    "code": "603858",
+    "name": "步长制药",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603859": {
+    "code": "603859",
+    "name": "能科科技",
+    "short_term_score": 4.5,
+    "long_term_score": 3.1,
+    "chip_score": 6.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603860": {
+    "code": "603860",
+    "name": "中公高科",
+    "short_term_score": 8.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603861": {
+    "code": "603861",
+    "name": "白云电器",
+    "short_term_score": 6.25,
+    "long_term_score": 3.1,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603863": {
+    "code": "603863",
+    "name": "松炀资源",
+    "short_term_score": 5.25,
+    "long_term_score": 6.3,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603866": {
+    "code": "603866",
+    "name": "桃李面包",
+    "short_term_score": 8.0,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603867": {
+    "code": "603867",
+    "name": "新化股份",
+    "short_term_score": 9.0,
+    "long_term_score": 5.4,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603868": {
+    "code": "603868",
+    "name": "飞科电器",
+    "short_term_score": 2.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603871": {
+    "code": "603871",
+    "name": "嘉友国际",
+    "short_term_score": 5.25,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603876": {
+    "code": "603876",
+    "name": "鼎胜新材",
+    "short_term_score": 8.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603877": {
+    "code": "603877",
+    "name": "太平鸟",
+    "short_term_score": 4.25,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603878": {
+    "code": "603878",
+    "name": "武进不锈",
+    "short_term_score": 3.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603879": {
+    "code": "603879",
+    "name": "永悦科技",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603880": {
+    "code": "603880",
+    "name": "南卫股份",
+    "short_term_score": 8.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603881": {
+    "code": "603881",
+    "name": "数据港",
+    "short_term_score": 8.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603882": {
+    "code": "603882",
+    "name": "金域医学",
+    "short_term_score": 2.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603883": {
+    "code": "603883",
+    "name": "老百姓",
+    "short_term_score": 4.75,
+    "long_term_score": 5.4,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603885": {
+    "code": "603885",
+    "name": "吉祥航空",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603886": {
+    "code": "603886",
+    "name": "元祖股份",
+    "short_term_score": 6.0,
+    "long_term_score": 5.4,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603887": {
+    "code": "603887",
+    "name": "城地香江",
+    "short_term_score": 6.25,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603888": {
+    "code": "603888",
+    "name": "新华网",
+    "short_term_score": 4.25,
+    "long_term_score": 3.1,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603889": {
+    "code": "603889",
+    "name": "新澳股份",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603890": {
+    "code": "603890",
+    "name": "春秋电子",
+    "short_term_score": 2.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603893": {
+    "code": "603893",
+    "name": "瑞芯微",
+    "short_term_score": 1.0,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603895": {
+    "code": "603895",
+    "name": "天永智能",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603896": {
+    "code": "603896",
+    "name": "寿仙谷",
+    "short_term_score": 7.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603897": {
+    "code": "603897",
+    "name": "长城科技",
+    "short_term_score": 6.25,
+    "long_term_score": 5.4,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603898": {
+    "code": "603898",
+    "name": "好莱客",
+    "short_term_score": 3.5,
+    "long_term_score": 3.1,
+    "chip_score": 6.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603899": {
+    "code": "603899",
+    "name": "晨光股份",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603900": {
+    "code": "603900",
+    "name": "莱绅通灵",
+    "short_term_score": 4.25,
+    "long_term_score": 6.3,
+    "chip_score": 9.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603901": {
+    "code": "603901",
+    "name": "永创智能",
+    "short_term_score": 4.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603903": {
+    "code": "603903",
+    "name": "中持股份",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 6.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603906": {
+    "code": "603906",
+    "name": "龙蟠科技",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603908": {
+    "code": "603908",
+    "name": "牧高笛",
+    "short_term_score": 9.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603909": {
+    "code": "603909",
+    "name": "建发合诚",
+    "short_term_score": 6.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603912": {
+    "code": "603912",
+    "name": "佳力图",
+    "short_term_score": 4.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603915": {
+    "code": "603915",
+    "name": "国茂股份",
+    "short_term_score": 2.5,
+    "long_term_score": 3.1,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603916": {
+    "code": "603916",
+    "name": "苏博特",
+    "short_term_score": 4.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603917": {
+    "code": "603917",
+    "name": "合力科技",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603918": {
+    "code": "603918",
+    "name": "金桥信息",
+    "short_term_score": 1.0,
+    "long_term_score": 6.3,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603919": {
+    "code": "603919",
+    "name": "金徽酒",
+    "short_term_score": 6.25,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603920": {
+    "code": "603920",
+    "name": "世运电路",
+    "short_term_score": 4.75,
+    "long_term_score": 3.1,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603922": {
+    "code": "603922",
+    "name": "金鸿顺",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603926": {
+    "code": "603926",
+    "name": "铁流股份",
+    "short_term_score": 4.25,
+    "long_term_score": 3.1,
+    "chip_score": 6.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603927": {
+    "code": "603927",
+    "name": "中科软",
+    "short_term_score": 3.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.3,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603928": {
+    "code": "603928",
+    "name": "兴业股份",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603929": {
+    "code": "603929",
+    "name": "亚翔集成",
+    "short_term_score": 3.5,
+    "long_term_score": 3.1,
+    "chip_score": 4.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603931": {
+    "code": "603931",
+    "name": "格林达",
+    "short_term_score": 1.0,
+    "long_term_score": 3.1,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603933": {
+    "code": "603933",
+    "name": "睿能科技",
+    "short_term_score": 4.75,
+    "long_term_score": 3.1,
+    "chip_score": 6.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603936": {
+    "code": "603936",
+    "name": "博敏电子",
+    "short_term_score": 1.0,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603937": {
+    "code": "603937",
+    "name": "丽岛新材",
+    "short_term_score": 6.25,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603938": {
+    "code": "603938",
+    "name": "三孚股份",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603939": {
+    "code": "603939",
+    "name": "益丰药房",
+    "short_term_score": 8.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603948": {
+    "code": "603948",
+    "name": "建业股份",
+    "short_term_score": 3.5,
+    "long_term_score": 5.4,
+    "chip_score": 8.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603949": {
+    "code": "603949",
+    "name": "雪龙集团",
+    "short_term_score": 7.25,
+    "long_term_score": 3.1,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603950": {
+    "code": "603950",
+    "name": "长源东谷",
+    "short_term_score": 4.25,
+    "long_term_score": 5.4,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603955": {
+    "code": "603955",
+    "name": "大千生态",
+    "short_term_score": 2.5,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603956": {
+    "code": "603956",
+    "name": "威派格",
+    "short_term_score": 7.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603958": {
+    "code": "603958",
+    "name": "哈森股份",
+    "short_term_score": 6.0,
+    "long_term_score": 6.3,
+    "chip_score": 4.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603959": {
+    "code": "603959",
+    "name": "百利科技",
+    "short_term_score": 8.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603960": {
+    "code": "603960",
+    "name": "克来机电",
+    "short_term_score": 8.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603966": {
+    "code": "603966",
+    "name": "法兰泰克",
+    "short_term_score": 6.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603967": {
+    "code": "603967",
+    "name": "中创物流",
+    "short_term_score": 6.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603968": {
+    "code": "603968",
+    "name": "醋化股份",
+    "short_term_score": 7.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603969": {
+    "code": "603969",
+    "name": "银龙股份",
+    "short_term_score": 5.75,
+    "long_term_score": 5.4,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603970": {
+    "code": "603970",
+    "name": "中农立华",
+    "short_term_score": 5.75,
+    "long_term_score": 5.4,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603976": {
+    "code": "603976",
+    "name": "正川股份",
+    "short_term_score": 8.5,
+    "long_term_score": 3.1,
+    "chip_score": 7.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603977": {
+    "code": "603977",
+    "name": "国泰集团",
+    "short_term_score": 4.0,
+    "long_term_score": 3.1,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603978": {
+    "code": "603978",
+    "name": "深圳新星",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 6.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603979": {
+    "code": "603979",
+    "name": "金诚信",
+    "short_term_score": 2.0,
+    "long_term_score": 5.4,
+    "chip_score": 7.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603980": {
+    "code": "603980",
+    "name": "吉华集团",
+    "short_term_score": 7.5,
+    "long_term_score": 3.1,
+    "chip_score": 6.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603982": {
+    "code": "603982",
+    "name": "泉峰汽车",
+    "short_term_score": 5.25,
+    "long_term_score": 6.3,
+    "chip_score": 8.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603983": {
+    "code": "603983",
+    "name": "丸美生物",
+    "short_term_score": 6.0,
+    "long_term_score": 3.1,
+    "chip_score": 8.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603985": {
+    "code": "603985",
+    "name": "恒润股份",
+    "short_term_score": 2.5,
+    "long_term_score": 6.3,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603986": {
+    "code": "603986",
+    "name": "兆易创新",
+    "short_term_score": 3.5,
+    "long_term_score": 3.1,
+    "chip_score": 5.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603987": {
+    "code": "603987",
+    "name": "康德莱",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603988": {
+    "code": "603988",
+    "name": "中电电机",
+    "short_term_score": 3.5,
+    "long_term_score": 3.1,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603989": {
+    "code": "603989",
+    "name": "艾华集团",
+    "short_term_score": 3.5,
+    "long_term_score": 5.4,
+    "chip_score": 7.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603990": {
+    "code": "603990",
+    "name": "麦迪科技",
+    "short_term_score": 3.0,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603991": {
+    "code": "603991",
+    "name": "至正股份",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 6.5,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603992": {
+    "code": "603992",
+    "name": "松霖科技",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 6.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603993": {
+    "code": "603993",
+    "name": "洛阳钼业",
+    "short_term_score": 3.5,
+    "long_term_score": 5.4,
+    "chip_score": 6.7,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603995": {
+    "code": "603995",
+    "name": "甬金股份",
+    "short_term_score": 5.75,
+    "long_term_score": 6.3,
+    "chip_score": 7.2,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "603997": {
+    "code": "603997",
+    "name": "继峰股份",
+    "short_term_score": 5.75,
+    "long_term_score": 3.1,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "新上市企业"
+  },
+  "000003": {
+    "code": "000003",
+    "name": "PT金田A",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "深圳主板"
+  },
+  "000015": {
+    "code": "000015",
+    "name": "PT中浩A",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "深圳主板"
+  },
+  "000982": {
+    "code": "000982",
+    "name": "中银绒业",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "深圳主板"
+  }
+}

@@ -2,7 +2,7 @@
   "stocks": {
     "002197": {
       "code": "002197",
-      "timestamp": "2026-01-30T23:34:59.732920",
+      "timestamp": "2026-02-16T16:24:56.096869",
       "collection_time": "2025-12-28 22:39:07",
       "data_source": "choice_api",
       "basic_info": {
@@ -16,86 +16,6 @@
       },
       "kline_data": {
         "daily": [
-          {
-            "date": "2025-10-23",
-            "open": 9.58,
-            "high": 9.62,
-            "low": 9.42,
-            "close": 9.49,
-            "volume": 8129780.0
-          },
-          {
-            "date": "2025-10-24",
-            "open": 9.49,
-            "high": 9.5,
-            "low": 9.38,
-            "close": 9.45,
-            "volume": 6787901.0
-          },
-          {
-            "date": "2025-10-27",
-            "open": 9.44,
-            "high": 9.49,
-            "low": 9.41,
-            "close": 9.46,
-            "volume": 5149365.0
-          },
-          {
-            "date": "2025-10-28",
-            "open": 9.47,
-            "high": 9.8,
-            "low": 9.43,
-            "close": 9.72,
-            "volume": 12177180.0
-          },
-          {
-            "date": "2025-10-29",
-            "open": 9.7,
-            "high": 10.15,
-            "low": 9.63,
-            "close": 10.03,
-            "volume": 14927823.0
-          },
-          {
-            "date": "2025-10-30",
-            "open": 9.93,
-            "high": 10.15,
-            "low": 9.83,
-            "close": 9.83,
-            "volume": 13058503.0
-          },
-          {
-            "date": "2025-10-31",
-            "open": 9.85,
-            "high": 9.92,
-            "low": 9.78,
-            "close": 9.92,
-            "volume": 8462500.0
-          },
-          {
-            "date": "2025-11-10",
-            "open": 9.97,
-            "high": 10.01,
-            "low": 9.9,
-            "close": 9.95,
-            "volume": 8393643.0
-          },
-          {
-            "date": "2025-11-11",
-            "open": 10.0,
-            "high": 10.2,
-            "low": 9.94,
-            "close": 10.18,
-            "volume": 11400579.0
-          },
-          {
-            "date": "2025-11-12",
-            "open": 10.18,
-            "high": 10.22,
-            "low": 10.08,
-            "close": 10.14,
-            "volume": 7699977.0
-          },
           {
             "date": "2025-11-13",
             "open": 10.2,
@@ -655,12 +575,92 @@
             "low": 8.37,
             "close": 8.51,
             "volume": 29100064.0
+          },
+          {
+            "date": "2026-02-02",
+            "open": 8.49,
+            "high": 8.74,
+            "low": 8.41,
+            "close": 8.51,
+            "volume": 22321749.0
+          },
+          {
+            "date": "2026-02-03",
+            "open": 8.66,
+            "high": 8.77,
+            "low": 8.58,
+            "close": 8.71,
+            "volume": 14932320.0
+          },
+          {
+            "date": "2026-02-04",
+            "open": 8.75,
+            "high": 8.88,
+            "low": 8.64,
+            "close": 8.7,
+            "volume": 17158999.0
+          },
+          {
+            "date": "2026-02-05",
+            "open": 8.66,
+            "high": 8.69,
+            "low": 8.57,
+            "close": 8.63,
+            "volume": 15342388.0
+          },
+          {
+            "date": "2026-02-06",
+            "open": 8.6,
+            "high": 8.94,
+            "low": 8.51,
+            "close": 8.79,
+            "volume": 19310329.0
+          },
+          {
+            "date": "2026-02-09",
+            "open": 9.0,
+            "high": 9.45,
+            "low": 8.95,
+            "close": 9.0,
+            "volume": 26505987.0
+          },
+          {
+            "date": "2026-02-10",
+            "open": 9.03,
+            "high": 9.43,
+            "low": 9.0,
+            "close": 9.24,
+            "volume": 24985566.0
+          },
+          {
+            "date": "2026-02-11",
+            "open": 9.2,
+            "high": 9.64,
+            "low": 9.2,
+            "close": 9.31,
+            "volume": 29119236.0
+          },
+          {
+            "date": "2026-02-12",
+            "open": 9.5,
+            "high": 9.59,
+            "low": 9.12,
+            "close": 9.2,
+            "volume": 24040465.0
+          },
+          {
+            "date": "2026-02-13",
+            "open": 9.25,
+            "high": 9.5,
+            "low": 9.15,
+            "close": 9.15,
+            "volume": 23851919.0
           }
         ],
-        "latest_price": 8.51,
+        "latest_price": 9.15,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-01-30T23:34:59.732878"
+        "update_time": "2026-02-16T16:24:56.096826"
       },
       "financial_data": {
         "pe_ratio": -17.02319,
@@ -685,18 +685,18 @@
         "data_source": "choice_calculated"
       },
       "technical_indicators": {
-        "current_price": 8.51,
-        "ma5": 9.03,
-        "ma10": 9.346,
-        "ma20": 9.937999999999999,
-        "ma60": 10.112,
-        "rsi": 20.47244094488191,
-        "macd": -0.36529544399845015,
-        "signal": -0.19489900248605985,
-        "volume_ratio": 1.228961087655368,
+        "current_price": 9.15,
+        "ma5": 9.18,
+        "ma10": 8.924000000000001,
+        "ma20": 9.135,
+        "ma60": 9.846833333333334,
+        "rsi": 44.05940594059406,
+        "macd": -0.24416858624116777,
+        "signal": -0.31460169238919355,
+        "volume_ratio": 0.9620689903580854,
         "status": "calculated"
       },
-      "last_kline_update": "2026-01-30T23:34:59.732882",
+      "last_kline_update": "2026-02-16T16:24:56.096830",
       "industry_concept": {
         "code": "002197",
         "source": "baostock_default",
@@ -708,7 +708,7 @@
     },
     "002425": {
       "code": "002425",
-      "timestamp": "2026-01-30T23:35:25.936997",
+      "timestamp": "2026-02-16T16:25:38.849765",
       "collection_time": "2025-12-28 22:39:07",
       "data_source": "choice_api",
       "basic_info": {
@@ -722,86 +722,6 @@
       },
       "kline_data": {
         "daily": [
-          {
-            "date": "2025-10-23",
-            "open": 3.92,
-            "high": 3.97,
-            "low": 3.9,
-            "close": 3.97,
-            "volume": 9208100.0
-          },
-          {
-            "date": "2025-10-24",
-            "open": 3.97,
-            "high": 3.99,
-            "low": 3.92,
-            "close": 3.95,
-            "volume": 9194020.0
-          },
-          {
-            "date": "2025-10-27",
-            "open": 3.96,
-            "high": 3.98,
-            "low": 3.81,
-            "close": 3.91,
-            "volume": 11776360.0
-          },
-          {
-            "date": "2025-10-28",
-            "open": 3.89,
-            "high": 3.99,
-            "low": 3.88,
-            "close": 3.98,
-            "volume": 11981900.0
-          },
-          {
-            "date": "2025-10-29",
-            "open": 3.98,
-            "high": 3.98,
-            "low": 3.91,
-            "close": 3.97,
-            "volume": 10139660.0
-          },
-          {
-            "date": "2025-10-30",
-            "open": 4.06,
-            "high": 4.16,
-            "low": 4.06,
-            "close": 4.09,
-            "volume": 23173820.0
-          },
-          {
-            "date": "2025-10-31",
-            "open": 4.1,
-            "high": 4.29,
-            "low": 4.09,
-            "close": 4.22,
-            "volume": 32161425.0
-          },
-          {
-            "date": "2025-11-10",
-            "open": 4.2,
-            "high": 4.22,
-            "low": 4.12,
-            "close": 4.18,
-            "volume": 9444280.0
-          },
-          {
-            "date": "2025-11-11",
-            "open": 4.2,
-            "high": 4.26,
-            "low": 4.17,
-            "close": 4.26,
-            "volume": 16251600.0
-          },
-          {
-            "date": "2025-11-12",
-            "open": 4.27,
-            "high": 4.31,
-            "low": 4.19,
-            "close": 4.22,
-            "volume": 17924400.0
-          },
           {
             "date": "2025-11-13",
             "open": 4.21,
@@ -1361,12 +1281,92 @@
             "low": 3.91,
             "close": 3.94,
             "volume": 25516101.0
+          },
+          {
+            "date": "2026-02-02",
+            "open": 3.83,
+            "high": 3.97,
+            "low": 3.76,
+            "close": 3.82,
+            "volume": 27501000.0
+          },
+          {
+            "date": "2026-02-03",
+            "open": 3.85,
+            "high": 3.95,
+            "low": 3.84,
+            "close": 3.91,
+            "volume": 24514940.0
+          },
+          {
+            "date": "2026-02-04",
+            "open": 3.89,
+            "high": 3.92,
+            "low": 3.81,
+            "close": 3.86,
+            "volume": 20623000.0
+          },
+          {
+            "date": "2026-02-05",
+            "open": 3.83,
+            "high": 3.91,
+            "low": 3.81,
+            "close": 3.84,
+            "volume": 15824560.0
+          },
+          {
+            "date": "2026-02-06",
+            "open": 3.82,
+            "high": 3.88,
+            "low": 3.76,
+            "close": 3.83,
+            "volume": 15456500.0
+          },
+          {
+            "date": "2026-02-09",
+            "open": 3.89,
+            "high": 3.99,
+            "low": 3.89,
+            "close": 3.99,
+            "volume": 26069690.0
+          },
+          {
+            "date": "2026-02-10",
+            "open": 4.03,
+            "high": 4.3,
+            "low": 4.01,
+            "close": 4.15,
+            "volume": 79925160.0
+          },
+          {
+            "date": "2026-02-11",
+            "open": 4.15,
+            "high": 4.18,
+            "low": 4.06,
+            "close": 4.07,
+            "volume": 44768623.0
+          },
+          {
+            "date": "2026-02-12",
+            "open": 4.05,
+            "high": 4.05,
+            "low": 3.92,
+            "close": 3.97,
+            "volume": 37667831.0
+          },
+          {
+            "date": "2026-02-13",
+            "open": 3.97,
+            "high": 4.02,
+            "low": 3.9,
+            "close": 3.91,
+            "volume": 23983571.0
           }
         ],
-        "latest_price": 3.94,
+        "latest_price": 3.91,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-01-30T23:35:25.936954"
+        "update_time": "2026-02-16T16:25:38.849586"
       },
       "financial_data": {
         "pe_ratio": -6.581315,
@@ -1391,18 +1391,18 @@
         "data_source": "choice_calculated"
       },
       "technical_indicators": {
-        "current_price": 3.94,
-        "ma5": 3.992,
-        "ma10": 4.0120000000000005,
-        "ma20": 4.0255,
-        "ma60": 3.9636666666666667,
-        "rsi": 26.666666666666615,
-        "macd": 0.0003364609756006942,
-        "signal": 0.017813342762353364,
-        "volume_ratio": 0.8266158748922409,
+        "current_price": 3.91,
+        "ma5": 4.018,
+        "ma10": 3.935,
+        "ma20": 3.9735,
+        "ma60": 3.9455000000000005,
+        "rsi": 46.15384615384615,
+        "macd": -0.010212476311239005,
+        "signal": -0.012809817512742358,
+        "volume_ratio": 0.5881560968698256,
         "status": "calculated"
       },
-      "last_kline_update": "2026-01-30T23:35:25.936960",
+      "last_kline_update": "2026-02-16T16:25:38.849596",
       "industry_concept": {
         "code": "002425",
         "source": "baostock_default",
@@ -1414,7 +1414,7 @@
     },
     "600200": {
       "code": "600200",
-      "timestamp": "2026-01-30T23:35:25.942805",
+      "timestamp": "2026-02-16T16:25:38.855912",
       "collection_time": "2025-12-28 22:39:09",
       "data_source": "choice_api",
       "basic_info": {
@@ -1920,7 +1920,7 @@
         "latest_price": 0.95,
         "data_points": 61,
         "source": "incremental_update",
-        "update_time": "2026-01-30T23:35:25.942732"
+        "update_time": "2026-02-16T16:25:38.855771"
       },
       "financial_data": {
         "pe_ratio": 3.227444,
@@ -1956,7 +1956,7 @@
         "volume_ratio": 0.13918337698021296,
         "status": "calculated"
       },
-      "last_kline_update": "2026-01-30T23:35:25.942739",
+      "last_kline_update": "2026-02-16T16:25:38.855776",
       "industry_concept": {
         "code": "600200",
         "source": "baostock_default",
@@ -1967,6 +1967,6 @@
       }
     }
   },
-  "last_updated": "2026-01-30T23:35:29.197809",
+  "last_updated": "2026-02-16T16:25:42.832670",
   "total_stocks": 3
 }
