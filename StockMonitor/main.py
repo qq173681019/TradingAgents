@@ -31,7 +31,7 @@ def get_chinese_font():
     
     for f in priority_fonts:
         if f in system_fonts:
-            print(f"✅ 已检测到中文字体: {f}")
+            print(f"[OK] 已检测到中文字体: {f}")
             return f
             
     # 如果没找到，尝试回退配置
@@ -135,16 +135,16 @@ class DataFetcher:
             
             if hasattr(login_result, 'ErrorCode') and login_result.ErrorCode == 0:
                 self.choice_active = True
-                print("✅ Choice 登录成功")
+                print("[OK] Choice 登录成功")
             else:
                 # 登录失败时明确标记不可用
                 self.choice_active = False
                 err_msg = getattr(login_result, 'ErrorMsg', '未知错误')
-                print(f"⚠️ Choice 暂时不可用 (代码 {login_result.ErrorCode}): {err_msg}")
+                print(f"[WARN] Choice 暂时不可用 (代码 {login_result.ErrorCode}): {err_msg}")
                 if login_result.ErrorCode == 35:
                     print("提示: 请尝试解绑其他设备或联系 Choice 客服。程序将自动切换至备用源。")
         except Exception as e:
-            print(f"❌ Choice 初始化异常: {e}")
+            print(f"[FAIL] Choice 初始化异常: {e}")
             self.choice_active = False
 
     def get_sina_data(self, code):
@@ -317,15 +317,15 @@ class StockMonitorApp:
     def handle_data_update(self, df, source):
         from datetime import datetime
         if df.empty:
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] ❌ 数据获取失败 - 所有数据源不可用")
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] [FAIL] 数据获取失败 - 所有数据源不可用")
             self.lbl_status.config(text=f"获取失败: 数据源不可用 (Choice错误/新浪无数据)", fg="red")
             return
             
         self.df = df
         latest_price = df.iloc[-1]['Close']
         latest_time = df.index[-1].strftime('%H:%M')
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] ✅ 数据获取成功 - 来源: {source} | 现价: {latest_price:.2f} | 数据时间: {latest_time}")
-        self.lbl_status.config(text=f"✅ 来源: {source} | 现价: {latest_price:.2f} | 更新: {latest_time}", fg="green")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] [OK] 数据获取成功 - 来源: {source} | 现价: {latest_price:.2f} | 数据时间: {latest_time}")
+        self.lbl_status.config(text=f"[OK] 来源: {source} | 现价: {latest_price:.2f} | 更新: {latest_time}", fg="green")
         
         self.check_and_trigger_signal(df)
         self.redraw_chart()

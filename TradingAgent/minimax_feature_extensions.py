@@ -481,7 +481,7 @@ class MiniMaxFeatureExtensions:
     def create_feature_usage_guide(self) -> str:
         """创建功能使用指南"""
         guide = """
-# 🚀 MiniMax CodingPlan 功能使用指南
+# [ROCKET] MiniMax CodingPlan 功能使用指南
 
 ## 快速开始
 
@@ -623,7 +623,7 @@ def main():
     
     # 导出提示词集合
     result = extensions.export_prompts_collection()
-    print(f"\n✅ {result}")
+    print(f"\n[OK] {result}")
 
 if __name__ == "__main__":
     main()

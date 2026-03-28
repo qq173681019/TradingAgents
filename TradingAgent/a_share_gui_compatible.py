@@ -134,7 +134,7 @@ except ImportError:
 try:
     from chip_health_analyzer import ChipHealthAnalyzer
     CHIP_ANALYZER_AVAILABLE = True
-    print("✓ 筹码分析模块加载成功")
+    print("[OK] 筹码分析模块加载成功")
 except ImportError:
     CHIP_ANALYZER_AVAILABLE = False
     print("⚠ 筹码分析模块不可用")
@@ -485,7 +485,7 @@ except Exception:
 try:
     import baostock as bs
     BAOSTOCK_AVAILABLE = True
-    print("✓ baostock库加载成功")
+    print("[OK] baostock库加载成功")
 except ImportError as e:
     bs = None
     BAOSTOCK_AVAILABLE = False
@@ -620,7 +620,7 @@ class AShareAnalyzerGUI:
         self.st_keywords = ['ST', '*ST', 'ST*', 'S*ST', 'SST', '退', '停牌']
         self.data_collection_thread = None   # 数据收集线程
         
-        # 🚀 性能优化系统集成 (基于MiniMax CodingPlan)
+        # [ROCKET] 性能优化系统集成 (基于MiniMax CodingPlan)
         self.performance_optimizer = None
         self.async_processor = None
         self.high_performance_cache = None
@@ -647,10 +647,18 @@ class AShareAnalyzerGUI:
         else:
             print("使用标准性能处理模式")
         
-        # 🚀 性能优化系统集成 (基于MiniMax CodingPlan)
+        # [ROCKET] 性能优化系统集成 (基于MiniMax CodingPlan)
         self.performance_optimizer = None
         self.async_processor = None
         self.high_performance_cache = None
+        
+        # FIX: 非GUI模式下初始化use_choice_data属性
+        if not TKINTER_AVAILABLE or self.root is None:
+            # Mock对象，模拟tkinter.BooleanVar，默认False
+            class MockBooleanVar:
+                def get(self):
+                    return False
+            self.use_choice_data = MockBooleanVar()
         
         if PERFORMANCE_OPTIMIZATION_AVAILABLE:
             try:
@@ -672,7 +680,7 @@ class AShareAnalyzerGUI:
         if CHIP_ANALYZER_AVAILABLE:
             try:
                 self.chip_analyzer = ChipHealthAnalyzer()
-                print("✓ 筹码健康度分析器已启用")
+                print("[OK] 筹码健康度分析器已启用")
             except Exception as e:
                 print(f"⚠ 筹码分析器初始化失败: {e}")
                 self.chip_analyzer = None
@@ -688,7 +696,7 @@ class AShareAnalyzerGUI:
             import config as cfg
             if hasattr(cfg, 'ENABLE_CHOICE') and cfg.ENABLE_CHOICE:
                 self.choice_enabled = True
-                print("✅ Choice金融终端数据源已启用")
+                print("[OK] Choice金融终端数据源已启用")
                 print(f"   账号: {cfg.CHOICE_USERNAME}")
                 
                 # 检测运行环境，决定使用哪种模式
@@ -699,8 +707,8 @@ class AShareAnalyzerGUI:
                     # 调试器环境：直接禁用Choice
                     print("   " + "="*60)
                     print("   🐛 检测到调试器环境（F5调试模式）")
-                    print("   ⚠️  Choice SDK无法在调试器环境下工作（WinError 87）")
-                    print("   💡 解决方案：")
+                    print("   [WARN]  Choice SDK无法在调试器环境下工作（WinError 87）")
+                    print("   [IDEA] 解决方案：")
                     print("      1. 关闭调试器")
                     print("      2. 使用 启动系统.bat 批处理文件启动")
                     print("      3. 或在终端运行: python a_share_gui_compatible.py")
@@ -719,15 +727,15 @@ class AShareAnalyzerGUI:
                     # 检查缓存文件是否存在
                     cache_file = os.path.join("data", "choice_cache.json")
                     if os.path.exists(cache_file):
-                        print(f"   ✅ 找到Choice缓存文件: {cache_file}")
+                        print(f"   [OK] 找到Choice缓存文件: {cache_file}")
                         self.choice_cache_mode = True
                     else:
-                        print(f"   ⚠️  缓存文件不存在，请先运行后台服务")
+                        print(f"   [WARN]  缓存文件不存在，请先运行后台服务")
                         self.choice_cache_mode = False
             else:
                 print("ℹ️ Choice金融终端数据源未启用")
         except Exception as e:
-            print(f"⚠️ 加载Choice配置失败: {e}")
+            print(f"[WARN] 加载Choice配置失败: {e}")
         
         # 加载现有数据
         self.load_batch_scores(silent=True)         # 加载批量评分数据
@@ -1299,7 +1307,7 @@ class AShareAnalyzerGUI:
             if not is_valid:
                 warn_msg = f"{model_name}批量评分数据已超过48小时，建议重新获取以保证准确性"
                 if not silent:
-                    print(f"⚠️ 警告: {warn_msg}")
+                    print(f"[WARN] 警告: {warn_msg}")
                 # 弹出警告（用户要求，但限制弹出频率和静默模式）
                 if not silent and hasattr(self, 'root') and self.root and not getattr(self, 'warning_shown', False):
                     from tkinter import messagebox
@@ -1361,7 +1369,7 @@ class AShareAnalyzerGUI:
             
             status_msg = f"加载{model_name}批量评分：{len(self.batch_scores)}只股票 (评分时间: {score_time}, 模型: {score_model})"
             if not is_valid:
-                status_msg += " [⚠️ 数据已过期]"
+                status_msg += " [[WARN] 数据已过期]"
             print(status_msg)
             
             # 显示一些示例评分用于调试
@@ -2101,7 +2109,7 @@ class AShareAnalyzerGUI:
         # 根据股票类型过滤
         for code in all_cache_codes:
             if self.is_stock_type_match(code, stock_type):
-                # ✅ 额外过滤：排除创业板、科创板、ST股票和退市股票
+                # [OK] 额外过滤：排除创业板、科创板、ST股票和退市股票
                 
                 # 1️⃣ 排除创业板（300开头）
                 if code.startswith('300'):
@@ -3288,7 +3296,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         else:
             data_source_label = "常规数据"
         
-        print(f"[DEBUG] 🚀 启动优化批量评分: {stock_type} ({data_source_label})")
+        print(f"[DEBUG] [ROCKET] 启动优化批量评分: {stock_type} ({data_source_label})")
         
         # 检查是否启用断点续传
         start_from_index = 0
@@ -3311,7 +3319,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         # 标记为正在运行 (在主线程设置，防止重复点击)
         self._batch_running = True
         
-        # 🚀 使用优化后的异步处理（基于MiniMax CodingPlan）
+        # [ROCKET] 使用优化后的异步处理（基于MiniMax CodingPlan）
         def optimized_batch_scoring_thread():
             try:
                 # 转换股票类型
@@ -3323,15 +3331,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     filter_type = stock_type
                 
                 data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
-                print(f"[DEBUG] 🚀 启动优化批量评分线程，类型: {filter_type} ({data_source_label})")
-                self.show_progress(f"🚀 开始获取{stock_type}股票评分（MiniMax优化模式 - {data_source_label}）...")
+                print(f"[DEBUG] [ROCKET] 启动优化批量评分线程，类型: {filter_type} ({data_source_label})")
+                self.show_progress(f"[ROCKET] 开始获取{stock_type}股票评分（MiniMax优化模式 - {data_source_label}）...")
                 
                 # 检查缓存状态，如果未加载则尝试加载
                 if not getattr(self, 'comprehensive_data_loaded', False):
                     print(f"[DEBUG] 内存缓存未加载，尝试从磁盘加载...")
                     self.load_comprehensive_stock_data()
                 
-                # 🎯 优化的股票代码获取策略
+                # [TARGET] 优化的股票代码获取策略
                 # 检查是否是快速评分模式
                 is_quick_mode = False
                 if hasattr(self, '_is_quick_scoring_mode') and self._is_quick_scoring_mode and hasattr(self, '_quick_score_filtered_codes'):
@@ -3428,10 +3436,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     self.show_progress("筛选后未找到符合条件的股票")
                     return
                 
-                print(f"[INFO] 🎯 获取到 {filtered_total} 只符合条件的股票（原始:{original_total}只，已过滤:{total_filtered}只）")
-                self.show_progress(f"🎯 获取到 {filtered_total} 只符合条件的股票")
+                print(f"[INFO] [TARGET] 获取到 {filtered_total} 只符合条件的股票（原始:{original_total}只，已过滤:{total_filtered}只）")
+                self.show_progress(f"[TARGET] 获取到 {filtered_total} 只符合条件的股票")
                 
-                # 🚀 优先使用LLM真实分析模式
+                # [ROCKET] 优先使用LLM真实分析模式
                 print(f"[INFO] 启用LLM真实分析模式处理 {filtered_total} 只股票")
                 self.show_progress(f"启用LLM智能分析 {filtered_total} 只股票...")
                 
@@ -3545,7 +3553,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             # 记录数据来源
             if stock_code == '000001':
-                print(f"[DEBUG-000001] 数据来源检查: tech_data={'✓有' if tech_data else '✗无'}, fund_data={'✓有' if fund_data else '✗无'}, 来源={data_source}")
+                print(f"[DEBUG-000001] 数据来源检查: tech_data={'[OK]有' if tech_data else '✗无'}, fund_data={'[OK]有' if fund_data else '✗无'}, 来源={data_source}")
             
             # ========== 生成投资建议（可能返回失败原因） ==========
             # 传递use_cache参数，确保批量评分遵循缓存策略
@@ -4218,7 +4226,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                                     
                                     if top10_map:
                                         self.chip_analyzer.inject_batch_data(top10_concentrations=top10_map)
-                                        print(f"  ✓ 已从 Choice 批量注入 {len(top10_map)} 只股票的十大股东数据")
+                                        print(f"  [OK] 已从 Choice 批量注入 {len(top10_map)} 只股票的十大股东数据")
                             except Exception as e:
                                 print(f"  ⚠ Choice 批量获取股东数据失败: {e}")
                                 
@@ -4519,7 +4527,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             # 创建摘要报告
             report = "=" * 100 + "\n"
-            report += f"📊 CSV批量分析结果 (共 {len(results)} 只股票)\n"
+            report += f"[CHART] CSV批量分析结果 (共 {len(results)} 只股票)\n"
             report += "=" * 100 + "\n\n"
             
             # 显示每只股票的评分 - 使用中文字符宽度计算对齐
@@ -4641,7 +4649,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             report += "\n" + "=" * 100 + "\n"
             report += "IDEA: 投资建议:\n"
             if high_quality > 0:
-                report += f"✓ 重点关注: 评分8.0以上的 {high_quality} 只股票\n"
+                report += f"[OK] 重点关注: 评分8.0以上的 {high_quality} 只股票\n"
             if medium_quality > 0:
                 report += f"⚖️ 适度配置: 评分6.0-8.0的 {medium_quality} 只股票\n"
             if low_quality > 0:
@@ -4650,7 +4658,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             if oversold > 0:
                 report += f"TREND: 潜在机会: {oversold} 只股票处于超卖状态\n"
             if overbought > 0:
-                report += f"📉 风险提示: {overbought} 只股票处于超买状态\n"
+                report += f"[DOWN] 风险提示: {overbought} 只股票处于超买状态\n"
             
             # 趋势建议
             uptrend_count = sum(count for trend, count in trend_counts.items() if '上涨' in trend or '偏多' in trend)
@@ -4787,7 +4795,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             if oversold > 0:
                 report += f"TREND: 潜在机会: {oversold} 只股票处于超卖状态，可关注反弹机会\n"
             if overbought > 0:
-                report += f"📉 风险提示: {overbought} 只股票处于超买状态，注意回调风险\n"
+                report += f"[DOWN] 风险提示: {overbought} 只股票处于超买状态，注意回调风险\n"
                 
             # 趋势建议
             uptrend_count = sum(count for trend, count in trend_counts.items() if '上涨' in trend or '偏多' in trend)
@@ -5315,7 +5323,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         self.extra_words_entry = tk.Entry(remark_frame, textvariable=self.extra_words_var, font=("微软雅黑", 11), fg="#2c3e50")
         self.extra_words_entry.pack(side="left", padx=8, fill="x", expand=True)
         # 添加一个提示标签
-        tk.Label(remark_frame, text="💡 这里的文字将作为补充信息发送给AI", font=("微软雅黑", 9), fg="#7f8c8d", bg="#f0f0f0").pack(side="left", padx=5)
+        tk.Label(remark_frame, text="[IDEA] 这里的文字将作为补充信息发送给AI", font=("微软雅黑", 9), fg="#7f8c8d", bg="#f0f0f0").pack(side="left", padx=5)
         
         # 初始化权重显示
         self._update_weight_label()
@@ -5394,7 +5402,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
         score_data_row.pack(fill="x", pady=2)
         
         tk.Label(score_data_row,
-                text="🎯 评分数据：",
+                text="[TARGET] 评分数据：",
                 font=("微软雅黑", 9, "bold"),
                 fg="#34495e",
                 bg="#ecf0f1",
@@ -5642,7 +5650,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 print(f"🔄 重新加载comprehensive数据...")
                 self.load_comprehensive_data()
                 
-            print(f"✅ {model}模型数据加载完成")
+            print(f"[OK] {model}模型数据加载完成")
         else:
             print(f"不支持的LLM模型: {model}")
     
@@ -5817,7 +5825,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     messagebox.showinfo("提示", "没有已加载的评分数据")
                 return
             
-            # 🚀 批量优化：预先获取一次热门板块数据（使用缓存）
+            # [ROCKET] 批量优化：预先获取一次热门板块数据（使用缓存）
             print(f"[批量重算] 预先获取热门板块数据（共{len(self.batch_scores)}只股票）")
             hot_sectors = self.get_hot_sectors(use_cache=True)
             
@@ -5870,7 +5878,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     self.hide_progress()
                     messagebox.showinfo("成功", f"已根据新权重重新计算 {count} 只股票的综合评分\n耗时: {elapsed:.2f}秒")
                 else:
-                    self.show_progress(f"✅ 已重算 {count} 只股票评分（{elapsed:.1f}秒）")
+                    self.show_progress(f"[OK] 已重算 {count} 只股票评分（{elapsed:.1f}秒）")
                     # 1.5秒后隐藏提示
                     self.root.after(1500, self.hide_progress)
             else:
@@ -6160,19 +6168,19 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     messagebox.showerror("Choice配置缺失", error_msg)
                 else:
                     print(f"\n{'='*60}")
-                    print("❌ " + error_msg.replace('\n', '\n   '))
+                    print("[FAIL] " + error_msg.replace('\n', '\n   '))
                     print('='*60 + '\n')
                 
                 # 取消勾选
                 self.use_choice_data.set(False)
-                self.show_progress("❌ Choice账号未配置，已切换回常规数据源")
+                self.show_progress("[FAIL] Choice账号未配置，已切换回常规数据源")
                 return
             
-            self.show_progress("✅ 已切换到Choice数据源")
+            self.show_progress("[OK] 已切换到Choice数据源")
             # 预加载Choice数据
             self._preload_choice_data()
         else:
-            self.show_progress("✅ 已切换到常规数据源")
+            self.show_progress("[OK] 已切换到常规数据源")
     
     def _preload_choice_data(self):
         """预加载Choice数据到内存"""
@@ -6199,10 +6207,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     messagebox.showwarning("Choice数据缺失", error_msg)
                 else:
                     print(f"\n{'='*60}")
-                    print("⚠️  " + error_msg.replace('\n', '\n   '))
+                    print("[WARN]  " + error_msg.replace('\n', '\n   '))
                     print('='*60 + '\n')
                 
-                self.show_progress("⚠️  Choice数据文件不存在，已切换回常规数据源")
+                self.show_progress("[WARN]  Choice数据文件不存在，已切换回常规数据源")
                 self.use_choice_data.set(False)
                 return
             
@@ -6212,7 +6220,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             stocks = cache_data.get("stocks", {})
             if not stocks:
-                self.show_progress("⚠️  Choice数据为空")
+                self.show_progress("[WARN]  Choice数据为空")
                 self.use_choice_data.set(False)
                 return
             
@@ -6246,10 +6254,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     continue
             
             self.comprehensive_stock_data = converted_data
-            self.show_progress(f"✅ Choice数据加载完成：{len(converted_data)} 只股票")
+            self.show_progress(f"[OK] Choice数据加载完成：{len(converted_data)} 只股票")
             
         except Exception as e:
-            self.show_progress(f"❌ 加载Choice数据失败: {e}")
+            self.show_progress(f"[FAIL] 加载Choice数据失败: {e}")
             self.use_choice_data.set(False)
     
     def test_choice_connection(self):
@@ -6262,7 +6270,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 self._test_choice_wrapper()
                     
             except Exception as e:
-                self.show_progress(f"\n❌ 处理异常: {type(e).__name__}: {e}")
+                self.show_progress(f"\n[FAIL] 处理异常: {type(e).__name__}: {e}")
                 import traceback
                 traceback.print_exc()
         
@@ -6279,10 +6287,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             result = self.choice_direct.start("")
             
             if result.ErrorCode != 0:
-                self.show_progress(f"❌ 初始化失败: {result.ErrorMsg}")
+                self.show_progress(f"[FAIL] 初始化失败: {result.ErrorMsg}")
                 return
             
-            self.show_progress("✅ 初始化成功\n")
+            self.show_progress("[OK] 初始化成功\n")
             self.choice_connected = True
             
             # 获取K线数据
@@ -6294,19 +6302,19 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             if data.ErrorCode == 0:
                 num_dates = len(data.Dates) if hasattr(data, 'Dates') else 0
-                self.show_progress(f"✅ 成功获取{num_dates}条数据")
+                self.show_progress(f"[OK] 成功获取{num_dates}条数据")
                 if num_dates > 0:
                     self.show_progress(f"   日期范围: {data.Dates[0]} ~ {data.Dates[-1]}")
             else:
-                self.show_progress(f"❌ 数据获取失败: {data.ErrorMsg}")
+                self.show_progress(f"[FAIL] 数据获取失败: {data.ErrorMsg}")
                 
             self.show_progress("\n" + "="*50)
-            self.show_progress("✅✅✅ Choice直接调用测试成功！")
+            self.show_progress("[OK][OK][OK] Choice直接调用测试成功！")
             self.show_progress("⚡ 性能最优模式")
             self.show_progress("="*50)
             
         except Exception as e:
-            self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+            self.show_progress(f"\n[FAIL] 测试异常: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
     
@@ -6352,7 +6360,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 self.show_progress("ERROR: Choice数据为空")
                 return
             
-            self.show_progress(f"✅ 读取到 {len(stocks)} 只股票的Choice数据")
+            self.show_progress(f"[OK] 读取到 {len(stocks)} 只股票的Choice数据")
             
             # 转换Choice数据格式为系统格式
             print(f">>> 开始转换数据格式")
@@ -6451,7 +6459,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 self.show_progress("ERROR: 数据转换后无有效股票")
                 return
             
-            self.show_progress(f"✅ 成功转换 {len(converted_data)} 只股票数据")
+            self.show_progress(f"[OK] 成功转换 {len(converted_data)} 只股票数据")
             
             # 将转换后的数据存储到 comprehensive_stock_data
             print(f">>> 存储到 comprehensive_stock_data")
@@ -6504,7 +6512,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             total_count = len(filtered_stocks)
             print(f">>> 低分筛选完成: 过滤{low_score_filtered_count}只，剩余{total_count}只")
             self.show_progress(f"低分筛选: 排除 {low_score_filtered_count} 只低分股票 (< {min_score_threshold:.1f}分)")
-            self.show_progress(f"\n🎯 最终候选: {total_count} 只股票")
+            self.show_progress(f"\n[TARGET] 最终候选: {total_count} 只股票")
             
             # 保存筛选后的股票列表
             print(f">>> 保存筛选结果")
@@ -6543,7 +6551,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     print(f"计算 {code} 评分失败: {e}")
             
             self.show_progress("-" * 60)
-            self.show_progress(f"✅ 计算完成，共 {count} 只股票")
+            self.show_progress(f"[OK] 计算完成，共 {count} 只股票")
             print(f">>> _test_choice_wrapper 执行完成")
             
         except Exception as e:
@@ -6636,43 +6644,43 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     # TODO: 以下是数据读取和验证逻辑，暂时注释用于测试BAT执行
     # 后续可以恢复这部分代码用于完整的数据验证
     #                 if field in cache_data:
-    #                     validation_msgs.append(f"✅ 字段 '{field}' 存在")
+    #                     validation_msgs.append(f"[OK] 字段 '{field}' 存在")
     #                 else:
     #                     format_valid = False
-    #                     validation_msgs.append(f"❌ 缺少必需字段 '{field}'")
+    #                     validation_msgs.append(f"[FAIL] 缺少必需字段 '{field}'")
     #             
     #             # 检查 stocks 结构
     #             if "stocks" in cache_data:
     #                 stocks = cache_data["stocks"]
     #                 if isinstance(stocks, dict):
-    #                     validation_msgs.append(f"✅ stocks 为字典类型 (符合标准)")
+    #                     validation_msgs.append(f"[OK] stocks 为字典类型 (符合标准)")
     #                     
     #                     # 检查第一只股票的结构
     #                     if stocks:
     #                         first_code, first_stock = next(iter(stocks.items()))
     #                         if isinstance(first_stock, dict):
     #                             if "name" in first_stock and "kline" in first_stock:
-    #                                 validation_msgs.append(f"✅ 股票数据包含 'name' 和 'kline' 字段")
+    #                                 validation_msgs.append(f"[OK] 股票数据包含 'name' 和 'kline' 字段")
     #                                 
     #                                 # 检查 kline 结构
     #                                 kline = first_stock.get("kline", {})
     #                                 kline_fields = ["stock_code", "dates", "indicators", "data"]
     #                                 kline_valid = all(f in kline for f in kline_fields)
     #                                 if kline_valid:
-    #                                     validation_msgs.append(f"✅ kline 数据结构完整 (stock_code, dates, indicators, data)")
+    #                                     validation_msgs.append(f"[OK] kline 数据结构完整 (stock_code, dates, indicators, data)")
     #                                 else:
     #                                     format_valid = False
     #                                     missing = [f for f in kline_fields if f not in kline]
-    #                                     validation_msgs.append(f"❌ kline 缺少字段: {missing}")
+    #                                     validation_msgs.append(f"[FAIL] kline 缺少字段: {missing}")
     #                             else:
     #                                 format_valid = False
-    #                                 validation_msgs.append(f"❌ 股票数据缺少 'name' 或 'kline' 字段")
+    #                                 validation_msgs.append(f"[FAIL] 股票数据缺少 'name' 或 'kline' 字段")
     #                         else:
     #                             format_valid = False
-    #                             validation_msgs.append(f"❌ 股票数据应为字典类型")
+    #                             validation_msgs.append(f"[FAIL] 股票数据应为字典类型")
     #                 else:
     #                     format_valid = False
-    #                     validation_msgs.append(f"❌ stocks 应为字典类型")
+    #                     validation_msgs.append(f"[FAIL] stocks 应为字典类型")
     #         
     #         # 输出验证结果
     #         for msg in validation_msgs:
@@ -6680,18 +6688,18 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     #         output("")
     #         
     #         if format_valid:
-    #             output("✅✅ 数据格式验证通过！符合系统数据标准")
+    #             output("[OK][OK] 数据格式验证通过！符合系统数据标准")
     #         else:
-    #             output("⚠️  数据格式存在问题，可能影响后续使用")
+    #             output("[WARN]  数据格式存在问题，可能影响后续使用")
     #         output("")
     #         
     #         # 兼容全量格式：cache_data 是 dict，包含 stocks 映射
     #         if isinstance(cache_data, dict) and "stocks" in cache_data:
     #             stocks = cache_data.get("stocks", {})
     #             if len(stocks) == 0:
-    #                 output("⚠️  结果文件无股票数据，请检查返回码/日志")
+    #                 output("[WARN]  结果文件无股票数据，请检查返回码/日志")
     #             else:
-    #                 output(f"✅ 成功读取 {len(stocks)} 只股票的数据")
+    #                 output(f"[OK] 成功读取 {len(stocks)} 只股票的数据")
     #             output("")
     #             output("[3/3] 数据汇总")
     #             output(f"      股票数量: {len(stocks)} 只")
@@ -6719,7 +6727,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     #         else:
     #             # 兼容旧的列表格式
     #             if isinstance(cache_data, list):
-    #                 output(f"✅ 成功读取 {len(cache_data)} 只股票的数据")
+    #                 output(f"[OK] 成功读取 {len(cache_data)} 只股票的数据")
     #                 output("")
     #                 output("[3/3] 数据汇总")
     #                 output(f"      股票数量: {len(cache_data)} 只")
@@ -6742,16 +6750,16 @@ KDJ: {tech_data.get('kdj', 'N/A')}
     #                     output("="*50)
     #         
     #         output("")
-    #         output("✅✅✅ Choice获取A股主板50日K线数据成功！")
+    #         output("[OK][OK][OK] Choice获取A股主板50日K线数据成功！")
     #         if is_fresh_data:
-    #             output("✅ 确认读取的是本次运行生成的新数据")
+    #             output("[OK] 确认读取的是本次运行生成的新数据")
     #         elif is_fresh_data == False:
-    #             output("⚠️ 注意：读取的是旧数据，非本次运行生成")
+    #             output("[WARN] 注意：读取的是旧数据，非本次运行生成")
     #         output(f"💾 数据已保存: {result_file}")
     #         self.choice_connected = True
                     
         except Exception as e:
-            print(f"❌ 测试异常: {type(e).__name__}: {e}")
+            print(f"[FAIL] 测试异常: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
     
@@ -6772,7 +6780,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 if days_until_monday == 0:
                     days_until_monday = 7
                     
-                msg = f"⚠️  Choice配额提示：\n\n"
+                msg = f"[WARN]  Choice配额提示：\n\n"
                 msg += f"当前时间：{today.strftime('%Y年%m月%d日 %A')}\n"
                 msg += f"配额重置：每周一 00:00\n"
                 msg += f"距离重置：还有 {days_until_monday} 天\n\n"
@@ -6782,10 +6790,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 
                 result = messagebox.askyesno("配额提示", msg)
                 if not result:
-                    self.show_progress("❌ 用户取消数据采集")
+                    self.show_progress("[FAIL] 用户取消数据采集")
                     return
             
-            self.show_progress("🚀 启动Choice数据采集...")
+            self.show_progress("[ROCKET] 启动Choice数据采集...")
             
             # BAT文件路径
             bat_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "更新Choice数据.bat")
@@ -6803,8 +6811,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 creationflags=subprocess.CREATE_NEW_CONSOLE
             )
             
-            self.show_progress("✅ 数据采集已启动（在新窗口中运行）")
-            self.show_progress("💡 采集完成后请重新加载数据或重启程序")
+            self.show_progress("[OK] 数据采集已启动（在新窗口中运行）")
+            self.show_progress("[IDEA] 采集完成后请重新加载数据或重启程序")
             
         except Exception as e:
             self.show_progress(f"ERROR: 启动数据采集失败: {e}")
@@ -6824,15 +6832,15 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             is_weekend = now.weekday() >= 5
             
             if is_weekend:
-                msg = "⚠️  当前是周末，市场未开盘。\n\n竞价排行在交易日 9:15 - 9:30 运行效果最佳。\n是否仍要启动分析？"
+                msg = "[WARN]  当前是周末，市场未开盘。\n\n竞价排行在交易日 9:15 - 9:30 运行效果最佳。\n是否仍要启动分析？"
                 if not messagebox.askyesno("时间提示", msg):
                     return
             elif now.hour < 9 or (now.hour == 9 and now.minute < 15):
-                msg = "⚠️  当前尚未进入竞价时段（9:15开始）。\n\n是否仍要启动分析？"
+                msg = "[WARN]  当前尚未进入竞价时段（9:15开始）。\n\n是否仍要启动分析？"
                 if not messagebox.askyesno("时间提示", msg):
                     return
             
-            self.show_progress("🚀 启动竞价排行分析...")
+            self.show_progress("[ROCKET] 启动竞价排行分析...")
             
             # 获取脚本路径
             script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
@@ -6856,7 +6864,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 creationflags=subprocess.CREATE_NEW_CONSOLE
             )
             
-            self.show_progress("✅ 竞价排行分析已在独立窗口启动")
+            self.show_progress("[OK] 竞价排行分析已在独立窗口启动")
             self.root.after(3000, self.hide_progress)
             
         except Exception as e:
@@ -6933,12 +6941,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             if result.returncode == 0:
                 print(">>> 测试成功")
-                self.show_progress("\n✅✅✅ Choice K线数据测试成功！")
-                self.show_progress("💡 已验证：独立进程可以正常获取Choice数据")
-                self.show_progress("📊 可以使用此方式在主程序中调用Choice接口")
+                self.show_progress("\n[OK][OK][OK] Choice K线数据测试成功！")
+                self.show_progress("[IDEA] 已验证：独立进程可以正常获取Choice数据")
+                self.show_progress("[CHART] 可以使用此方式在主程序中调用Choice接口")
             else:
                 print(f">>> 测试失败: {result.returncode}")
-                self.show_progress(f"\n❌ 测试失败，退出码: {result.returncode}")
+                self.show_progress(f"\n[FAIL] 测试失败，退出码: {result.returncode}")
                 if result.stderr:
                     print(f">>> stderr: {result.stderr[:200]}")
                     self.show_progress(f"错误信息: {result.stderr[:500]}")
@@ -6949,7 +6957,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             self.show_progress("Choice客户端可能响应缓慢")
         except Exception as e:
             print(f">>> 捕获异常: {type(e).__name__}: {e}")
-            self.show_progress(f"\n❌ 测试异常: {type(e).__name__}: {e}")
+            self.show_progress(f"\n[FAIL] 测试异常: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
         
@@ -6967,7 +6975,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             print(">>> 准备导入 EmQuantAPI")
             from EmQuantAPI import c
             print(">>> EmQuantAPI 导入成功")
-            self.show_progress("    ✅ 导入成功")
+            self.show_progress("    [OK] 导入成功")
             print(">>> show_progress 调用成功")
             
             # 2. 登录/初始化
@@ -6979,10 +6987,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             if result.ErrorCode != 0:
                 print(f">>> 初始化失败: ErrorCode={result.ErrorCode}")
-                self.show_progress(f"    ❌ 初始化失败")
+                self.show_progress(f"    [FAIL] 初始化失败")
                 return
             print(">>> 初始化成功")
-            self.show_progress("    ✅ 初始化成功")
+            self.show_progress("    [OK] 初始化成功")
             
             # 3. 获取000001.SZ的K线
             print(">>> 准备获取K线数据")
@@ -7001,7 +7009,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             
             if data.ErrorCode != 0:
                 print(">>> 数据获取失败")
-                self.show_progress(f"    ❌ 数据获取失败")
+                self.show_progress(f"    [FAIL] 数据获取失败")
                 return
             
             # 4. 解析并显示数据
@@ -7011,10 +7019,10 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             if "000001.SZ" in data.Data:
                 stock_data = data.Data["000001.SZ"]
                 num_records = len(stock_data[3])
-                self.show_progress(f"    ✅ 获取到 {num_records} 条K线数据")
+                self.show_progress(f"    [OK] 获取到 {num_records} 条K线数据")
                 
                 # 显示最近3日数据
-                self.show_progress(f"\n    📊 最近3日K线数据:")
+                self.show_progress(f"\n    [CHART] 最近3日K线数据:")
                 num_days = min(3, num_records)
                 for i in range(num_days):
                     idx = -(num_days - i)
@@ -7027,21 +7035,21 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                     )
                 
                 print(">>> 测试完成！")
-                self.show_progress(f"\n✅✅✅ Choice测试成功！SDK工作正常！")
+                self.show_progress(f"\n[OK][OK][OK] Choice测试成功！SDK工作正常！")
             else:
                 print(">>> 数据中没有 000001.SZ")
-                self.show_progress(f"    ❌ 返回数据中没有 000001.SZ")
+                self.show_progress(f"    [FAIL] 返回数据中没有 000001.SZ")
                 
         except OSError as e:
             if 'WinError 87' in str(e) or getattr(e, 'winerror', None) == 87:
-                error_msg = "\n⚠️ Choice客户端未完全就绪"
+                error_msg = "\n[WARN] Choice客户端未完全就绪"
                 print(f">>> {error_msg}")
                 self.show_progress(error_msg)
                 self.show_progress("\n📋 当前状态:")
                 self.show_progress("   → Choice客户端进程正在运行")
                 self.show_progress("   → 但内部服务尚未完全启动")
                 self.show_progress("   → SDK无法加载DLL文件 (WinError 87)")
-                self.show_progress("\n💡 解决方案:")
+                self.show_progress("\n[IDEA] 解决方案:")
                 self.show_progress("   ⏰ 等待30-60秒后重试")
                 self.show_progress("   或:")
                 self.show_progress("   1. 打开Choice客户端窗口")
@@ -7050,24 +7058,24 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 self.show_progress("\n📌 提示: Choice首次启动需要较长初始化时间")
             else:
                 print(f">>> OSError: {e}")
-                self.show_progress(f"\n❌ 测试失败: OSError: {e}")
+                self.show_progress(f"\n[FAIL] 测试失败: OSError: {e}")
         except KeyError as e:
             if 'setserverlistdir' in str(e):
-                error_msg = "\n❌ Choice SDK状态已损坏"
+                error_msg = "\n[FAIL] Choice SDK状态已损坏"
                 print(f">>> {error_msg}")
                 self.show_progress(error_msg)
-                self.show_progress("\n⚠️  原因分析:")
+                self.show_progress("\n[WARN]  原因分析:")
                 self.show_progress("   → 之前的WinError 87导致SDK状态损坏")
                 self.show_progress("   → 无法在当前进程中恢复")
-                self.show_progress("\n💡 解决方案:")
+                self.show_progress("\n[IDEA] 解决方案:")
                 self.show_progress("   1. 完全关闭本程序")
                 self.show_progress("   2. 确认Choice客户端已完全启动")
                 self.show_progress("   3. 重新启动本程序")
             else:
                 print(f">>> KeyError: {e}")
-                self.show_progress(f"\n❌ 测试失败: KeyError: {e}")
+                self.show_progress(f"\n[FAIL] 测试失败: KeyError: {e}")
         except Exception as e:
-            error_msg = f"\n❌ Choice测试失败: {type(e).__name__}: {e}"
+            error_msg = f"\n[FAIL] Choice测试失败: {type(e).__name__}: {e}"
             print(f">>> 异常: {error_msg}")
             self.show_progress(error_msg)
             import traceback
@@ -7097,7 +7105,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             all_codes = self._get_optimized_stock_codes("主板")
             
             if not all_codes:
-                self.show_progress("❌ 无法获取股票列表")
+                self.show_progress("[FAIL] 无法获取股票列表")
                 return
 
             # 应用与评分按钮一致的过滤逻辑 (ST, 创业板, 科创板, 退市)
@@ -7129,7 +7137,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             missing_financial = []
             total_checked = 0
             
-            self.show_progress(f"📊 正在检查 {total_to_check} 只符合条件的股票数据...")
+            self.show_progress(f"[CHART] 正在检查 {total_to_check} 只符合条件的股票数据...")
             
             for code in all_mainboard_codes:
                 total_checked += 1
@@ -7170,7 +7178,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             all_missing = list(set(missing_kline + missing_financial))
             
             result_msg = (
-                f"📊 数据检查完成！\n\n"
+                f"[CHART] 数据检查完成！\n\n"
                 f"符合评分条件的股票总数: {total_to_check}\n"
                 f"缺失K线数据: {len(missing_kline)} 只 (影响筹码分析和技术指标)\n"
                 f"缺失财务数据: {len(missing_financial)} 只 (影响基本面评分)\n"
@@ -7178,8 +7186,8 @@ KDJ: {tech_data.get('kdj', 'N/A')}
             )
             
             if not all_missing:
-                self.root.after(0, lambda: messagebox.showinfo("数据检查", result_msg + "✅ 所有数据均已完整，可以进行准确评分！"))
-                self.show_progress("✅ 数据检查完成：所有数据完整")
+                self.root.after(0, lambda: messagebox.showinfo("数据检查", result_msg + "[OK] 所有数据均已完整，可以进行准确评分！"))
+                self.show_progress("[OK] 数据检查完成：所有数据完整")
             else:
                 result_msg += "注意：缺失K线会导致「筹码健康度」无法计算。\n是否立即获取这些缺失的数据？"
                 
@@ -7188,7 +7196,7 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                         self.start_specific_data_collection(all_missing)
                 
                 self.root.after(0, ask_to_fetch)
-                self.show_progress(f"⚠️ 数据检查完成：发现 {len(all_missing)} 只股票数据不完整")
+                self.show_progress(f"[WARN] 数据检查完成：发现 {len(all_missing)} 只股票数据不完整")
 
         except Exception as e:
             self.show_progress(f"ERROR: 数据检查失败: {e}")
@@ -7359,13 +7367,13 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 filtered_stocks = final_filtered_stocks
                 print(f"🚫 排除低分股票: {low_score_filtered_count} 只 (评分 < {min_score_threshold:.1f})")
             else:
-                print(f"⚠️ 未找到历史评分表，跳过低分筛选")
+                print(f"[WARN] 未找到历史评分表，跳过低分筛选")
                 print(f"   batch_scores 类型: {type(getattr(self, 'batch_scores', None))}")
                 print(f"   batch_scores 内容: {getattr(self, 'batch_scores', 'None')}")
             
             total_count = len(filtered_stocks)
             data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
-            self.show_progress(f"🎯 快速评分：筛选出 {total_count} 只候选股票 (ST筛选: {st_filtered_count} → 低分筛选: {total_count}) - {data_source_label}")
+            self.show_progress(f"[TARGET] 快速评分：筛选出 {total_count} 只候选股票 (ST筛选: {st_filtered_count} → 低分筛选: {total_count}) - {data_source_label}")
             
             # 如果勾选了"仅重算权重"，则直接执行重算逻辑并返回
             if hasattr(self, 'only_recalc_var') and self.only_recalc_var.get():
@@ -7613,7 +7621,7 @@ K线更新后快速评分完成！
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(save_data, f, ensure_ascii=False, indent=2)
             
-            print(f"✅ K线更新快速评分结果已保存到: {filename}")
+            print(f"[OK] K线更新快速评分结果已保存到: {filename}")
             
         except Exception as e:
             print(f"保存K线更新快速评分结果失败: {e}")
@@ -8769,7 +8777,7 @@ K线更新后快速评分完成！
             # 使用与单独分析和批量评分相同的三时间段预测算法
             short_prediction, medium_prediction, long_prediction = self.generate_investment_advice(ticker)
             
-            print(f"📊 {ticker} 预测结果:")
+            print(f"[CHART] {ticker} 预测结果:")
             print(f"   短期: {short_prediction.get('trend', '未知')} (评分: {short_prediction.get('technical_score', 0)})")
             print(f"   中期: {medium_prediction.get('trend', '未知')} (评分: {medium_prediction.get('total_score', 0)})")
             print(f"   长期: {long_prediction.get('trend', '未知')} (评分: {long_prediction.get('fundamental_score', 0)})")
@@ -8794,7 +8802,7 @@ K线更新后快速评分完成！
             except Exception:
                 total_score = max(1.0, min(10.0, 5.0 + (raw_weighted or 0.0) * 0.5))
 
-            print(f"🎯 {ticker} 最终评分: 加权={raw_weighted:.2f}, 标准化={total_score:.1f}")
+            print(f"[TARGET] {ticker} 最终评分: 加权={raw_weighted:.2f}, 标准化={total_score:.1f}")
             
             # 生成推荐指数显示
             # 将技术面与基本面评分转换为1-10分制以便显示
@@ -8812,7 +8820,7 @@ K线更新后快速评分完成！
             return index_display
             
         except Exception as e:
-            print(f"❌ 计算推荐指数失败 {ticker}: {e}")
+            print(f"[FAIL] 计算推荐指数失败 {ticker}: {e}")
             import traceback
             traceback.print_exc()
             # 如果出错，返回默认评分
@@ -8880,12 +8888,12 @@ K线更新后快速评分完成！
             extra_lines += "\n三维度评分明细:\n"
             try:
                 if technical_score is not None:
-                    extra_lines += "📈 技术面评分: {:.2f}/10\n".format(float(technical_score))
+                    extra_lines += "[UP] 技术面评分: {:.2f}/10\n".format(float(technical_score))
             except Exception:
                 pass
             try:
                 if fundamental_score is not None:
-                    extra_lines += "📊 基本面评分: {:.2f}/10\n".format(float(fundamental_score))
+                    extra_lines += "[CHART] 基本面评分: {:.2f}/10\n".format(float(fundamental_score))
             except Exception:
                 pass
             try:
@@ -8945,7 +8953,7 @@ K线更新后快速评分完成！
                     time.sleep(2)  # 重试间隔2秒
         
         # 跳过失败的股票，不再生成模拟数据
-        print(f"❌ {ticker} 网络获取失败，且已禁用模拟数据")
+        print(f"[FAIL] {ticker} 网络获取失败，且已禁用模拟数据")
         
         # 记录无法获取真实数据的股票
         if ticker not in [item['code'] for item in self.failed_real_data_stocks]:
@@ -9027,7 +9035,7 @@ K线更新后快速评分完成！
                                 if not fina.empty:
                                     roe = float(fina.iloc[0]['roe']) / 100 if fina.iloc[0]['roe'] else 0.1
                                     
-                                print(f"\033[92m✓ {ticker} Tushare基础数据获取成功\033[0m")
+                                print(f"\033[92m[OK] {ticker} Tushare基础数据获取成功\033[0m")
                                 return {
                                     'pe_ratio': float(df.iloc[0]['pe_ttm']) if df.iloc[0]['pe_ttm'] else 15.0,
                                     'pb_ratio': float(df.iloc[0]['pb']) if df.iloc[0]['pb'] else 2.0,
@@ -9067,7 +9075,7 @@ K线更新后快速评分完成！
                             
                             if rs.error_code == '0' and rs.next():
                                 row = rs.get_row_data()
-                                print(f"\033[92m✓ {ticker} Baostock基础数据获取成功\033[0m")
+                                print(f"\033[92m[OK] {ticker} Baostock基础数据获取成功\033[0m")
                                 bs.logout()
                                 return {
                                     'pe_ratio': float(row[0]) if row[0] else 15.0,
@@ -9093,7 +9101,7 @@ K线更新后快速评分完成！
                         print(f"{ticker} 尝试yfinance基础数据...")
                         yf_data = self._try_get_yfinance_fundamental_data(ticker)
                         if yf_data:
-                            print(f"\033[92m✓ {ticker} yfinance基础数据获取成功\033[0m")
+                            print(f"\033[92m[OK] {ticker} yfinance基础数据获取成功\033[0m")
                             return yf_data
                         else:
                             print(f"⚠ {ticker} yfinance基础数据为空")
@@ -9154,7 +9162,7 @@ K线更新后快速评分完成！
                                 pe = float(parts[39]) if parts[39] and parts[39] != '' else None
                                 pb = float(parts[46]) if len(parts) > 46 and parts[46] and parts[46] != '' else None
                                 if pe and pb and pe > 0 and pb > 0:
-                                    print(f"✅ {ticker} 腾讯财经接口获取成功 - PE:{pe:.2f} PB:{pb:.2f}")
+                                    print(f"[OK] {ticker} 腾讯财经接口获取成功 - PE:{pe:.2f} PB:{pb:.2f}")
                                     return {
                                         'pe_ratio': pe,
                                         'pb_ratio': pb,
@@ -9185,7 +9193,7 @@ K线更新后快速评分完成！
                             pe = data.get('f162')  # 市盈率（动态）
                             pb = data.get('f173')  # 市净率
                             if pe and pb and pe > 0 and pb > 0:
-                                print(f"✅ {ticker} 东方财富接口获取成功 - PE:{pe:.2f} PB:{pb:.2f}")
+                                print(f"[OK] {ticker} 东方财富接口获取成功 - PE:{pe:.2f} PB:{pb:.2f}")
                                 return {
                                     'pe_ratio': float(pe),
                                     'pb_ratio': float(pb),
@@ -9201,7 +9209,7 @@ K线更新后快速评分完成！
                 # 7. 兜底方案：使用价格数据估算（标记为默认值）
                 if stock_individual_info is None or stock_individual_info.empty:
                     try:
-                        print(f"⚠️ {ticker} 所有数据源失败，使用估算默认值...")
+                        print(f"[WARN] {ticker} 所有数据源失败，使用估算默认值...")
                         price = self.get_stock_price(ticker)
                         if price:
                             return {
@@ -9211,8 +9219,8 @@ K线更新后快速评分完成！
                                 'market_cap': price * 1000000000,  # 估算市值
                                 'revenue_growth': 5.0,  # 百分比形式
                                 'profit_growth': 5.0,   # 百分比形式，与Choice保持一致
-                                'data_source': 'default',  # ⚠️ 标记为默认值
-                                'is_default_value': True   # ⚠️ 重要标记
+                                'data_source': 'default',  # [WARN] 标记为默认值
+                                'is_default_value': True   # [WARN] 重要标记
                             }
                     except Exception as e2:
                         print(f"{ticker} 价格估算基础数据失败: {e2}")
@@ -9325,7 +9333,7 @@ K线更新后快速评分完成！
                 macd = 0
                 signal = 0
             
-            print(f"\033[92m✓ {ticker} Choice数据+技术指标计算完成\033[0m")
+            print(f"\033[92m[OK] {ticker} Choice数据+技术指标计算完成\033[0m")
             return {
                 'current_price': current_price,
                 'ma5': ma5,
@@ -9440,7 +9448,7 @@ K线更新后快速评分完成！
                                     '收盘': df['close'].astype(float).values,
                                     '成交量': df['volume'].astype(float).values
                                 })
-                                print(f"\033[92m✓ {ticker} Baostock数据获取成功\033[0m")
+                                print(f"\033[92m[OK] {ticker} Baostock数据获取成功\033[0m")
                             else:
                                 print(f"⚠ {ticker} Baostock返回数据为空 (日期范围: {start_date} - {end_date})")
                             bs.logout()
@@ -9459,7 +9467,7 @@ K线更新后快速评分完成！
                         print(f"{ticker} 尝试yfinance接口...")
                         stock_hist = self._try_get_yfinance_data(ticker)
                         if stock_hist is not None and not stock_hist.empty:
-                            print(f"\033[92m✓ {ticker} yfinance数据获取成功\033[0m")
+                            print(f"\033[92m[OK] {ticker} yfinance数据获取成功\033[0m")
                         else:
                             print(f"⚠ {ticker} yfinance返回数据为空")
                     except Exception as e_yf:
@@ -9520,7 +9528,7 @@ K线更新后快速评分完成！
                             '收盘': df[c_close].values,
                             '成交量': df[c_vol].values
                         })
-                        print(f"\033[92m✓ {ticker} 腾讯K线API获取成功，{len(stock_hist)}条记录\033[0m")
+                        print(f"\033[92m[OK] {ticker} 腾讯K线API获取成功，{len(stock_hist)}条记录\033[0m")
                     else:
                         print(f"⚠ {ticker} 腾讯K线API返回数据为空")
                 except Exception as e_tencent_kline:
@@ -9533,7 +9541,7 @@ K线更新后快速评分完成！
                     print(f"{ticker} 尝试网易财经数据源...")
                     stock_hist = self._try_get_netease_data(ticker)
                     if stock_hist is not None and not stock_hist.empty:
-                        print(f"\033[92m✓ {ticker} 网易财经数据获取成功\033[0m")
+                        print(f"\033[92m[OK] {ticker} 网易财经数据获取成功\033[0m")
                     else:
                         print(f"⚠ {ticker} 网易财经返回数据为空")
                 except Exception as e_netease:
@@ -9546,7 +9554,7 @@ K线更新后快速评分完成！
                     print(f"{ticker} 尝试新浪财经数据源...")
                     stock_hist = self._try_get_sina_data(ticker)
                     if stock_hist is not None and not stock_hist.empty:
-                        print(f"\033[92m✓ {ticker} 新浪财经数据获取成功\033[0m")
+                        print(f"\033[92m[OK] {ticker} 新浪财经数据获取成功\033[0m")
                     else:
                         print(f"⚠ {ticker} 新浪财经返回数据为空")
                 except Exception as e_sina:
@@ -9559,7 +9567,7 @@ K线更新后快速评分完成！
                     print(f"{ticker} 尝试QQ/腾讯数据源...")
                     stock_hist = self._try_get_qq_finance_data(ticker)
                     if stock_hist is not None and not stock_hist.empty:
-                        print(f"\033[92m✓ {ticker} QQ/腾讯数据获取成功\033[0m")
+                        print(f"\033[92m[OK] {ticker} QQ/腾讯数据获取成功\033[0m")
                     else:
                         print(f"⚠ {ticker} QQ/腾讯数据返回为空")
                 except Exception as e_qq:
@@ -9595,18 +9603,18 @@ K线更新后快速评分完成！
             
             # 全部数据源失败
             if stock_hist is None or stock_hist.empty:
-                print(f"❌ {ticker} 未获取到任何有效历史数据，且已禁用模拟数据")
+                print(f"[FAIL] {ticker} 未获取到任何有效历史数据，且已禁用模拟数据")
                 return None
             
             if stock_hist is not None and not stock_hist.empty:
-                print(f"\033[92m✓ {ticker} 实时数据获取成功\033[0m")
+                print(f"\033[92m[OK] {ticker} 实时数据获取成功\033[0m")
                 
                 # 首先尝试获取实时价格（不使用K线数据的收盘价）
                 real_time_price = None
                 try:
                     real_time_price = self.try_get_real_price_tencent(ticker)
                     if real_time_price and real_time_price > 0:
-                        print(f"✓ 腾讯实时价格: ¥{real_time_price:.2f}")
+                        print(f"[OK] 腾讯实时价格: ¥{real_time_price:.2f}")
                 except Exception as e:
                     print(f"腾讯实时价格失败: {e}")
                 
@@ -9614,7 +9622,7 @@ K线更新后快速评分完成！
                     try:
                         real_time_price = self.try_get_real_price_sina(ticker)
                         if real_time_price and real_time_price > 0:
-                            print(f"✓ 新浪实时价格: ¥{real_time_price:.2f}")
+                            print(f"[OK] 新浪实时价格: ¥{real_time_price:.2f}")
                     except Exception as e:
                         print(f"新浪实时价格失败: {e}")
                 
@@ -9622,7 +9630,7 @@ K线更新后快速评分完成！
                     try:
                         real_time_price = self.try_get_real_price_netease(ticker)
                         if real_time_price and real_time_price > 0:
-                            print(f"✓ 网易实时价格: ¥{real_time_price:.2f}")
+                            print(f"[OK] 网易实时价格: ¥{real_time_price:.2f}")
                     except Exception as e:
                         print(f"网易实时价格失败: {e}")
                 
@@ -9632,7 +9640,7 @@ K线更新后快速评分完成！
                 
                 if real_time_price and real_time_price > 0:
                     current_price = real_time_price
-                    print(f"✓✓✓ 最终使用实时API价格: ¥{current_price:.2f} ✓✓✓")
+                    print(f"[OK][OK][OK] 最终使用实时API价格: ¥{current_price:.2f} [OK][OK][OK]")
                 else:
                     current_price = kline_close_price
                     print(f"⚠⚠⚠ 最终使用K线收盘价: ¥{current_price:.2f} ⚠⚠⚠")
@@ -9778,7 +9786,7 @@ K线更新后快速评分完成！
                     '成交量': hist['Volume']
                 })
                 
-                print(f"\033[92m✓ yfinance获取 {ticker} 数据成功，共{len(hist_cn)}条记录\033[0m")
+                print(f"\033[92m[OK] yfinance获取 {ticker} 数据成功，共{len(hist_cn)}条记录\033[0m")
                 return hist_cn
             else:
                 print(f"yfinance获取 {ticker} 数据为空")
@@ -10309,7 +10317,7 @@ K线更新后快速评分完成！
         # ========== 数据获取失败则返回失败 - 不使用模拟数据和默认值 ==========
         if technical_data is None:
             failure_reason = f"所有数据源（Tushare/Baostock/akshare/yfinance/Tencent/Sina）均无法获取技术数据"
-            print(f"❌ {ticker} {failure_reason}")
+            print(f"[FAIL] {ticker} {failure_reason}")
             return ({
                 'technical_score': 0,
                 'failure_reason': failure_reason
@@ -10323,7 +10331,7 @@ K线更新后快速评分完成！
             
         if financial_data is None:
             failure_reason = f"所有数据源（Tushare/Baostock/akshare/yfinance）均无法获取基本面数据"
-            print(f"❌ {ticker} {failure_reason}")
+            print(f"[FAIL] {ticker} {failure_reason}")
             return ({
                 'technical_score': 0,
                 'failure_reason': failure_reason
@@ -10340,7 +10348,7 @@ K线更新后快速评分完成！
         missing_tech_fields = [f for f in required_tech_fields if f not in technical_data or technical_data[f] is None]
         if missing_tech_fields:
             failure_reason = f"技术数据不完整，缺少必需字段: {', '.join(missing_tech_fields)}"
-            print(f"❌ {ticker} {failure_reason}")
+            print(f"[FAIL] {ticker} {failure_reason}")
             print(f"[DEBUG-验证] 技术数据内容: {technical_data}")
             for field in required_tech_fields:
                 if field in technical_data:
@@ -10363,7 +10371,7 @@ K线更新后快速评分完成！
         missing_fund_fields = [f for f in required_fund_fields if f not in financial_data or financial_data[f] is None]
         if missing_fund_fields:
             failure_reason = f"基本面数据不完整，缺少必需字段: {', '.join(missing_fund_fields)}"
-            print(f"❌ {ticker} {failure_reason}")
+            print(f"[FAIL] {ticker} {failure_reason}")
             print(f"[DEBUG-验证] 基本面数据内容: {financial_data}")
             for field in required_fund_fields:
                 if field in financial_data:
@@ -10401,7 +10409,7 @@ K线更新后快速评分完成！
         else:
             data_source = "实时获取"
         
-        print(f"📊 {ticker} 数据来源({data_source}): 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
+        print(f"[CHART] {ticker} 数据来源({data_source}): 价格={current_price:.2f}, RSI={rsi:.1f}, MACD={macd:.3f}, PE={pe_ratio:.1f}")
 
         # 如果选择了大模型，优先用大模型生成投资建议
         print(f"[调试] generate_investment_advice 检查:")
@@ -10410,7 +10418,7 @@ K线更新后快速评分完成！
         print(f"  - 是否在支持列表中: {getattr(self, 'llm_model', None) in ['deepseek', 'minimax', 'openrouter', 'gemini']}")
         
         if hasattr(self, 'llm_model') and self.llm_model in ["deepseek", "minimax", "openrouter", "gemini"]:
-            print(f"✅ [调试] 命中大模型分支: {self.llm_model}")
+            print(f"[OK] [调试] 命中大模型分支: {self.llm_model}")
             
             # 安全获取股票信息，确保不为None
             stock_name = stock_info.get('name') or '未知'
@@ -10879,12 +10887,12 @@ K线更新后快速评分完成！
             # 打印技术数据详情（用于对比Choice和非Choice的差异）
             stock_label = f"[{stock_code}]" if stock_code else ""
             print(f"\n{'='*60}")
-            print(f"📊 {stock_label} 短期预测 - 技术数据详情")
+            print(f"[CHART] {stock_label} 短期预测 - 技术数据详情")
             print(f"{'='*60}")
             print(f"  当前价格: ¥{current_price:.2f}")
-            print(f"  MA5:  ¥{ma5:.2f}  {'✓' if current_price > ma5 else '✗'}")
-            print(f"  MA10: ¥{ma10:.2f}  {'✓' if current_price > ma10 else '✗'}")
-            print(f"  MA20: ¥{ma20:.2f}  {'✓' if current_price > ma20 else '✗'}")
+            print(f"  MA5:  ¥{ma5:.2f}  {'[OK]' if current_price > ma5 else '✗'}")
+            print(f"  MA10: ¥{ma10:.2f}  {'[OK]' if current_price > ma10 else '✗'}")
+            print(f"  MA20: ¥{ma20:.2f}  {'[OK]' if current_price > ma20 else '✗'}")
             print(f"  RSI: {rsi:.2f}")
             print(f"  MACD: {macd:.4f}")
             print(f"  Signal: {signal:.4f}")
@@ -10906,7 +10914,7 @@ K线更新后快速评分完成！
                              ma20 == 10.0 and volume_ratio == 1.0)
             if is_default_data:
                 stock_label = f"[{stock_code}] " if stock_code else ""
-                print(f"⚠️  {stock_label}警告：检测到所有技术指标都是默认值！")
+                print(f"[WARN]  {stock_label}警告：检测到所有技术指标都是默认值！")
                 print(f"    可能原因：1) K线数据不足(<120条) 2) 数据格式错误 3) 数据未正确加载")
             
             # RSI分析 (权重25% - A股市场优化阈值)
@@ -11081,7 +11089,7 @@ K线更新后快速评分完成！
             final_score = max(1.0, min(10.0, 5.0 + prediction_score * 0.5))
             
             # 打印评分计算详情
-            print(f"📊 {stock_label} 短期预测评分详情:")
+            print(f"[CHART] {stock_label} 短期预测评分详情:")
             print(f"  RSI评分: {rsi_score:+.1f}")
             print(f"  MACD评分: {macd_score:+.1f}")
             print(f"  均线评分: {ma_score:+.1f}")
@@ -11311,7 +11319,7 @@ K线更新后快速评分完成！
             stock_code = stock_info.get('code', '') if isinstance(stock_info, dict) else ''
             stock_label = f"[{stock_code}]" if stock_code else ""
             print(f"\n{'='*60}")
-            print(f"📊 {stock_label} 长期预测 - 基本面数据详情")
+            print(f"[CHART] {stock_label} 长期预测 - 基本面数据详情")
             print(f"{'='*60}")
             print(f"  PE市盈率: {pe_ratio:.2f}" if pe_ratio else "  PE市盈率: None")
             print(f"  PB市净率: {pb_ratio:.2f}" if pb_ratio else "  PB市净率: None")
@@ -11519,7 +11527,7 @@ K线更新后快速评分完成！
                 investment_period = "强烈建议回避"
             
             # 打印基本面评分详情
-            print(f"📊 {stock_label} 长期预测评分详情:")
+            print(f"[CHART] {stock_label} 长期预测评分详情:")
             print(f"  基本面原始总分: {fundamental_score:+.1f} (仅用于趋势描述)")
             print(f"  最终得分(1-10): {final_score:.2f} (来自calculate_fundamental_score)")
             print(f"  趋势判断: {trend}\n")
@@ -12176,7 +12184,7 @@ WARNING:  风险提示:
 
             chip_info = ""
             if chip_score is not None:
-                # 🚀 增强：更灵活的筹码等级匹配
+                # [ROCKET] 增强：更灵活的筹码等级匹配
                 chip_emoji = '⚪'
                 if chip_level:
                     if any(k in chip_level for k in ['极度健康', '非常健康', 'A+']): chip_emoji = '🟢'
@@ -12189,10 +12197,10 @@ WARNING:  风险提示:
             else:
                 chip_info = " | 筹码:⚪N/A"
 
-            report += f"""📈 第 {i} 名：{stock['code']} {stock['name']}
+            report += f"""[UP] 第 {i} 名：{stock['code']} {stock['name']}
     • 所属板块：{sector_status}
-    📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  📊 {rating.split(' ')[0]}
-    📈 趋势判断：{stock.get('trend', '未知')}
+    [CHART] 综合评分：{score:.2f}/10.0{extra}{chip_info}  [CHART] {rating.split(' ')[0]}
+    [UP] 趋势判断：{stock.get('trend', '未知')}
 
 """
         
@@ -12748,9 +12756,9 @@ WARNING:  风险提示:
 
 RATING: 评分总览
 ---------------------------------------------------------
-📈 技术面评分: {:.2f}/10  {}
-📊 基本面评分: {:.2f}/10  {}
-🎯 综合评分: {:.1f}/10  {}
+[UP] 技术面评分: {:.2f}/10  {}
+[CHART] 基本面评分: {:.2f}/10  {}
+[TARGET] 综合评分: {:.1f}/10  {}
 
 {}
 
@@ -12857,7 +12865,7 @@ WARNING:  风险管控:
             fundamental_score,
             "🟢 基本面良好" if fundamental_score >= 7.0 else "⚖️ 基本面一般" if fundamental_score >= 5.0 else "🔴 基本面偏弱",
             final_score,
-            "⭐ 优秀投资标的" if final_score >= 8 else "✅ 良好投资选择" if final_score >= 7 else "⚖️ 中性评价" if final_score >= 6 else "⚠️ 需谨慎考虑" if final_score >= 5 else "🔴 高风险标的",
+            "⭐ 优秀投资标的" if final_score >= 8 else "[OK] 良好投资选择" if final_score >= 7 else "⚖️ 中性评价" if final_score >= 6 else "[WARN] 需谨慎考虑" if final_score >= 5 else "🔴 高风险标的",
             
             comprehensive_index,
             
@@ -13106,7 +13114,7 @@ WARNING:  风险管控:
         print(f"  利润增长率: {profit_growth}% (类型: {type(profit_growth).__name__})")
         print(f"  行业类型: {industry}")
         print(f"  初始分数: {score}")
-        print(f"\n  ⚠️  请特别注意：")
+        print(f"\n  [WARN]  请特别注意：")
         print(f"     - ROE应为百分比形式（10.0=10%）")
         print(f"     - 增长率应为百分比形式（5.0=5%）")
         print(f"{'='*70}")
@@ -13320,7 +13328,7 @@ WARNING:  风险管控:
             
             # 热门板块归属分析
             if sectors_info['is_in_hot_sectors']:
-                analysis += f"热门板块: ✅ 是\n"
+                analysis += f"热门板块: [OK] 是\n"
                 analysis += f"加权分数: +{hot_sector_bonus:.2f}分\n\n"
                 
                 if sectors_info['hot_concepts']:
@@ -13339,7 +13347,7 @@ WARNING:  风险管控:
                         else:
                             analysis += f"  • {ind}\n"
                             
-                analysis += "\n📈 投资建议:\n"
+                analysis += "\n[UP] 投资建议:\n"
                 if hot_sector_bonus >= 1.0:
                     analysis += "  • 属于顶级热门板块，市场关注度极高\n"
                     analysis += "  • 短期有望获得资金青睐和估值溢价\n"
@@ -13352,7 +13360,7 @@ WARNING:  风险管控:
                     analysis += "  • 属于一般热门板块，关注度中等\n"
                     analysis += "  • 需要更多依靠个股基本面支撑\n"
             else:
-                analysis += f"热门板块: ❌ 否\n"
+                analysis += f"热门板块: [FAIL] 否\n"
                 analysis += f"加权分数: +{hot_sector_bonus:.2f}分\n\n"
                 
                 # 显示所属的非热门板块
@@ -13366,7 +13374,7 @@ WARNING:  风险管控:
                     for ind in sectors_info['all_industries']:
                         analysis += f"  • {ind}\n"
                 
-                analysis += "\n💡 投资建议:\n"
+                analysis += "\n[IDEA] 投资建议:\n"
                 analysis += "  • 不属于当前热门板块，市场关注度较低\n"
                 analysis += "  • 投资需更多关注公司基本面质量\n"
                 analysis += "  • 可能存在价值低估机会\n"
@@ -13599,13 +13607,13 @@ CSV批量分析使用方法:
             if result.get('error'):
                 error_msg = result['error']
                 self.root.after(0, self.show_error, f"筹码分析失败：{error_msg}")
-                print(f"❌ 筹码分析失败: {ticker} - {error_msg}")
+                print(f"[FAIL] 筹码分析失败: {ticker} - {error_msg}")
                 return
             
             # 检查关键数据是否有效
             if result.get('current_price', 0) == 0:
                 self.root.after(0, self.show_error, "无法获取股票数据，请检查网络连接或稍后重试")
-                print(f"❌ 筹码分析失败: {ticker} - 无有效数据")
+                print(f"[FAIL] 筹码分析失败: {ticker} - 无有效数据")
                 return
             
             # 格式化输出结果
@@ -13613,10 +13621,10 @@ CSV批量分析使用方法:
             
             # 在主线程显示结果
             self.root.after(0, self._display_chip_result, output)
-            print(f"✓ 筹码分析完成: {ticker}")
+            print(f"[OK] 筹码分析完成: {ticker}")
             
         except Exception as e:
-            print(f"❌ 筹码分析异常: {e}")
+            print(f"[FAIL] 筹码分析异常: {e}")
             import traceback
             traceback.print_exc()
             self.root.after(0, self.show_error, f"筹码分析出错：{str(e)}")
@@ -13800,10 +13808,10 @@ CSV批量分析使用方法:
                     print(f"📡 正在从Choice API实时获取 {ticker} 数据...")
                     tech_data = self._get_choice_technical_data_realtime(ticker)
                     if tech_data is None:
-                        print(f"⚠️  Choice API失败，检查是否已取消勾选...")
+                        print(f"[WARN]  Choice API失败，检查是否已取消勾选...")
                         # 检查用户是否已取消勾选（在_get_choice_technical_data_realtime中设置）
                         if not self.use_choice_data.get():
-                            print(f"✅ 已自动取消Choice，切换到其他数据源")
+                            print(f"[OK] 已自动取消Choice，切换到其他数据源")
                             # 切换到其他数据源
                             tech_data = self._try_get_real_technical_data(ticker)
                             if tech_data is None:
@@ -13812,14 +13820,14 @@ CSV批量分析使用方法:
                                 timeout_timer.cancel()
                                 self.root.after(0, self.show_error, error_msg)
                                 return
-                            print(f"✅ 步骤2完成: 技术数据获取成功 - 价格¥{tech_data.get('current_price', 0):.2f} [备用数据源]")
+                            print(f"[OK] 步骤2完成: 技术数据获取成功 - 价格¥{tech_data.get('current_price', 0):.2f} [备用数据源]")
                         else:
                             # 用户选择了"否"，停止分析
-                            print(f"⚠️  用户选择停止分析")
+                            print(f"[WARN]  用户选择停止分析")
                             timeout_timer.cancel()
                             return
                     else:
-                        print(f"✅ 步骤2完成: Choice API获取成功 - 价格¥{tech_data.get('current_price', 0):.2f} [Choice实时API]")
+                        print(f"[OK] 步骤2完成: Choice API获取成功 - 价格¥{tech_data.get('current_price', 0):.2f} [Choice实时API]")
                         # 将Choice数据缓存到comprehensive_stock_data，供后续generate_investment_advice使用
                         if not hasattr(self, 'comprehensive_stock_data'):
                             self.comprehensive_stock_data = {}
@@ -13853,10 +13861,10 @@ CSV批量分析使用方法:
                     print(f"📡 正在从Choice API实时获取 {ticker} 基本面数据...")
                     fund_data = self._get_choice_fundamental_data_realtime(ticker)
                     if fund_data is None:
-                        print(f"⚠️  Choice API失败，检查是否已取消勾选...")
+                        print(f"[WARN]  Choice API失败，检查是否已取消勾选...")
                         # 检查用户是否已取消勾选
                         if not self.use_choice_data.get():
-                            print(f"✅ 已自动取消Choice，切换到其他数据源")
+                            print(f"[OK] 已自动取消Choice，切换到其他数据源")
                             fund_data = self._try_get_real_fundamental_data(ticker)
                             if fund_data is None:
                                 print(f"步骤3失败: 所有数据源均失败")
@@ -13864,14 +13872,14 @@ CSV批量分析使用方法:
                                 timeout_timer.cancel()
                                 self.root.after(0, self.show_error, error_msg)
                                 return
-                            print(f"✅ 步骤3完成: 基本面数据获取成功 - PE{fund_data.get('pe_ratio', 0):.1f} [备用数据源]")
+                            print(f"[OK] 步骤3完成: 基本面数据获取成功 - PE{fund_data.get('pe_ratio', 0):.1f} [备用数据源]")
                         else:
                             # 用户选择了"否"，停止分析
-                            print(f"⚠️  用户选择停止分析")
+                            print(f"[WARN]  用户选择停止分析")
                             timeout_timer.cancel()
                             return
                     else:
-                        print(f"✅ 步骤3完成: Choice API基本面获取成功 - PE{fund_data.get('pe_ratio', 0):.1f} [Choice实时API]")
+                        print(f"[OK] 步骤3完成: Choice API基本面获取成功 - PE{fund_data.get('pe_ratio', 0):.1f} [Choice实时API]")
                         # 将Choice数据缓存到comprehensive_stock_data，供后续generate_investment_advice使用
                         if not hasattr(self, 'comprehensive_stock_data'):
                             self.comprehensive_stock_data = {}
@@ -13888,7 +13896,7 @@ CSV批量分析使用方法:
                         timeout_timer.cancel()
                         self.root.after(0, self.show_error, error_msg)
                         return
-                    print(f"✅ 步骤3完成: 基本面数据获取成功 - PE{fund_data.get('pe_ratio', 0):.1f} [实时数据源]")
+                    print(f"[OK] 步骤3完成: 基本面数据获取成功 - PE{fund_data.get('pe_ratio', 0):.1f} [实时数据源]")
             except Exception as e:
                 print(f"步骤3出错: {e}")
                 error_msg = f"ERROR: 基本面数据生成失败\n\n{str(e)}\n请稍后重试"
@@ -13926,7 +13934,7 @@ CSV批量分析使用方法:
                     print(f"步骤5完成: 基本面分析(含板块分析)生成 ({len(fundamental_analysis)}字符) [数据源: {data_source}]")
                 else:
                     # fund_data不存在（不应该发生，因为步骤3必须成功）
-                    print("⚠️ 警告: 步骤3的fund_data丢失，降级为智能模拟数据")
+                    print("[WARN] 警告: 步骤3的fund_data丢失，降级为智能模拟数据")
                     mock_fund_data = self._generate_smart_mock_fundamental_data(ticker)
                     fund_score = self.calculate_fundamental_score(mock_fund_data)
                     fundamental_analysis = self.format_fundamental_index(fund_score, ticker)
@@ -15048,7 +15056,7 @@ IDEA: 优势:
             # 检查数据是否有效（48小时内）
             if not self._is_batch_scores_valid(data):
                 score_time = data.get('timestamp', data.get('date', '未知'))
-                print(f"⚠️ 警告: 批量评分数据已超过48小时 (评分时间: {score_time})")
+                print(f"[WARN] 警告: 批量评分数据已超过48小时 (评分时间: {score_time})")
                 
                 # 弹出警告对话框，但允许继续（限制弹出频率）
                 from tkinter import messagebox
@@ -15927,11 +15935,11 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 code_only=True
             )
             
-            print(f"✅ 推荐股票已导出到: {csv_path}")
-            print(f"📊 共导出 {len(recommended_stocks)} 只推荐股票")
+            print(f"[OK] 推荐股票已导出到: {csv_path}")
+            print(f"[CHART] 共导出 {len(recommended_stocks)} 只推荐股票")
             
         except Exception as e:
-            print(f"❌ CSV导出失败: {str(e)}")
+            print(f"[FAIL] CSV导出失败: {str(e)}")
     
     def export_recommended_stocks_to_csv_simple(self, recommended_stocks, period):
         """导出推荐股票到CSV文件（简化版） - 使用共享工具"""
@@ -15953,11 +15961,11 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                 code_only=True
             )
             
-            print(f"✅ 推荐股票已导出到: {csv_path}")
-            print(f"📊 共导出 {len(recommended_stocks)} 只推荐股票")
+            print(f"[OK] 推荐股票已导出到: {csv_path}")
+            print(f"[CHART] 共导出 {len(recommended_stocks)} 只推荐股票")
             
         except Exception as e:
-            print(f"❌ CSV导出失败: {str(e)}")
+            print(f"[FAIL] CSV导出失败: {str(e)}")
 
     def export_last_recommendations_to_csv(self):
         """手动导出最近一次推荐的股票代码到CSV"""
@@ -15993,11 +16001,11 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                     writer.writerow([stock['code']])
             
             messagebox.showinfo("导出成功", f"已成功导出 {len(self.last_recommendations)} 只股票代码到：\n{file_path}")
-            print(f"✅ 手动导出成功: {file_path}")
+            print(f"[OK] 手动导出成功: {file_path}")
             
         except Exception as e:
             messagebox.showerror("导出失败", f"导出过程中发生错误：\n{str(e)}")
-            print(f"❌ 手动导出失败: {str(e)}")
+            print(f"[FAIL] 手动导出失败: {str(e)}")
 
     def export_batch_results_to_csv(self):
         """导出批量分析结果到CSV文件"""
@@ -16040,11 +16048,11 @@ WARNING: 风险提示: 股市有风险，投资需谨慎。以上分析仅供参
                     writer.writerow(row)
             
             messagebox.showinfo("导出成功", f"已成功导出 {len(self.last_batch_results)} 只股票的分析结果到：\n{file_path}")
-            print(f"✅ 批量分析结果导出成功: {file_path}")
+            print(f"[OK] 批量分析结果导出成功: {file_path}")
             
         except Exception as e:
             messagebox.showerror("导出失败", f"导出过程中发生错误：\n{str(e)}")
-            print(f"❌ 批量分析结果导出失败: {str(e)}")
+            print(f"[FAIL] 批量分析结果导出失败: {str(e)}")
     
     def show_detailed_analysis(self, ticker):
         """显示股票详细分析（在新窗口中）"""
@@ -16373,7 +16381,7 @@ ERROR: 暂无符合条件的{stock_type}股票数据
                 for i, stock in enumerate(top_stocks, 1):
                     if stock['score'] == -10.0:
                         # 退市股票简单标记
-                        report += f"【{i:02d}】{stock['code']} - {stock['name']:<12} ⚠️ {stock['score']:.1f}分 | 已退市\n"
+                        report += f"【{i:02d}】{stock['code']} - {stock['name']:<12} [WARN] {stock['score']:.1f}分 | 已退市\n"
                     else:
                         # 正常股票显示
                         score_color = "🟢" if stock['score'] >= 8 else "🟡" if stock['score'] >= 7 else "🔴"
@@ -16393,14 +16401,14 @@ DATA: 统计信息
 
 TARGET: 平均评分: {avg_score:.2f}分 (正常股票)
 STAR: 高分股票: {high_score_count}只 (≥8分)
-⚠️  退市股票: {delisted_count}只 (-10分)
+[WARN]  退市股票: {delisted_count}只 (-10分)
 TREND: 最高评分: {normal_stocks[0]['score']:.1f}分 ({normal_stocks[0]['name']}) 
-📉 最低评分: {normal_stocks[-1]['score']:.1f}分 ({normal_stocks[-1]['name']})
+[DOWN] 最低评分: {normal_stocks[-1]['score']:.1f}分 ({normal_stocks[-1]['name']})
 
 IDEA: 使用提示:
    • 双击任意股票代码行可快速进行详细分析
    • 高分股票(≥8分)值得重点关注  
-   • ⚠️ 退市股票(-10分)已被系统自动识别
+   • [WARN] 退市股票(-10分)已被系统自动识别
    • 建议结合技术面和基本面综合判断
 
 WARNING:  风险提示: 评分仅供参考，投资需谨慎
@@ -17152,7 +17160,7 @@ IDEA: 使用提示：双击任意股票代码行查看详细分析
                 # 检测基本面数据是否使用默认值
                 if financial_data.get('is_default_value') or financial_data.get('data_source') == 'default':
                     fund_data_quality = 'default'
-                    print(f"⚠️ {ticker} 检测到基本面使用默认估算值（PE={pe_ratio}, PB={financial_data.get('pb_ratio')})")
+                    print(f"[WARN] {ticker} 检测到基本面使用默认估算值（PE={pe_ratio}, PB={financial_data.get('pb_ratio')})")
                     # 动态调整权重：降低基本面权重，提升技术面权重
                     original_fund_weight = fund_weight
                     fund_weight = fund_weight * 0.5  # 基本面权重减半
@@ -17381,7 +17389,7 @@ TARGET: 趋势分析:
    {"SUCCESS: 多头排列" if tech_data['current_price'] > tech_data['ma5'] > tech_data['ma20'] else "WARNING: 空头排列" if tech_data['current_price'] < tech_data['ma5'] < tech_data['ma20'] else "震荡整理"}
    
    RSI分析:
-   {"TREND: 超买区域，注意回调" if tech_data['rsi'] > 70 else "📉 超卖区域，关注反弹" if tech_data['rsi'] < 30 else "⚖️ 正常区间"}
+   {"TREND: 超买区域，注意回调" if tech_data['rsi'] > 70 else "[DOWN] 超卖区域，关注反弹" if tech_data['rsi'] < 30 else "⚖️ 正常区间"}
    
    MACD分析:
    {"🟢 金叉信号" if tech_data['macd'] > tech_data['signal'] and tech_data['macd'] > 0 else "🔴 死叉信号" if tech_data['macd'] < tech_data['signal'] and tech_data['macd'] < 0 else "🟡 震荡信号"}
@@ -17420,14 +17428,14 @@ MONEY: 财务健康:
    流动比率: {fund_data['current_ratio']:.2f}
 
 TARGET: 估值分析:
-   PE估值: {"SUCCESS: 合理" if 10 <= fund_data['pe_ratio'] <= 25 else "WARNING: 偏高" if fund_data['pe_ratio'] > 25 else "📉 偏低"}
-   PB估值: {"SUCCESS: 合理" if 1 <= fund_data['pb_ratio'] <= 3 else "WARNING: 偏高" if fund_data['pb_ratio'] > 3 else "📉 偏低"}
+   PE估值: {"SUCCESS: 合理" if 10 <= fund_data['pe_ratio'] <= 25 else "WARNING: 偏高" if fund_data['pe_ratio'] > 25 else "[DOWN] 偏低"}
+   PB估值: {"SUCCESS: 合理" if 1 <= fund_data['pb_ratio'] <= 3 else "WARNING: 偏高" if fund_data['pb_ratio'] > 3 else "[DOWN] 偏低"}
    
 DATA: 盈利质量:
    ROE水平: {"STAR: 优秀" if fund_data['roe'] > 15 else "SUCCESS: 良好" if fund_data['roe'] > 10 else "WARNING: 一般"}
    
 START: 成长前景:
-   收入增长: {"START: 强劲" if fund_data['revenue_growth'] > 20 else "SUCCESS: 稳健" if fund_data['revenue_growth'] > 10 else "📉 放缓" if fund_data['revenue_growth'] > 0 else "WARNING: 下滑"}
+   收入增长: {"START: 强劲" if fund_data['revenue_growth'] > 20 else "SUCCESS: 稳健" if fund_data['revenue_growth'] > 10 else "[DOWN] 放缓" if fund_data['revenue_growth'] > 0 else "WARNING: 下滑"}
    
 财务稳健性:
    负债水平: {"SUCCESS: 健康" if fund_data['debt_ratio'] < 50 else "WARNING: 偏高"}
@@ -17450,7 +17458,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
 ║                     💎 筹码健康度分析                              ║
 ╚════════════════════════════════════════════════════════════════════╝
 
-⚠️  筹码分析模块未启用
+[WARN]  筹码分析模块未启用
 
 原因可能包括：
   • 筹码分析模块未正确安装
@@ -17493,7 +17501,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
 ║                     💎 筹码健康度分析                              ║
 ╚════════════════════════════════════════════════════════════════════╝
 
-❌ 分析失败
+[FAIL] 分析失败
 
 股票代码: {ticker}
 错误信息: {error_msg}
@@ -17527,13 +17535,13 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
 ║                     💎 筹码健康度分析报告 (40日 & 60日)            ║
 ╚════════════════════════════════════════════════════════════════════╝
 
-📊 股票信息
+[CHART] 股票信息
 ─────────────────────────────────────────────────────────────────
   股票代码: {ticker}
   当前价格: ¥{chip_result.get('current_price', 0):.2f}
   分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-🎯 健康度评估
+[TARGET] 健康度评估
 ─────────────────────────────────────────────────────────────────
   综合评分: {chip_result['health_score']:.1f}/10.0
   健康等级: {chip_result['health_level']}
@@ -17547,7 +17555,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
   • 乖离率: {self._get_bias_desc(chip_result.get('chip_bias', 0))}
   • 稳定性: {self._get_stability_desc(chip_result.get('hhi', 0))}
 
-�📊 基础指标 (60日)
+�[CHART] 基础指标 (60日)
 ─────────────────────────────────────────────────────────────────
   筹码成本(P50): ¥{chip_result.get('chip_cost', 0):.2f}
   获利盘比例: {chip_result.get('profit_ratio', 0):.1f}%
@@ -17557,17 +17565,17 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
   HHI集中度: {chip_result.get('hhi', 0):.4f} ({'高度集中' if chip_result.get('hhi', 0) > 0.25 else '分散' if chip_result.get('hhi', 0) < 0.15 else '适中'})
   基尼系数: {chip_result.get('gini_coefficient', 0):.4f} ({'分布不均' if chip_result.get('gini_coefficient', 0) > 0.6 else '分布均匀' if chip_result.get('gini_coefficient', 0) < 0.4 else '适中'})
 
-�📈📈 核心指标对比 (40日 vs 60日)
+�[UP][UP] 核心指标对比 (40日 vs 60日)
 ─────────────────────────────────────────────────────────────────
   SCR筹码集中度:
     └─ 60日(长期): {scr_60:.2f}% ({'🟢 高' if scr_60 < 10 else '⚖️ 中' if scr_60 < 20 else '🔴 低'})
     └─ 40日(中期): {scr_40:.2f}% ({'🟢 高' if scr_40 < 10 else '⚖️ 中' if scr_40 < 20 else '🔴 低'})
-    └─ 趋势: {'📈 筹码正在集中' if scr_40 < scr_60 - 0.5 else '📉 筹码正在发散' if scr_40 > scr_60 + 0.5 else '➡️ 筹码结构稳定'}
+    └─ 趋势: {'[UP] 筹码正在集中' if scr_40 < scr_60 - 0.5 else '[DOWN] 筹码正在发散' if scr_40 > scr_60 + 0.5 else '➡️ 筹码结构稳定'}
 
   获利盘比例:
     └─ 60日(长期): {pr_60:.1f}%
     └─ 40日(中期): {pr_40:.1f}%
-    └─ 趋势: {'📈 获利盘增加' if pr_40 > pr_60 + 2 else '📉 获利盘减少' if pr_40 < pr_60 - 2 else '➡️ 获利盘稳定'}
+    └─ 趋势: {'[UP] 获利盘增加' if pr_40 > pr_60 + 2 else '[DOWN] 获利盘减少' if pr_40 < pr_60 - 2 else '➡️ 获利盘稳定'}
 
   筹码乖离率:
     └─ 60日(长期): {bias_60:+.2f}%
@@ -17577,7 +17585,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
     └─ 60日: {periods.get('60d', {}).get('peak_type', chip_result.get('peak_type', '未知'))}
     └─ 40日: {periods.get('40d', {}).get('peak_type', '未知')}
 
-💡 交易建议
+[IDEA] 交易建议
 ─────────────────────────────────────────────────────────────────
   {chip_result['trading_suggestion']}
 
@@ -17595,7 +17603,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
                 p90 = chip_result['percentiles'].get('p90', 0)
                 
                 report += f"""
-📊 筹码分布详情
+[CHART] 筹码分布详情
 ─────────────────────────────────────────────────────────────────
   P10筹码位: ¥{p10:.2f} (10%筹码低于此价格)
   P50筹码位: ¥{p50:.2f} (50%筹码低于此价格，中位数)
@@ -17619,7 +17627,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
             report += """
 ════════════════════════════════════════════════════════════════════
 
-⚠️  风险提示
+[WARN]  风险提示
   • 筹码分析仅供参考，不构成投资建议
   • 市场有风险，投资需谨慎
   • 建议结合技术面、基本面综合判断
@@ -17638,7 +17646,7 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
 ║                     💎 筹码健康度分析                              ║
 ╚════════════════════════════════════════════════════════════════════╝
 
-❌ 分析过程出错
+[FAIL] 分析过程出错
 
 股票代码: {ticker}
 错误类型: {type(e).__name__}
@@ -17665,11 +17673,11 @@ WARNING: 投资提示: 基本面分析基于模拟数据，实际投资请参考
     def _get_price_position(self, current_price, p10, p50, p90):
         """获取当前价格在筹码分布中的位置描述"""
         if current_price < p10:
-            return "极低位（低于90%筹码）⚠️"
+            return "极低位（低于90%筹码）[WARN]"
         elif current_price < p50:
-            return "低位（低于50%筹码）📉"
+            return "低位（低于50%筹码）[DOWN]"
         elif current_price < p90:
-            return "高位（高于50%筹码）📈"
+            return "高位（高于50%筹码）[UP]"
         else:
             return "极高位（高于90%筹码）🔥"
 
@@ -17816,12 +17824,12 @@ MONEY: 基本信息:
    概念标签: {concept}
 
 RATING: 三维度评分详情 (技术 + 基本 + 筹码):
-   📈 技术面评分: {tech_score_1_10:.2f}/10  {"🟢 技术强势" if tech_score_1_10 >= 7.0 else "⚖️ 技术中性" if tech_score_1_10 >= 5.0 else "🔴 技术偏弱"}
-   📊 基本面评分: {fund_score_1_10:.2f}/10  {"🟢 基本面良好" if fund_score_1_10 >= 7.0 else "⚖️ 基本面一般" if fund_score_1_10 >= 5.0 else "🔴 基本面偏弱"}
+   [UP] 技术面评分: {tech_score_1_10:.2f}/10  {"🟢 技术强势" if tech_score_1_10 >= 7.0 else "⚖️ 技术中性" if tech_score_1_10 >= 5.0 else "🔴 技术偏弱"}
+   [CHART] 基本面评分: {fund_score_1_10:.2f}/10  {"🟢 基本面良好" if fund_score_1_10 >= 7.0 else "⚖️ 基本面一般" if fund_score_1_10 >= 5.0 else "🔴 基本面偏弱"}
    💎 筹码健康度: {chip_score_1_10:.2f}/10  {"🟢 筹码健康" if chip_score_1_10 >= 7.0 else "⚖️ 筹码一般" if chip_score_1_10 >= 5.0 else "🔴 筹码风险" if chip_score_1_10 > 0 else "⚪ 未分析"}
    
-   🎯 综合评分: {final_score:.1f}/10
-   {"⭐ 优秀投资标的" if final_score >= 8 else "✅ 良好投资选择" if final_score >= 7 else "⚖️ 中性评价" if final_score >= 6 else "⚠️ 需谨慎考虑" if final_score >= 5 else "🔴 高风险标的"}
+   [TARGET] 综合评分: {final_score:.1f}/10
+   {"⭐ 优秀投资标的" if final_score >= 8 else "[OK] 良好投资选择" if final_score >= 7 else "⚖️ 中性评价" if final_score >= 6 else "[WARN] 需谨慎考虑" if final_score >= 5 else "🔴 高风险标的"}
    
    权重说明: 技术面45% + 基本面35% + 筹码健康度20%
 
@@ -17839,7 +17847,7 @@ DATA: 关键指标概览:
 
 TARGET: 投资亮点:
    {"SUCCESS: 技术面向好，趋势向上" if momentum == "上升趋势" else "WARNING: 技术面偏弱，需关注支撑" if momentum == "下降趋势" else "技术面震荡，等待方向选择"}
-   {"SUCCESS: 估值合理，具备投资价值" if 10 <= pe_ratio <= 25 else "WARNING: 估值偏高，需谨慎" if pe_ratio > 25 else "📉 估值偏低，关注基本面"}
+   {"SUCCESS: 估值合理，具备投资价值" if 10 <= pe_ratio <= 25 else "WARNING: 估值偏高，需谨慎" if pe_ratio > 25 else "[DOWN] 估值偏低，关注基本面"}
    {"SUCCESS: 盈利能力强，ROE表现优秀" if roe > 15 else "⚖️ 盈利能力中等" if roe > 10 else "WARNING: 盈利能力有待提升"}
 
 TREND: 近期表现:
@@ -17853,7 +17861,7 @@ WARNING: 风险提示:
 
 分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-💡 评分说明:
+[IDEA] 评分说明:
    • 此评分与推荐系统完全一致，来源相同数据
    • 短期侧重技术面分析，中期综合考虑，长期侧重基本面
    • 可点击"生成推荐"验证评分一致性
@@ -18053,7 +18061,7 @@ WARNING: 重要声明:
                 if '000001' in self.batch_scores:
                     print(f"[DEBUG] 000001 在batch_scores中: 综合评分={self.batch_scores['000001'].get('score', 0)}")
                 else:
-                    print(f"[DEBUG] ⚠️ 000001 不在batch_scores中！共{len(self.batch_scores)}只股票")
+                    print(f"[DEBUG] [WARN] 000001 不在batch_scores中！共{len(self.batch_scores)}只股票")
                 
                 for code, score_data in self.batch_scores.items():
                     if self.is_stock_type_match(code, stock_type):
@@ -18084,7 +18092,7 @@ WARNING: 重要声明:
                                     trend = cd_info[p_key].get('trend')
                                     break
                         
-                        # 🚀 增强：如果趋势仍为未知，根据评分自动推断
+                        # [ROCKET] 增强：如果趋势仍为未知，根据评分自动推断
                         if trend == '未知':
                             score = score_data.get('score', 0)
                             if score >= 9.0: trend = "强势上涨"
@@ -18124,7 +18132,7 @@ WARNING: 重要声明:
                 if filtered_000001:
                     print(f"[DEBUG] 筛选后000001仍在列表中: 评分={filtered_000001[0]['score']}")
                 else:
-                    print(f"[DEBUG] ⚠️ 筛选后000001被移除！总共{len(filtered_stocks)}只股票")
+                    print(f"[DEBUG] [WARN] 筛选后000001被移除！总共{len(filtered_stocks)}只股票")
             
             elif period_type in ['technical', 'fundamental', 'chip']:
                 # 技术面、基础面或筹码面：直接使用对应的单一评分
@@ -18263,7 +18271,7 @@ WARNING: 重要声明:
                             concept = score_data.get('concept') or score_data.get('concepts')
                             trend = score_data.get('trend') or score_data.get('trend_status') or '未知'
                             
-                            # 🚀 增强：如果趋势仍为未知，根据评分自动推断
+                            # [ROCKET] 增强：如果趋势仍为未知，根据评分自动推断
                             if trend == '未知':
                                 if weighted_score >= 9.0: trend = "强势上涨"
                                 elif weighted_score >= 8.0: trend = "稳步上涨"
@@ -18315,7 +18323,7 @@ WARNING: 重要声明:
                     if self.comprehensive_data:
                         sample_code = list(self.comprehensive_data.keys())[0]
                         sample_data = self.comprehensive_data[sample_code]
-                        print(f"📊 数据结构示例 ({sample_code}):")
+                        print(f"[CHART] 数据结构示例 ({sample_code}):")
                         print(f"   可用的键: {list(sample_data.keys())[:10]}")
                         
                         # 检查是否是评分数据结构
@@ -18324,9 +18332,9 @@ WARNING: 重要声明:
                         has_raw_structure = 'basic_info' in sample_data or 'kline_data' in sample_data
                         
                         if has_score_structure:
-                            print(f"   ✓ 检测到评分数据结构")
+                            print(f"   [OK] 检测到评分数据结构")
                         elif has_raw_structure:
-                            print(f"   ⚠️ 检测到原始数据结构（需要先运行批量评分）")
+                            print(f"   [WARN] 检测到原始数据结构（需要先运行批量评分）")
                     
                     # 从comprehensive_data中筛选符合类型的股票
                     filtered_stocks = []
@@ -18411,7 +18419,7 @@ WARNING: 重要声明:
                     if 'basic_info' in sample_data or 'kline_data' in sample_data:
                         error_msg = f"""未找到{stock_type}类型的{period_display}评分数据
 
-⚠️ 检测到您只收集了原始数据，还没有进行评分
+[WARN] 检测到您只收集了原始数据，还没有进行评分
 
 请按以下步骤操作：
 1. 点击"获取主板评分"按钮（或其他类型评分按钮）
@@ -18431,7 +18439,7 @@ WARNING: 重要声明:
             
             # 获取最低评分阈值
             min_score_threshold = self.min_score_var.get() if hasattr(self, 'min_score_var') else 6.0
-            print(f"📊 最低评分阈值: {min_score_threshold:.1f} 分")
+            print(f"[CHART] 最低评分阈值: {min_score_threshold:.1f} 分")
             
             # 按评分筛选（只保留评分 >= 阈值的股票）
             qualified_stocks = [stock for stock in filtered_stocks if stock['score'] >= min_score_threshold]
@@ -18448,7 +18456,7 @@ WARNING: 重要声明:
             qualified_stocks.sort(key=lambda x: x['score'], reverse=True)
             top_recommendations = qualified_stocks[:10]
             
-            # 🚀 增强：为前10名推荐股票精准匹配热门板块
+            # [ROCKET] 增强：为前10名推荐股票精准匹配热门板块
             if AKSHARE_AVAILABLE and hot_sectors:
                 self.update_progress("正在精准匹配热门板块...")
                 try:
@@ -18516,9 +18524,9 @@ WARNING: 重要声明:
                 all_000001 = [s for s in qualified_stocks if s['code'] == '000001']
                 if all_000001:
                     rank = [s['code'] for s in qualified_stocks].index('000001') + 1
-                    print(f"[DEBUG] ⚠️ 000001未进入前10，但在全部中排名第{rank}位，评分: {all_000001[0]['score']}")
+                    print(f"[DEBUG] [WARN] 000001未进入前10，但在全部中排名第{rank}位，评分: {all_000001[0]['score']}")
                 else:
-                    print(f"[DEBUG] ⚠️ 000001不在qualified_stocks中！(评分可能低于{min_score_threshold:.1f})")
+                    print(f"[DEBUG] [WARN] 000001不在qualified_stocks中！(评分可能低于{min_score_threshold:.1f})")
             
             if top_recommendations:
                 print(f"🥇 最高评分: {top_recommendations[0]['score']:.2f} ({top_recommendations[0]['name']})")
@@ -18613,9 +18621,9 @@ WARNING: 重要声明:
 🔍 {period_name}{stock_type}股票投资推荐报告
 ================================================================================
 📅 生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-📊 推荐数量：{len(recommendations)} 只
-🎯 投资期限：{period_name}
-📈 股票类型：{stock_type}
+[CHART] 推荐数量：{len(recommendations)} 只
+[TARGET] 投资期限：{period_name}
+[UP] 股票类型：{stock_type}
 
 """
         # 添加热门板块信息
@@ -18627,7 +18635,7 @@ WARNING: 重要声明:
                 report_title += f"• 热门概念: {', '.join(hot_concept_names[:5])}\n"
             report_title += "\n"
 
-        report_title += f"💡 {period_name}投资策略说明：\n"
+        report_title += f"[IDEA] {period_name}投资策略说明：\n"
         
         # 根据时间周期添加策略说明
         if period_name == "短期":
@@ -18794,7 +18802,7 @@ WARNING: 重要声明:
             
             # 生成筹码显示信息（始终显示，即使没有数据）
             if chip_score is not None and chip_level:
-                # 🚀 增强：更灵活的筹码等级匹配
+                # [ROCKET] 增强：更灵活的筹码等级匹配
                 chip_emoji = '⚪'
                 if any(k in chip_level for k in ['极度健康', '非常健康', 'A+']): chip_emoji = '🟢'
                 elif any(k in chip_level for k in ['优秀', '健康', 'A']): chip_emoji = '🟢'
@@ -18820,21 +18828,21 @@ WARNING: 重要声明:
                 score_level = "👍 可考虑"
                 score_color = "⚡"
             else:
-                score_level = "📊 观察"
-                score_color = "📈"
+                score_level = "[CHART] 观察"
+                score_color = "[UP]"
             
             stock_info = f"""
 {score_color} 第 {i} 名：{code} {name}
     • 所属板块：{sector_status}
-    📊 综合评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
-    📈 趋势判断：{trend}
+    [CHART] 综合评分：{score:.2f}/10.0{extra}{chip_info}  {score_level}
+    [UP] 趋势判断：{trend}
 """
             
             # 添加筹码健康度详细信息（始终显示）
             stock_info += chip_detail_line
             
             if strategy:
-                stock_info += f"   💡 投资策略：{strategy}\n"
+                stock_info += f"   [IDEA] 投资策略：{strategy}\n"
             
             stock_info += f"   {'─' * 60}\n"
             recommendations_list += stock_info
@@ -18929,7 +18937,7 @@ WARNING: 重要声明:
             # 检查是否勾选了Choice
             if self.use_choice_data.get():
                 print("\n" + "="*60)
-                print("✓ 已勾选Choice数据源，使用Choice更新K线")
+                print("[OK] 已勾选Choice数据源，使用Choice更新K线")
                 print("="*60 + "\n")
                 
                 # 检查Choice配置
@@ -18961,7 +18969,7 @@ WARNING: 重要声明:
                     
                     self.root.after(0, show_error)
                     print(f"\n{'='*60}")
-                    print("❌ " + error_msg.replace('\n', '\n   '))
+                    print("[FAIL] " + error_msg.replace('\n', '\n   '))
                     print('='*60 + '\n')
                     return
                 
@@ -19112,7 +19120,7 @@ WARNING: 重要声明:
                                         
                                         success_count += 1
                                         merged_total = len(stocks[code]['kline_data']['daily'])
-                                        print(f"  ✓ {code}: 新增{len(kline_data['dates'])}天，总计{merged_total}天")
+                                        print(f"  [OK] {code}: 新增{len(kline_data['dates'])}天，总计{merged_total}天")
                                     
                                 import time
                                 time.sleep(0.1)  # 控制频率
@@ -19318,7 +19326,7 @@ WARNING: 重要声明:
                     
                     self.root.after(0, show_error)
                     print(f"\n{'='*60}")
-                    print("❌ " + error_msg.replace('\n', '\n   '))
+                    print("[FAIL] " + error_msg.replace('\n', '\n   '))
                     print('='*60 + '\n')
                     return
             
@@ -19605,7 +19613,7 @@ WARNING: 重要声明:
         except Exception as e:
             print(f"显示板块分析报告失败: {e}")
     
-    # ==================== 🚀 MiniMax CodingPlan 性能优化方法 ====================
+    # ==================== [ROCKET] MiniMax CodingPlan 性能优化方法 ====================
     
     def _get_optimized_stock_codes(self, filter_type: str) -> List[str]:
         """优化的股票代码获取策略"""
@@ -19621,7 +19629,7 @@ WARNING: 重要声明:
                 cached_codes = loop.run_until_complete(self.high_performance_cache.get(cache_key))
                 loop.close()
                 if cached_codes:
-                    print(f"[INFO] 🎯 从高性能缓存获取到 {len(cached_codes)} 只{filter_type}股票")
+                    print(f"[INFO] [TARGET] 从高性能缓存获取到 {len(cached_codes)} 只{filter_type}股票")
                     return cached_codes
             except Exception as e:
                 print(f"[WARN] 高性能缓存读取失败: {e}")
@@ -19652,11 +19660,11 @@ WARNING: 重要声明:
                 asyncio.set_event_loop(loop)
                 loop.run_until_complete(self.high_performance_cache.set(cache_key, all_codes, 3600))
                 loop.close()
-                print(f"[INFO] 🎯 已缓存股票代码列表到高性能缓存")
+                print(f"[INFO] [TARGET] 已缓存股票代码列表到高性能缓存")
             except Exception as e:
                 print(f"[WARN] 高性能缓存写入失败: {e}")
         
-        print(f"[INFO] 🎯 {source_info}中获取到 {len(all_codes)} 只{filter_type}股票")
+        print(f"[INFO] [TARGET] {source_info}中获取到 {len(all_codes)} 只{filter_type}股票")
         return all_codes
     
     def _convert_async_results_to_batch_scores(self, async_results: Dict[str, Any]) -> Dict[str, Any]:
@@ -19761,7 +19769,7 @@ WARNING: 重要声明:
         if original_total is None:
             original_total = len(all_codes) + start_from_index  # 计算真正的原始总数
         
-        print(f"[INFO] 📊 智能评分模式: {current_model} | 当前处理: {len(all_codes)} | 原始总数: {original_total}")
+        print(f"[INFO] [CHART] 智能评分模式: {current_model} | 当前处理: {len(all_codes)} | 原始总数: {original_total}")
         
         processed_count = 0
         results = {}
@@ -19769,8 +19777,8 @@ WARNING: 重要声明:
         if current_model == "none":
             # None模式：使用基本面技术面算法计算评分（不使用LLM，不读缓存）
             data_source_label = "Choice数据" if self.use_choice_data.get() else "常规数据"
-            print(f"[INFO] 📈 启用算法计算模式（使用{data_source_label}）")
-            initial_msg = f"📈 算法计算模式处理 {len(all_codes)} 只股票（{data_source_label}）..."
+            print(f"[INFO] [UP] 启用算法计算模式（使用{data_source_label}）")
+            initial_msg = f"[UP] 算法计算模式处理 {len(all_codes)} 只股票（{data_source_label}）..."
             self.update_progress_with_bar(initial_msg, 0, f"准备开始算法计算（{data_source_label}）...")
             
             for i, code in enumerate(all_codes):
@@ -19790,7 +19798,7 @@ WARNING: 重要声明:
                         progress_percent = (actual_position / original_total) * 100
                         
                         if processed_count % 100 == 0:  # None模式处理更快，减少进度显示频率
-                            progress = f"📈 算法计算: {actual_position}/{original_total}"
+                            progress = f"[UP] 算法计算: {actual_position}/{original_total}"
                             detail = f"当前: {code} | 进度: {progress_percent:.1f}% | 已处理: {processed_count}"
                             
                             print(f"[PROGRESS] {progress}")
@@ -19858,7 +19866,7 @@ WARNING: 重要声明:
             self._save_optimized_batch_scores(results, filter_type)
             mode_name = "算法计算" if current_model == "none" else f"{current_model.upper()} LLM分析"
             final_percent = 100.0
-            final_msg = f"✅ {mode_name}完成: {processed_count} 只股票"
+            final_msg = f"[OK] {mode_name}完成: {processed_count} 只股票"
             final_detail = f"处理完成！成功: {processed_count}只 | 整体进度: {final_percent:.0f}%"
             
             print(f"[SUCCESS] 🎉 {mode_name}完成: {processed_count} 只股票")
@@ -19868,7 +19876,7 @@ WARNING: 重要声明:
             if hasattr(self, '_batch_missing_kline_stocks') and len(self._batch_missing_kline_stocks) > 0:
                 missing_count = len(self._batch_missing_kline_stocks)
                 warning_msg = (
-                    f"⚠️ 筹码健康度警告\n\n"
+                    f"[WARN] 筹码健康度警告\n\n"
                     f"有 {missing_count} 只股票因缺少K线缓存数据，未能计算筹码健康度。\n\n"
                     f"建议：\n"
                     f"1. 点击「数据检查」按钮检查并补全缺失的K线数据\n"
@@ -19887,7 +19895,7 @@ WARNING: 重要声明:
                 # 清空记录
                 self._batch_missing_kline_stocks = []
         else:
-            self.update_progress_with_bar(f"❌ {current_model}模式未产生有效结果", 0, "处理失败")
+            self.update_progress_with_bar(f"[FAIL] {current_model}模式未产生有效结果", 0, "处理失败")
 
     def _calculate_stock_score_algorithmic(self, code: str) -> dict:
         """使用算法计算股票评分（无LLM模式） - 优先使用本地缓存数据，确保与开始分析一致"""
@@ -20606,7 +20614,7 @@ def main():
             print(f"[DEBUG-CSD] 登录结果 - ErrorCode: {result.ErrorCode}, ErrorMsg: {result.ErrorMsg}")
             
             if result.ErrorCode != 0:
-                print(f"❌ Choice登录失败: {result.ErrorMsg}")
+                print(f"[FAIL] Choice登录失败: {result.ErrorMsg}")
                 return None
             
             # 获取K线数据（250天足够计算筹码分布）
@@ -20632,7 +20640,7 @@ def main():
             c.stop()
             
             if data.ErrorCode != 0:
-                print(f"❌ Choice CSD获取失败: {data.ErrorMsg}")
+                print(f"[FAIL] Choice CSD获取失败: {data.ErrorMsg}")
                 
                 # 弹窗询问用户
                 import tkinter.messagebox as msgbox
@@ -20645,12 +20653,12 @@ def main():
                 )
                 
                 if user_choice:
-                    print("⚠️  用户选择取消勾选Choice数据源")
+                    print("[WARN]  用户选择取消勾选Choice数据源")
                     if hasattr(self, 'use_choice_data'):
                         self.use_choice_data.set(False)
                     return None
                 else:
-                    print("⚠️  用户选择停止分析")
+                    print("[WARN]  用户选择停止分析")
                     return None
             
             # 解析K线数据并计算技术指标
@@ -20662,7 +20670,7 @@ def main():
             print(f"[DEBUG-CSD] data.Data.keys(): {list(data.Data.keys()) if hasattr(data.Data, 'keys') else 'N/A'}")
             
             if stock_code not in data.Data:
-                print(f"❌ Choice返回数据中无 {stock_code}")
+                print(f"[FAIL] Choice返回数据中无 {stock_code}")
                 
                 import tkinter.messagebox as msgbox
                 user_choice = msgbox.askyesno(
@@ -20674,12 +20682,12 @@ def main():
                 )
                 
                 if user_choice:
-                    print("⚠️  用户选择取消勾选Choice数据源")
+                    print("[WARN]  用户选择取消勾选Choice数据源")
                     if hasattr(self, 'use_choice_data'):
                         self.use_choice_data.set(False)
                     return None
                 else:
-                    print("⚠️  用户选择停止分析")
+                    print("[WARN]  用户选择停止分析")
                     return None
             
             stock_values = data.Data[stock_code]
@@ -20694,7 +20702,7 @@ def main():
                 print(f"[DEBUG-CSD] VOLUME数据量: {len(stock_values[4])}")
             
             if len(stock_values) < 4 or len(stock_values[3]) == 0:
-                print(f"❌ 无有效K线数据")
+                print(f"[FAIL] 无有效K线数据")
                 
                 import tkinter.messagebox as msgbox
                 user_choice = msgbox.askyesno(
@@ -20706,12 +20714,12 @@ def main():
                 )
                 
                 if user_choice:
-                    print("⚠️  用户选择取消勾选Choice数据源")
+                    print("[WARN]  用户选择取消勾选Choice数据源")
                     if hasattr(self, 'use_choice_data'):
                         self.use_choice_data.set(False)
                     return None
                 else:
-                    print("⚠️  用户选择停止分析")
+                    print("[WARN]  用户选择停止分析")
                     return None
             
             # 按照Indicators顺序提取：OPEN, HIGH, LOW, CLOSE, VOLUME
@@ -20745,7 +20753,7 @@ def main():
                 print(f"[DEBUG-CSD] 保存K线数据失败: {e}")
 
             if not closes or len(closes) < 20:
-                print(f"⚠️  K线数据不足: {len(closes)}条")
+                print(f"[WARN]  K线数据不足: {len(closes)}条")
                 
                 import tkinter.messagebox as msgbox
                 user_choice = msgbox.askyesno(
@@ -20757,12 +20765,12 @@ def main():
                 )
                 
                 if user_choice:
-                    print("⚠️  用户选择取消勾选Choice数据源")
+                    print("[WARN]  用户选择取消勾选Choice数据源")
                     if hasattr(self, 'use_choice_data'):
                         self.use_choice_data.set(False)
                     return None
                 else:
-                    print("⚠️  用户选择停止分析")
+                    print("[WARN]  用户选择停止分析")
                     return None
             
             import numpy as np
@@ -20840,7 +20848,7 @@ def main():
             }
             
         except Exception as e:
-            print(f"❌ Choice API调用异常: {e}")
+            print(f"[FAIL] Choice API调用异常: {e}")
             import traceback
             traceback.print_exc()
             return None
@@ -20870,7 +20878,7 @@ def main():
             print(f"[DEBUG] 登录结果 - ErrorCode: {result.ErrorCode}, ErrorMsg: {result.ErrorMsg}")
             
             if result.ErrorCode != 0:
-                print(f"❌ Choice登录失败: {result.ErrorMsg}")
+                print(f"[FAIL] Choice登录失败: {result.ErrorMsg}")
                 return None
             
             # 使用CSS获取基本面数据 - 分别获取每个指标（同时获取多个会导致10000013错误）
@@ -20960,7 +20968,7 @@ def main():
             return result
             
         except Exception as e:
-            print(f"❌ Choice API调用异常: {e}")
+            print(f"[FAIL] Choice API调用异常: {e}")
             import traceback
             traceback.print_exc()
             return None
@@ -20977,7 +20985,7 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         import traceback
-        print(f"❌ 程序启动失败: {e}")
+        print(f"[FAIL] 程序启动失败: {e}")
         traceback.print_exc()
         # 如果是打包版本，显示错误对话框
         try:

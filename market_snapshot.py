@@ -38,7 +38,7 @@ if API_DIR not in sys.path and os.path.exists(API_DIR):
 try:
     import config
 except ImportError:
-    print("⚠️ 无法导入 config.py，请检查路径")
+    print("[WARN] 无法导入 config.py，请检查路径")
     class ConfigMock: CHOICE_USERNAME = ""; CHOICE_PASSWORD = ""
     config = ConfigMock()
 
@@ -61,10 +61,10 @@ try:
         abs_dll_path = os.path.abspath(dll_path)
         
         if os.path.exists(abs_dll_path):
-            print(f"✅ [补丁] 锁定 DLL 路径: {abs_dll_path}")
+            print(f"[OK] [补丁] 锁定 DLL 路径: {abs_dll_path}")
             return abs_dll_path
         else:
-            print(f"❌ [补丁] DLL 文件未找到: {abs_dll_path}")
+            print(f"[FAIL] [补丁] DLL 文件未找到: {abs_dll_path}")
             return ""
     
     # 应用补丁：覆盖 GetLibraryPath 方法
@@ -73,12 +73,12 @@ try:
     # 获取核心类 c
     ChoiceAPI = EmQuantAPI.c
     CHOICE_INSTALLED = True
-    print("✅ EmQuantAPI 模块导入成功")
+    print("[OK] EmQuantAPI 模块导入成功")
 
 except ImportError as e:
-    print(f"❌ EmQuantAPI 导入失败: {e}")
+    print(f"[FAIL] EmQuantAPI 导入失败: {e}")
 except Exception as e:
-    print(f"❌ 初始化异常: {e}")
+    print(f"[FAIL] 初始化异常: {e}")
 
 # ==================== 3. 数据引擎类 ====================
 class MarketDataEngine:
@@ -101,8 +101,8 @@ class MarketDataEngine:
             is_debugger = sys.gettrace() is not None or 'debugpy' in sys.modules
             
             if is_debugger:
-                print("❌ 检测到调试器环境，Choice SDK无法工作")
-                print("💡 请使用以下方式之一运行：")
+                print("[FAIL] 检测到调试器环境，Choice SDK无法工作")
+                print("[IDEA] 请使用以下方式之一运行：")
                 print("   1. 关闭调试器，直接运行: python market_snapshot.py")
                 print("   2. 使用批处理文件启动")
                 return False
@@ -118,14 +118,14 @@ class MarketDataEngine:
             
             if login_result.ErrorCode == 0:
                 self.is_connected = True
-                print("✅ Choice 登录成功")
+                print("[OK] Choice 登录成功")
                 return True
             else:
-                print(f"❌ Choice 登录失败 (Code {login_result.ErrorCode}): {login_result.ErrorMsg}")
+                print(f"[FAIL] Choice 登录失败 (Code {login_result.ErrorCode}): {login_result.ErrorMsg}")
                 
                 # 提供具体的错误处理建议
                 if login_result.ErrorCode == 10001019:
-                    print("💡 设备绑定错误解决方案：")
+                    print("[IDEA] 设备绑定错误解决方案：")
                     print("   1. 确保在非调试环境下运行")
                     print("   2. 检查Choice账号是否在此设备上激活")
                     print("   3. 尝试重新激活Choice终端")
@@ -133,7 +133,7 @@ class MarketDataEngine:
                 
                 return False
         except Exception as e:
-            print(f"❌ Choice 连接崩溃: {e}")
+            print(f"[FAIL] Choice 连接崩溃: {e}")
             # 这里的 WinError 87 可能会在 start 内部抛出，如果 DLL 路径不对
             return False
 
@@ -238,15 +238,15 @@ class MarketDataEngine:
                     if data_list:
                         df = pd.DataFrame(data_list)
                         df.set_index('代码', inplace=True)
-                        print(f"✅ 从缓存获取到 {len(df)} 只股票数据")
+                        print(f"[OK] 从缓存获取到 {len(df)} 只股票数据")
                         self.df = df
                         return df
             
-            print("❌ 未找到可用的缓存数据")
+            print("[FAIL] 未找到可用的缓存数据")
             return pd.DataFrame()
             
         except Exception as e:
-            print(f"❌ 缓存数据获取失败: {e}")
+            print(f"[FAIL] 缓存数据获取失败: {e}")
             return pd.DataFrame()
 
 # ==================== 4. GUI 界面类 ====================
@@ -260,7 +260,7 @@ class MarketApp:
         self._setup_ui()
         
         if not self.engine.is_connected:
-            self.status_var.set("❌ Choice 未连接 (请检查 DLL 路径或账号)")
+            self.status_var.set("[FAIL] Choice 未连接 (请检查 DLL 路径或账号)")
             self.btn_fetch.config(state="disabled")
 
     def _setup_ui(self):
@@ -307,7 +307,7 @@ class MarketApp:
             self.set_status("正在获取A股代码列表...", busy=True)
             codes = self.engine.fetch_all_codes()
             if not codes:
-                self.set_status("❌ 代码列表获取失败", busy=False)
+                self.set_status("[FAIL] 代码列表获取失败", busy=False)
                 return
             
             self.set_status(f"获取到 {len(codes)} 只股票，正在下载行情...", busy=True)
@@ -338,7 +338,7 @@ class MarketApp:
             self.btn_update.config(state="normal")
             
             if df.empty:
-                self.status_var.set("⚠️ 数据为空")
+                self.status_var.set("[WARN] 数据为空")
                 return
 
             # 清空并显示前200条涨幅最高的
@@ -353,7 +353,7 @@ class MarketApp:
                 vals = (code, row['名称'], f"{row['现价']:.2f}", f"{row['涨跌幅']:.2f}%")
                 self.tree.insert("", "end", values=vals, tags=tags)
                 
-            self.status_var.set(f"✅ {msg} ({datetime.now().strftime('%H:%M:%S')})")
+            self.status_var.set(f"[OK] {msg} ({datetime.now().strftime('%H:%M:%S')})")
             self.lbl_stats.config(text=f"总股票数: {len(df)} | 展示涨幅Top200")
             
         self.root.after(0, _update)

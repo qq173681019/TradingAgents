@@ -227,7 +227,7 @@ def test_alpha_vantage_integration():
     print("\n=== Alpha Vantage A股支持测试结果 ===")
     success_count = 0
     for code, result in results.items():
-        status = "✅" if result['overall_success'] else "❌"
+        status = "[OK]" if result['overall_success'] else "[FAIL]"
         print(f"{status} {code}: 总体={'支持' if result['overall_success'] else '不支持'}")
         if result['overall_success']:
             success_count += 1

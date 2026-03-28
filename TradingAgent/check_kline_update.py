@@ -45,7 +45,7 @@ expected_latest = now.strftime('%Y%m%d')
 actual_latest = kline[0]['date'] if kline else ''
 
 if actual_latest == expected_latest:
-    print("✓ K线数据已是最新（包含今天的数据）")
+    print("[OK] K线数据已是最新（包含今天的数据）")
 elif is_trading_day and not is_market_closed:
     print("ℹ️  市场尚未收盘，今天的K线数据尚未生成")
     print(f"   数据源通常在收盘后（15:00后）才提供当日K线数据")
@@ -55,6 +55,6 @@ elif not is_trading_day:
     if actual_latest >= yesterday:
         print(f"   K线数据已是最新（最后交易日: {actual_latest[:4]}-{actual_latest[4:6]}-{actual_latest[6:]}）")
 else:
-    print(f"⚠️  K线数据可能未更新")
+    print(f"[WARN]  K线数据可能未更新")
     print(f"   期望最新日期: {expected_latest}")
     print(f"   实际最新日期: {actual_latest}")

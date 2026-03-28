@@ -48,13 +48,13 @@ def setup_choice_dll_path():
     # 方法1: 添加到 PATH（适用于所有 Python 版本）
     if dll_dir not in os.environ.get('PATH', ''):
         os.environ['PATH'] = dll_dir + os.pathsep + os.environ.get('PATH', '')
-        print(f"✓ 已添加到 PATH: {dll_dir}")
+        print(f"[OK] 已添加到 PATH: {dll_dir}")
     
     # 方法2: Python 3.8+ 的 DLL 目录（推荐）
     if sys.version_info >= (3, 8):
         try:
             os.add_dll_directory(dll_dir)
-            print(f"✓ 已添加 DLL 搜索目录 (Python 3.8+): {dll_dir}")
+            print(f"[OK] 已添加 DLL 搜索目录 (Python 3.8+): {dll_dir}")
         except (OSError, AttributeError) as e:
             print(f"! 添加 DLL 搜索目录失败: {e}")
     
@@ -79,11 +79,11 @@ def setup_choice_dll_path():
             import ctypes.wintypes
             LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008
             ctypes.CDLL(dll_path, winmode=LOAD_WITH_ALTERED_SEARCH_PATH)
-            print(f"✓ 已预加载 DLL (winmode): {dll_name}")
+            print(f"[OK] 已预加载 DLL (winmode): {dll_name}")
         else:
             # Python 3.7 及以下
             ctypes.CDLL(dll_path)
-            print(f"✓ 已预加载 DLL: {dll_name}")
+            print(f"[OK] 已预加载 DLL: {dll_name}")
         
         return True
         
@@ -98,14 +98,14 @@ print("正在初始化 Choice SDK 环境...")
 print("="*60)
 
 if not setup_choice_dll_path():
-    print("\n❌ Choice DLL 环境设置失败")
+    print("\n[FAIL] Choice DLL 环境设置失败")
     print("请确保:")
     print("  1. libs/windows 目录存在")
     print("  2. EmQuantAPI_x64.dll (或 EmQuantAPI.dll) 文件存在")
     print("  3. 所有依赖的 DLL 文件都在 libs/windows 目录中")
     sys.exit(1)
 
-print("\n✓ Choice SDK 环境设置完成，开始导入 EmQuantAPI...")
+print("\n[OK] Choice SDK 环境设置完成，开始导入 EmQuantAPI...")
 
 try:
     from .EmQuantAPI import c
@@ -129,7 +129,7 @@ except ImportError:
             print(f"无法导入 EmQuantAPI: {e}")
             sys.exit(1)
 
-print("✓ EmQuantAPI 导入成功\n")
+print("[OK] EmQuantAPI 导入成功\n")
 
 
 def login_callback(msg):
@@ -147,25 +147,25 @@ def check_csd_available():
     data = c.csd("000001.SZ", "CLOSE", test_date, test_date, "")
     
     if data.ErrorCode == 0:
-        print("  ✅ CSD接口可用 - 将使用CSD接口（序列数据）")
+        print("  [OK] CSD接口可用 - 将使用CSD接口（序列数据）")
         return True
     elif data.ErrorCode == 10001012:
         print(f"\n{'='*70}")
-        print(f"  ⚠️  ⚠️  ⚠️  CSD接口配额不足 (错误码: {data.ErrorCode})  ⚠️  ⚠️  ⚠️")
+        print(f"  [WARN]  [WARN]  [WARN]  CSD接口配额不足 (错误码: {data.ErrorCode})  [WARN]  [WARN]  [WARN]")
         print(f"{'='*70}")
         print(f"  配额类型: 周配额")
         print(f"  当前状态: 已用完")
         print(f"  重置时间: 下周一 00:00")
         print(f"  替代方案: 将使用CSS接口（仅收盘价数据）")
         print(f"")
-        print(f"  ⚠️  重要提示：")
+        print(f"  [WARN]  重要提示：")
         print(f"     CSS接口只能获取CLOSE和PRECLOSE数据")
         print(f"     缺少OPEN/HIGH/LOW/VOLUME，无法计算技术指标")
         print(f"     建议等待配额重置后重新采集数据")
         print(f"{'='*70}\n")
         return False
     else:
-        print(f"  ⚠️  CSD接口错误 ({data.ErrorCode}: {data.ErrorMsg}) - 将切换到CSS接口")
+        print(f"  [WARN]  CSD接口错误 ({data.ErrorCode}: {data.ErrorMsg}) - 将切换到CSS接口")
         return False
 
 def get_kline_data_css(stock_code, start_date, end_date):
@@ -281,7 +281,7 @@ def calculate_technical_indicators_from_kline(kline_data):
         
         # 检查数据质量：如果只有1条数据，无法计算技术指标
         if len(df) < 5:
-            print(f"    ⚠️  数据不足（只有{len(df)}条），无法计算技术指标")
+            print(f"    [WARN]  数据不足（只有{len(df)}条），无法计算技术指标")
             return None
         
         # 计算均线
@@ -333,7 +333,7 @@ def calculate_technical_indicators_from_kline(kline_data):
         }
         
     except Exception as e:
-        print(f"    ⚠️  计算技术指标失败: {e}")
+        print(f"    [WARN]  计算技术指标失败: {e}")
         return None
 
 def check_cache_date():
@@ -352,11 +352,11 @@ def check_cache_date():
             today = datetime.now().strftime("%Y-%m-%d")
             
             if cache_date == today:
-                print(f"✅ 检测到今日缓存数据 ({cache_date})，跳过数据采集")
+                print(f"[OK] 检测到今日缓存数据 ({cache_date})，跳过数据采集")
                 return True
         return False
     except Exception as e:
-        print(f"⚠️  缓存检查失败: {e}")
+        print(f"[WARN]  缓存检查失败: {e}")
         return False
 
 def main():
@@ -375,9 +375,9 @@ def main():
     login_options = f"username={CHOICE_USERNAME},password={CHOICE_PASSWORD}"
     result = c.start(login_options, logcallback=login_callback)
     if result.ErrorCode != 0:
-        print(f"❌ Choice连接失败: {result.ErrorMsg}")
+        print(f"[FAIL] Choice连接失败: {result.ErrorMsg}")
         return
-    print("✅ Choice连接成功")
+    print("[OK] Choice连接成功")
     
     # ==================== K线数据获取策略 ====================
     # 获取：150个交易日（约180自然日）- 确保有足够数据计算MA120等长期指标
@@ -464,13 +464,13 @@ def main():
                 mainboard_stocks.append(stock_code)
                 mainboard_stock_names[stock_code] = stock_name  # 保存名称
             
-            print(f"✅ 方法1成功: 获取到 {len(mainboard_stocks)} 只主板股票（已排除ST）")
+            print(f"[OK] 方法1成功: 获取到 {len(mainboard_stocks)} 只主板股票（已排除ST）")
             print(f"   已排除: {filtered_st} 只ST股票, {filtered_board} 只非主板股票, {invalid_format} 只格式错误")
         else:
-            print(f"⚠️  板块数据获取失败")
+            print(f"[WARN]  板块数据获取失败")
             
     except Exception as e:
-        print(f"⚠️  方法1异常: {e}")
+        print(f"[WARN]  方法1异常: {e}")
     
     # 如果方法1失败，使用方法2：边获取边过滤
     mainboard_stock_names = {}  # 初始化名称映射
@@ -493,9 +493,9 @@ def main():
         
         print(f"  生成 {len(candidate_codes)} 个候选代码")
         print(f"  将在获取K线数据时自动过滤:")
-        print(f"    ✓ 不存在的股票代码")
-        print(f"    ✓ ST股票（通过股票名称识别）")
-        print(f"    ✓ 无交易数据的股票")
+        print(f"    [OK] 不存在的股票代码")
+        print(f"    [OK] ST股票（通过股票名称识别）")
+        print(f"    [OK] 无交易数据的股票")
         print(f"  预计最终有效股票: ~1800-2500 只\n")
         mainboard_stocks = candidate_codes
         
@@ -523,7 +523,7 @@ def main():
             import time
             time.sleep(0.05)  # 避免频率限制
         
-        print(f"  ✅ 获取到 {names_fetched} 只股票名称")
+        print(f"  [OK] 获取到 {names_fetched} 只股票名称")
     
     # 3. 预过滤股票（排除新股、退市股）并获取基础信息（上市日期、行业）
     print(f"\n[3/5] 预过滤股票并获取基础信息...")
@@ -605,13 +605,13 @@ def main():
                     filter_stats['valid'] += 1
             else:
                 # 如果批量查询失败，保留所有代码（后续K线获取时会自然过滤）
-                print(f"  ⚠️ 批次 {batch_start}-{batch_end} 查询失败 (ErrorCode: {info_data.ErrorCode})")
+                print(f"  [WARN] 批次 {batch_start}-{batch_end} 查询失败 (ErrorCode: {info_data.ErrorCode})")
                 filtered_stocks.extend(batch_codes)
                 filter_stats['valid'] += len(batch_codes)
                 
         except Exception as e:
             # 异常时保留所有代码
-            print(f"  ⚠️ 批次 {batch_start}-{batch_end} 异常: {e}")
+            print(f"  [WARN] 批次 {batch_start}-{batch_end} 异常: {e}")
             filtered_stocks.extend(batch_codes)
             filter_stats['valid'] += len(batch_codes)
         
@@ -620,7 +620,7 @@ def main():
         time.sleep(0.1)
     
     print(f"\n  过滤结果:")
-    print(f"    ✓ 有效股票: {filter_stats['valid']} 只")
+    print(f"    [OK] 有效股票: {filter_stats['valid']} 只")
     print(f"    ✗ 新股(<70天): {filter_stats['new_stocks']} 只")
     print(f"    ✗ 已退市: {filter_stats['delisted']} 只")
     print(f"    ✗ 无数据: {filter_stats['no_data']} 只")
@@ -637,9 +637,9 @@ def main():
     
     print(f"\n[4/6] 逐个获取 {len(mainboard_stocks)} 只股票的60日K线数据...")
     if use_csd:
-        print("💡 使用CSD接口（序列数据）- 完整OHLCV数据")
+        print("[IDEA] 使用CSD接口（序列数据）- 完整OHLCV数据")
     else:
-        print("💡 使用CSS接口（截面数据）- 仅收盘价数据")
+        print("[IDEA] 使用CSS接口（截面数据）- 仅收盘价数据")
         print("   提示: CSS接口限制只能获取 CLOSE, PRECLOSE")
         print("   提示: 需要逐日查询，速度较慢但不消耗CSD配额")
     print(f"日期范围: {start_date} ~ {end_date}")
@@ -798,7 +798,7 @@ def main():
     print(f"  跳过: {skip_count} (不存在或无数据)")
     print(f"  总计: {total}")
     if not use_csd:
-        print(f"  💡 提示: 使用CSS接口，只有CLOSE和PRECLOSE数据")
+        print(f"  [IDEA] 提示: 使用CSS接口，只有CLOSE和PRECLOSE数据")
     
     # 只对成功获取K线的股票获取基本面数据
     valid_stocks = list(stocks_data.keys())
@@ -806,7 +806,7 @@ def main():
     
     # 5.1 获取估值数据
     print(f"  获取估值指标 (PE, PB)...")
-    print(f"  💡 使用CSS接口批量获取（PE/PB是截面数据，不是时序数据）")
+    print(f"  [IDEA] 使用CSS接口批量获取（PE/PB是截面数据，不是时序数据）")
     valuation_success = 0
     
     # 估值指标 - PE和PB是截面数据，必须用CSS接口
@@ -857,7 +857,7 @@ def main():
         
         time.sleep(0.1)  # 避免频率限制
     
-    print(f"  ✅ 估值数据获取完成: {valuation_success}/{len(valid_stocks)}")
+    print(f"  [OK] 估值数据获取完成: {valuation_success}/{len(valid_stocks)}")
     
     fundamental_success = valuation_success
     fundamental_fail = len(valid_stocks) - valuation_success
@@ -870,9 +870,9 @@ def main():
     print(f"\n{'='*60}")
     print(f"数据获取完成汇总:")
     print(f"  候选股票: {total} 只")
-    print(f"  ✅ K线数据成功: {success_count} 只")
-    print(f"  ✅ 基本面数据成功: {fundamental_success} 只")
-    print(f"  ❌ 跳过: {skip_count} 只")
+    print(f"  [OK] K线数据成功: {success_count} 只")
+    print(f"  [OK] 基本面数据成功: {fundamental_success} 只")
+    print(f"  [FAIL] 跳过: {skip_count} 只")
     print(f"     - ST股票: {st_count} 只")
     print(f"     - 无效/不存在: {invalid_count} 只")
     print(f"  最终有效股票: {success_count} 只主板非ST股票")
@@ -982,7 +982,7 @@ def main():
     
     # 获取文件大小
     file_size = os.path.getsize(output_file)
-    print(f"\n✅ 数据已保存到: {output_file}")
+    print(f"\n[OK] 数据已保存到: {output_file}")
     print(f"   文件大小: {file_size / 1024 / 1024:.2f} MB")
     
     # 检查tech_data是否正常生成
@@ -991,7 +991,7 @@ def main():
     
     if tech_data_success == 0:
         print(f"\n{'='*70}")
-        print(f"  ⚠️  警告：未能生成技术指标数据")
+        print(f"  [WARN]  警告：未能生成技术指标数据")
         print(f"{'='*70}")
         print(f"  原因：使用CSS接口，数据不完整（仅有收盘价）")
         print(f"  影响：无法计算RSI/MACD/MA等技术指标")
@@ -1000,9 +1000,9 @@ def main():
         print(f"     2. 或使用'获取全部数据'按钮使用Tushare等数据源")
         print(f"{'='*70}")
     elif tech_data_success < tech_data_total:
-        print(f"\n  ⚠️  部分股票技术指标计算失败: {tech_data_success}/{tech_data_total}")
+        print(f"\n  [WARN]  部分股票技术指标计算失败: {tech_data_success}/{tech_data_total}")
     else:
-        print(f"\n  ✅ 技术指标计算完成: {tech_data_success}/{tech_data_total}")
+        print(f"\n  [OK] 技术指标计算完成: {tech_data_success}/{tech_data_total}")
     
     # 保存失败记录
     if failed_stocks:
@@ -1016,7 +1016,7 @@ def main():
         with open(failed_file, 'w', encoding='utf-8') as f:
             json.dump(failed_data, f, ensure_ascii=False, indent=2)
         
-        print(f"\n⚠️  失败记录已保存到: {failed_file}")
+        print(f"\n[WARN]  失败记录已保存到: {failed_file}")
         print(f"   失败数量: {len(failed_stocks)}")
         print(f"   失败率: {len(failed_stocks)/total*100:.1f}%")
         
@@ -1027,7 +1027,7 @@ def main():
     
     # 8. 断开连接
     c.stop()
-    print("\n✅✅✅ 全部主板数据获取完成！")
+    print("\n[OK][OK][OK] 全部主板数据获取完成！")
 
 if __name__ == "__main__":
     main()

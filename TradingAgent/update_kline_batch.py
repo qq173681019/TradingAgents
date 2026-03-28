@@ -37,9 +37,9 @@ if __name__ == '__main__':
             hot_sectors_data = analyzer._get_hot_sectors_from_tencent()
             if hot_sectors_data and 'sectors' in hot_sectors_data:
                 hot_sectors = [s['name'] for s in hot_sectors_data['sectors'][:20]]  # 取前20个热门板块
-                print(f'✓ 获取到 {len(hot_sectors)} 个热门板块')
+                print(f'[OK] 获取到 {len(hot_sectors)} 个热门板块')
         except Exception as e:
-            print(f'⚠️  获取热门板块失败: {e}')
+            print(f'[WARN]  获取热门板块失败: {e}')
         
         # 加载并更新 batch_stock_scores_none.json
         data_dir = os.path.join(os.path.dirname(__file__), '..', 'TradingShared', 'data')
@@ -57,16 +57,16 @@ if __name__ == '__main__':
             with open(score_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             
-            print(f'✓ 热门板块信息已保存到 batch_stock_scores_none.json')
+            print(f'[OK] 热门板块信息已保存到 batch_stock_scores_none.json')
             if hot_sectors:
                 print(f'  热门板块: {", ".join(hot_sectors[:5])}{"..." if len(hot_sectors) > 5 else ""}')
         else:
-            print(f'⚠️  未找到 {score_file}')
+            print(f'[WARN]  未找到 {score_file}')
         
         root.destroy()
         
     except Exception as e:
-        print(f'⚠️  保存热门板块信息失败: {e}')
+        print(f'[WARN]  保存热门板块信息失败: {e}')
         import traceback
         traceback.print_exc()
     

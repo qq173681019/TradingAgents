@@ -147,13 +147,13 @@ class MiniMaxCodingPlan:
         response = self._make_request(messages, max_tokens=50, temperature=0.1)
         
         if response.success:
-            print("✅ MiniMax API 连接成功！")
-            print(f"📝 回复内容: {response.content}")
+            print("[OK] MiniMax API 连接成功！")
+            print(f"[WRITE] 回复内容: {response.content}")
             if response.usage:
-                print(f"📊 使用情况: {response.usage}")
+                print(f"[CHART] 使用情况: {response.usage}")
             return True
         else:
-            print(f"❌ 连接失败: {response.error}")
+            print(f"[FAIL] 连接失败: {response.error}")
             return False
     
     def generate_code(self, prompt: str, language: str = "python") -> MiniMaxResponse:
@@ -243,19 +243,19 @@ def test_minimax_integration():
         )
         
         if code_response.success:
-            print("✅ 代码生成测试成功！")
-            print(f"📝 生成的代码:\n{code_response.content}")
+            print("[OK] 代码生成测试成功！")
+            print(f"[WRITE] 生成的代码:\n{code_response.content}")
             if code_response.usage:
-                print(f"📊 使用情况: {code_response.usage}")
+                print(f"[CHART] 使用情况: {code_response.usage}")
         else:
-            print(f"❌ 代码生成失败: {code_response.error}")
+            print(f"[FAIL] 代码生成失败: {code_response.error}")
             return False
         
         print("\n🎉 所有测试通过！MiniMax 集成成功配置")
         return True
         
     except Exception as e:
-        print(f"❌ 测试失败: {e}")
+        print(f"[FAIL] 测试失败: {e}")
         print("🔧 请检查:")
         print("   1. API 密钥是否正确")
         print("   2. 网络连接是否正常")

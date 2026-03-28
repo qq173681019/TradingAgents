@@ -224,9 +224,9 @@ class BaoStockAPI:
                 df = self.get_stock_kline(code, days)
                 if df is not None and not df.empty:
                     results[code] = df
-                    print(f"[{i}/{total}] BaoStock {code} ✅")
+                    print(f"[{i}/{total}] BaoStock {code} [OK]")
                 else:
-                    print(f"[{i}/{total}] BaoStock {code} ❌")
+                    print(f"[{i}/{total}] BaoStock {code} [FAIL]")
                 
                 # 控制请求频率
                 time.sleep(0.1)  # BaoStock对免费用户有频率限制
@@ -292,28 +292,28 @@ def test_baostock_api():
     bao = BaoStockAPI()
     
     if not bao.is_connected:
-        print("❌ BaoStock 连接失败")
+        print("[FAIL] BaoStock 连接失败")
         return False
     
     # 测试连接
     if not bao.test_connection():
-        print("❌ BaoStock 连接测试失败")
+        print("[FAIL] BaoStock 连接测试失败")
         return False
     
     # 测试单只股票
     print("\n测试单只股票获取...")
     df = bao.get_stock_kline("000001", days=5)
     if df is not None and not df.empty:
-        print(f"✅ 单只股票测试成功: {len(df)} 条数据")
+        print(f"[OK] 单只股票测试成功: {len(df)} 条数据")
         print(f"   列名: {list(df.columns)}")
     else:
-        print("❌ 单只股票测试失败")
+        print("[FAIL] 单只股票测试失败")
     
     # 测试批量获取
     print("\n测试批量获取...")
     test_codes = ["000001", "600000", "000002"]
     batch_results = bao.batch_get_klines(test_codes, days=3)
-    print(f"✅ 批量测试完成: {len(batch_results)}/{len(test_codes)}")
+    print(f"[OK] 批量测试完成: {len(batch_results)}/{len(test_codes)}")
     
     # 关闭连接
     bao.close()

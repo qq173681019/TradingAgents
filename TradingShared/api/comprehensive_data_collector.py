@@ -773,12 +773,12 @@ class ComprehensiveDataCollector:
                     thread.join(timeout=test_case['timeout'])
                     
                     if thread.is_alive():
-                        print(" ❌ 超时")
+                        print(" [FAIL] 超时")
                         continue
                     elif exception[0]:
                         error_msg = str(exception[0])
                         error_type = type(exception[0]).__name__
-                        print(f" ❌ 异常: {error_type}")
+                        print(f" [FAIL] 异常: {error_type}")
                         # 详细诊断AKShare常见错误
                         if 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
                             print(f"    [诊断] 网络超时 - 可能网络连接不稳定或AKShare服务器响应慢")
@@ -792,10 +792,10 @@ class ComprehensiveDataCollector:
                             print(f"    [诊断] 访问被拒绝 - 可能IP被限制或需要更新AKShare版本")
                         continue
                     elif result[0] is not None and not result[0].empty:
-                        print(" ✅ 成功")
+                        print(" [OK] 成功")
                         success_count += 1
                     else:
-                        print(" ❌ 无数据")
+                        print(" [FAIL] 无数据")
                 else:
                     # Unix系统使用signal超时
                     signal.signal(signal.SIGALRM, timeout_handler)
@@ -806,19 +806,19 @@ class ComprehensiveDataCollector:
                         signal.alarm(0)
                         
                         if result is not None and not result.empty:
-                            print(" ✅ 成功")
+                            print(" [OK] 成功")
                             success_count += 1
                         else:
-                            print(" ❌ 无数据")
+                            print(" [FAIL] 无数据")
                     except TimeoutError:
-                        print(" ❌ 超时")
+                        print(" [FAIL] 超时")
                         signal.alarm(0)
                     except Exception as e:
-                        print(f" ❌ 异常: {type(e).__name__}")
+                        print(f" [FAIL] 异常: {type(e).__name__}")
                         signal.alarm(0)
                         
             except Exception as e:
-                print(f" ❌ 测试失败: {type(e).__name__}")
+                print(f" [FAIL] 测试失败: {type(e).__name__}")
                 continue
             
             # 测试间隔
@@ -3732,7 +3732,7 @@ class ComprehensiveDataCollector:
                         basic_info = self.collect_basic_info(code, source)
                         if basic_info and basic_info.get('name') and basic_info['name'] != f'股票{code}':
                             self.wait_period_data[code]['basic_info'] = basic_info
-                            print(f"    ✓ {code}: 基础信息 ({source})")
+                            print(f"    [OK] {code}: 基础信息 ({source})")
                             break
                 
                 # 2. 行业概念 - 优先baostock, 兜底akshare
@@ -3744,7 +3744,7 @@ class ComprehensiveDataCollector:
                         industry_concept = self.collect_industry_concept_info(code, source)
                         if industry_concept and (industry_concept.get('industry') or industry_concept.get('concepts')):
                             self.wait_period_data[code]['industry_concept'] = industry_concept
-                            print(f"    ✓ {code}: 行业概念 ({source})")
+                            print(f"    [OK] {code}: 行业概念 ({source})")
                             break
                 
                 # 3. 财务数据 - 优先baostock, 兜底akshare
@@ -3756,7 +3756,7 @@ class ComprehensiveDataCollector:
                         financial_data = self.collect_financial_data(code, source)
                         if financial_data and any(v is not None for v in financial_data.values() if v != source):
                             self.wait_period_data[code]['financial_data'] = financial_data
-                            print(f"    ✓ {code}: 财务数据 ({source})")
+                            print(f"    [OK] {code}: 财务数据 ({source})")
                             break
                 
                 # 4. 资金流向 - 优先tencent, 兜底akshare
@@ -3768,14 +3768,14 @@ class ComprehensiveDataCollector:
                         fund_flow = self.collect_fund_flow_data(code, source)
                         if fund_flow and any(v is not None for v in fund_flow.values() if v != source):
                             self.wait_period_data[code]['fund_flow'] = fund_flow
-                            print(f"    ✓ {code}: 资金流向 ({source})")
+                            print(f"    [OK] {code}: 资金流向 ({source})")
                             break
                 
                 collected_count += 1
                 time.sleep(1)  # 避免请求过快
                 
             except Exception as e:
-                print(f"    ⚠️ {code}: 等待期间数据收集失败 - {e}")
+                print(f"    [WARN] {code}: 等待期间数据收集失败 - {e}")
                 continue
         
         elapsed = time.time() - start_time
@@ -3811,7 +3811,7 @@ class ComprehensiveDataCollector:
                     if kline_data is not None and not kline_data.empty:
                         result[kline_code] = kline_data
                         akshare_kline_count += 1
-                        print(f"    ✓ [K线] {kline_code}: {len(kline_data)}天K线数据 (akshare)")
+                        print(f"    [OK] [K线] {kline_code}: {len(kline_data)}天K线数据 (akshare)")
                     else:
                         print(f"    ✗ [K线] {kline_code}: akshare获取失败")
                 
@@ -3828,7 +3828,7 @@ class ComprehensiveDataCollector:
                         if basic_info and basic_info.get('name') and basic_info['name'] != f'股票{code}':
                             self.wait_period_data[code]['basic_info'] = basic_info
                             other_data_count += 1
-                            print(f"    ✓ [其他] {code}: 基础信息 ({source})")
+                            print(f"    [OK] [其他] {code}: 基础信息 ({source})")
                             break
                 
                 # 收集财务数据（如果时间充足）
@@ -3840,13 +3840,13 @@ class ComprehensiveDataCollector:
                         financial_data = self.collect_financial_data(code, source)
                         if financial_data and any(v is not None for v in financial_data.values() if v != source):
                             self.wait_period_data[code]['financial_data'] = financial_data
-                            print(f"    ✓ [其他] {code}: 财务数据 ({source})")
+                            print(f"    [OK] [其他] {code}: 财务数据 ({source})")
                             break
                 
                 time.sleep(0.5)  # 短暂延时避免请求过快
                 
             except Exception as e:
-                print(f"    ⚠️ {code}: 并行数据收集失败 - {e}")
+                print(f"    [WARN] {code}: 并行数据收集失败 - {e}")
                 continue
         
         elapsed = time.time() - start_time
@@ -4287,11 +4287,11 @@ class ComprehensiveDataCollector:
                         'data_points': len(kline_df),
                         'source': 'batch_rotation'
                     }
-                    print(f"    ✓ K线数据: {len(kline_df)}天 (轮换策略)")
+                    print(f"    [OK] K线数据: {len(kline_df)}天 (轮换策略)")
                 else:
                     kline_df = None
             else:
-                print(f"    ⚠️ 未在批量K线数据中，尝试AKShare兜底")
+                print(f"    [WARN] 未在批量K线数据中，尝试AKShare兜底")
                 kline_df = self.collect_kline_data(code, 'akshare')
                 if kline_df is not None and not kline_df.empty:
                     # 安全获取最新价格
@@ -4314,10 +4314,10 @@ class ComprehensiveDataCollector:
             # 技术指标计算 - 基于K线数据
             if kline_df is not None and not kline_df.empty:
                 stock_data['technical_indicators'] = self.collect_technical_indicators(kline_df)
-                print(f"    ✓ 技术指标: 基于K线数据计算完成")
+                print(f"    [OK] 技术指标: 基于K线数据计算完成")
             else:
                 stock_data['technical_indicators'] = {'status': 'no_kline_data'}
-                print(f"    ⚠️ 技术指标: 无K线数据，跳过")
+                print(f"    [WARN] 技术指标: 无K线数据，跳过")
             
             # 数据源追踪 - 记录实际使用的数据源
             data_sources_used = {
@@ -4329,18 +4329,18 @@ class ComprehensiveDataCollector:
             }
             
             # 输出批量采集结果汇总
-            print(f"    ✓ 基础信息: {data_sources_used['basic_info']}")
-            print(f"    ✓ 财务数据: {data_sources_used['financial_data']}")
-            print(f"    ✓ 行业概念: {data_sources_used['industry_concept']}")
-            print(f"    ✓ 资金流向: {data_sources_used['fund_flow']}")
+            print(f"    [OK] 基础信息: {data_sources_used['basic_info']}")
+            print(f"    [OK] 财务数据: {data_sources_used['financial_data']}")
+            print(f"    [OK] 行业概念: {data_sources_used['industry_concept']}")
+            print(f"    [OK] 资金流向: {data_sources_used['fund_flow']}")
             
             # 新闻公告 - 实时收集（时效性重要，使用AKShare）
             try:
                 stock_data['news_announcements'] = self.collect_news_announcements(code, 'akshare')
-                print(f"    ✓ 新闻公告: AKShare实时收集")
+                print(f"    [OK] 新闻公告: AKShare实时收集")
             except Exception as e:
                 stock_data['news_announcements'] = {'status': 'failed', 'error': str(e)}
-                print(f"    ⚠️ 新闻公告: 收集失败 - {e}")
+                print(f"    [WARN] 新闻公告: 收集失败 - {e}")
             
             # 记录完整数据源信息
             stock_data['data_sources_used'] = data_sources_used
@@ -4799,14 +4799,14 @@ class ComprehensiveDataCollector:
                                         truly_added = len(new_dates - old_dates)
                                         
                                         total_count = len(kline_df)
-                                        print(f"    ✓ {code}: 接口返回{len(new_kline_df)}天，实际新增{truly_added}天，总计{total_count}天K线")
+                                        print(f"    [OK] {code}: 接口返回{len(new_kline_df)}天，实际新增{truly_added}天，总计{total_count}天K线")
                                     else:
                                         # 无法合并，使用新数据
                                         kline_df = new_kline_df
-                                        print(f"    ✓ {code}: 更新K线 {len(kline_df)}天（无法合并）")
+                                        print(f"    [OK] {code}: 更新K线 {len(kline_df)}天（无法合并）")
                                 else:
                                     kline_df = new_kline_df
-                                    print(f"    ✓ {code}: 更新K线 {len(kline_df)}天")
+                                    print(f"    [OK] {code}: 更新K线 {len(kline_df)}天")
                             else:
                                 kline_df = new_kline_df
                                 print(f"    + {code}: 新增K线 {len(kline_df)}天")

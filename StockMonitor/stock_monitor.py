@@ -16,7 +16,7 @@ def update_success(self, df, source, code):
             price = latest['Close']
             curr_time = latest.name.strftime('%H:%M')
             
-            self.safe_config(self.lbl_status, text=f"✅ {source} | {code} | {price:.2f} | {curr_time}", fg="#006400")
+            self.safe_config(self.lbl_status, text=f"[OK] {source} | {code} | {price:.2f} | {curr_time}", fg="#006400")
             # 初始化交互状态（仅第一次）
             if not getattr(self, '_kline_initialized', False):
                 self.kline_options = [30, 60, 120, 'D']

@@ -362,9 +362,9 @@ if __name__ == "__main__":
     # 测试连接
     print("[1] 测试连接...")
     if choice.test_connection():
-        print("    ✅ 连接成功\n")
+        print("    [OK] 连接成功\n")
     else:
-        print("    ❌ 连接失败\n")
+        print("    [FAIL] 连接失败\n")
         exit(1)
     
     # 测试获取K线数据
@@ -372,25 +372,25 @@ if __name__ == "__main__":
     result = choice.get_kline_data("000001.SZ", days=5)
     
     if result["success"]:
-        print(f"    ✅ 成功获取 {len(result['dates'])} 条数据")
+        print(f"    [OK] 成功获取 {len(result['dates'])} 条数据")
         print(f"    日期: {result['dates'][:3]}...")
         if 'CLOSE' in result['data']:
             closes = result['data']['CLOSE']
             print(f"    收盘价: {closes[:3]}...")
     else:
-        print(f"    ❌ 失败: {result['error']}")
+        print(f"    [FAIL] 失败: {result['error']}")
     
     # 测试获取实时行情
     print("\n[3] 获取实时行情...")
     result = choice.get_realtime_quote(["000001.SZ", "600036.SH"])
     
     if result["success"]:
-        print(f"    ✅ 成功获取 {len(result['codes'])} 只股票")
+        print(f"    [OK] 成功获取 {len(result['codes'])} 只股票")
         print(f"    代码: {result['codes']}")
         if 'LASTPRICE' in result['data']:
             prices = result['data']['LASTPRICE']
             print(f"    最新价: {prices}")
     else:
-        print(f"    ❌ 失败: {result['error']}")
+        print(f"    [FAIL] 失败: {result['error']}")
     
-    print("\n✅ 测试完成")
+    print("\n[OK] 测试完成")

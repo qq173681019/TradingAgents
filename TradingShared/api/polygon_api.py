@@ -279,10 +279,10 @@ def demonstrate_polygon_integration():
         # 测试连接
         print("🔍 测试连接...")
         if api.test_connection():
-            print("✅ Polygon.io连接成功")
+            print("[OK] Polygon.io连接成功")
             
             # 演示功能
-            print("\n📊 功能演示:")
+            print("\n[CHART] 功能演示:")
             
             # 美股测试
             test_symbols = ['AAPL', 'MSFT']
@@ -299,9 +299,9 @@ def demonstrate_polygon_integration():
                 print(f"   公司: {company_info.get('name')}")
                 print(f"   市场: {company_info.get('market')}")
         else:
-            print("❌ 连接失败")
+            print("[FAIL] 连接失败")
     
-    print("\n🎯 集成到现有系统的建议:")
+    print("\n[TARGET] 集成到现有系统的建议:")
     print("1. 作为美股数据的补充数据源")
     print("2. 国际化扩展时的主要美股API")
     print("3. 可与现有A股API形成互补")

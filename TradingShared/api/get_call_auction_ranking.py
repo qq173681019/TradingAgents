@@ -101,23 +101,23 @@ def main():
     print("="*60)
     
     if not setup_choice_dll_path():
-        print("❌ Choice DLL 环境设置失败")
+        print("[FAIL] Choice DLL 环境设置失败")
         return
 
     login_options = f"username={CHOICE_USERNAME},password={CHOICE_PASSWORD}"
     result = c.start(login_options, logcallback=login_callback)
     if result.ErrorCode != 0:
-        print(f"❌ Choice连接失败: {result.ErrorMsg}")
+        print(f"[FAIL] Choice连接失败: {result.ErrorMsg}")
         return
-    print("✅ Choice连接成功")
+    print("[OK] Choice连接成功")
 
     try:
         # 1. 获取股票列表
         stocks, names = get_mainboard_stocks()
         if not stocks:
-            print("❌ 未获取到股票列表")
+            print("[FAIL] 未获取到股票列表")
             return
-        print(f"✅ 获取到 {len(stocks)} 只主板股票")
+        print(f"[OK] 获取到 {len(stocks)} 只主板股票")
 
         # 2. 获取竞价快照数据
         # 竞价期间关键指标：
@@ -162,7 +162,7 @@ def main():
             time.sleep(0.1) # 避免频率限制
 
         if not all_data:
-            print("\n⚠️ 未获取到有效的竞价数据。请确保在交易日 9:15 - 9:30 之间运行。")
+            print("\n[WARN] 未获取到有效的竞价数据。请确保在交易日 9:15 - 9:30 之间运行。")
             return
 
         # 3. 排序并展示
@@ -179,7 +179,7 @@ def main():
         # 按竞价额排序
         df_volume = df.sort_values(by="竞价额(万)", ascending=False)
         print("\n" + "="*80)
-        print(f"💰 A股竞价成交额排行 (前20名) - {datetime.now().strftime('%H:%M:%S')}")
+        print(f"[MONEY] A股竞价成交额排行 (前20名) - {datetime.now().strftime('%H:%M:%S')}")
         print("="*80)
         print(df_volume.head(20).to_string(index=False))
 
@@ -188,7 +188,7 @@ def main():
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, f"call_auction_ranking_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
         df_sorted.to_csv(output_file, index=False, encoding='utf_8_sig')
-        print(f"\n✅ 排行数据已保存至: {output_file}")
+        print(f"\n[OK] 排行数据已保存至: {output_file}")
 
     finally:
         c.stop()

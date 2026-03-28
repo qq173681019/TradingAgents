@@ -18,10 +18,10 @@ def init_choice():
     print("[服务] 初始化Choice SDK...")
     result = c.start("")
     if result.ErrorCode == 0:
-        print("[服务] ✅ Choice连接成功")
+        print("[服务] [OK] Choice连接成功")
         return True
     else:
-        print(f"[服务] ❌ Choice连接失败: {result.ErrorMsg}")
+        print(f"[服务] [FAIL] Choice连接失败: {result.ErrorMsg}")
         return False
 
 def get_kline_data(stock_code, days=5):
@@ -47,10 +47,10 @@ def get_kline_data(stock_code, days=5):
             for i, indicator in enumerate(data.Indicators):
                 result["data"][indicator] = stock_data[i]
         
-        print(f"[服务] ✅ 成功获取 {len(data.Dates)} 条数据")
+        print(f"[服务] [OK] 成功获取 {len(data.Dates)} 条数据")
         return result
     else:
-        print(f"[服务] ❌ 获取失败: {data.ErrorMsg}")
+        print(f"[服务] [FAIL] 获取失败: {data.ErrorMsg}")
         return None
 
 def update_status(status, message):
@@ -101,13 +101,13 @@ def get_all_stocks():
                                 'name': names[i] if i < len(names) else ''
                             }
                             stocks.append(stock_info)
-                    print(f"[服务] ✅ 获取到 {len(stocks)} 只A股主板股票 (板块: {block_code}, 参数: {param_set['desc']})")
+                    print(f"[服务] [OK] 获取到 {len(stocks)} 只A股主板股票 (板块: {block_code}, 参数: {param_set['desc']})")
                     return stocks
                 else:
-                    print(f"[服务] ❌ 失败: {data.ErrorMsg if hasattr(data, 'ErrorMsg') else '未知错误'} (板块: {block_code}, 参数: {param_set['desc']})")
+                    print(f"[服务] [FAIL] 失败: {data.ErrorMsg if hasattr(data, 'ErrorMsg') else '未知错误'} (板块: {block_code}, 参数: {param_set['desc']})")
             except Exception as e:
                 print(f"[服务] 异常: {e} (板块: {block_code}, 参数: {param_set['desc']})")
-    print("[服务] ❌ 所有板块代码和参数组合均失败，无法获取股票列表")
+    print("[服务] [FAIL] 所有板块代码和参数组合均失败，无法获取股票列表")
     # 额外测试：尝试用css和cst接口获取主板股票列表（只用Choice）
     print("[服务] 尝试用css接口获取A股主板股票列表...")
     try:
@@ -124,12 +124,12 @@ def get_all_stocks():
                         'name': names[i] if i < len(names) else ''
                     }
                     stocks.append(stock_info)
-            print(f"[服务] ✅ css接口获取到 {len(stocks)} 只A股主板股票")
+            print(f"[服务] [OK] css接口获取到 {len(stocks)} 只A股主板股票")
             return stocks
         else:
-            print(f"[服务] ❌ css接口失败: {data.ErrorMsg if hasattr(data, 'ErrorMsg') else '未知错误'}")
+            print(f"[服务] [FAIL] css接口失败: {data.ErrorMsg if hasattr(data, 'ErrorMsg') else '未知错误'}")
     except Exception as e:
-        print(f"[服务] ❌ css接口异常: {e}")
+        print(f"[服务] [FAIL] css接口异常: {e}")
     print("[服务] 尝试用cst接口获取A股主板股票列表...")
     try:
         # cst接口：板块成分
@@ -145,13 +145,13 @@ def get_all_stocks():
                         'name': names[i] if i < len(names) else ''
                     }
                     stocks.append(stock_info)
-            print(f"[服务] ✅ cst接口获取到 {len(stocks)} 只A股主板股票")
+            print(f"[服务] [OK] cst接口获取到 {len(stocks)} 只A股主板股票")
             return stocks
         else:
-            print(f"[服务] ❌ cst接口失败: {data.ErrorMsg if hasattr(data, 'ErrorMsg') else '未知错误'}")
+            print(f"[服务] [FAIL] cst接口失败: {data.ErrorMsg if hasattr(data, 'ErrorMsg') else '未知错误'}")
     except Exception as e:
-        print(f"[服务] ❌ cst接口异常: {e}")
-    print("[服务] ❌ css/cst接口也无法获取主板股票列表，请检查Choice环境或联系技术支持。")
+        print(f"[服务] [FAIL] cst接口异常: {e}")
+    print("[服务] [FAIL] css/cst接口也无法获取主板股票列表，请检查Choice环境或联系技术支持。")
     return []
 
 def main():
@@ -172,7 +172,7 @@ def main():
     stocks = get_all_stocks()
     
     if not stocks:
-        print("❌ 未能获取股票列表")
+        print("[FAIL] 未能获取股票列表")
         update_status("error", "股票列表获取失败")
         return
     
@@ -201,11 +201,11 @@ def main():
                 fail_count += 1
                 error_list.append({"code": code, "name": name, "reason": "K线数据获取失败"})
                 if fail_count <= 10:
-                    print(f"  ⚠️  {code} {name} 获取失败")
+                    print(f"  [WARN]  {code} {name} 获取失败")
         except Exception as e:
             fail_count += 1
             error_list.append({"code": code, "name": name, "reason": str(e)})
-            print(f"  ❌ {code} {name} 异常: {e}")
+            print(f"  [FAIL] {code} {name} 异常: {e}")
     # 保存到缓存
     print(f"\n[3/3] 保存数据...")
     cache_data = {
@@ -222,16 +222,16 @@ def main():
         error_file = DATA_DIR / "choice_failed_stocks.json"
         with open(error_file, 'w', encoding='utf-8') as f:
             json.dump(error_list, f, ensure_ascii=False, indent=2)
-        print(f"❌ 有 {len(error_list)} 只股票获取失败，详情见 {error_file}")
+        print(f"[FAIL] 有 {len(error_list)} 只股票获取失败，详情见 {error_file}")
     print(f"\n" + "="*60)
-    print(f"✅ 数据更新完成")
+    print(f"[OK] 数据更新完成")
     print(f"   成功: {success_count} 只")
     print(f"   失败: {fail_count} 只")
     print(f"   缓存文件: {CACHE_FILE}")
     print(f"   文件大小: {CACHE_FILE.stat().st_size / 1024 / 1024:.2f} MB")
     print("="*60)
     update_status("success", f"数据更新成功 ({success_count}/{len(stocks)})")
-    print("\n💡 提示：可以将此脚本设置为定时任务，定期更新数据。")
+    print("\n[IDEA] 提示：可以将此脚本设置为定时任务，定期更新数据。")
 
 if __name__ == "__main__":
     main()

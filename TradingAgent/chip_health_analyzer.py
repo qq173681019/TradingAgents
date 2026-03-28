@@ -27,7 +27,7 @@ warnings.filterwarnings('ignore')
 try:
     import akshare as ak
     AKSHARE_AVAILABLE = True
-    print("✓ akshare库加载成功")
+    print("[OK] akshare库加载成功")
 except ImportError:
     AKSHARE_AVAILABLE = False
     print("⚠ akshare库未安装，请运行: pip install akshare")
@@ -38,7 +38,7 @@ try:
     TUSHARE_AVAILABLE = True
     # 如果有token可以在这里配置
     # ts.set_token('your_token_here')
-    print("✓ tushare库加载成功")
+    print("[OK] tushare库加载成功")
 except ImportError:
     TUSHARE_AVAILABLE = False
     print("⚠ tushare库未安装")
@@ -48,7 +48,7 @@ try:
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.preprocessing import StandardScaler
     ML_AVAILABLE = True
-    print("✓ scikit-learn库加载成功 - 机器学习增强已启用")
+    print("[OK] scikit-learn库加载成功 - 机器学习增强已启用")
 except ImportError:
     ML_AVAILABLE = False
     print("⚠ scikit-learn库未安装 - 机器学习增强未启用")
@@ -75,7 +75,7 @@ class ChipHealthAnalyzer:
         self.ml_scaler = None
         
         if self.ml_available:
-            print("✓ 机器学习增强模式已启用")
+            print("[OK] 机器学习增强模式已启用")
             self._initialize_ml_model()
             
         # 数据缓存（用于提升批量处理效率）
@@ -93,7 +93,7 @@ class ChipHealthAnalyzer:
         if not self.akshare_available:
             return
             
-        print(f"\n🚀 正在预取筹码分析相关数据 (共 {len(stock_codes) if stock_codes else '全市场'} 只股票)...")
+        print(f"\n[ROCKET] 正在预取筹码分析相关数据 (共 {len(stock_codes) if stock_codes else '全市场'} 只股票)...")
         
         try:
             # 1. 预取全市场资金流向排名（包含部分股东动向信息）
@@ -101,7 +101,7 @@ class ChipHealthAnalyzer:
                 try:
                     import akshare as ak
                     self._fund_flow_rank_cache = ak.stock_individual_fund_flow_rank(indicator="今日")
-                    print("  ✓ 已预取全市场资金流向排名数据")
+                    print("  [OK] 已预取全市场资金流向排名数据")
                 except Exception as e:
                     print(f"  ⚠ 预取资金流向排名失败: {e}")
                 
@@ -112,12 +112,12 @@ class ChipHealthAnalyzer:
 
                     # 这个接口返回全市场的股东户数最新数据
                     self._holder_count_cache = ak.stock_zh_a_gdhs_em()
-                    print("  ✓ 已预取全市场股东户数数据")
+                    print("  [OK] 已预取全市场股东户数数据")
                 except Exception as e:
                     print(f"  ⚠ 预取股东户数数据失败: {e}")
                     
         except Exception as e:
-            print(f"  ❌ 预取数据过程中出现异常: {e}")
+            print(f"  [FAIL] 预取数据过程中出现异常: {e}")
     
     def inject_batch_data(self, top10_concentrations=None, holder_changes=None):
         """
@@ -203,23 +203,23 @@ class ChipHealthAnalyzer:
         # 批量模式：只使用缓存数据，不从网络获取
         if is_batch_mode:
             if cached_kline_data is not None and len(cached_kline_data) > 0:
-                print("  ✓ [批量模式] 使用缓存K线数据")
+                print("  [OK] [批量模式] 使用缓存K线数据")
                 current_price, hist_data = self._convert_cached_kline_to_dataframe(cached_kline_data)
             else:
-                print("  ❌ [批量模式] 无缓存K线数据，跳过筹码分析")
+                print("  [FAIL] [批量模式] 无缓存K线数据，跳过筹码分析")
                 result['error'] = '批量模式下缺少K线缓存数据，请先更新K线数据'
                 return result
         else:
             # 实时模式：优先使用缓存，没有缓存时从网络获取
             if cached_kline_data is not None and len(cached_kline_data) > 0:
-                print("  ✓ [实时模式] 使用缓存K线数据")
+                print("  [OK] [实时模式] 使用缓存K线数据")
                 current_price, hist_data = self._convert_cached_kline_to_dataframe(cached_kline_data)
             else:
                 print("  ⚠ [实时模式] 无缓存数据，从网络获取...")
                 current_price, hist_data = self._get_price_and_history(stock_code)
         
         if current_price == 0 or hist_data is None:
-            print("❌ 无法获取价格数据")
+            print("[FAIL] 无法获取价格数据")
             result['error'] = '无法获取股票数据，请检查网络连接或稍后重试'
             return result
         
@@ -240,11 +240,11 @@ class ChipHealthAnalyzer:
             result['data_start_date'] = str(hist_data[date_col].iloc[0])
             result['data_end_date'] = str(hist_data[date_col].iloc[-1])
             result['data_days'] = len(hist_data)
-            print(f"✓ 当前价格: ¥{current_price:.2f}")
-            print(f"✓ 数据时间: {result['data_start_date']} 至 {result['data_end_date']} (共{result['data_days']}天)")
+            print(f"[OK] 当前价格: ¥{current_price:.2f}")
+            print(f"[OK] 数据时间: {result['data_start_date']} 至 {result['data_end_date']} (共{result['data_days']}天)")
         else:
             result['data_days'] = len(hist_data)
-            print(f"✓ 当前价格: ¥{current_price:.2f}")
+            print(f"[OK] 当前价格: ¥{current_price:.2f}")
             print(f"⚠ 未找到日期列，数据天数: {result['data_days']}天")
         
         # 2. 获取十大流通股东（优先使用缓存/预取数据）
@@ -258,7 +258,7 @@ class ChipHealthAnalyzer:
             result['top10_holders'] = top10_data
             chip_concentration = self._calculate_concentration(top10_data)
             result['chip_concentration'] = chip_concentration
-            print(f"✓ 十大股东持股: {chip_concentration:.2f}%")
+            print(f"[OK] 十大股东持股: {chip_concentration:.2f}%")
         elif is_batch_mode:
             print("  ⚠ [批量模式] 未命中缓存，跳过实时获取十大股东数据")
         else:
@@ -273,7 +273,7 @@ class ChipHealthAnalyzer:
         
         if holder_change != 0:
             result['holder_count_change'] = holder_change
-            print(f"✓ 股东户数变化: {holder_change:+.2f}%")
+            print(f"[OK] 股东户数变化: {holder_change:+.2f}%")
         elif is_batch_mode:
             print("  ⚠ [批量模式] 未命中缓存，跳过实时获取股东户数")
         else:
@@ -315,8 +315,8 @@ class ChipHealthAnalyzer:
                 result['periods'][period]['scr'] = 100.0
         
         result['scr'] = result['periods']['60d']['scr']
-        print(f"✓ 60日筹码成本: P10=¥{p10_60:.2f}, P50=¥{p50_60:.2f}, P90=¥{p90_60:.2f} (SCR: {result['periods']['60d']['scr']:.2f}%)")
-        print(f"✓ 40日筹码成本: P10=¥{p10_40:.2f}, P50=¥{p50_40:.2f}, P90=¥{p90_40:.2f} (SCR: {result['periods']['40d']['scr']:.2f}%)")
+        print(f"[OK] 60日筹码成本: P10=¥{p10_60:.2f}, P50=¥{p50_60:.2f}, P90=¥{p90_60:.2f} (SCR: {result['periods']['60d']['scr']:.2f}%)")
+        print(f"[OK] 40日筹码成本: P10=¥{p10_40:.2f}, P50=¥{p50_40:.2f}, P90=¥{p90_40:.2f} (SCR: {result['periods']['40d']['scr']:.2f}%)")
         
         # 5. 计算获利盘/套牢盘比例
         print("")
@@ -331,14 +331,14 @@ class ChipHealthAnalyzer:
         
         result['profit_ratio'] = pr_60
         result['loss_ratio'] = lr_60
-        print(f"✓ 60日获利盘: {pr_60:.1f}%, 40日获利盘: {pr_40:.1f}%")
+        print(f"[OK] 60日获利盘: {pr_60:.1f}%, 40日获利盘: {pr_40:.1f}%")
         
         # 6. 计算换手率
         print("")
         step_log("计算换手率...")
         turnover = self._calculate_turnover_rate(hist_data)
         result['turnover_rate'] = turnover
-        print(f"✓ 近5日平均换手率: {turnover:.2f}%")
+        print(f"[OK] 近5日平均换手率: {turnover:.2f}%")
         
         # 7. 计算筹码乖离率
         print("")
@@ -350,7 +350,7 @@ class ChipHealthAnalyzer:
                 result['periods']['40d']['chip_bias'] = ((current_price - p50_40) / p50_40) * 100
             
             result['chip_bias'] = result['periods']['60d'].get('chip_bias', 0)
-            print(f"✓ 60日乖离率: {result['chip_bias']:+.2f}%, 40日乖离率: {result['periods']['40d'].get('chip_bias', 0):+.2f}%")
+            print(f"[OK] 60日乖离率: {result['chip_bias']:+.2f}%, 40日乖离率: {result['periods']['40d'].get('chip_bias', 0):+.2f}%")
         
         # 8. 计算HHI和基尼系数
         print("")
@@ -358,7 +358,7 @@ class ChipHealthAnalyzer:
         hhi, gini = self._calculate_hhi_and_gini(hist_data)
         result['hhi'] = hhi
         result['gini_coefficient'] = gini
-        print(f"✓ 赫芬达尔指数(HHI): {hhi:.4f}, 基尼系数: {gini:.4f}")
+        print(f"[OK] 赫芬达尔指数(HHI): {hhi:.4f}, 基尼系数: {gini:.4f}")
         
         # 9. 识别筹码峰型
         print("")
@@ -368,7 +368,7 @@ class ChipHealthAnalyzer:
         result['periods']['60d']['peak_type'] = pt_60
         result['periods']['40d']['peak_type'] = pt_40
         result['peak_type'] = pt_60
-        print(f"✓ 60日峰型: {pt_60}, 40日峰型: {pt_40}")
+        print(f"[OK] 60日峰型: {pt_60}, 40日峰型: {pt_40}")
         
         # 10. 检测底部筹码锁定
         print("")
@@ -378,7 +378,7 @@ class ChipHealthAnalyzer:
         result['periods']['60d']['bottom_locked'] = bl_60
         result['periods']['40d']['bottom_locked'] = bl_40
         result['bottom_locked'] = bl_60
-        print(f"✓ 底部锁定: 60日={'是' if bl_60 else '否'}, 40日={'是' if bl_40 else '否'}")
+        print(f"[OK] 底部锁定: 60日={'是' if bl_60 else '否'}, 40日={'是' if bl_40 else '否'}")
         
         # 11. 综合评分（新版严格算法）
         print("")
@@ -393,7 +393,7 @@ class ChipHealthAnalyzer:
         step_log("识别主力动向...")
         main_force_status = self._identify_main_force_status(result)
         result['main_force_status'] = main_force_status
-        print(f"✓ 主力动向: {main_force_status}")
+        print(f"[OK] 主力动向: {main_force_status}")
         
         # 打印结果
         self._print_result(result)
@@ -521,7 +521,7 @@ class ChipHealthAnalyzer:
                         })
                         
                         current_price = float(df['收盘'].iloc[-1])
-                        print(f"  ✓ 成功获取数据 (腾讯源)")
+                        print(f"  [OK] 成功获取数据 (腾讯源)")
                         return current_price, df
                         
         except Exception as e:
@@ -564,7 +564,7 @@ class ChipHealthAnalyzer:
                         # 确保日期格式
                         df['日期'] = pd.to_datetime(df['日期']).dt.strftime('%Y-%m-%d')
                         current_price = float(df['收盘'].iloc[-1])
-                        print(f"  ✓ 成功获取数据 (Tushare Pro)")
+                        print(f"  [OK] 成功获取数据 (Tushare Pro)")
                         return current_price, df
                 except:
                     # Pro接口失败，尝试免费接口
@@ -583,13 +583,13 @@ class ChipHealthAnalyzer:
                             'volume': '成交量'
                         })
                         current_price = float(df['收盘'].iloc[-1])
-                        print(f"  ✓ 成功获取数据 (Tushare 免费版)")
+                        print(f"  [OK] 成功获取数据 (Tushare 免费版)")
                         return current_price, df
                     
             except Exception as e:
                 print(f"  ✗ Tushare源失败: {str(e)[:80]}")
         
-        print("❌ 所有数据源均失败")
+        print("[FAIL] 所有数据源均失败")
         return 0, None
     
     def _convert_cached_kline_to_dataframe(self, cached_kline_data):
@@ -626,7 +626,7 @@ class ChipHealthAnalyzer:
             
             # 确保必需的列存在
             if '日期' not in df.columns or '收盘' not in df.columns or '成交量' not in df.columns:
-                print(f"  ❌ 缓存数据格式错误，列名: {list(df.columns)}")
+                print(f"  [FAIL] 缓存数据格式错误，列名: {list(df.columns)}")
                 return 0, None
             
             # 确保日期格式（支持ISO8601格式）
@@ -645,12 +645,12 @@ class ChipHealthAnalyzer:
             # 获取当前价格（最后一条数据的收盘价）
             current_price = float(df['收盘'].iloc[-1])
             
-            print(f"  ✓ 缓存数据转换成功: {len(df)}条K线，当前价: ¥{current_price:.2f}")
+            print(f"  [OK] 缓存数据转换成功: {len(df)}条K线，当前价: ¥{current_price:.2f}")
             
             return current_price, df
             
         except Exception as e:
-            print(f"  ❌ 缓存数据转换失败: {e}")
+            print(f"  [FAIL] 缓存数据转换失败: {e}")
             import traceback
             traceback.print_exc()
             return 0, None
@@ -1028,9 +1028,9 @@ class ChipHealthAnalyzer:
                         return '底部单峰（弱）'
                 elif peak_pos > 7:
                     if peak_strength > 2.0:
-                        return '高位单峰密集 ⚠️'  # 强峰
+                        return '高位单峰密集 [WARN]'  # 强峰
                     else:
-                        return '高位单峰（弱）⚠️'
+                        return '高位单峰（弱）[WARN]'
                 else:
                     return '中位单峰'
             elif len(peaks) == 2:
@@ -1041,7 +1041,7 @@ class ChipHealthAnalyzer:
                 else:
                     return '双峰分布（弱）'
             else:
-                return '多峰林立（散户博弈）⚠️'
+                return '多峰林立（散户博弈）[WARN]'
                 
         except Exception as e:
             print(f"识别峰型失败: {e}")
@@ -1303,7 +1303,7 @@ class ChipHealthAnalyzer:
             suggestion = "🟠 散户博弈！筹码图上多个峰峦，说明没有主导资金，全是散户在博弈，每涨一点都遇解套抛压。建议：观望为主，等待主力资金介入。"
             signal_strength = '弱'
         elif scr < 15 and 5 <= chip_bias <= 15:
-            suggestion = "✓ 筹码集中且处于健康持股区，具备上涨潜力。建议：适度关注，结合技术面判断入场时机。"
+            suggestion = "[OK] 筹码集中且处于健康持股区，具备上涨潜力。建议：适度关注，结合技术面判断入场时机。"
             signal_strength = '中'
         elif scr > 30:
             suggestion = "⚠ 筹码发散严重，多空分歧大，股价可能剧烈震荡。建议：谨慎操作，等待筹码重新收敛。"
@@ -1386,43 +1386,43 @@ class ChipHealthAnalyzer:
         # 记录权重信息
         if self.market_condition != 'normal':
             market_name = {'bull': '牛市', 'bear': '熊市'}.get(self.market_condition, '震荡市')
-            signals.append(f"📊 动态权重({market_name}): 集中{weights['concentration']:.0%} 换手{weights['turnover']:.0%} 盈亏{weights['profit_loss']:.0%} 乖离{weights['bias']:.0%} 形态{weights['pattern']:.0%}")
+            signals.append(f"[CHART] 动态权重({market_name}): 集中{weights['concentration']:.0%} 换手{weights['turnover']:.0%} 盈亏{weights['profit_loss']:.0%} 乖离{weights['bias']:.0%} 形态{weights['pattern']:.0%}")
         
         # 生成详细信号
         scr = result['scr']
         if scr < 10:
-            signals.append("✓✓ SCR高度集中(<10%)，变盘在即 ⭐⭐⭐⭐⭐")
+            signals.append("[OK][OK] SCR高度集中(<10%)，变盘在即 ⭐⭐⭐⭐⭐")
         elif scr < 15:
-            signals.append("✓ SCR相对集中(<15%)，筹码合力强 ⭐⭐⭐⭐")
+            signals.append("[OK] SCR相对集中(<15%)，筹码合力强 ⭐⭐⭐⭐")
         elif scr < 25:
             signals.append("→ SCR适中(15-25%)，正常波动")
         else:
-            signals.append("⚠ SCR发散(>25%)，多空分歧大 ⚠️")
+            signals.append("⚠ SCR发散(>25%)，多空分歧大 [WARN]")
         
         profit_ratio = result['profit_ratio']
         if profit_ratio < 30:
-            signals.append("✓ 套牢盘多(<30%)，反弹动力强")
+            signals.append("[OK] 套牢盘多(<30%)，反弹动力强")
         elif profit_ratio > 80:
             signals.append("⚠ 获利盘过多(>80%)，警惕获利回吐")
         
         chip_bias = result['chip_bias']
         if 3 <= chip_bias <= 12:
-            signals.append("✓ 筹码乖离率在最佳持股区(3-12%) ⭐⭐⭐⭐")
+            signals.append("[OK] 筹码乖离率在最佳持股区(3-12%) ⭐⭐⭐⭐")
         elif chip_bias > 40:
-            signals.append("⚠ 乖离率过高(>40%)，极度危险 ⚠️⚠️")
+            signals.append("⚠ 乖离率过高(>40%)，极度危险 [WARN][WARN]")
         
         peak_type = result['peak_type']
         if '底部单峰' in peak_type:
-            signals.append(f"✓✓ {peak_type} - 吸筹完成，经典起涨信号 🚀")
+            signals.append(f"[OK][OK] {peak_type} - 吸筹完成，经典起涨信号 [ROCKET]")
         elif '高位单峰' in peak_type:
-            signals.append(f"⚠⚠ {peak_type} - 出货完毕，散户接盘 ⚠️⚠️")
+            signals.append(f"⚠⚠ {peak_type} - 出货完毕，散户接盘 [WARN][WARN]")
         elif '多峰林立' in peak_type:
             signals.append(f"⚠ {peak_type} - 最磨人，每涨一点遇抛压")
         elif '双峰' in peak_type:
             signals.append(f"→ {peak_type} - 健康换手接力")
         
         if result['bottom_locked']:
-            signals.append("✓✓ 底部筹码锁定 🔒 - 主力志在长远 ⭐⭐⭐⭐⭐")
+            signals.append("[OK][OK] 底部筹码锁定 🔒 - 主力志在长远 ⭐⭐⭐⭐⭐")
             
         # 添加多周期对比信号
         periods = result.get('periods', {})
@@ -1430,9 +1430,9 @@ class ChipHealthAnalyzer:
             scr_40 = periods['40d']['scr']
             scr_60 = periods['60d']['scr']
             if scr_40 < scr_60 - 1.0:
-                signals.append(f"📈 筹码加速集中: 40日({scr_40:.1f}%) < 60日({scr_60:.1f}%)，主力近期介入明显")
+                signals.append(f"[UP] 筹码加速集中: 40日({scr_40:.1f}%) < 60日({scr_60:.1f}%)，主力近期介入明显")
             elif scr_40 > scr_60 + 1.0:
-                signals.append(f"📉 筹码近期发散: 40日({scr_40:.1f}%) > 60日({scr_60:.1f}%)，需警惕主力派发")
+                signals.append(f"[DOWN] 筹码近期发散: 40日({scr_40:.1f}%) > 60日({scr_60:.1f}%)，需警惕主力派发")
         
         # 确保评分在合理范围内（正常情况下应该已经在0-10之间，这里只是安全保护）
         score = max(0.0, min(10.0, score))
@@ -1461,7 +1461,7 @@ class ChipHealthAnalyzer:
         elif score >= 4.0:
             return "D 偏弱 ⭐"
         else:
-            return "E 不健康 ⚠️"
+            return "E 不健康 [WARN]"
     
     def _print_result(self, result):
         """打印分析结果"""
@@ -1531,7 +1531,7 @@ class ChipHealthAnalyzer:
                 - target_score: 目标评分（专家标注或历史验证后的评分）
         """
         if not self.ml_available:
-            print("❌ 机器学习功能未启用，请安装scikit-learn")
+            print("[FAIL] 机器学习功能未启用，请安装scikit-learn")
             return False
         
         try:
@@ -1552,13 +1552,13 @@ class ChipHealthAnalyzer:
             # 计算训练得分
             train_score = self.ml_model.score(features_scaled, targets)
             
-            print(f"✓ 模型训练完成！R² Score: {train_score:.4f}")
+            print(f"[OK] 模型训练完成！R² Score: {train_score:.4f}")
             
             # 特征重要性
             if hasattr(self.ml_model, 'feature_importances_'):
                 importances = self.ml_model.feature_importances_
                 feature_names = ['SCR', '乖离率', '获利盘', '换手率', 'HHI', '基尼系数']
-                print("\n📊 特征重要性排名:")
+                print("\n[CHART] 特征重要性排名:")
                 for name, importance in sorted(zip(feature_names, importances), 
                                               key=lambda x: x[1], reverse=True):
                     print(f"  {name}: {importance:.4f}")
@@ -1566,7 +1566,7 @@ class ChipHealthAnalyzer:
             return True
             
         except Exception as e:
-            print(f"❌ 模型训练失败: {e}")
+            print(f"[FAIL] 模型训练失败: {e}")
             return False
     
     def backtest_parameters(self, hist_stocks_data, lookback_days=60):
@@ -1580,7 +1580,7 @@ class ChipHealthAnalyzer:
         Returns:
             dict: 回测统计结果
         """
-        print("📈 开始参数回测...")
+        print("[UP] 开始参数回测...")
         
         results = {
             'total_stocks': 0,
@@ -1604,7 +1604,7 @@ class ChipHealthAnalyzer:
             print("⚠ 回测功能正在开发中...")
             
         except Exception as e:
-            print(f"❌ 回测失败: {e}")
+            print(f"[FAIL] 回测失败: {e}")
         
         return results
     
@@ -1647,11 +1647,11 @@ class ChipHealthAnalyzer:
                 
                 f.write("\n" + "="*70 + "\n")
             
-            print(f"✓ 分析报告已导出: {filename}")
+            print(f"[OK] 分析报告已导出: {filename}")
             return filename
             
         except Exception as e:
-            print(f"❌ 导出报告失败: {e}")
+            print(f"[FAIL] 导出报告失败: {e}")
             return None
 
 
@@ -1680,7 +1680,7 @@ def main():
         stock_code = input("\n请输入股票代码（6位数字，如600519）: ").strip()
     
     if not stock_code or len(stock_code) != 6:
-        print("❌ 无效的股票代码")
+        print("[FAIL] 无效的股票代码")
         return
     
     # 创建分析器（支持ML增强和市场环境设置）
@@ -1696,7 +1696,7 @@ def main():
     
     # 保存结果
     if result['health_score'] > 0:
-        print(f"\n✓ 分析完成！")
+        print(f"\n[OK] 分析完成！")
         
         # 导出报告
         export = input("\n是否导出分析报告？(y/n): ").strip().lower()
