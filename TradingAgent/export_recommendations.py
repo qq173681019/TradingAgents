@@ -138,12 +138,8 @@ def select_diversified_top_n(scored_stocks, n=10, max_per_sector=2, min_tech_sco
         if len(selected) >= n:
             break
 
-        # 过滤掉技术面评分过低的股票
-        if stock.get('tech', 0) < min_tech_score:
-            continue
-
-        # 过滤掉失败的股票（评分为-10）
-        if stock.get('tech', 0) <= 0 or stock.get('fund', 0) <= 0:
+        # 过滤掉技术面评分过低或失败的股票（-10为分析失败标记）
+        if stock.get('tech', 0) < min_tech_score or stock.get('fund', 0) <= 0:
             continue
 
         industry = stock.get('industry', '未知')

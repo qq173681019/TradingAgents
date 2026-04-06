@@ -275,8 +275,8 @@ def _clean_industry_name(industry):
     """
     if not industry:
         return industry
-    # 去除罗马数字后缀 (Ⅰ Ⅱ Ⅲ Ⅳ Ⅴ)
-    for suffix in ['Ⅱ', 'Ⅲ', 'Ⅰ', 'Ⅳ', 'Ⅴ', 'II', 'III', 'IV', 'I']:
+    # 去除罗马数字后缀（按长度降序避免误匹配，如'I'不会误匹配'III'）
+    for suffix in ['III', 'II', 'IV', 'Ⅲ', 'Ⅱ', 'Ⅳ', 'Ⅴ', 'Ⅰ', 'I']:
         industry = industry.replace(suffix, '')
     return industry.strip()
 
