@@ -108,6 +108,14 @@ def safety_filter(code, name, comprehensive_data, st_stocks):
 # 风险等级与风险提示
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# 风险评估阈值常量
+# ---------------------------------------------------------------------------
+EXTREME_PE_THRESHOLD = 100   # 市盈率极端偏高
+HIGH_PE_THRESHOLD = 50       # 市盈率偏高
+HIGH_PB_THRESHOLD = 10       # 市净率偏高
+
+
 def assess_risk_level(stock, comprehensive_data):
     """
     评估单只股票的风险等级与风险提示。
@@ -152,14 +160,14 @@ def assess_risk_level(stock, comprehensive_data):
         pb = fin.get('pb_ratio')
 
         if pe is not None:
-            if pe > 100:
+            if pe > EXTREME_PE_THRESHOLD:
                 warnings.append(f'市盈率偏高({pe:.1f})，估值泡沫风险')
                 risk_score += 2
-            elif pe > 50:
+            elif pe > HIGH_PE_THRESHOLD:
                 warnings.append(f'市盈率较高({pe:.1f})，需关注估值回调')
                 risk_score += 1
 
-        if pb is not None and pb > 10:
+        if pb is not None and pb > HIGH_PB_THRESHOLD:
             warnings.append(f'市净率偏高({pb:.1f})，注意估值风险')
             risk_score += 1
 

@@ -25,7 +25,7 @@ def _clean_industry_name(industry):
     """清理行业名称后缀"""
     if not industry:
         return industry
-    for suffix in ['III', 'II', 'IV', 'Ⅲ', 'Ⅱ', 'Ⅳ', 'Ⅴ', 'Ⅰ', 'I']:
+    for suffix in ['Ⅲ', 'Ⅱ', 'Ⅳ', 'Ⅴ', 'Ⅰ', 'III', 'II', 'IV', 'I']:
         industry = industry.replace(suffix, '')
     return industry.strip()
 

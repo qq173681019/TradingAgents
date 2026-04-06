@@ -39,6 +39,13 @@ except:
     pass
 
 
+# 板块评分对数映射参数
+# 公式：base + log10(1 + change * LOG_SCALE_FACTOR) * LOG_MULTIPLIER
+# 效果：涨幅1%≈6.8分, 涨幅5%≈8.4分, 涨幅10%≈9.2分
+LOG_SCALE_FACTOR = 0.5   # 涨幅缩放因子
+LOG_MULTIPLIER = 6       # 对数放大系数
+
+
 def get_sector_changes_3d():
     """
     获取各行业板块近3日涨幅数据
@@ -276,7 +283,7 @@ def _clean_industry_name(industry):
     if not industry:
         return industry
     # 去除罗马数字后缀（按长度降序避免误匹配，如'I'不会误匹配'III'）
-    for suffix in ['III', 'II', 'IV', 'Ⅲ', 'Ⅱ', 'Ⅳ', 'Ⅴ', 'Ⅰ', 'I']:
+    for suffix in ['Ⅲ', 'Ⅱ', 'Ⅳ', 'Ⅴ', 'Ⅰ', 'III', 'II', 'IV', 'I']:
         industry = industry.replace(suffix, '')
     return industry.strip()
 
@@ -412,7 +419,7 @@ def match_sector_score(industry, sector_changes, hot_sectors_list=None):
     if matched_sector:
         if matched_change > 0:
             # 对数映射：涨幅1%≈6.8分，涨幅5%≈8.4分，涨幅10%≈9.2分
-            best_score = 5.0 + math.log10(1 + matched_change * 0.5) * 6
+            best_score = 5.0 + math.log10(1 + matched_change * LOG_SCALE_FACTOR) * LOG_MULTIPLIER
         else:
             # 负涨幅线性递减
             best_score = 5.0 + matched_change * 0.6
