@@ -2,7 +2,7 @@
   "stocks": {
     "603999": {
       "code": "603999",
-      "timestamp": "2026-04-02T22:25:19.697358",
+      "timestamp": "2026-04-06T21:30:25.740487",
       "collection_time": "2025-12-28 22:39:11",
       "data_source": "choice_api",
       "basic_info": {
@@ -16,14 +16,6 @@
       },
       "kline_data": {
         "daily": [
-          {
-            "date": "2025-12-23",
-            "open": 7.04,
-            "high": 7.05,
-            "low": 6.9,
-            "close": 6.93,
-            "volume": 7275400
-          },
           {
             "date": "2025-12-24",
             "open": 6.93,
@@ -655,12 +647,20 @@
             "low": 6.77,
             "close": 6.82,
             "volume": 6518640
+          },
+          {
+            "date": "2026-04-03",
+            "open": 6.85,
+            "high": 6.85,
+            "low": 6.49,
+            "close": 6.52,
+            "volume": 9164680
           }
         ],
-        "latest_price": 6.82,
+        "latest_price": 6.52,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-04-02T22:25:19.697296"
+        "update_time": "2026-04-06T21:30:25.740191"
       },
       "financial_data": {
         "pe_ratio": 64.023614,
@@ -685,18 +685,18 @@
         "data_source": "choice_calculated"
       },
       "technical_indicators": {
-        "current_price": 6.82,
-        "ma5": 6.862,
-        "ma10": 6.867,
-        "ma20": 7.1295,
-        "ma60": 7.419666666666667,
-        "rsi": 39.99999999999999,
-        "macd": -0.19171569595888727,
-        "signal": -0.17588475563386602,
-        "volume_ratio": 0.7456442090340419,
+        "current_price": 6.52,
+        "ma5": 6.8,
+        "ma10": 6.809,
+        "ma20": 7.083,
+        "ma60": 7.421666666666667,
+        "rsi": 31.325301204819255,
+        "macd": -0.21343348427825237,
+        "signal": -0.1835019724582806,
+        "volume_ratio": 1.1416928548884,
         "status": "calculated"
       },
-      "last_kline_update": "2026-04-02T22:25:19.697303",
+      "last_kline_update": "2026-04-06T21:30:25.740205",
       "industry_concept": {
         "code": "603999",
         "source": "baostock_default",
@@ -57650,6 +57650,6 @@
       }
     }
   },
-  "last_updated": "2026-04-06T21:09:56.179697",
+  "last_updated": "2026-04-06T21:31:37.966787",
   "total_stocks": 112
 }
