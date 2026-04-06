@@ -477,6 +477,57 @@ if __name__ == '__main__':
             if code.startswith(('600', '601', '603', '000', '001', '002'))
         ]
         print(f'主板股票总数: {len(main_board_codes)} 只\n')
+
+        # ── 安全阀前置过滤：剔除 *ST/退市、负PE（亏损股） ──
+        print('正在执行安全阀前置过滤（*ST、负PE、亏损股）...')
+        st_stocks = set()
+        status_file = os.path.join(data_dir, 'stock_status_cache.json')
+        if os.path.exists(status_file):
+            try:
+                with open(status_file, 'r', encoding='utf-8') as f:
+                    status_data = json.load(f)
+                st_stocks = set(status_data.get('st_stocks', []))
+                st_stocks |= set(status_data.get('delisted_stocks', []))
+                print(f'  ST/退市标记股票: {len(st_stocks)} 只')
+            except Exception as e:
+                print(f'  [WARN] 加载ST状态失败: {e}')
+
+        # 综合数据中提取PE信息
+        comp_stocks = comprehensive_data.get('stocks', comprehensive_data) if isinstance(comprehensive_data, dict) else {}
+        neg_pe_set = set()
+        for code in main_board_codes:
+            if code in comp_stocks:
+                fin = comp_stocks[code].get('financial_data', {}) if isinstance(comp_stocks[code], dict) else {}
+                pe = fin.get('pe_ratio')
+                if pe is not None and pe < 0:
+                    neg_pe_set.add(code)
+
+        safe_codes = []
+        filter_st = 0
+        filter_pe = 0
+        filter_name = 0
+        for code in main_board_codes:
+            stock_name = all_stocks[code].get('name', '')
+            # 规则 1: ST/退市状态缓存
+            if code in st_stocks:
+                filter_st += 1
+                continue
+            # 规则 2: 股票名称含ST/退市标记
+            if stock_name:
+                name_upper = stock_name.upper()
+                if any(tag in name_upper for tag in ['*ST', 'ST', '退市']):
+                    filter_name += 1
+                    continue
+            # 规则 3: 市盈率为负（年报亏损）
+            if code in neg_pe_set:
+                filter_pe += 1
+                continue
+            safe_codes.append(code)
+
+        removed = len(main_board_codes) - len(safe_codes)
+        print(f'  安全阀过滤: 移除 {removed} 只 '
+              f'(ST/退市={filter_st}, 名称标记={filter_name}, 负PE={filter_pe})')
+        print(f'  剩余: {len(safe_codes)} 只进入评分计算\n')
         
         # 加载热门板块列表
         print('正在加载热门板块数据...')
@@ -509,12 +560,12 @@ if __name__ == '__main__':
         # 统计热门板块评分分布
         hot_score_dist = {}
         
-        for i, code in enumerate(main_board_codes, 1):
+        for i, code in enumerate(safe_codes, 1):
             try:
                 if i % 50 == 0 or i == 1:
                     elapsed = time.time() - start_time
                     rate = i / elapsed if elapsed > 0 else 0
-                    print(f'进度: {i}/{len(main_board_codes)} ({i/len(main_board_codes)*100:.1f}%) '
+                    print(f'进度: {i}/{len(safe_codes)} ({i/len(safe_codes)*100:.1f}%) '
                           f'- 速度: {rate:.1f}只/秒 - 成功: {success_count}, 失败: {failed_count}')
                 
                 stock_name = all_stocks[code].get('name', analyzer.get_stock_name(code) or 'N/A')
