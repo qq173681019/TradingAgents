@@ -39,6 +39,13 @@ except:
     pass
 
 
+# 板块评分对数映射参数
+# 公式：base + log10(1 + change * LOG_SCALE_FACTOR) * LOG_MULTIPLIER
+# 效果：涨幅1%≈6.8分, 涨幅5%≈8.4分, 涨幅10%≈9.2分
+LOG_SCALE_FACTOR = 0.5   # 涨幅缩放因子
+LOG_MULTIPLIER = 6       # 对数放大系数
+
+
 def get_sector_changes_3d():
     """
     获取各行业板块近3日涨幅数据
@@ -268,10 +275,24 @@ def get_real_industry(stock_code, stock_data, comprehensive_data=None):
     return '未知'
 
 
+def _clean_industry_name(industry):
+    """
+    清理行业名称，去除后缀和特殊字符
+    例如: '游戏Ⅱ' -> '游戏', '白酒Ⅱ' -> '白酒', '证券Ⅱ' -> '证券'
+    """
+    if not industry:
+        return industry
+    # 去除罗马数字后缀（按长度降序避免误匹配，如'I'不会误匹配'III'）
+    for suffix in ['Ⅲ', 'Ⅱ', 'Ⅳ', 'Ⅴ', 'Ⅰ', 'III', 'II', 'IV', 'I']:
+        industry = industry.replace(suffix, '')
+    return industry.strip()
+
+
 def match_sector_score(industry, sector_changes, hot_sectors_list=None):
     """
-    根据行业名称匹配板块评分 - 改进版
-    使用对数映射提高区分度，让大涨幅板块获得更高分数
+    根据行业名称匹配板块评分 - 改进版v2
+    修复匹配过于宽泛问题（如"汽车零部件"不应匹配"新能源汽车"）
+    评分范围统一为1-10，与其他评分维度保持一致
 
     Args:
         industry: 股票的行业名称
@@ -284,101 +305,127 @@ def match_sector_score(industry, sector_changes, hot_sectors_list=None):
     if not industry or industry == '未知':
         return 5.0, None, 0
 
-    industry_lower = industry.lower()
+    # 清理行业名称后缀
+    clean_industry = _clean_industry_name(industry)
+
     best_score = 5.0
     matched_sector = None
     matched_change = 0
 
-    # 行业名称映射表
-    industry_alias = {
-        '银行': ['银行', '金融', '商业银行'],
-        '房地产': ['房地产', '地产', '物业'],
-        '白酒': ['白酒', '酒类', '酿酒'],
-        '家电': ['家电', '家用电器', '白色家电'],
-        '汽车': ['汽车', '整车', '新能源汽车', '新能源车'],
-        '半导体': ['半导体', '芯片', '集成电路', '晶圆'],
-        '医药': ['医药', '医药生物', '化学制药', '中药', '生物制药'],
-        '电力': ['电力', '电力设备', '电网'],
-        '煤炭': ['煤炭', '煤化工'],
-        '石油': ['石油', '石化', '油气'],
-        '钢铁': ['钢铁', '特钢'],
-        '有色金属': ['有色金属', '铜', '铝', '锂', '稀土'],
-        '化工': ['化工', '化学制品', '化纤'],
-        '通信': ['通信', '5G', '光通信'],
-        '计算机': ['计算机', 'IT', '软件', '信息技术'],
-        '传媒': ['传媒', '影视', '游戏'],
+    # 行业名称→板块精确映射表（基于实际数据中出现的行业名）
+    # 键：数据中的行业名（清理后），值：应该匹配的板块关键词列表
+    industry_to_sector = {
+        # 金融
+        '银行': ['银行'],
+        '多元金融': ['银行', '证券', '金融'],
+        '证券': ['证券'],
+        '保险': ['保险'],
+        # 地产
+        '房地产开发': ['房地产'],
+        '房地产服务': ['房地产'],
+        # 消费
+        '白酒': ['白酒', '酿酒'],
+        '非白酒': ['酿酒', '食品'],
+        '白色家电': ['家电', '家用电器'],
+        '家电零部件': ['家电', '家用电器'],
+        '一般零售': ['零售', '商业百货', '商贸'],
+        '饰品': ['零售', '纺织服装'],
+        '服装家纺': ['纺织服装', '服装'],
+        '旅游及景区': ['旅游', '酒店餐饮'],
+        '教育': ['教育'],
+        # 汽车（注意：汽车零部件不等于新能源汽车）
+        '汽车零部件': ['汽车零部件', '汽车整车', '汽车'],
+        '汽车服务': ['汽车整车', '汽车', '汽车服务'],
+        '商用车': ['汽车整车', '汽车'],
+        '摩托车及其他': ['汽车', '摩托车'],
+        '新能源汽车': ['新能源汽车', '汽车整车'],
+        # 科技
+        'IT服务': ['计算机', '软件开发', '信息技术'],
+        '软件开发': ['计算机', '软件开发'],
+        '半导体': ['半导体', '芯片'],
+        '光学光电子': ['光学光电子', '消费电子', '电子'],
+        '游戏': ['游戏', '传媒'],
+        '电视广播': ['传媒', '影视'],
+        '广告营销': ['传媒', '广告'],
+        '人工智能': ['人工智能', '算力'],
+        # 医药
+        '化学制药': ['医药', '化学制药'],
+        '中药': ['医药', '中药'],
+        '生物制品': ['医药', '生物制品'],
+        '医药商业': ['医药', '医药商业'],
+        '医疗服务': ['医药', '医疗服务'],
+        # 工业
+        '电力': ['电力', '电力设备'],
+        '化学原料': ['化工', '化学原料'],
+        '农化制品': ['化工', '农化'],
+        '水泥': ['水泥', '建材'],
+        '工业金属': ['有色金属', '工业金属'],
+        '煤炭': ['煤炭'],
+        '钢铁': ['钢铁'],
+        '石油': ['石油', '石化'],
+        '炼化及贸易': ['石油', '石化', '化工'],
+        '燃气': ['燃气', '天然气', '公用事业'],
+        # 运输物流
+        '物流': ['物流', '快递'],
+        '铁路公路': ['交通运输', '公路铁路'],
+        '航运港口': ['港口', '航运'],
+        '航海装备': ['船舶制造', '军工'],
+        # 其他
+        '工程咨询服务': ['工程咨询', '建筑', '专业服务'],
+        '专业服务': ['专业服务', '工程咨询'],
+        '综合': ['综合'],
+        '贸易': ['贸易', '商贸'],
         '军工': ['军工', '国防'],
-        '新能源': ['新能源', '光伏', '风电', '储能'],
-        '人工智能': ['人工智能', 'AI', '算力'],
-        '机器人': ['机器人', '工业机器人', '服务机器人'],
     }
 
-    # FIX: 改进的匹配逻辑 - 使用最长匹配优先
-    best_direct_match = None
-    best_direct_length = 0
-
-    # 先进行直接匹配（优先级最高）
-    for sector_name, change in sector_changes.items():
-        sector_lower = sector_name.lower()
-
-        # 检查行业名包含板块名
-        if sector_name in industry:
-            if len(sector_name) > best_direct_length:
-                best_direct_length = len(sector_name)
-                best_direct_match = (sector_name, change)
-
-        # 检查板块名包含行业名
-        elif industry in sector_name:
-            if len(industry) > best_direct_length:
-                best_direct_length = len(industry)
-                best_direct_match = (sector_name, change)
-
-    if best_direct_match:
-        matched_sector, matched_change = best_direct_match
-    else:
-        # 别名匹配（计算匹配度）
-        best_alias_match = None
-        best_alias_score = 0
+    # 第一步：精确映射匹配（最高优先级）
+    if clean_industry in industry_to_sector:
+        target_keywords = industry_to_sector[clean_industry]
+        best_keyword_match = None
+        best_keyword_len = 0
 
         for sector_name, change in sector_changes.items():
-            sector_lower = sector_name.lower()
+            for keyword in target_keywords:
+                # 要求板块名包含关键词 或 关键词包含板块名
+                if keyword in sector_name or sector_name in keyword:
+                    match_len = min(len(keyword), len(sector_name))
+                    if match_len > best_keyword_len:
+                        best_keyword_len = match_len
+                        best_keyword_match = (sector_name, change)
 
-            for key, aliases in industry_alias.items():
-                # 计算行业在别名中的匹配度
-                industry_match_score = sum(1 for a in aliases if a in industry)
+        if best_keyword_match:
+            matched_sector, matched_change = best_keyword_match
 
-                # 计算板块在别名中的匹配度
-                sector_match_score = sum(1 for a in aliases if a in sector_name)
+    # 第二步：直接名称匹配（要求至少2个字匹配）
+    if not matched_sector:
+        best_direct_match = None
+        best_direct_length = 0
 
-                # 如果两边都匹配，计算总分
-                if industry_match_score > 0 and sector_match_score > 0:
-                    total_score = industry_match_score + sector_match_score
+        for sector_name, change in sector_changes.items():
+            # 双向包含匹配，要求匹配长度至少2个字符
+            if sector_name in clean_industry and len(sector_name) >= 2:
+                if len(sector_name) > best_direct_length:
+                    best_direct_length = len(sector_name)
+                    best_direct_match = (sector_name, change)
+            elif clean_industry in sector_name and len(clean_industry) >= 2:
+                if len(clean_industry) > best_direct_length:
+                    best_direct_length = len(clean_industry)
+                    best_direct_match = (sector_name, change)
 
-                    # 优先选择匹配度最高的
-                    if total_score > best_alias_score:
-                        best_alias_score = total_score
-                        best_alias_match = (sector_name, change)
+        if best_direct_match:
+            matched_sector, matched_change = best_direct_match
 
-                    # 如果匹配度相同，选择匹配词更长的
-                    elif total_score == best_alias_score:
-                        if len(sector_name) > len(best_alias_match[0]):
-                            best_alias_match = (sector_name, change)
-
-        if best_alias_match:
-            matched_sector, matched_change = best_alias_match
-
-    # FIX: 根据涨幅计算评分 - 使用对数映射提高区分度
+    # 根据涨幅计算评分 - 统一到1-10范围
     if matched_sector:
         if matched_change > 0:
-            # 对数映射：涨幅1%=5分，涨幅10%=9.1分，涨幅20%=11分
-            best_score = 5.0 + math.log10(1 + matched_change * 0.5) * 6
+            # 对数映射：涨幅1%≈6.8分，涨幅5%≈8.4分，涨幅10%≈9.2分
+            best_score = 5.0 + math.log10(1 + matched_change * LOG_SCALE_FACTOR) * LOG_MULTIPLIER
         else:
             # 负涨幅线性递减
             best_score = 5.0 + matched_change * 0.6
 
-        best_score = round(max(1.0, min(15.0, best_score)), 2)  # 范围：1-15分
-
-    # 移除热门板块额外加分（避免重复计算，对数映射已经体现了板块热度）
+        # 统一范围到 1-10 分（与其他维度一致）
+        best_score = round(max(1.0, min(10.0, best_score)), 2)
 
     return best_score, matched_sector, matched_change
 
@@ -437,6 +484,57 @@ if __name__ == '__main__':
             if code.startswith(('600', '601', '603', '000', '001', '002'))
         ]
         print(f'主板股票总数: {len(main_board_codes)} 只\n')
+
+        # ── 安全阀前置过滤：剔除 *ST/退市、负PE（亏损股） ──
+        print('正在执行安全阀前置过滤（*ST、负PE、亏损股）...')
+        st_stocks = set()
+        status_file = os.path.join(data_dir, 'stock_status_cache.json')
+        if os.path.exists(status_file):
+            try:
+                with open(status_file, 'r', encoding='utf-8') as f:
+                    status_data = json.load(f)
+                st_stocks = set(status_data.get('st_stocks', []))
+                st_stocks |= set(status_data.get('delisted_stocks', []))
+                print(f'  ST/退市标记股票: {len(st_stocks)} 只')
+            except Exception as e:
+                print(f'  [WARN] 加载ST状态失败: {e}')
+
+        # 综合数据中提取PE信息
+        comp_stocks = comprehensive_data.get('stocks', comprehensive_data) if isinstance(comprehensive_data, dict) else {}
+        neg_pe_set = set()
+        for code in main_board_codes:
+            if code in comp_stocks:
+                fin = comp_stocks[code].get('financial_data', {}) if isinstance(comp_stocks[code], dict) else {}
+                pe = fin.get('pe_ratio')
+                if pe is not None and pe < 0:
+                    neg_pe_set.add(code)
+
+        safe_codes = []
+        filter_st = 0
+        filter_pe = 0
+        filter_name = 0
+        for code in main_board_codes:
+            stock_name = all_stocks[code].get('name', '')
+            # 规则 1: ST/退市状态缓存
+            if code in st_stocks:
+                filter_st += 1
+                continue
+            # 规则 2: 股票名称含ST/退市标记
+            if stock_name:
+                name_upper = stock_name.upper()
+                if any(tag in name_upper for tag in ['*ST', 'ST', '退市']):
+                    filter_name += 1
+                    continue
+            # 规则 3: 市盈率为负（年报亏损）
+            if code in neg_pe_set:
+                filter_pe += 1
+                continue
+            safe_codes.append(code)
+
+        removed = len(main_board_codes) - len(safe_codes)
+        print(f'  安全阀过滤: 移除 {removed} 只 '
+              f'(ST/退市={filter_st}, 名称标记={filter_name}, 负PE={filter_pe})')
+        print(f'  剩余: {len(safe_codes)} 只进入评分计算\n')
         
         # 加载热门板块列表
         print('正在加载热门板块数据...')
@@ -469,12 +567,12 @@ if __name__ == '__main__':
         # 统计热门板块评分分布
         hot_score_dist = {}
         
-        for i, code in enumerate(main_board_codes, 1):
+        for i, code in enumerate(safe_codes, 1):
             try:
                 if i % 50 == 0 or i == 1:
                     elapsed = time.time() - start_time
                     rate = i / elapsed if elapsed > 0 else 0
-                    print(f'进度: {i}/{len(main_board_codes)} ({i/len(main_board_codes)*100:.1f}%) '
+                    print(f'进度: {i}/{len(safe_codes)} ({i/len(safe_codes)*100:.1f}%) '
                           f'- 速度: {rate:.1f}只/秒 - 成功: {success_count}, 失败: {failed_count}')
                 
                 stock_name = all_stocks[code].get('name', analyzer.get_stock_name(code) or 'N/A')
