@@ -16,7 +16,7 @@ echo [2] 检查Python路径...
 echo.
 
 echo [3] 检查必需的包...
-"%PYTHON_EXE%" -c "import sys; from importlib import util; packages = ['tushare', 'akshare', 'baostock', 'yfinance', 'pandas', 'requests']; missing = []; [missing.append(pkg) if util.find_spec(pkg) is None else print(f'✓ {pkg}') for pkg in packages]; [print(f'✗ {pkg} - 未安装') for pkg in missing]; sys.exit(len(missing))"
+"%PYTHON_EXE%" -c "import sys; from importlib import util; packages = ['tushare', 'akshare', 'baostock', 'yfinance', 'pandas', 'requests']; missing = []; [missing.append(pkg) if util.find_spec(pkg) is None else print(f'[OK] {pkg}') for pkg in packages]; [print(f'[X] {pkg} - not installed') for pkg in missing]; sys.exit(len(missing))"
 
 if errorlevel 1 (
     echo.

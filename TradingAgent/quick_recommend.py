@@ -264,7 +264,7 @@ def recommend(n=3, strategy='short', verbose=False):
 
     stocks, filename = load_latest_scores(data_dir)
     if not stocks:
-        print('❌ 未找到评分数据文件，请先运行评分生成脚本')
+        print('[FAIL] 未找到评分数据文件，请先运行评分生成脚本')
         return []
 
     # 提取评分文件日期
@@ -363,7 +363,7 @@ def main():
 
     strategy_name = weights['name']
     print(f'\n{"="*70}')
-    print(f'📊 {strategy_name}推荐 TOP {args.n} | 数据日期: {file_date}')
+    print(f'[REPORT] {strategy_name}推荐 TOP {args.n} | 数据日期: {file_date}')
     print(f'   多因子权重: 技术形态{weights["tech"]*100:.0f}% + 财务健康度{weights["fund"]*100:.0f}% '
           f'+ 资金流向{weights["chip"]*100:.0f}% + 行业热度{weights["sector"]*100:.0f}%')
     if filter_count > 0:
@@ -375,14 +375,14 @@ def main():
         change = stock.get('sector_change', 0)
         change_str = f'{change:+.1f}%' if change else ''
         risk_level = stock.get('risk_level', '-')
-        risk_emoji = {'低': '🟢', '中': '🟡', '高': '🔴'}.get(risk_level, '⚪')
+        risk_emoji = {'低': '[LOW]', '中': '[MID]', '高': '[HIGH]'}.get(risk_level, '[N/A]')
 
-        print(f'\n  🏆 第{i}名: {stock["code"]} {stock["name"]}')
+        print(f'\n  # 第{i}名: {stock["code"]} {stock["name"]}')
         print(f'     综合评分: {stock["score"]:.2f}/10  |  风险等级: {risk_emoji} {risk_level}')
         print(f'     行业: {stock["industry"]} | 匹配板块: {sector_info} {change_str}')
         print(f'     推荐理由: {stock.get("reason", "-")}')
-        print(f'     ⚠️ 风险提示: {stock.get("risk_tip", "-")}')
-        print(f'     📐 选股逻辑: {stock.get("theory", "-")}')
+        print(f'     [WARN] 风险提示: {stock.get("risk_tip", "-")}')
+        print(f'     [LOGIC] 选股逻辑: {stock.get("theory", "-")}')
 
         if args.verbose:
             print(f'     ├─ 技术形态: {stock["tech"]:.1f}/10')
@@ -396,7 +396,7 @@ def main():
     print(f'  2. 多因子模型: 技术形态(40%) + 财务健康度(30%) + 资金流向(20%) + 行业热度(10%)')
     print(f'  3. 分散化: 每板块最多2只，避免集中度过高')
     print(f'{"="*70}')
-    print(f'⚠️ 以上推荐仅供参考，不构成投资建议')
+    print(f'[WARN] 以上推荐仅供参考，不构成投资建议')
     print(f'   数据来源: {filename}')
     print(f'{"="*70}\n')
 

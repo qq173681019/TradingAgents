@@ -1,0 +1,172 @@
+======================================================================
+股票推荐算法回测报告
+Stock Recommendation Algorithm Backtest Report
+======================================================================
+
+回测时间段: 2026-02-20 至 2026-04-07
+算法版本: v2
+权重配置: {'momentum': 0.5, 'trend': 0.25, 'static': 0.25}
+
+总交易日: 19
+胜利日数: 12
+准确率: 63.16%
+目标准确率: 85%
+
+[FAIL] 算法未达标（差 21.84%）
+
+======================================================================
+每日详细结果
+======================================================================
+
+
+2026-03-10 [WIN]
+  Index Return: 0.65%
+  Win Rate: 67%
+  Recommendations:
+    - 600722 金牛化工: -3.78% [LOSE]
+    - 603826 坤彩科技: 2.35% [BEAT]
+    - 600645 中源协和: 1.88% [BEAT]
+
+2026-03-11 [WIN]
+  Index Return: 0.25%
+  Win Rate: 100%
+  Recommendations:
+    - 603826 坤彩科技: 0.67% [BEAT]
+    - 600722 金牛化工: 9.98% [BEAT]
+    - 600726 华电能源: 9.97% [BEAT]
+
+2026-03-12 [WIN]
+  Index Return: -0.10%
+  Win Rate: 100%
+  Recommendations:
+    - 600623 华谊集团: 5.08% [BEAT]
+    - 603826 坤彩科技: 5.59% [BEAT]
+    - 600726 华电能源: 9.92% [BEAT]
+
+2026-03-13 [LOSE]
+  Index Return: -0.82%
+  Win Rate: 33%
+  Recommendations:
+    - 600623 华谊集团: -3.25% [LOSE]
+    - 603826 坤彩科技: -2.79% [LOSE]
+    - 600726 华电能源: 10.05% [BEAT]
+
+2026-03-16 [WIN]
+  Index Return: -0.26%
+  Win Rate: 100%
+  Recommendations:
+    - 603936 博敏电子: -0.13% [BEAT]
+    - 600722 金牛化工: 8.62% [BEAT]
+    - 600603 广汇物流: 0.00% [BEAT]
+
+2026-03-17 [WIN]
+  Index Return: -0.85%
+  Win Rate: 100%
+  Recommendations:
+    - 603248 锡华科技: 9.99% [BEAT]
+    - 600722 金牛化工: 4.89% [BEAT]
+    - 600691 潞化科技: 10.02% [BEAT]
+
+2026-03-18 [LOSE]
+  Index Return: 0.32%
+  Win Rate: 33%
+  Recommendations:
+    - 600691 潞化科技: -6.36% [LOSE]
+    - 603817 海峡环保: 4.32% [BEAT]
+    - 603092 德力佳: -3.06% [LOSE]
+
+2026-03-19 [WIN]
+  Index Return: -1.39%
+  Win Rate: 67%
+  Recommendations:
+    - 603817 海峡环保: 4.25% [BEAT]
+    - 600691 潞化科技: -3.17% [LOSE]
+    - 600722 金牛化工: 3.22% [BEAT]
+
+2026-03-20 [LOSE]
+  Index Return: -1.24%
+  Win Rate: 33%
+  Recommendations:
+    - 603817 海峡环保: -4.19% [LOSE]
+    - 600643 爱建集团: -5.93% [LOSE]
+    - 600726 华电能源: 9.96% [BEAT]
+
+2026-03-23 [WIN]
+  Index Return: -3.63%
+  Win Rate: 100%
+  Recommendations:
+    - 600726 华电能源: -3.62% [BEAT]
+    - 603817 海峡环保: -0.58% [BEAT]
+    - 600683 京投发展: -2.95% [BEAT]
+
+2026-03-24 [WIN]
+  Index Return: 1.78%
+  Win Rate: 67%
+  Recommendations:
+    - 600726 华电能源: 5.08% [BEAT]
+    - 600617 国新能源: 3.16% [BEAT]
+    - 600643 爱建集团: 1.16% [LOSE]
+
+2026-03-25 [WIN]
+  Index Return: 1.30%
+  Win Rate: 100%
+  Recommendations:
+    - 600726 华电能源: 10.02% [BEAT]
+    - 603929 亚翔集成: 4.60% [BEAT]
+    - 600617 国新能源: 2.12% [BEAT]
+
+2026-03-26 [WIN]
+  Index Return: -1.09%
+  Win Rate: 67%
+  Recommendations:
+    - 600726 华电能源: 10.08% [BEAT]
+    - 600666 奥瑞德: 4.73% [BEAT]
+    - 600617 国新能源: -2.31% [LOSE]
+
+2026-03-27 [WIN]
+  Index Return: 0.63%
+  Win Rate: 67%
+  Recommendations:
+    - 603906 龙蟠科技: 7.12% [BEAT]
+    - 600726 华电能源: -1.33% [LOSE]
+    - 600617 国新能源: 2.60% [BEAT]
+
+2026-03-30 [LOSE]
+  Index Return: 0.24%
+  Win Rate: 33%
+  Recommendations:
+    - 603906 龙蟠科技: 0.04% [LOSE]
+    - 600666 奥瑞德: 2.63% [BEAT]
+    - 600726 华电能源: -10.03% [LOSE]
+
+2026-03-31 [LOSE]
+  Index Return: -0.80%
+  Win Rate: 0%
+  Recommendations:
+    - 603937 丽岛新材: -4.80% [LOSE]
+    - 600698 湖南天雁: -3.67% [LOSE]
+    - 600666 奥瑞德: -8.65% [LOSE]
+
+2026-04-01 [WIN]
+  Index Return: 1.46%
+  Win Rate: 67%
+  Recommendations:
+    - 603826 坤彩科技: 3.51% [BEAT]
+    - 600666 奥瑞德: 10.00% [BEAT]
+    - 600721 百花医药: 0.00% [LOSE]
+
+2026-04-02 [LOSE]
+  Index Return: -0.74%
+  Win Rate: 33%
+  Recommendations:
+    - 603937 丽岛新材: -3.27% [LOSE]
+    - 600666 奥瑞德: -1.59% [LOSE]
+    - 600721 百花医药: 0.00% [BEAT]
+
+2026-04-03 [LOSE]
+  Index Return: -1.00%
+  Win Rate: 0%
+  Recommendations:
+    - 603826 坤彩科技: -2.99% [LOSE]
+    - 600666 奥瑞德: -4.70% [LOSE]
+    - 600613 神奇制药: -1.65% [LOSE]

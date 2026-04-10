@@ -1,0 +1,9 @@
+﻿仅导出推荐到桌面.bat
+仅生成主板评分.bat
+启动系统.bat
+更新Choice数据.bat
+查看竞价排行.bat
+检查Python环境.bat
+每日潜力股推荐.bat
+生成推荐_修复版.bat
+自动更新K线并生成主板推荐.bat

@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-04-10 07:28:22",
+  "success": false,
+  "best_version": "v2",
+  "accuracy": 0.631578947368421,
+  "target_accuracy": 0.85,
+  "elapsed_seconds": 16.516530752182007,
+  "report_path": "C:\\Users\\admin\\Documents\\GitHub\\TradingAgents\\TradingAgent\\backtest_results\\backtest_report_v2_20260410_072822.txt"
+}

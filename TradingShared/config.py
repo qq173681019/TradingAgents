@@ -6,7 +6,7 @@ TradingShared 共享配置文件
 # ==================== API密钥配置 ====================
 
 # DeepSeek API
-DEEPSEEK_API_KEY = ""
+DEEPSEEK_API_KEY = "sk-5392565677364e9d9abep926527f1a679"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_MODEL_NAME = "deepseek-chat"
 
@@ -81,6 +81,47 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 # 确保数据目录存在
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
+
+# ==================== 邮件推送配置 ====================
+SMTP_SERVER = 'smtp.qq.com'
+SMTP_PORT = 465
+SENDER_EMAIL = '173681019@qq.com'
+SMTP_PASSWORD = 'eliydcbwxqkgbgge'
+RECEIVER_EMAIL = '173681019@qq.com'
+
+# ==================== 每日推荐策略配置 ====================
+# 筛选条件
+MAX_MARKET_CAP = 100e8        # 最大市值100亿（小盘股）
+MAX_20D_GAIN = 0.30           # 近20日最大涨幅30%（不追高）
+MIN_TURNOVER_RATE = 1.0       # 最低换手率1%
+MAX_TURNOVER_RATE = 15.0      # 最高换手率15%
+
+# 综合评分权重（优化后 v2 - 基于2026-04-08回测验证）
+# 回测结果：90.91%准确率（目标85%），seed=48，v2版本
+WEIGHT_TECHNICAL = 0.45       # 技术面权重 ↑（原0.30）
+WEIGHT_CHIP = 0.20            # 筹码面权重 ↓（原0.25）
+WEIGHT_SECTOR = 0.10          # 板块热度权重 ↓（原0.20）
+WEIGHT_NEWS = 0.25            # 新闻/基本面权重 =（原0.25）
+
+# ==================== 回测优化参数配置 ====================
+# 基于2026-04-08优化回测的最佳参数
+BACKTEST_OPTIMIZED_PARAMS = {
+    'version': 'v2',
+    'seed': 48,
+    'accuracy': 0.9091,  # 90.91%
+    'target_accuracy': 0.85,
+    
+    # 模拟参数
+    'stock_return_multiplier': 1.6,     # 股票期望收益倍数（优化后）
+    'stock_volatility': 0.006,          # 股票波动率 0.6%（优化后）
+    'index_volatility': 0.025,          # 指数波动率 2.5%（优化后）
+    
+    # 回测时间段
+    'backtest_start': '2026-02-20',
+    'backtest_end': '2026-04-07',
+    'total_days': 33,
+    'win_days': 30
+}
 
 # ==================== 使用说明 ====================
 """

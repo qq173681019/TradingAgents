@@ -1,0 +1,244 @@
+======================================================================
+股票推荐算法回测报告
+Stock Recommendation Algorithm Backtest Report
+======================================================================
+
+回测时间段: 2026-02-20 至 2026-04-07
+算法版本: v1
+权重配置: {'tech': 0.4, 'fund': 0.3, 'chip': 0.2, 'sector': 0.1}
+
+总交易日: 28
+胜利日数: 13
+准确率: 46.43%
+目标准确率: 85%
+
+[FAIL] 算法未达标（差 38.57%）
+
+======================================================================
+每日详细结果
+======================================================================
+
+
+2026-02-25 [LOSE]
+  Index Return: 0.72%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: 0.49% [LOSE]
+    - 600648 外高桥: 1.14% [BEAT]
+    - 600668 尖峰集团: 0.43% [LOSE]
+
+2026-02-26 [LOSE]
+  Index Return: -0.01%
+  Win Rate: 0%
+  Recommendations:
+    - 600676 交运股份: -0.61% [LOSE]
+    - 600648 外高桥: -1.31% [LOSE]
+    - 600668 尖峰集团: -0.78% [LOSE]
+
+2026-02-27 [WIN]
+  Index Return: 0.39%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: 0.86% [BEAT]
+    - 600648 外高桥: 0.47% [BEAT]
+    - 600668 尖峰集团: -0.26% [LOSE]
+
+2026-03-02 [LOSE]
+  Index Return: 0.47%
+  Win Rate: 0%
+  Recommendations:
+    - 600676 交运股份: -1.71% [LOSE]
+    - 600648 外高桥: -1.32% [LOSE]
+    - 600668 尖峰集团: -2.53% [LOSE]
+
+2026-03-03 [LOSE]
+  Index Return: -1.43%
+  Win Rate: 0%
+  Recommendations:
+    - 600676 交运股份: -3.86% [LOSE]
+    - 600648 外高桥: -1.91% [LOSE]
+    - 600668 尖峰集团: -1.52% [LOSE]
+
+2026-03-04 [LOSE]
+  Index Return: -0.98%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: -1.68% [LOSE]
+    - 600648 外高桥: -1.27% [LOSE]
+    - 600668 尖峰集团: -0.82% [BEAT]
+
+2026-03-05 [WIN]
+  Index Return: 0.64%
+  Win Rate: 100%
+  Recommendations:
+    - 600676 交运股份: 1.19% [BEAT]
+    - 600648 外高桥: 1.18% [BEAT]
+    - 600668 尖峰集团: 0.82% [BEAT]
+
+2026-03-06 [WIN]
+  Index Return: 0.38%
+  Win Rate: 100%
+  Recommendations:
+    - 600676 交运股份: 10.03% [BEAT]
+    - 600648 外高桥: 0.49% [BEAT]
+    - 600668 尖峰集团: 1.00% [BEAT]
+
+2026-03-09 [LOSE]
+  Index Return: -0.67%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: -1.54% [LOSE]
+    - 600648 外高桥: -1.17% [LOSE]
+    - 600668 尖峰集团: -0.36% [BEAT]
+
+2026-03-10 [WIN]
+  Index Return: 0.65%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: 1.56% [BEAT]
+    - 600648 外高桥: 1.18% [BEAT]
+    - 600668 尖峰集团: 0.45% [LOSE]
+
+2026-03-11 [LOSE]
+  Index Return: 0.25%
+  Win Rate: 0%
+  Recommendations:
+    - 600676 交运股份: -2.84% [LOSE]
+    - 600648 外高桥: 0.19% [LOSE]
+    - 600668 尖峰集团: -0.54% [LOSE]
+
+2026-03-12 [LOSE]
+  Index Return: -0.10%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: -3.65% [LOSE]
+    - 600648 外高桥: 0.19% [BEAT]
+    - 600668 尖峰集团: -0.36% [LOSE]
+
+2026-03-13 [WIN]
+  Index Return: -0.82%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: -1.77% [LOSE]
+    - 600648 外高桥: 0.68% [BEAT]
+    - 600668 尖峰集团: 0.09% [BEAT]
+
+2026-03-16 [WIN]
+  Index Return: -0.26%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: 1.03% [BEAT]
+    - 600648 外高桥: -0.10% [BEAT]
+    - 600668 尖峰集团: -0.54% [LOSE]
+
+2026-03-17 [WIN]
+  Index Return: -0.85%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: -1.53% [LOSE]
+    - 600648 外高桥: 0.77% [BEAT]
+    - 600668 尖峰集团: 0.09% [BEAT]
+
+2026-03-18 [LOSE]
+  Index Return: 0.32%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: 0.91% [BEAT]
+    - 600648 外高桥: -0.29% [LOSE]
+    - 600668 尖峰集团: -0.36% [LOSE]
+
+2026-03-19 [LOSE]
+  Index Return: -1.39%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: -2.69% [LOSE]
+    - 600648 外高桥: -0.38% [BEAT]
+    - 600668 尖峰集团: -3.01% [LOSE]
+
+2026-03-20 [LOSE]
+  Index Return: -1.24%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: -1.84% [LOSE]
+    - 600648 外高桥: 0.29% [BEAT]
+    - 600668 尖峰集团: -2.54% [LOSE]
+
+2026-03-23 [LOSE]
+  Index Return: -3.63%
+  Win Rate: 0%
+  Recommendations:
+    - 600676 交运股份: -5.64% [LOSE]
+    - 600648 外高桥: -5.08% [LOSE]
+    - 600668 尖峰集团: -5.51% [LOSE]
+
+2026-03-24 [WIN]
+  Index Return: 1.78%
+  Win Rate: 100%
+  Recommendations:
+    - 600676 交运股份: 4.13% [BEAT]
+    - 600648 外高桥: 2.02% [BEAT]
+    - 600668 尖峰集团: 3.78% [BEAT]
+
+2026-03-25 [LOSE]
+  Index Return: 1.30%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: 1.23% [LOSE]
+    - 600648 外高桥: 1.58% [BEAT]
+    - 600668 尖峰集团: 0.30% [LOSE]
+
+2026-03-26 [WIN]
+  Index Return: -1.09%
+  Win Rate: 100%
+  Recommendations:
+    - 600676 交运股份: 2.02% [BEAT]
+    - 600648 外高桥: 0.78% [BEAT]
+    - 600668 尖峰集团: -1.08% [BEAT]
+
+2026-03-27 [WIN]
+  Index Return: 0.63%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: 1.06% [BEAT]
+    - 600648 外高桥: -0.97% [LOSE]
+    - 600668 尖峰集团: 1.19% [BEAT]
+
+2026-03-30 [WIN]
+  Index Return: 0.24%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: -2.88% [LOSE]
+    - 600648 外高桥: 0.78% [BEAT]
+    - 600668 尖峰集团: 1.47% [BEAT]
+
+2026-03-31 [WIN]
+  Index Return: -0.80%
+  Win Rate: 100%
+  Recommendations:
+    - 600676 交运股份: 0.81% [BEAT]
+    - 600648 外高桥: 0.48% [BEAT]
+    - 600668 尖峰集团: 0.10% [BEAT]
+
+2026-04-01 [WIN]
+  Index Return: 1.46%
+  Win Rate: 67%
+  Recommendations:
+    - 600676 交运股份: 1.60% [BEAT]
+    - 600648 外高桥: 0.48% [LOSE]
+    - 600668 尖峰集团: 1.93% [BEAT]
+
+2026-04-02 [LOSE]
+  Index Return: -0.74%
+  Win Rate: 33%
+  Recommendations:
+    - 600676 交运股份: -1.18% [LOSE]
+    - 600648 外高桥: -1.53% [LOSE]
+    - 600668 尖峰集团: -0.38% [BEAT]
+
+2026-04-03 [LOSE]
+  Index Return: -1.00%
+  Win Rate: 0%
+  Recommendations:
+    - 600676 交运股份: -3.86% [LOSE]
+    - 600648 外高桥: -1.07% [LOSE]
+    - 600668 尖峰集团: -2.47% [LOSE]
