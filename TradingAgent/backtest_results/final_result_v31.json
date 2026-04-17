@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-04-10 23:46:27",
+  "version": "v3.1",
+  "best_mode": "rule_top3",
+  "best_accuracy": 0.5757575757575758,
+  "target": 0.65,
+  "success": false,
+  "all_results": [
+    {
+      "mode": "rule",
+      "top_n": 3,
+      "accuracy": 0.5757575757575758,
+      "wins": 19,
+      "total": 33
+    },
+    {
+      "mode": "rule",
+      "top_n": 5,
+      "accuracy": 0.5454545454545454,
+      "wins": 18,
+      "total": 33
+    },
+    {
+      "mode": "hybrid",
+      "top_n": 3,
+      "accuracy": 0.42424242424242425,
+      "wins": 14,
+      "total": 33
+    },
+    {
+      "mode": "hybrid",
+      "top_n": 5,
+      "accuracy": 0.42424242424242425,
+      "wins": 14,
+      "total": 33
+    }
+  ],
+  "news_sentiment": "positive",
+  "elapsed": 616.8014678955078
+}

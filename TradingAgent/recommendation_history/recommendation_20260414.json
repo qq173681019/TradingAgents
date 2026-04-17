@@ -1,0 +1,92 @@
+{
+  "date": "2026-04-14",
+  "recommended": {
+    "date": "2026-04-14",
+    "stock_code": "600676",
+    "stock_name": "交运股份",
+    "total_score": 7.55,
+    "technical_score": 9.0,
+    "chip_score": 6.7,
+    "sector_score": 9.06,
+    "news_score": 5.0,
+    "news_sentiment": "中性",
+    "news_reason": "API调用失败（分析了10条近期新闻）",
+    "market_cap": "50.0亿",
+    "industry": "汽车服务",
+    "sector_name": "新能源汽车",
+    "recent_gain_20d": "+0.0%",
+    "recommendation_reason": "技术面强势（9.0分），短期趋势向好；筹码分布较为合理（6.7分）；所属新能源汽车板块热度较高（9.1分）；市值50.0亿，属于小盘股；换手率3.0%，交投活跃且健康。"
+  },
+  "candidates": [
+    {
+      "code": "600676",
+      "name": "交运股份",
+      "total_score": 7.55,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600643",
+      "name": "爱建集团",
+      "total_score": 7.5,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600638",
+      "name": "新黄浦",
+      "total_score": 7.49,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600715",
+      "name": "文投控股",
+      "total_score": 7.48,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600648",
+      "name": "外高桥",
+      "total_score": 7.36,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600699",
+      "name": "均胜电子",
+      "total_score": 7.32,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600604",
+      "name": "市北高新",
+      "total_score": 7.3,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600657",
+      "name": "信达地产",
+      "total_score": 7.04,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600660",
+      "name": "福耀玻璃",
+      "total_score": 6.95,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "600609",
+      "name": "金杯汽车",
+      "total_score": 6.87,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    }
+  ]
+}

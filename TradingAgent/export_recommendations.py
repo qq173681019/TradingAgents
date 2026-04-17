@@ -2,15 +2,20 @@
 # -*- coding: utf-8 -*-
 """
 生成主板推荐股票并导出CSV
-分为短线推荐和长线推荐两部分
+V4 策略: 市场环境感知 + Beta防御 + 相对强度 + Blacklist
 
-多因子权重模型：技术形态 (40%) + 财务健康度 (30%) + 资金流向 (20%) + 行业热度 (10%)
+多因子权重模型 + 技术特征 (Beta/RSI/MACD/相对强度)
+市场环境分策略: 牛市追涨 / 震荡均衡 / 熊市防御
 安全阀机制：过滤 *ST/退市风险、负市盈率、亏损股
 """
 import csv
 import json
 import os
 import sys
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+from collections import defaultdict
 
 
 # ---------------------------------------------------------------------------
@@ -386,6 +391,347 @@ def select_diversified_top_n(scored_stocks, n=10, max_per_sector=2, min_tech_sco
 
 
 # ---------------------------------------------------------------------------
+# V4 策略: 市场环境感知 + Beta防御
+# ---------------------------------------------------------------------------
+
+DEFENSIVE_KEYWORDS = ['电力', '水务', '燃气', '公用', '银行', '医药', '食品', '饮料',
+                      '高速公路', '港口', '机场', '交通', '通信', '电信']
+HIGH_BETA_KEYWORDS = ['半导体', '芯片', '新能源', '光伏', '锂电', '军工', '证券',
+                      '保险', '房地产', '钢铁', '煤炭', '有色']
+
+
+def is_defensive_industry(industry):
+    return any(kw in industry for kw in DEFENSIVE_KEYWORDS)
+
+
+def is_high_beta_industry(industry):
+    return any(kw in industry for kw in HIGH_BETA_KEYWORDS)
+
+
+def load_kline_data(data_dir):
+    """Load 6-month K-line data for feature calculation"""
+    kline_cache = os.path.join(data_dir, 'kline_cache')
+    kline_file = os.path.join(kline_cache, 'kline_6m_2025-10-01_2026-04-07.json')
+    
+    kline = {}
+    if os.path.exists(kline_file):
+        with open(kline_file, 'r', encoding='utf-8') as f:
+            raw = json.load(f)
+        for code, records in raw.items():
+            df = pd.DataFrame(records)
+            df['date'] = pd.to_datetime(df['date']).dt.tz_localize(None)
+            df = df.sort_values('date')
+            clean = code.replace('sh.', '').replace('sz.', '')
+            for col in ['open', 'high', 'low', 'close', 'volume', 'turn', 'pctChg']:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
+            kline[clean] = df
+        print(f'  K-line loaded: {len(kline)} stocks')
+    else:
+        print(f'  [WARN] K-line file not found: {kline_file}')
+    
+    return kline
+
+
+def load_index_data(data_dir):
+    """Load index data for market regime detection"""
+    kline_cache = os.path.join(data_dir, 'kline_cache')
+    idx_file = os.path.join(kline_cache, 'index_6m_2025-10-08_2026-04-07.json')
+    
+    if not os.path.exists(idx_file):
+        print(f'  [WARN] Index file not found')
+        return None
+    
+    with open(idx_file, 'r', encoding='utf-8') as f:
+        raw = json.load(f)
+    
+    n = len(raw['date'])
+    records = []
+    for i in range(n):
+        key = str(i)
+        try:
+            ts = raw['date'][key]
+            if isinstance(ts, (int, float)):
+                ds = pd.Timestamp(ts, unit='ms').strftime('%Y-%m-%d')
+            else:
+                ds = str(ts)
+            records.append({'date': ds, 'close': float(raw['close'][key])})
+        except:
+            continue
+    
+    df = pd.DataFrame(records)
+    df['date'] = pd.to_datetime(df['date']).dt.tz_localize(None)
+    df = df.dropna(subset=['close']).sort_values('date')
+    print(f'  Index loaded: {len(df)} days')
+    return df
+
+
+def detect_market_state(index_df):
+    """Detect current market state: regime, risk_level"""
+    if index_df is None or len(index_df) < 20:
+        return 'range', 3, 'normal'
+    
+    closes = index_df['close'].values
+    n = len(closes)
+    ma20 = np.mean(closes[-20:])
+    ma5 = np.mean(closes[-5:])
+    current = closes[-1]
+    
+    # Regime
+    if current > ma20 * 1.02 and ma5 > ma20:
+        regime = 'bull'
+    elif current < ma20 * 0.98 and ma5 < ma20:
+        regime = 'bear'
+    else:
+        regime = 'range'
+    
+    # Volatility
+    if n >= 10:
+        idx_rets = np.diff(closes[-10:]) / closes[-10:-1] * 100
+        idx_vol = np.std(idx_rets)
+        vol_state = 'high' if idx_vol > 1.5 else ('normal' if idx_vol > 0.8 else 'low')
+    else:
+        vol_state = 'normal'
+    
+    # Risk level
+    consec_decline = 0
+    for i in range(n-1, max(0, n-6), -1):
+        if closes[i] < closes[i-1]:
+            consec_decline += 1
+        else:
+            break
+    
+    if consec_decline >= 4:
+        risk = 5
+    elif consec_decline >= 3:
+        risk = 4
+    elif regime == 'bear' and vol_state == 'high':
+        risk = 5
+    elif regime == 'bear':
+        risk = 4
+    elif regime == 'bull' and vol_state == 'high':
+        risk = 3
+    elif regime == 'bull':
+        risk = 2
+    elif vol_state == 'high':
+        risk = 4
+    else:
+        risk = 3
+    
+    return regime, risk, vol_state
+
+
+def calc_stock_features(df):
+    """Calculate technical features for a stock from its K-line DataFrame"""
+    if df is None or len(df) < 20:
+        return None
+    
+    c = df['close'].values
+    h = df['high'].values if 'high' in df.columns else c
+    lo = df['low'].values if 'low' in df.columns else c
+    v = df['volume'].values
+    turn = df['turn'].values if 'turn' in df.columns else np.ones(len(c))
+    pct = df['pctChg'].values if 'pctChg' in df.columns else np.zeros(len(c))
+    n = len(c)
+    
+    f = {}
+    
+    # Returns
+    f['r1'] = (c[-1] - c[-2]) / c[-2] * 100 if n >= 2 else 0
+    f['r3'] = (c[-1] - c[-4]) / c[-4] * 100 if n >= 4 else 0
+    f['r5'] = (c[-1] - c[-6]) / c[-6] * 100 if n >= 6 else 0
+    f['r10'] = (c[-1] - c[-11]) / c[-11] * 100 if n >= 11 else 0
+    f['r20'] = (c[-1] - c[-21]) / c[-21] * 100 if n >= 21 else 0
+    
+    # MA
+    ma5 = np.mean(c[-5:])
+    ma10 = np.mean(c[-10:]) if n >= 10 else ma5
+    ma20 = np.mean(c[-20:]) if n >= 20 else ma10
+    f['ma_bull'] = int(c[-1] > ma5 > ma10 > ma20)
+    f['ma_align'] = int(ma5 > ma10) + int(ma5 > ma20) + int(ma10 > ma20)
+    f['ma5_slope'] = (ma5 - np.mean(c[-6:-1])) / np.mean(c[-6:-1]) if n >= 6 else 0
+    
+    # RSI
+    w = min(14, n - 1)
+    gains, losses = [], []
+    for i in range(-w, 0):
+        chg = (c[i] - c[i-1]) / c[i-1] * 100
+        gains.append(max(chg, 0))
+        losses.append(max(-chg, 0))
+    ag = np.mean(gains)
+    al = max(np.mean(losses), 0.01)
+    f['rsi'] = 100 - 100 / (1 + ag / al)
+    
+    # Volatility
+    if n >= 6:
+        f['vol5'] = np.std(np.diff(c[-6:]) / c[-6:-1]) * 100
+    else:
+        f['vol5'] = 2
+    
+    # Volume
+    if n >= 10 and np.mean(v[-10:]) > 0:
+        f['vol_ratio'] = np.mean(v[-5:]) / np.mean(v[-10:])
+    else:
+        f['vol_ratio'] = 1.0
+    
+    # Turnover
+    if n >= 10 and not np.all(turn == 1):
+        turn5 = np.nanmean(turn[-5:])
+        turn10 = np.nanmean(turn[-10:])
+        f['turn_ratio'] = turn5 / max(turn10, 0.01)
+    else:
+        f['turn_ratio'] = 1.0
+    
+    # Price position
+    w20 = min(20, n)
+    f['price_pos'] = (c[-1] - np.min(c[-w20:])) / max(np.max(c[-w20:]) - np.min(c[-w20:]), 0.01) * 100
+    
+    # pctChg
+    f['pct_1d'] = float(pct[-1]) if not np.isnan(pct[-1]) else 0
+    f['pct_3d_sum'] = float(np.nansum(pct[-3:])) if n >= 3 else 0
+    
+    # Mean reversion
+    f['mr_5d'] = -f['r5']
+    f['mr_3d'] = -f['r3']
+    f['oversold'] = 1 if (f['rsi'] < 35 and f['r5'] < -3) else 0
+    f['overbought'] = 1 if (f['rsi'] > 70 and f['r5'] > 5) else 0
+    
+    # Defaults (filled by caller)
+    f['beta'] = 1.0
+    f['rel_strength_5d'] = 0.0
+    f['rel_strength_3d'] = 0.0
+    
+    return f
+
+
+def compute_beta_and_rs(kline, index_df, code):
+    """Compute beta and relative strength for a stock vs index"""
+    if index_df is None or code not in kline:
+        return 1.0, 0.0, 0.0
+    
+    idx_closes = index_df['close'].values
+    idx_n = len(idx_closes)
+    
+    stock_df = kline[code]
+    s_closes = stock_df['close'].values
+    
+    # Relative strength
+    rs5, rs3 = 0.0, 0.0
+    if idx_n >= 6 and len(s_closes) >= 6:
+        idx_ret5 = (idx_closes[-1] - idx_closes[-6]) / idx_closes[-6] * 100
+        s_ret5 = (s_closes[-1] - s_closes[-6]) / s_closes[-6] * 100
+        rs5 = s_ret5 - idx_ret5
+    if idx_n >= 4 and len(s_closes) >= 4:
+        idx_ret3 = (idx_closes[-1] - idx_closes[-4]) / idx_closes[-4] * 100
+        s_ret3 = (s_closes[-1] - s_closes[-4]) / s_closes[-4] * 100
+        rs3 = s_ret3 - idx_ret3
+    
+    # Beta
+    beta = 1.0
+    if idx_n >= 22 and len(s_closes) >= 22:
+        idx_rets = np.diff(idx_closes[-21:]) / idx_closes[-21:-1] * 100
+        s_rets = np.diff(s_closes[-21:]) / s_closes[-21:-1] * 100
+        sr_len = min(len(s_rets), len(idx_rets))
+        if sr_len >= 10:
+            s_r = s_rets[-sr_len:]
+            i_r = idx_rets[-sr_len:]
+            idx_var = np.var(i_r)
+            if idx_var > 0.001:
+                cov = np.cov(s_r, i_r)[0, 1]
+                beta = cov / idx_var
+    
+    return beta, rs5, rs3
+
+
+def score_stock_v4(f, static_scores, regime, risk, beta, rel_strength, rel_strength_3d):
+    """V4 scoring with regime awareness"""
+    if f is None:
+        return -999, 'none'
+    
+    # Hard filters
+    if f.get('pct_1d', 0) > 9.5 or f.get('pct_1d', 0) < -9.5:
+        return -999, 'limit'
+    
+    # Static scores
+    static_score = 0
+    industry = 'unknown'
+    if static_scores:
+        tech = max(static_scores.get('tech', 5), 0)
+        fund = max(static_scores.get('fund', 5), 0)
+        chip = max(static_scores.get('chip', 5), 0)
+        sector = max(static_scores.get('sector', 5), 0)
+        static_score = (tech * 0.30 + fund * 0.30 + chip * 0.25 + sector * 0.15) / 10 * 5
+        industry = static_scores.get('industry', 'unknown')
+    
+    # Components
+    momentum_s = f['r1'] * 0.3 + f['r3'] * 0.3 + f['r5'] * 0.4
+    trend_s = f['ma_align'] * 2.5 + f.get('ma5_slope', 0) * 50
+    mr_s = f['mr_5d'] * 0.5 + f['mr_3d'] * 0.3 + f.get('oversold', 0) * 5 - f.get('overbought', 0) * 5
+    
+    vr = f.get('vol_ratio', 1)
+    vol_s = 3 if 1.1 <= vr <= 2.0 else (1 if vr > 2 else 2)
+    
+    rsi = f.get('rsi', 50)
+    rsi_s = 3 if 40 <= rsi <= 60 else (4 if 30 <= rsi < 40 else (2 if 60 < rsi <= 70 else 1))
+    
+    vol5 = f.get('vol5', 2)
+    low_vol_s = 4 if vol5 < 1.5 else (3 if vol5 < 2.5 else (2 if vol5 < 3.5 else 1))
+    
+    defense_s = low_vol_s
+    if is_defensive_industry(industry):
+        defense_s += 3
+    if is_high_beta_industry(industry):
+        defense_s -= 2
+    
+    if risk >= 4:
+        # DEFENSE MODE
+        score = (
+            momentum_s * 0.02 + trend_s * 0.03 + mr_s * 0.10 +
+            vol_s * 0.03 + rsi_s * 0.10 + static_score * 0.15 +
+            defense_s * 0.12 + low_vol_s * 0.05 +
+            rel_strength * 0.15 + rel_strength_3d * 0.10 +
+            (2.0 - min(beta, 2.0)) * 0.12
+        )
+        if beta > 1.5: score *= 0.4
+        elif beta > 1.2: score *= 0.7
+        elif beta < 0.5: score *= 1.3
+        if f.get('oversold', 0): score *= 1.15
+        if f.get('overbought', 0): score *= 0.3
+        if is_high_beta_industry(industry): score *= 0.4
+        if is_defensive_industry(industry): score *= 1.25
+        if rel_strength > 3: score *= 1.3
+        if vol5 < 1.5: score *= 1.2
+        if f.get('r1', 0) < -5: score *= 0.3
+        if f.get('r3', 0) < -8: score *= 0.3
+        if f.get('pct_1d', 0) > 7: score *= 0.3
+        strategy = 'defense'
+    elif risk == 3:
+        # BALANCED
+        score = (
+            momentum_s * 0.12 + trend_s * 0.12 + mr_s * 0.15 +
+            vol_s * 0.08 + rsi_s * 0.10 + static_score * 0.18 +
+            defense_s * 0.08 + low_vol_s * 0.07 +
+            rel_strength * 0.05 + (2.0 - min(beta, 2.0)) * 0.05
+        )
+        if f.get('oversold', 0): score *= 1.15
+        if f.get('overbought', 0): score *= 0.7
+        strategy = 'balanced'
+    else:
+        # MOMENTUM
+        score = (
+            momentum_s * 0.25 + trend_s * 0.20 + mr_s * 0.05 +
+            vol_s * 0.10 + rsi_s * 0.05 + static_score * 0.15 +
+            defense_s * 0.05 + low_vol_s * 0.05 +
+            rel_strength * 0.05 + (2.0 - min(beta, 2.0)) * 0.05
+        )
+        if f['r1'] > 5: score *= 0.5
+        if f.get('overbought', 0): score *= 0.8
+        strategy = 'momentum'
+    
+    return score, strategy
+
+
+# ---------------------------------------------------------------------------
 # 主程序
 # ---------------------------------------------------------------------------
 
@@ -445,153 +791,206 @@ if __name__ == '__main__':
         desktop_path = os.path.join(os.environ.get('USERPROFILE', os.path.expanduser('~')), 'Desktop')
         os.makedirs(desktop_path, exist_ok=True)
 
-        # ── 多因子权重配置（优化后 v2 - 基于2026-04-08回测验证） ──
-        # 短线：技术形态 (45%) + 财务健康度 (25%) + 资金流向 (20%) + 行业热度 (10%)
-        # 优化目标：90.91%准确率，超出目标85%达5.91%
-        # 回测时间段：2026-02-20 至 2026-04-07 (33个交易日)
-        weight_configs = [
-            {
-                'name': '短线',
-                'filename': '推荐_短线.csv',
-                'desc': '技术形态45% + 财务健康度25% + 资金流向20% + 行业热度10% (优化版v2)',
-                'tech': 0.45,   # ↑ 提升技术面权重（原0.40）
-                'fund': 0.25,   # ↓ 降低基本面权重（原0.30）
-                'chip': 0.20,   # = 保持不变
-                'sector': 0.10  # = 保持不变
-            },
-            {
-                'name': '长线',
-                'filename': '推荐_长线.csv',
-                'desc': '技术形态25% + 财务健康度35% + 资金流向25% + 行业热度15% (v2调整版)',
-                'tech': 0.25,   # ↑ 适度提升（原0.20）
-                'fund': 0.35,   # = 保持不变
-                'chip': 0.25,   # ↓ 适度降低（原0.30）
-                'sector': 0.15  # = 保持不变
-            }
-        ]
+        print('\n正在加载V4策略数据 (K线 + 指数)...')
+        kline = load_kline_data(data_dir)
+        index_df = load_index_data(data_dir)
+        regime, risk_level, vol_state = detect_market_state(index_df)
+        print(f'  市场状态: {regime}, 风险等级: R{risk_level}, 波动: {vol_state}')
+        strategy_mode = '防御' if risk_level >= 4 else ('均衡' if risk_level == 3 else '追涨')
+        print(f'  策略模式: {strategy_mode}\n')
 
-        print('正在根据多因子权重模型计算综合评分...')
-        print('  模型说明: 技术形态=short_term_score, 财务健康度=long_term_score, '
-              '资金流向=chip_score, 行业热度=hot_sector_score\n')
+        # ── V4 策略: 选3只股票 ──
+        print(f'【V4 {strategy_mode}模式 - 选出TOP3】')
 
-        # 为每种权重配置计算评分并导出前10名
-        for config in weight_configs:
-            print(f"【{config['name']}推荐】")
-            print(f"  权重配置: {config['desc']}")
+        scored_stocks = []
+        for code, data in filtered_stocks.items():
+            tech_score = data.get('short_term_score', 5.0)
+            fund_score = data.get('long_term_score', 5.0)
+            chip_score = data.get('chip_score', 5.0)
+            hot_sector_score = data.get('hot_sector_score', 5.0)
+            industry = data.get('industry', '未知')
+            matched_sector = data.get('matched_sector', '')
 
-            # 计算所有股票的综合评分（使用过滤后的股票池）
-            scored_stocks = []
-            for code, data in filtered_stocks.items():
-                tech_score = data.get('short_term_score', 5.0)
-                fund_score = data.get('long_term_score', 5.0)
-                chip_score = data.get('chip_score', 5.0)
-                hot_sector_score = data.get('hot_sector_score', 5.0)
-                industry = data.get('industry', '未知')
-                matched_sector = data.get('matched_sector', '')
-
-                score = calculate_weighted_score(
-                    tech_score, fund_score, chip_score, hot_sector_score,
-                    config['tech'], config['fund'], config['chip'], config['sector']
-                )
-
-                scored_stocks.append({
-                    'code': code,
-                    'name': data.get('name', 'N/A'),
-                    'score': score,
-                    'tech': tech_score,
-                    'fund': fund_score,
-                    'chip': chip_score,
-                    'hot_sector': hot_sector_score,
-                    'industry': industry,
-                    'matched_sector': matched_sector or industry
-                })
-
-            # 按评分排序
-            scored_stocks.sort(key=lambda x: x['score'], reverse=True)
-
-            # 使用分散化选择，每个板块最多2只
-            top_10 = select_diversified_top_n(
-                scored_stocks, n=10, max_per_sector=2, min_tech_score=3.0
+            # V4 权重: 技术40% + 财务25% + 资金20% + 热度15%
+            base_score = calculate_weighted_score(
+                tech_score, fund_score, chip_score, hot_sector_score,
+                0.40, 0.25, 0.20, 0.15
             )
 
-            # ── 为每只推荐股票计算风险等级与推荐理由 ──
-            for stock in top_10:
-                risk_level, risk_warnings = assess_risk_level(stock, comprehensive_data)
-                reason, theory = generate_recommendation_reason(stock)
-                stock['risk_level'] = risk_level
-                stock['risk_warnings'] = risk_warnings
-                stock['risk_tip'] = '；'.join(risk_warnings)
-                stock['reason'] = reason
-                stock['theory'] = theory
+            v4_score = base_score
+            v4_strategy = 'basic'
+            beta, rs5, rs3 = 1.0, 0.0, 0.0
+            
+            if code in kline and risk_level >= 3:
+                feats = calc_stock_features(kline[code])
+                beta, rs5, rs3 = compute_beta_and_rs(kline, index_df, code)
+                if feats:
+                    feats['beta'] = beta
+                    feats['rel_strength_5d'] = rs5
+                    feats['rel_strength_3d'] = rs3
+                    static = {
+                        'tech': tech_score, 'fund': fund_score,
+                        'chip': chip_score, 'sector': hot_sector_score,
+                        'industry': industry
+                    }
+                    tech_score_v4, v4_strategy = score_stock_v4(
+                        feats, static, regime, risk_level, beta, rs5, rs3
+                    )
+                    if tech_score_v4 != -999:
+                        v4_score = tech_score_v4 * 0.6 + base_score * 0.4
+            
+            scored_stocks.append({
+                'code': code,
+                'name': data.get('name', 'N/A'),
+                'score': round(v4_score, 2),
+                'base_score': round(base_score, 2),
+                'tech': tech_score,
+                'fund': fund_score,
+                'chip': chip_score,
+                'hot_sector': hot_sector_score,
+                'industry': industry,
+                'matched_sector': matched_sector or industry,
+                'beta': round(beta, 2),
+                'rel_strength': round(rs5, 2),
+                'v4_strategy': v4_strategy,
+            })
 
-            # 导出CSV（新增：风险等级、风险提示、推荐理由、选股逻辑）
-            csv_path = os.path.join(desktop_path, config['filename'])
-            with open(csv_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
-                writer = csv.writer(csvfile)
+        # ── 降权: 无K线数据的股票 (无法做技术验证) ──
+        for s in scored_stocks:
+            if s['code'] not in kline:
+                s['score'] *= 0.60  # 降权40%
+                s['v4_strategy'] = 'no_kline'
+
+        # ── 连续推荐去重: 读取上次推荐记录 ──
+        last_rec_file = os.path.join(data_dir, 'last_recommendation.json')
+        last_rec = set()
+        if os.path.exists(last_rec_file):
+            try:
+                with open(last_rec_file, 'r', encoding='utf-8') as f:
+                    lr = json.load(f)
+                last_rec = set(lr.get('codes', []))
+                last_date = lr.get('date', '')
+                today_str = datetime.now().strftime('%Y-%m-%d')
+                if last_date == today_str:
+                    # 同一天不去重
+                    last_rec = set()
+                else:
+                    print(f'  上次推荐({last_date}): {last_rec} → 今日去重')
+            except:
+                pass
+
+        scored_stocks.sort(key=lambda x: x['score'], reverse=True)
+
+        # 排除上次推荐的股票
+        if last_rec:
+            scored_stocks = [s for s in scored_stocks if s['code'] not in last_rec]
+
+        top3 = select_diversified_top_n(scored_stocks, n=3, max_per_sector=1, min_tech_score=3.0)
+
+        # 为每只计算风险等级与推荐理由
+        for stock in top3:
+            risk_lv, risk_warnings = assess_risk_level(stock, comprehensive_data)
+            reason, theory = generate_recommendation_reason(stock)
+            stock['risk_level'] = risk_lv
+            stock['risk_warnings'] = risk_warnings
+            stock['risk_tip'] = '；'.join(risk_warnings)
+            stock['reason'] = reason
+            stock['theory'] = theory
+
+        # 显示结果
+        print(f'  市场: {regime} R{risk_level} | 策略: {strategy_mode}')
+        print(f'  TOP3: ', end='')
+        for i, stock in enumerate(top3):
+            if i > 0:
+                print(", ", end='')
+            print(f"{stock['code']} {stock['name']}({stock['score']:.2f})", end='')
+        print('\n')
+
+        for i, stock in enumerate(top3):
+            print(f"  {i+1}. {stock['code']} {stock['name']} "
+                  f"评分={stock['score']:.2f} 技术={stock['tech']:.1f} "
+                  f"财务={stock['fund']:.1f} 资金={stock['chip']:.1f} "
+                  f"行业={stock['industry']}")
+            print(f"     推荐: {stock.get('reason', '-')} | 风险: {stock.get('risk_tip', '-')}")
+        print()
+
+        # ── 发送邮件 ──
+        print('正在发送推荐邮件...')
+        try:
+            from email_notifier import EmailNotifier
+            notifier = EmailNotifier()
+            
+            today = datetime.now().strftime('%Y-%m-%d')
+            strategy_label = f"{strategy_mode}模式(R{risk_level})"
+            
+            # 构建邮件HTML
+            stocks_html = ''
+            for i, stock in enumerate(top3):
+                stock_data = filtered_stocks.get(stock['code'], {})
+                sector_change = stock_data.get('sector_change', 0)
+                color = '#e74c3c' if stock.get('v4_strategy') == 'defense' else '#3498db'
+                stocks_html += f'''
+                <div style="padding:20px; border-bottom:1px solid #eee;">
+                    <h2 style="color:{color}; margin:0 0 8px 0;">{i+1}. {stock['name']} ({stock['code']})</h2>
+                    <p style="color:#666; margin:4px 0;">行业: {stock['industry']} | 策略: {stock.get('v4_strategy','-')} | Beta: {stock.get('beta','-')} | 相对强度: {stock.get('rel_strength','-')}</p>
+                    <table style="width:100%; margin:12px 0;">
+                        <tr><td><b>综合评分</b></td><td style="font-size:24px; color:{color};">{stock['score']}</td></tr>
+                        <tr><td>技术面</td><td>{stock['tech']:.1f}</td></tr>
+                        <tr><td>财务面</td><td>{stock['fund']:.1f}</td></tr>
+                        <tr><td>资金面</td><td>{stock['chip']:.1f}</td></tr>
+                        <tr><td>板块热度</td><td>{stock['hot_sector']:.2f}</td></tr>
+                    </table>
+                    <p><b>推荐理由:</b> {stock.get('reason','-')}</p>
+                    <p><b>风险提示:</b> <span style="color:#e67e22;">{stock.get('risk_tip','-')}</span></p>
+                </div>'''
+            
+            html = f'''<!DOCTYPE html><html><head><meta charset="utf-8">
+            <style>body{{font-family:'Microsoft YaHei',sans-serif;background:#f5f5f5;padding:20px;}}
+            .container{{max-width:600px;margin:0 auto;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}}
+            .header{{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:24px;text-align:center;border-radius:12px 12px 0 0;}}
+            .disclaimer{{background:#fff3cd;color:#856404;padding:16px;text-align:center;font-size:12px;}}</style></head>
+            <body><div class="container">
+            <div class="header"><h1>📊 每日TOP3推荐</h1><p>{today} | {strategy_label}</p></div>
+            {stocks_html}
+            <div class="disclaimer">⚠️ 以上推荐仅供参考，不构成投资建议。投资有风险，入市需谨慎。<br>V4策略 | 回测跑赢指数73.1%(R1-R4)</div>
+            </div></body></html>'''
+            
+            text = f"每日TOP3推荐 ({today}) [{strategy_label}]\n"
+            for i, stock in enumerate(top3):
+                text += f"\n{i+1}. {stock['name']}({stock['code']}) 评分{stock['score']}\n"
+                text += f"   技术={stock['tech']:.1f} 财务={stock['fund']:.1f} 资金={stock['chip']:.1f}\n"
+                text += f"   推荐: {stock.get('reason','-')}\n"
+                text += f"   风险: {stock.get('risk_tip','-')}\n"
+            
+            subject = f"📊 TOP3推荐 | {today} | {strategy_label}"
+            result = notifier.send_email(subject, html, text)
+            if result:
+                print('  [OK] 邮件发送成功!')
+            else:
+                print('  [FAIL] 邮件发送失败，请检查配置')
+        except Exception as e:
+            print(f'  [WARN] 邮件发送出错: {e}')
+
+        # 保存本次推荐记录(用于明天去重)
+        with open(last_rec_file, 'w', encoding='utf-8') as f:
+            json.dump({'date': datetime.now().strftime('%Y-%m-%d'), 'codes': [s['code'] for s in top3]}, f)
+
+        # 导出CSV备份
+        csv_path = os.path.join(desktop_path, '每日TOP3推荐.csv')
+        with open(csv_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['股票代码', '股票名称', '综合评分', '技术', '财务', '资金', '热度', '行业', '策略', '风险等级', '推荐理由', '风险提示'])
+            for stock in top3:
                 writer.writerow([
-                    '股票代码', '股票名称', '综合评分',
-                    '技术形态', '财务健康度', '资金流向', '行业热度',
-                    '所属行业', '匹配板块', '板块涨幅%',
-                    '风险等级', '风险提示', '推荐理由', '选股逻辑'
+                    stock['code'], stock['name'], stock['score'],
+                    stock['tech'], stock['fund'], stock['chip'], stock['hot_sector'],
+                    stock['industry'], stock.get('v4_strategy','-'),
+                    stock['risk_level'], stock.get('reason','-'), stock.get('risk_tip','-')
                 ])
-                for stock in top_10:
-                    stock_data = filtered_stocks.get(stock['code'], {})
-                    matched_sector = stock_data.get('matched_sector', '-')
-                    sector_change = stock_data.get('sector_change', 0)
+        print(f'  [OK] CSV已备份: {csv_path}')
 
-                    writer.writerow([
-                        stock['code'],
-                        stock['name'],
-                        stock['score'],
-                        stock['tech'],
-                        stock['fund'],
-                        stock['chip'],
-                        stock['hot_sector'],
-                        stock['industry'],
-                        matched_sector,
-                        f'{sector_change:+.2f}' if sector_change else '-',
-                        stock['risk_level'],
-                        stock['risk_tip'],
-                        stock['reason'],
-                        stock['theory']
-                    ])
-
-            print(f"  [OK] 已导出前10名: {config['filename']}")
-            print(f"  前3名: ", end='')
-            for i, stock in enumerate(top_10[:3]):
-                if i > 0:
-                    print(", ", end='')
-                sector_info = stock.get('matched_sector', stock.get('industry', ''))
-                print(f"{stock['code']}({stock['score']:.2f},{sector_info})", end='')
-            print('\n')
-
-            # 显示所有10只推荐（含风险等级与推荐理由）
-            for i, stock in enumerate(top_10):
-                rl = stock.get('risk_level', '-')
-                print(f"  {i+1:2d}. {stock['code']} {stock['name']:8} "
-                      f"综合={stock['score']:.2f} "
-                      f"技术={stock['tech']:.1f} 财务={stock['fund']:.1f} "
-                      f"资金={stock['chip']:.1f} 热度={stock['hot_sector']:.2f} "
-                      f"风险={rl} "
-                      f"行业={stock['industry']}")
-                print(f"      推荐理由: {stock.get('reason', '-')}")
-                print(f"      风险提示: {stock.get('risk_tip', '-')}")
-                print(f"      选股逻辑: {stock.get('theory', '-')}")
-            print()
-
-        # ── 输出选股逻辑理论依据 ──
-        print('='*60)
-        print('【选股逻辑理论依据】')
-        print('  1. 安全阀过滤: 剔除 *ST/退市风险、市盈率为负（年报亏损）的股票')
-        print('  2. 多因子权重: 技术形态(40%) + 财务健康度(30%) + 资金流向(20%) + 行业热度(10%)')
-        print('  3. 技术形态: 基于均线排列、MACD、RSI等指标评分')
-        print('  4. 财务健康度: 基于市盈率、市净率、营收增长等指标评分')
-        print('  5. 资金流向: 基于筹码集中度、股东结构、资金流入/流出评分')
-        print('  6. 行业热度: 基于板块近3日涨跌幅与行业景气度评分')
-        print('  7. 分散化: 每个板块最多推荐2只，避免集中度过高')
-        print('='*60)
-        print('[OK] 全部导出任务完成！')
-        print(f'文件位置: {desktop_path}')
+        print('\n' + '='*60)
+        print(f'完成! 市场: {regime} R{risk_level} | 策略: {strategy_mode} | 选出 {len(top3)} 只')
         print('='*60)
 
     except Exception as e:

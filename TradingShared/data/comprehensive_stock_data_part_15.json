@@ -2,7 +2,7 @@
   "stocks": {
     "603999": {
       "code": "603999",
-      "timestamp": "2026-04-10T20:50:00.033691",
+      "timestamp": "2026-04-16T01:45:37.649343",
       "collection_time": "2025-12-28 22:39:11",
       "data_source": "choice_api",
       "basic_info": {
@@ -16,30 +16,6 @@
       },
       "kline_data": {
         "daily": [
-          {
-            "date": "2025-12-30",
-            "open": 6.86,
-            "high": 6.99,
-            "low": 6.8,
-            "close": 6.9,
-            "volume": 10638200
-          },
-          {
-            "date": "2025-12-31",
-            "open": 6.9,
-            "high": 7.09,
-            "low": 6.85,
-            "close": 7.03,
-            "volume": 14261100
-          },
-          {
-            "date": "2025109",
-            "open": 6.44,
-            "high": 6.46,
-            "low": 6.33,
-            "close": 6.38,
-            "volume": 6284328
-          },
           {
             "date": "2025113",
             "open": 6.78,
@@ -655,12 +631,36 @@
             "low": 6.91,
             "close": 7.04,
             "volume": 6655500
+          },
+          {
+            "date": "2026-04-13",
+            "open": 6.97,
+            "high": 6.99,
+            "low": 6.88,
+            "close": 6.95,
+            "volume": 6002700
+          },
+          {
+            "date": "2026-04-14",
+            "open": 7.0,
+            "high": 7.05,
+            "low": 6.88,
+            "close": 6.99,
+            "volume": 5822500
+          },
+          {
+            "date": "2026-04-15",
+            "open": 7.0,
+            "high": 7.0,
+            "low": 6.85,
+            "close": 6.87,
+            "volume": 5611200
           }
         ],
-        "latest_price": 7.04,
+        "latest_price": 6.87,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-04-10T20:50:00.033643"
+        "update_time": "2026-04-16T01:45:37.649284"
       },
       "financial_data": {
         "pe_ratio": 64.023614,
@@ -685,18 +685,18 @@
         "data_source": "choice_calculated"
       },
       "technical_indicators": {
-        "current_price": 7.04,
-        "ma5": 6.836,
-        "ma10": 6.849000000000001,
-        "ma20": 6.981,
-        "ma60": 7.420833333333333,
-        "rsi": 48.84615384615385,
-        "macd": -0.14701999986015757,
-        "signal": -0.17744863893313703,
-        "volume_ratio": 0.8821106294363982,
+        "current_price": 6.87,
+        "ma5": 6.95,
+        "ma10": 6.872,
+        "ma20": 6.919999999999999,
+        "ma60": 7.393666666666666,
+        "rsi": 45.810055865921804,
+        "macd": -0.11436073460341412,
+        "signal": -0.14985093280208056,
+        "volume_ratio": 0.8168042272588323,
         "status": "calculated"
       },
-      "last_kline_update": "2026-04-10T20:50:00.033647",
+      "last_kline_update": "2026-04-16T01:45:37.649289",
       "industry_concept": {
         "code": "603999",
         "source": "baostock_default",
@@ -57650,6 +57650,6 @@
       }
     }
   },
-  "last_updated": "2026-04-10T20:50:32.061437",
+  "last_updated": "2026-04-16T23:48:11.374105",
   "total_stocks": 112
 }

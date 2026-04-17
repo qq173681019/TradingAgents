@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-04-11 11:26:15",
+  "version": "v4",
+  "results": {
+    "adaptive": {
+      "accuracy": 0.48484848484848486,
+      "beat_idx_pct": 0.6666666666666666
+    },
+    "fixed3": {
+      "accuracy": 0.5151515151515151,
+      "beat_idx_pct": 0.6666666666666666
+    },
+    "fixed5": {
+      "accuracy": 0.48484848484848486,
+      "beat_idx_pct": 0.5757575757575758
+    }
+  },
+  "best": "adaptive"
+}
