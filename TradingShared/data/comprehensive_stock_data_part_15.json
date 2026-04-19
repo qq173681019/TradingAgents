@@ -2,7 +2,7 @@
   "stocks": {
     "603999": {
       "code": "603999",
-      "timestamp": "2026-04-16T01:45:37.649343",
+      "timestamp": "2026-04-19T20:24:38.998770",
       "collection_time": "2025-12-28 22:39:11",
       "data_source": "choice_api",
       "basic_info": {
@@ -16,22 +16,6 @@
       },
       "kline_data": {
         "daily": [
-          {
-            "date": "2025113",
-            "open": 6.78,
-            "high": 6.94,
-            "low": 6.77,
-            "close": 6.93,
-            "volume": 14977387
-          },
-          {
-            "date": "2025114",
-            "open": 6.9,
-            "high": 6.97,
-            "low": 6.84,
-            "close": 6.96,
-            "volume": 12556200
-          },
           {
             "date": "2025115",
             "open": 6.9,
@@ -655,12 +639,28 @@
             "low": 6.85,
             "close": 6.87,
             "volume": 5611200
+          },
+          {
+            "date": "2026-04-16",
+            "open": 6.88,
+            "high": 7.01,
+            "low": 6.83,
+            "close": 6.95,
+            "volume": 6538900
+          },
+          {
+            "date": "2026-04-17",
+            "open": 6.93,
+            "high": 6.98,
+            "low": 6.83,
+            "close": 6.87,
+            "volume": 6930400
           }
         ],
         "latest_price": 6.87,
         "data_points": 80,
         "source": "incremental_update",
-        "update_time": "2026-04-16T01:45:37.649284"
+        "update_time": "2026-04-19T20:24:38.998695"
       },
       "financial_data": {
         "pe_ratio": 64.023614,
@@ -686,17 +686,17 @@
       },
       "technical_indicators": {
         "current_price": 6.87,
-        "ma5": 6.95,
-        "ma10": 6.872,
-        "ma20": 6.919999999999999,
-        "ma60": 7.393666666666666,
-        "rsi": 45.810055865921804,
-        "macd": -0.11436073460341412,
-        "signal": -0.14985093280208056,
-        "volume_ratio": 0.8168042272588323,
+        "ma5": 6.926,
+        "ma10": 6.881,
+        "ma20": 6.874,
+        "ma60": 7.366333333333333,
+        "rsi": 51.13636363636364,
+        "macd": -0.10071889886328744,
+        "signal": -0.13289987342781237,
+        "volume_ratio": 1.1312796270420622,
         "status": "calculated"
       },
-      "last_kline_update": "2026-04-16T01:45:37.649289",
+      "last_kline_update": "2026-04-19T20:24:38.998705",
       "industry_concept": {
         "code": "603999",
         "source": "baostock_default",
@@ -57650,6 +57650,6 @@
       }
     }
   },
-  "last_updated": "2026-04-16T23:48:11.374105",
+  "last_updated": "2026-04-19T20:25:26.742548",
   "total_stocks": 112
 }
