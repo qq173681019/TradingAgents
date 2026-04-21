@@ -23,13 +23,13 @@ def get_kline_data(stock_code, start_date, end_date, indicators="OPEN,HIGH,LOW,C
         import time
 
         from EmQuantAPI import c
+        from config import CHOICE_USERNAME, CHOICE_PASSWORD
         max_retries = 3
         last_error = None
         
         for attempt in range(max_retries):
             try:
-                # 尝试调用c.start()
-                result = c.start("")
+                result = c.start(f"USERNAME={CHOICE_USERNAME},PASSWORD={CHOICE_PASSWORD}")
                 
                 # 检查是否成功
                 if result.ErrorCode == 0:
@@ -138,9 +138,10 @@ def get_realtime_quote(stock_codes):
     """
     try:
         from EmQuantAPI import c
+        from config import CHOICE_USERNAME, CHOICE_PASSWORD
 
         # 初始化
-        result = c.start("")
+        result = c.start(f"USERNAME={CHOICE_USERNAME},PASSWORD={CHOICE_PASSWORD}")
         if result.ErrorCode != 0:
             return {
                 "success": False,

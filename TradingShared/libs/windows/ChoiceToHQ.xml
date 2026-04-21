@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Rules fileversoin="115">
+<Rules fileversoin="117">
 	<CommonRules> <!-- 通用规则 -->
 		<!--  映射关系：Choice到财富通由3个字段映射成1个EMMarketID；财富通到Choice由EMMarketID映射成ChoicePostfix  -->
 		<Mapper ChoicePostfix="SH" ChoiceMarketCode="1" ChoiceTypeCode="1" HQMarketID="1" Desc="描述字段，可填可不填"/>
@@ -160,6 +160,11 @@
 		<Mapper ChoicePostfix="GFE" ChoiceMarketCode="161" ChoiceTypeCode="324" HQMarketID="225"/>
 		<Mapper ChoicePostfix="GFE" ChoiceMarketCode="161" ChoiceTypeCode="325" HQMarketID="226"/>
 		<Mapper ChoicePostfix="SG" ChoiceMarketCode="114" ChoiceTypeCode="350" HQMarketID="246"/>
+		<Mapper ChoicePostfix="SG" ChoiceMarketCode="0" ChoiceTypeCode="371" HQMarketID="154"/>
+		<Mapper ChoicePostfix="T" ChoiceMarketCode="0" ChoiceTypeCode="370" HQMarketID="176"/>
+		<Mapper ChoicePostfix="KS" ChoiceMarketCode="0" ChoiceTypeCode="377" HQMarketID="177"/>
+		<Mapper ChoicePostfix="TW" ChoiceMarketCode="0" ChoiceTypeCode="376" HQMarketID="178"/>
+		<Mapper ChoicePostfix="TWO" ChoiceMarketCode="0" ChoiceTypeCode="344" HQMarketID="178"/>
 	</CommonRules>
 	<SpecialCodeRules>
 		<!--  特殊代码转换规则，遇到这种代码，既要应用上面的通用规则替换后缀，也要进行代码替换  -->
