@@ -24,17 +24,14 @@ from typing import Dict, List, Optional
 # 添加共享模块路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'TradingShared'))
 
-from config import (
-    WEIGHT_TECHNICAL,
-    WEIGHT_CHIP,
-    WEIGHT_SECTOR,
-    WEIGHT_NEWS,
-    RECEIVER_EMAIL,
-)
-
+from config import RECEIVER_EMAIL
+from market_state import detect_market_state
 from stock_screener import StockScreener
 from news_analyzer import NewsAnalyzer
 from email_notifier import EmailNotifier
+
+# 全局市场状态（启动时检测一次）
+_market_state = None
 
 # 配置日志
 logging.basicConfig(
@@ -54,18 +51,22 @@ logger = logging.getLogger(__name__)
 TOP_N_CANDIDATES = 10
 
 
-def calculate_total_score(stock: Dict) -> float:
-    """计算综合评分"""
+def calculate_total_score(stock: Dict, weights: Dict = None) -> float:
+    """计算综合评分（支持动态权重）"""
+    if weights is None:
+        weights = _market_state['weights'] if _market_state else {
+            'technical': 0.45, 'chip': 0.20, 'sector': 0.10, 'news': 0.25
+        }
     technical = stock.get('short_term_score', 5.0)
     chip = stock.get('chip_score', 5.0)
     sector = stock.get('hot_sector_score', 5.0)
     news = stock.get('sentiment_score', 5.0)
 
     return round(
-        technical * WEIGHT_TECHNICAL +
-        chip * WEIGHT_CHIP +
-        sector * WEIGHT_SECTOR +
-        news * WEIGHT_NEWS,
+        technical * weights['technical'] +
+        chip * weights['chip'] +
+        sector * weights['sector'] +
+        news * weights['news'],
         2
     )
 
@@ -158,7 +159,15 @@ def run_daily_recommendation() -> Optional[Dict]:
     logger.info("=" * 60)
     logger.info("每日潜力股推荐引擎启动")
     logger.info(f"运行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    global _market_state
     logger.info("=" * 60)
+
+    # ---- 第0步：检测市场状态 ----
+    logger.info("[步骤0] 检测市场状态...")
+    _market_state = detect_market_state()
+    logger.info(_market_state['description'])
+    w = _market_state['weights']
+    logger.info(f"使用权重: 技术{w['technical']} + 筹码{w['chip']} + 板块{w['sector']} + 新闻{w['news']}")
 
     # ---- 第1步：筛选潜力股 ----
     logger.info("[步骤1] 筛选潜力股...")
