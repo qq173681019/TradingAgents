@@ -1202,7 +1202,6 @@ class ComprehensiveDataCollector:
                 print(f"[INFO] Choice数据源已启用，优先使用Choice获取 {len(codes)} 只股票")
                 try:
                     # 导入Choice相关函数
-                    import os
                     import sys
                     api_dir = os.path.dirname(os.path.abspath(__file__))
                     tradingshared_dir = os.path.dirname(api_dir)

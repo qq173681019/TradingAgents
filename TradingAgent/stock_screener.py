@@ -111,8 +111,46 @@ class StockScreener:
 
             logger.info('正在获取全市场实时行情数据...')
 
-            # 获取沪深A股实时行情
-            df = ak.stock_zh_a_spot_em()
+            # 多层策略禁用代理，防止系统代理干扰
+            import os
+            os.environ['HTTP_PROXY'] = ''
+            os.environ['HTTPS_PROXY'] = ''
+            os.environ['http_proxy'] = ''
+            os.environ['https_proxy'] = ''
+            os.environ['NO_PROXY'] = '*'
+
+            # 临时关闭系统注册表代理
+            import winreg
+            _orig_proxy = 0
+            try:
+                _proxy_key = winreg.OpenKey(
+                    winreg.HKEY_CURRENT_USER,
+                    r'Software\Microsoft\Windows\CurrentVersion\Internet Settings',
+                    0, winreg.KEY_READ | winreg.KEY_SET_VALUE
+                )
+                _orig_proxy = winreg.QueryValueEx(_proxy_key, 'ProxyEnable')[0]
+                if _orig_proxy:
+                    winreg.SetValueEx(_proxy_key, 'ProxyEnable', 0, winreg.REG_DWORD, 0)
+                    logger.info('已临时关闭系统代理')
+                winreg.CloseKey(_proxy_key)
+            except Exception:
+                pass
+
+            try:
+                df = ak.stock_zh_a_spot_em()
+            finally:
+                # 恢复代理设置
+                if _orig_proxy:
+                    try:
+                        _proxy_key = winreg.OpenKey(
+                            winreg.HKEY_CURRENT_USER,
+                            r'Software\Microsoft\Windows\CurrentVersion\Internet Settings',
+                            0, winreg.KEY_SET_VALUE
+                        )
+                        winreg.SetValueEx(_proxy_key, 'ProxyEnable', 0, winreg.REG_DWORD, _orig_proxy)
+                        winreg.CloseKey(_proxy_key)
+                    except Exception:
+                        pass
 
             if df is None or df.empty:
                 logger.warning('获取市场数据为空')
@@ -170,37 +208,44 @@ class StockScreener:
         Returns:
             近N日涨幅百分比
         """
-        # 首先尝试从缓存的市场数据中获取
-        if stock_code in self.market_data:
-            # 这里只有当日涨跌幅，没有多日涨幅
-            # 暂时返回当日涨跌幅
-            return self.market_data[stock_code].get('change_pct', 0.0)
+        # 尝试从本地kline_cache计算真实N日涨幅
+        try:
+            kline_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'TradingShared', 'data', 'kline_cache')
+            kline_file = os.path.join(kline_dir, f'kline_{stock_code}.json')
+            if os.path.exists(kline_file):
+                with open(kline_file, 'r', encoding='utf-8') as f:
+                    kline_data = json.load(f)
+                if isinstance(kline_data, list) and len(kline_data) >= days:
+                    latest_close = float(kline_data[-1].get('close', kline_data[-1].get('收盘', 0)))
+                    close_nd_ago = float(kline_data[-days].get('close', kline_data[-days].get('收盘', 0)))
+                    if close_nd_ago > 0:
+                        gain = (latest_close - close_nd_ago) / close_nd_ago
+                        return round(gain * 100, 2)
+        except Exception as e:
+            logger.debug(f'从kline_cache获取 {stock_code} 近{days}日涨幅失败: {e}')
 
-        # 如果需要获取历史涨幅，需要调用akshare的K线接口
+        # fallback: 尝试akshare在线获取
         try:
             import akshare as ak
-
-            # 计算日期范围
             end_date = datetime.now()
-            start_date = end_date - timedelta(days=days + 10)  # 多取几天避免节假日
-
-            # 获取K线数据
+            start_date = end_date - timedelta(days=days + 10)
             df = ak.stock_zh_a_hist(
                 symbol=stock_code,
                 period="daily",
                 start_date=start_date.strftime("%Y%m%d"),
                 end_date=end_date.strftime("%Y%m%d")
             )
-
             if df is not None and len(df) >= days:
-                # 计算近N日涨幅
                 latest_close = float(df.iloc[-1]['收盘'])
                 close_nd_ago = float(df.iloc[-days]['收盘'])
                 gain = (latest_close - close_nd_ago) / close_nd_ago
                 return round(gain * 100, 2)
-
         except Exception as e:
-            logger.debug(f'获取 {stock_code} 近{days}日涨幅失败: {e}')
+            logger.debug(f'akshare获取 {stock_code} 近{days}日涨幅失败: {e}')
+
+        # 最终fallback: 使用当日涨跌幅
+        if stock_code in self.market_data:
+            return self.market_data[stock_code].get('change_pct', 0.0)
 
         return 0.0
 
@@ -362,10 +407,10 @@ class StockScreener:
         # 按综合评分排序
         screened_stocks.sort(
             key=lambda x: (
-                x['hot_sector_score'] * 0.3 +
-                x['short_term_score'] * 0.3 +
-                x['chip_score'] * 0.2 +
-                x['long_term_score'] * 0.2
+                x['short_term_score'] * 0.45 +
+                x['chip_score'] * 0.20 +
+                x['hot_sector_score'] * 0.10 +
+                x['long_term_score'] * 0.25
             ),
             reverse=True
         )

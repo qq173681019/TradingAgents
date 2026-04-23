@@ -6,9 +6,9 @@ TradingShared 共享配置文件
 # ==================== API密钥配置 ====================
 
 # DeepSeek API
-DEEPSEEK_API_KEY = "sk-5392565677364e9d9abep926527f1a679"
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_MODEL_NAME = "deepseek-chat"
+DEEPSEEK_API_KEY = "sk-7ad9f69c693e4284a2384a920591113d"
+DEEPSEEK_API_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+DEEPSEEK_MODEL_NAME = "qwen-turbo"
 
 # MiniMax API
 MINIMAX_API_KEY = ""

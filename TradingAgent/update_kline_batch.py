@@ -16,7 +16,12 @@ from TradingShared.api.comprehensive_data_collector import \
     ComprehensiveDataCollector
 
 if __name__ == '__main__':
-    collector = ComprehensiveDataCollector()
+    # 周五优先使用Choice数据源，其他时间不用Choice
+    is_friday = datetime.now().weekday() == 4  # 0=周一, 4=周五
+    use_choice = True if is_friday else False
+    print(f'[INFO] 今天是{"周五" if is_friday else "非周五"}，Choice数据源: {"启用" if use_choice else "禁用"}')
+    
+    collector = ComprehensiveDataCollector(use_choice=use_choice)
     collector.update_kline_data_only(batch_size=100, stock_type='主板', exclude_st=True)
     
     # 更新热门板块列表到 batch_stock_scores_none.json
