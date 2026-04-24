@@ -209,6 +209,55 @@ def detect_market_state(index_data=None):
     }
 
 
+def calc_beta(stock_closes: list, index_closes: list, window: int = 20) -> float:
+    """计算个股相对指数的Beta值
+    
+    Args:
+        stock_closes: 个股收盘价列表（从旧到新）
+        index_closes: 指数收盘价列表（从旧到新）
+        window: 计算窗口（天数）
+    
+    Returns:
+        beta值，默认1.0
+    """
+    import numpy as np
+    try:
+        if len(stock_closes) < window + 1 or len(index_closes) < window + 1:
+            return 1.0
+        s_closes = np.array(stock_closes[-(window+1):], dtype=float)
+        i_closes = np.array(index_closes[-(window+1):], dtype=float)
+        s_rets = np.diff(s_closes) / s_closes[:-1] * 100
+        i_rets = np.diff(i_closes) / i_closes[:-1] * 100
+        n = min(len(s_rets), len(i_rets))
+        if n < 10:
+            return 1.0
+        s_r = s_rets[-n:]
+        i_r = i_rets[-n:]
+        idx_var = np.var(i_r)
+        if idx_var < 0.001:
+            return 1.0
+        cov = np.cov(s_r, i_r)[0][1]
+        return round(cov / idx_var, 3)
+    except Exception:
+        return 1.0
+
+
+def calc_relative_strength(stock_closes: list, index_closes: list, days: int = 20) -> float:
+    """计算相对强度（个股涨幅 - 指数涨幅）
+    
+    Returns:
+        相对强度百分比，正值表示跑赢指数
+    """
+    try:
+        if len(stock_closes) < days + 1 or len(index_closes) < days + 1:
+            return 0.0
+        s_ret = (float(stock_closes[-1]) - float(stock_closes[-days-1])) / float(stock_closes[-days-1]) * 100
+        i_ret = (float(index_closes[-1]) - float(index_closes[-days-1])) / float(index_closes[-days-1]) * 100
+        return round(s_ret - i_ret, 2)
+    except Exception:
+        return 0.0
+
+
 if __name__ == '__main__':
     result = detect_market_state()
     print(result['description'])

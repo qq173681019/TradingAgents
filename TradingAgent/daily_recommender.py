@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'TradingShared'
 
 from config import RECEIVER_EMAIL
 from market_state import detect_market_state
+from blacklist import filter_blacklist
 from stock_screener import StockScreener
 from news_analyzer import NewsAnalyzer
 from email_notifier import EmailNotifier
@@ -56,7 +57,7 @@ MAX_SAME_INDUSTRY = 2
 
 
 def calculate_total_score(stock: Dict, weights: Dict = None) -> float:
-    """计算综合评分（支持动态权重，基本面纳入新闻维度）"""
+    """计算综合评分（支持动态权重，基本面纳入新闻维度，Beta调整）"""
     if weights is None:
         weights = _market_state['weights'] if _market_state else {
             'technical': 0.45, 'chip': 0.20, 'sector': 0.10, 'news': 0.25
@@ -69,13 +70,29 @@ def calculate_total_score(stock: Dict, weights: Dict = None) -> float:
     fundamental = stock.get('long_term_score', 5.0)
     news_fundamental = news * 0.6 + fundamental * 0.4
 
-    return round(
+    score = (
         technical * weights['technical'] +
         chip * weights['chip'] +
         sector * weights['sector'] +
-        news_fundamental * weights['news'],
-        2
+        news_fundamental * weights['news']
     )
+
+    # Beta调整：熊市惩罚高Beta，奖励低Beta
+    beta = stock.get('beta', 1.0)
+    risk_level = _market_state.get('risk_level', 3) if _market_state else 3
+    if risk_level >= 4:
+        if beta > 1.5:
+            score *= 0.8
+        elif beta > 1.2:
+            score *= 0.9
+        elif beta < 0.5:
+            score *= 1.2
+    elif risk_level <= 2:
+        # 牛市：高Beta可以适当加分
+        if 1.0 < beta < 1.5:
+            score *= 1.05
+
+    return round(score, 2)
 
 
 def generate_recommendation_reason(stock: Dict) -> str:
@@ -186,6 +203,16 @@ def run_daily_recommendation() -> Optional[Dict]:
         return None
 
     logger.info(f"筛选通过 {len(candidates)} 只潜力股")
+
+    # 黑名单过滤
+    pre_count = len(candidates)
+    candidates = filter_blacklist(candidates)
+    if len(candidates) < pre_count:
+        logger.info(f"黑名单过滤: {pre_count} → {len(candidates)} 只")
+
+    if not candidates:
+        logger.error("黑名单过滤后无候选股")
+        return None
 
     # 取前N只做深度分析
     top_candidates = candidates[:TOP_N_CANDIDATES]
