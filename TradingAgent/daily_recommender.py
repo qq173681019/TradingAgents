@@ -195,7 +195,7 @@ def run_daily_recommendation() -> Optional[Dict]:
 
     # ---- 第1步：筛选潜力股 ----
     logger.info("[步骤1] 筛选潜力股...")
-    screener = StockScreener()
+    screener = StockScreener(risk_level=_market_state.get('risk_level', 3))
     candidates = screener.screen()
 
     if not candidates:

@@ -50,19 +50,38 @@ except ImportError:
 class StockScreener:
     """潜力股筛选器"""
 
-    # 筛选条件配置
+    # 筛选条件配置（默认值，会根据市场状态动态调整）
     MAX_MARKET_CAP = MAX_MARKET_CAP      # 最大市值100亿（小盘股）
     MAX_20D_GAIN = MAX_20D_GAIN          # 近20日最大涨幅30%（不追高）
     MIN_TURNOVER_RATE = MIN_TURNOVER_RATE # 最低换手率1%
     MAX_TURNOVER_RATE = MAX_TURNOVER_RATE # 最高换手率15%
 
-    def __init__(self):
-        """初始化筛选器"""
+    def __init__(self, risk_level: int = 3):
+        """初始化筛选器
+        
+        Args:
+            risk_level: 市场风险等级 1-5，用于动态调整阈值
+        """
         self.data_dir = os.path.join(
             os.path.dirname(__file__), '..', 'TradingShared', 'data'
         )
         self.stock_scores: Dict = {}
         self.market_data: Dict = {}
+        
+        # 根据市场状态动态调整阈值
+        if risk_level >= 4:
+            # 熊市：更严格，低市值、低涨幅、高换手
+            self.MAX_MARKET_CAP = 80e8
+            self.MAX_20D_GAIN = 0.20
+            self.MIN_TURNOVER_RATE = 2.0
+            self.MAX_TURNOVER_RATE = 12.0
+        elif risk_level <= 2:
+            # 牛市：更宽松，允许更大市值和涨幅
+            self.MAX_MARKET_CAP = 150e8
+            self.MAX_20D_GAIN = 0.40
+            self.MIN_TURNOVER_RATE = 0.5
+            self.MAX_TURNOVER_RATE = 20.0
+        # else: 震荡市用默认值
 
     def load_stock_data(self) -> Dict:
         """
