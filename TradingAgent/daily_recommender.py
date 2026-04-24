@@ -48,11 +48,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # 候选股数量：筛选后取前N只做新闻分析
-TOP_N_CANDIDATES = 10
+TOP_N_CANDIDATES = 15
+# 最终推荐数量
+RECOMMEND_COUNT = 3
+# 同行业最多推荐几只
+MAX_SAME_INDUSTRY = 2
 
 
 def calculate_total_score(stock: Dict, weights: Dict = None) -> float:
-    """计算综合评分（支持动态权重）"""
+    """计算综合评分（支持动态权重，基本面纳入新闻维度）"""
     if weights is None:
         weights = _market_state['weights'] if _market_state else {
             'technical': 0.45, 'chip': 0.20, 'sector': 0.10, 'news': 0.25
@@ -61,12 +65,15 @@ def calculate_total_score(stock: Dict, weights: Dict = None) -> float:
     chip = stock.get('chip_score', 5.0)
     sector = stock.get('hot_sector_score', 5.0)
     news = stock.get('sentiment_score', 5.0)
+    # 基本面分数纳入：与新闻情绪加权混合（新闻60% + 基本面40%）
+    fundamental = stock.get('long_term_score', 5.0)
+    news_fundamental = news * 0.6 + fundamental * 0.4
 
     return round(
         technical * weights['technical'] +
         chip * weights['chip'] +
         sector * weights['sector'] +
-        news * weights['news'],
+        news_fundamental * weights['news'],
         2
     )
 
@@ -182,12 +189,32 @@ def run_daily_recommendation() -> Optional[Dict]:
 
     # 取前N只做深度分析
     top_candidates = candidates[:TOP_N_CANDIDATES]
-    logger.info(f"取评分前 {len(top_candidates)} 只进行新闻分析:")
+    logger.info(f"取评分前 {len(top_candidates)} 只候选股:")
     for i, s in enumerate(top_candidates, 1):
         logger.info(f"  {i}. {s['code']} {s['name']} "
                      f"(技术:{s.get('short_term_score', 0):.1f} "
                      f"筹码:{s.get('chip_score', 0):.1f} "
-                     f"热度:{s.get('hot_sector_score', 0):.1f})")
+                     f"热度:{s.get('hot_sector_score', 0):.1f} "
+                     f"基本面:{s.get('long_term_score', 0):.1f})")
+
+    # ---- 第1.5步：轻量新闻过滤（排除重大利空） ----
+    logger.info("[步骤1.5] 轻量新闻过滤...")
+    try:
+        analyzer = NewsAnalyzer()
+        pre_filtered = []
+        for stock in top_candidates:
+            quick = analyzer.quick_check(stock.get('code', ''), stock.get('name', ''))
+            if quick and quick.get('blocked', False):
+                logger.info(f"  过滤: {stock['code']} {stock['name']} - {quick.get('reason', '重大利空')}")
+            else:
+                pre_filtered.append(stock)
+        if pre_filtered:
+            top_candidates = pre_filtered
+            logger.info(f"过滤后剩余 {len(top_candidates)} 只")
+        else:
+            logger.info("全部被过滤，保留原始候选")
+    except Exception as e:
+        logger.info(f"轻量过滤跳过: {e}")
 
     # ---- 第2步：新闻情绪分析 ----
     logger.info(f"[步骤2] 分析 {len(top_candidates)} 只候选股的新闻情绪...")
@@ -210,33 +237,47 @@ def run_daily_recommendation() -> Optional[Dict]:
                      f"热度:{s.get('hot_sector_score', 0):.1f} "
                      f"新闻:{s.get('sentiment_score', 5.0):.1f})")
 
-    # ---- 第4步：选出TOP 1 ----
-    best_stock = analyzed_stocks[0]
-    recommendation = build_recommendation(best_stock)
+    # ---- 第4步：选出TOP N，行业分散 ----
+    top_picks = []
+    industry_count = {}
+    for stock in analyzed_stocks:
+        if len(top_picks) >= RECOMMEND_COUNT:
+            break
+        industry = stock.get('industry', stock.get('matched_sector', '未知'))
+        if industry_count.get(industry, 0) >= MAX_SAME_INDUSTRY:
+            logger.info(f"  跳过 {stock['code']} {stock['name']} ({industry}行业已达上限)")
+            continue
+        industry_count[industry] = industry_count.get(industry, 0) + 1
+        top_picks.append(stock)
+
+    recommendations = [build_recommendation(s) for s in top_picks]
 
     logger.info("=" * 60)
-    logger.info(f"今日推荐: {recommendation['stock_name']}({recommendation['stock_code']})")
-    logger.info(f"综合评分: {recommendation['total_score']}")
-    logger.info(f"推荐理由: {recommendation['recommendation_reason']}")
+    logger.info(f"今日推荐 TOP {len(recommendations)} 只:")
+    for i, rec in enumerate(recommendations, 1):
+        logger.info(f"  {i}. {rec['stock_name']}({rec['stock_code']}) 综合评分:{rec['total_score']}")
+        logger.info(f"     理由: {rec['recommendation_reason']}")
+    logger.info(f"市场状态: {_market_state['description']}")
     logger.info("=" * 60)
 
     # ---- 第5步：发送邮件 ----
     logger.info("[步骤5] 发送推荐邮件...")
     notifier = EmailNotifier()
-    success = notifier.send_recommendation(recommendation)
-
-    if success:
-        logger.info("推荐邮件发送成功！")
-    else:
-        logger.error("推荐邮件发送失败！")
+    # 逐只发送邮件
+    for i, rec in enumerate(recommendations):
+        success = notifier.send_recommendation(rec)
+        if success:
+            logger.info(f"  推荐{i+1}邮件发送成功: {rec['stock_name']}")
+        else:
+            logger.error(f"  推荐{i+1}邮件发送失败: {rec['stock_name']}")
 
     # ---- 保存推荐记录 ----
-    save_recommendation_record(recommendation, analyzed_stocks)
+    save_recommendation_record(recommendations, analyzed_stocks)
 
-    return recommendation
+    return recommendations
 
 
-def save_recommendation_record(recommendation: Dict, all_candidates: List[Dict]):
+def save_recommendation_record(recommendations: list, all_candidates: List[Dict]):
     """保存推荐记录到本地JSON文件"""
     record_dir = os.path.join(os.path.dirname(__file__), 'recommendation_history')
     os.makedirs(record_dir, exist_ok=True)
@@ -245,8 +286,9 @@ def save_recommendation_record(recommendation: Dict, all_candidates: List[Dict])
     filepath = os.path.join(record_dir, f'recommendation_{today}.json')
 
     record = {
-        "date": recommendation["date"],
-        "recommended": recommendation,
+        "date": recommendations[0]["date"] if recommendations else "",
+        "market_state": _market_state['description'] if _market_state else "",
+        "recommended": recommendations,
         "candidates": [
             {
                 "code": s.get('code', ''),
@@ -271,8 +313,9 @@ if __name__ == '__main__':
     try:
         result = run_daily_recommendation()
         if result:
-            print(f"\n今日推荐: {result['stock_name']}({result['stock_code']})")
-            print(f"综合评分: {result['total_score']}/10")
+            print(f"\n今日推荐 TOP {len(result)} 只:")
+            for i, r in enumerate(result, 1):
+                print(f"  {i}. {r['stock_name']}({r['stock_code']}) 综合评分:{r['total_score']}/10")
             print(f"推荐邮件已发送到 {RECEIVER_EMAIL}")
         else:
             print("\n今日未能生成推荐，请查看日志了解详情")

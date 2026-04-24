@@ -428,6 +428,28 @@ class NewsAnalyzer:
             "news_count": result["news_analyzed"]
         }
 
+    def quick_check(self, stock_code: str, stock_name: str) -> Optional[Dict]:
+        """轻量新闻检查：不调LLM，仅根据新闻标题关键词判断是否有重大利空
+
+        Returns:
+            {'blocked': True, 'reason': '...'} 或 {'blocked': False}
+        """
+        BLOCK_KEYWORDS = ['退市', '违规', '处罚', '立案调查', '警示', '谴责', '冻结', 
+                         '破产', '清算', 'ST', '*ST', '停产', '重大损失', '暴雷',
+                         '信披违规', '财务造假', '内幕交易', '操纵市场']
+        try:
+            news = self.fetch_stock_news(stock_code, stock_name, days=3, count=5)
+            if not news:
+                return {'blocked': False}
+            for n in news:
+                title = n.get('title', '')
+                for kw in BLOCK_KEYWORDS:
+                    if kw in title:
+                        return {'blocked': True, 'reason': f'新闻含关键词"{kw}": {title[:30]}'}
+            return {'blocked': False}
+        except Exception:
+            return {'blocked': False}
+
     def batch_analyze(self, stocks: List[Dict], days: int = 7) -> List[Dict]:
         """批量分析多只股票的新闻情绪
 
