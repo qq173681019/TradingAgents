@@ -1,0 +1,57 @@
+{
+  "date": "2026-04-23",
+  "recommended": {
+    "date": "2026-04-23",
+    "stock_code": "000003",
+    "stock_name": "PT金田A",
+    "total_score": -1.75,
+    "technical_score": -10.0,
+    "chip_score": 5.0,
+    "sector_score": 5.0,
+    "news_score": 5.0,
+    "news_sentiment": "中性",
+    "news_reason": "无近期新闻",
+    "market_cap": "50.0亿",
+    "industry": "未知",
+    "sector_name": null,
+    "recent_gain_20d": "+0.0%",
+    "recommendation_reason": "筹码分布较为合理（5.0分）；市值50.0亿，属于小盘股；换手率3.0%，交投活跃且健康。"
+  },
+  "candidates": [
+    {
+      "code": "000003",
+      "name": "PT金田A",
+      "total_score": -1.75,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "000015",
+      "name": "PT中浩A",
+      "total_score": -1.75,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "000982",
+      "name": "中银绒业",
+      "total_score": -1.75,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "603056",
+      "name": "德邦股份",
+      "total_score": -2.25,
+      "sentiment": "利空",
+      "sentiment_score": 3.0
+    },
+    {
+      "code": "600200",
+      "name": "600200",
+      "total_score": -2.75,
+      "sentiment": "利空",
+      "sentiment_score": 1.0
+    }
+  ]
+}

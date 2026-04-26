@@ -1,0 +1,172 @@
+============================================================
+Backtest V5 Hybrid (V4-R3 + ExcessReturn-R4+)
+============================================================
+Eval: 2026-02-20 ~ 2026-04-07
+Beat Index: 19/33 = 57.6%
+Status: FAIL
+
+
+2026-02-20 [W][↑IDX] avg=+1.30% idx=+0.87% wr=67% R3 [rang] n=3
+  600512 : +2.88% [V] (balanced)
+  600223 : +0.96% [V] (balanced)
+  002991 : +0.07% [X] (balanced)
+
+2026-02-23 [W][↑IDX] avg=+1.30% idx=+0.87% wr=67% R3 [rang] n=3
+  600512 : +2.88% [V] (balanced)
+  600223 : +0.96% [V] (balanced)
+  002991 : +0.07% [X] (balanced)
+
+2026-02-24 [W][↑IDX] avg=+1.30% idx=+0.87% wr=67% R3 [rang] n=3
+  600512 : +2.88% [V] (balanced)
+  600223 : +0.96% [V] (balanced)
+  002991 : +0.07% [X] (balanced)
+
+2026-02-25 [W][↓IDX] avg=+0.47% idx=+0.72% wr=67% R3 [rang] n=3
+  688710 : -1.00% [X] (balanced)
+  002187 : +1.11% [V] (balanced)
+  601089 : +1.30% [V] (balanced)
+
+2026-02-26 [L][↓IDX] avg=-1.85% idx=-0.01% wr=33% R3 [rang] n=3
+  301538 : +1.23% [V] (balanced)
+  002345 : -5.24% [X] (balanced)
+  601010 : -1.55% [X] (balanced)
+
+2026-02-27 [L][↓IDX] avg=-0.60% idx=+0.39% wr=33% R3 [rang] n=3
+  601128 : +0.98% [V] (balanced)
+  603052 : -2.77% [X] (balanced)
+  600061 : +0.00% [X] (balanced)
+
+2026-03-02 [W][↓IDX] avg=-0.30% idx=+0.47% wr=67% R3 [rang] n=3
+  002602 : -4.51% [X] (balanced)
+  399371 : +0.88% [V] (balanced)
+  601139 : +2.73% [V] (balanced)
+
+2026-03-03 [L][↓IDX] avg=-2.58% idx=-1.43% wr=33% R3 [rang] n=3
+  300662 : -4.78% [X] (balanced)
+  600386 : -2.33% [X] (balanced)
+  688068 : -0.63% [V] (balanced)
+
+2026-03-04 [W][↑IDX] avg=-0.51% idx=-0.98% wr=67% R3 [rang] n=3
+  002449 : -1.85% [X] (balanced)
+  300162 : -0.13% [V] (balanced)
+  001298 : +0.45% [V] (balanced)
+
+2026-03-05 [W][↑IDX] avg=+1.35% idx=+0.64% wr=100% R3 [rang] n=3
+  002677 : +1.74% [V] (balanced)
+  301309 : +1.27% [V] (balanced)
+  301298 : +1.04% [V] (balanced)
+
+2026-03-06 [W][↑IDX] avg=+1.04% idx=+0.38% wr=100% R3 [rang] n=3
+  600463 : +1.17% [V] (balanced)
+  603348 : +0.67% [V] (balanced)
+  000728 : +1.27% [V] (balanced)
+
+2026-03-09 [L][↓IDX] avg=-0.96% idx=-0.67% wr=0% R3 [rang] n=3
+  688981 : -1.28% [X] (balanced)
+  603348 : -0.82% [X] (balanced)
+  300482 : -0.77% [X] (balanced)
+
+2026-03-10 [W][↑IDX] avg=+1.63% idx=+0.65% wr=67% R3 [rang] n=3
+  301360 : +3.62% [V] (balanced)
+  000728 : +1.01% [V] (balanced)
+  002372 : +0.26% [X] (balanced)
+
+2026-03-11 [L][↓IDX] avg=-0.28% idx=+0.25% wr=33% R3 [rang] n=3
+  300316 : -1.07% [X] (balanced)
+  600315 : +0.90% [V] (balanced)
+  688053 : -0.67% [X] (balanced)
+
+2026-03-12 [W][↑IDX] avg=-0.00% idx=-0.10% wr=67% R3 [rang] n=3
+  603698 : -5.22% [X] (balanced)
+  600012 : +1.42% [V] (balanced)
+  603395 : +3.79% [V] (balanced)
+
+2026-03-13 [L][↓IDX] avg=-1.43% idx=-0.82% wr=33% R3 [rang] n=3
+  001238 : -0.46% [V] (balanced)
+  002320 : -1.56% [X] (balanced)
+  601727 : -2.27% [X] (balanced)
+
+2026-03-16 [W][↑IDX] avg=+0.77% idx=-0.26% wr=100% R3 [rang] n=3
+  000710 : +0.09% [V] (balanced)
+  002187 : +0.45% [V] (balanced)
+  300081 : +1.76% [V] (balanced)
+
+2026-03-17 [W][↑IDX] avg=+0.95% idx=-0.85% wr=100% R4 [rang] n=3
+  600350 : +2.96% [V] (defense)
+  603273 : +0.35% [V] (defense)
+  000568 : -0.45% [V] (defense)
+
+2026-03-18 [L][↓IDX] avg=-0.62% idx=+0.32% wr=33% R5 [rang] n=3
+  600350 : -0.48% [X] (defense)
+  600756 : +1.82% [V] (defense)
+  601107 : -3.21% [X] (defense)
+
+2026-03-19 [L][↓IDX] avg=-4.45% idx=-1.39% wr=0% R3 [rang] n=3
+  001283 : -2.78% [X] (balanced)
+  605007 : -4.63% [X] (balanced)
+  000762 : -5.93% [X] (balanced)
+
+2026-03-20 [L][↓IDX] avg=-2.24% idx=-1.24% wr=33% R4 [bear] n=3
+  600381 : +5.05% [V] (defense)
+  300482 : -1.74% [X] (defense)
+  002565 : -10.02% [X] (defense)
+
+2026-03-23 [W][↑IDX] avg=+1.44% idx=-3.63% wr=67% R4 [bear] n=3
+  600381 : -5.11% [X] (defense)
+  600815 : +6.37% [V] (defense)
+  300483 : +3.06% [V] (defense)
+
+2026-03-24 [L][↓IDX] avg=-0.30% idx=+1.78% wr=33% R5 [bear] n=3
+  300483 : -3.01% [X] (defense)
+  688552 : -1.51% [X] (defense)
+  688793 : +3.61% [V] (defense)
+
+2026-03-25 [W][↑IDX] avg=+1.58% idx=+1.30% wr=67% R4 [bear] n=3
+  600971 : +1.29% [X] (defense)
+  600149 : +1.36% [V] (defense)
+  601985 : +2.08% [V] (defense)
+
+2026-03-26 [W][↑IDX] avg=+2.01% idx=-1.09% wr=100% R5 [bear] n=3
+  600971 : +1.02% [V] (defense)
+  600997 : +0.30% [V] (defense)
+  000688 : +4.72% [V] (defense)
+
+2026-03-27 [W][↑IDX] avg=+2.59% idx=+0.63% wr=67% R5 [bear] n=3
+  000688 : +7.50% [V] (defense)
+  600396 : +1.24% [V] (defense)
+  601985 : -0.97% [X] (defense)
+
+2026-03-30 [W][↓IDX] avg=-0.46% idx=+0.24% wr=67% R5 [bear] n=3
+  600149 : -4.12% [X] (defense)
+  002828 : +1.54% [V] (defense)
+  600429 : +1.19% [V] (defense)
+
+2026-03-31 [L][↑IDX] avg=-0.58% idx=-0.80% wr=33% R5 [bear] n=3
+  003018 : -1.72% [X] (defense)
+  688710 : +1.72% [V] (defense)
+  002828 : -1.75% [X] (defense)
+
+2026-04-01 [L][↓IDX] avg=-0.93% idx=+1.46% wr=33% R5 [bear] n=3
+  300102 : -1.39% [X] (defense)
+  603270 : +1.63% [V] (defense)
+  002828 : -3.02% [X] (defense)
+
+2026-04-02 [W][↑IDX] avg=+0.05% idx=-0.74% wr=100% R4 [rang] n=3
+  000678 : +0.69% [V] (defense)
+  603270 : -0.68% [V] (defense)
+  301255 : +0.14% [V] (defense)
+
+2026-04-03 [W][↑IDX] avg=+0.17% idx=-1.00% wr=67% R4 [rang] n=3
+  301179 : +4.68% [V] (defense)
+  000678 : +0.69% [V] (defense)
+  301255 : -4.87% [X] (defense)
+
+2026-04-06 [W][↑IDX] avg=+4.85% idx=+0.26% wr=100% R4 [bear] n=3
+  301179 : +5.17% [V] (defense)
+  002001 : +5.95% [V] (defense)
+  000678 : +3.42% [V] (defense)
+
+2026-04-07 [W][↑IDX] avg=+4.85% idx=+0.26% wr=100% R4 [bear] n=3
+  301179 : +5.17% [V] (defense)
+  002001 : +5.95% [V] (defense)
+  000678 : +3.42% [V] (defense)

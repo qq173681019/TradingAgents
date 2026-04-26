@@ -621,9 +621,9 @@ def main():
     
     print(f"\n  过滤结果:")
     print(f"    [OK] 有效股票: {filter_stats['valid']} 只")
-    print(f"    ✗ 新股(<70天): {filter_stats['new_stocks']} 只")
-    print(f"    ✗ 已退市: {filter_stats['delisted']} 只")
-    print(f"    ✗ 无数据: {filter_stats['no_data']} 只")
+    print(f"    [X] 新股(<70天): {filter_stats['new_stocks']} 只")
+    print(f"    [X] 已退市: {filter_stats['delisted']} 只")
+    print(f"    [X] 无数据: {filter_stats['no_data']} 只")
     
     # 更新主板股票列表为过滤后的列表
     mainboard_stocks = filtered_stocks

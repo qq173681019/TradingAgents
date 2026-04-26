@@ -1,0 +1,180 @@
+============================================================
+Backtest adaptive Report
+============================================================
+Eval: 2026-03-01 ~ 2026-04-24
+
+Win Rate: 45.0% (18/40)
+Beat Index: 26/40 = 65.0%
+Beat Index (R1-R4): 22/33 = 66.7%
+
+By Risk Level:
+  Risk 2: 5/9 win=56% beat_idx=78%
+  Risk 3: 4/15 win=27% beat_idx=53%
+  Risk 4: 5/9 win=56% beat_idx=78%
+  Risk 5: 4/7 win=57% beat_idx=57%
+
+============================================================
+Daily Details
+============================================================
+
+2026-03-02 [L][↓IDX] avg=-2.43% idx=+0.47% wr=0% R3 [rang] n=2
+  603828 : -3.03% [X] (resilient)
+  605286 : -1.83% [X] (resilient)
+
+2026-03-03 [L][↑IDX] avg=-0.39% idx=-1.43% wr=50% R3 [rang] n=2
+  603580 : -5.02% [X] (resilient)
+  002384 东山精密: +4.23% [V] (resilient)
+
+2026-03-04 [L][↓IDX] avg=-2.29% idx=-0.98% wr=0% R3 [rang] n=2
+  601816 京沪高铁: -1.18% [X] (resilient)
+  603169 兰石重装: -3.40% [X] (resilient)
+
+2026-03-05 [L][↑IDX] avg=+1.46% idx=+0.64% wr=50% R3 [rang] n=2
+  600900 长江电力: -0.04% [X] (resilient)
+  600039 四川路桥: +2.96% [V] (resilient)
+
+2026-03-06 [W][↑IDX] avg=+1.46% idx=+0.38% wr=100% R3 [rang] n=2
+  601963 重庆银行: +2.42% [V] (resilient)
+  601728 中国电信: +0.51% [V] (resilient)
+
+2026-03-09 [W][↑IDX] avg=+1.10% idx=-0.67% wr=100% R3 [rang] n=2
+  601963 重庆银行: +1.82% [V] (resilient)
+  600846 同济科技: +0.37% [V] (resilient)
+
+2026-03-10 [L][↓IDX] avg=-1.10% idx=+0.65% wr=0% R3 [rang] n=2
+  601963 重庆银行: -2.50% [X] (resilient)
+  600846 同济科技: +0.29% [X] (resilient)
+
+2026-03-11 [W][↑IDX] avg=+2.20% idx=+0.25% wr=100% R3 [rang] n=2
+  600628 新世界: +3.66% [V] (resilient)
+  603683 晶华新材: +0.74% [V] (resilient)
+
+2026-03-12 [L][↑IDX] avg=+0.94% idx=-0.10% wr=50% R3 [rang] n=2
+  600628 新世界: +4.10% [V] (resilient)
+  600593 大连圣亚: -2.22% [X] (resilient)
+
+2026-03-13 [L][↓IDX] avg=-1.25% idx=-0.82% wr=0% R3 [rang] n=2
+  002567 唐人神: -1.33% [X] (resilient)
+  600228 : -1.16% [X] (resilient)
+
+2026-03-16 [W][↑IDX] avg=+1.89% idx=-0.26% wr=100% R3 [rang] n=2
+  603026 石大胜华: +2.74% [V] (resilient)
+  000049 德赛电池: +1.03% [V] (resilient)
+
+2026-03-17 [L][↓IDX] avg=-3.05% idx=-0.85% wr=0% R4 [rang] n=2
+  603659 璞泰来: -4.62% [X] (defense)
+  603607 京华激光: -1.48% [X] (defense)
+
+2026-03-18 [L][↓IDX] avg=-0.48% idx=+0.32% wr=0% R5 [rang] n=1
+  600350 山东高速: -0.48% [X] (defense)
+
+2026-03-19 [L][↑IDX] avg=+1.72% idx=-1.39% wr=50% R3 [rang] n=2
+  600599 : +4.92% [V] (resilient)
+  603008 喜临门: -1.48% [X] (resilient)
+
+2026-03-20 [L][↑IDX] avg=+0.21% idx=-1.24% wr=50% R4 [bear] n=2
+  603929 亚翔集成: +5.37% [V] (defense)
+  600408 安泰集团: -4.94% [X] (defense)
+
+2026-03-23 [W][↑IDX] avg=+2.81% idx=-3.63% wr=100% R4 [bear] n=2
+  600996 贵广网络: -0.75% [V] (defense)
+  600815 厦工股份: +6.37% [V] (defense)
+
+2026-03-24 [L][↓IDX] avg=+0.55% idx=+1.78% wr=0% R5 [bear] n=1
+  603366 日出东方: +0.55% [X] (defense)
+
+2026-03-25 [W][↑IDX] avg=+4.05% idx=+1.30% wr=100% R4 [bear] n=2
+  000908 : +4.96% [V] (defense)
+  603727 博迈科: +3.14% [V] (defense)
+
+2026-03-26 [W][↑IDX] avg=+4.96% idx=-1.09% wr=100% R5 [bear] n=1
+  000908 : +4.96% [V] (defense)
+
+2026-03-27 [W][↑IDX] avg=+5.00% idx=+0.63% wr=100% R5 [bear] n=1
+  000908 : +5.00% [V] (defense)
+
+2026-03-30 [W][↑IDX] avg=+5.02% idx=+0.24% wr=100% R5 [bear] n=1
+  000908 : +5.02% [V] (defense)
+
+2026-03-31 [L][↓IDX] avg=-8.65% idx=-0.80% wr=0% R5 [bear] n=1
+  002812 恩捷股份: -8.65% [X] (defense)
+
+2026-04-01 [W][↑IDX] avg=+5.03% idx=+1.46% wr=100% R5 [bear] n=1
+  603429 集友股份: +5.03% [V] (defense)
+
+2026-04-02 [W][↑IDX] avg=+5.42% idx=-0.74% wr=100% R4 [rang] n=2
+  603429 集友股份: +4.02% [V] (defense)
+  603182 嘉华股份: +6.83% [V] (defense)
+
+2026-04-03 [L][↑IDX] avg=+2.52% idx=-1.00% wr=50% R4 [rang] n=2
+  603429 集友股份: -4.97% [X] (defense)
+  600721 百花医药: +10.02% [V] (defense)
+
+2026-04-06 [W][↑IDX] avg=+5.64% idx=+0.26% wr=100% R4 [bear] n=2
+  603778 国晟科技: +10.01% [V] (defense)
+  002898 : +1.26% [V] (defense)
+
+2026-04-07 [W][↑IDX] avg=+1.12% idx=+0.26% wr=100% R4 [bear] n=2
+  002898 : +1.26% [V] (defense)
+  002553 南方精工: +0.97% [V] (defense)
+
+2026-04-08 [L][↓IDX] avg=+2.16% idx=+2.69% wr=50% R4 [bear] n=2
+  002718 友邦吊顶: +2.75% [V] (defense)
+  002553 南方精工: +1.58% [X] (defense)
+
+2026-04-09 [W][↑IDX] avg=+0.37% idx=-0.72% wr=67% R2 [rang] n=3
+  003031 : +3.30% [V] (momentum)
+  600488 津药药业: -3.80% [X] (momentum)
+  603296 华勤技术: +1.60% [V] (momentum)
+
+2026-04-10 [L][↓IDX] avg=-5.79% idx=+0.51% wr=0% R3 [rang] n=2
+  603182 嘉华股份: -9.97% [X] (resilient)
+  002956 西麦食品: -1.61% [X] (resilient)
+
+2026-04-13 [L][↓IDX] avg=-3.36% idx=+0.06% wr=0% R3 [rang] n=2
+  002430 杭氧股份: -5.13% [X] (resilient)
+  002549 凯美特气: -1.60% [X] (resilient)
+
+2026-04-14 [L][↓IDX] avg=-3.30% idx=+0.95% wr=0% R3 [rang] n=2
+  605228 : -6.60% [X] (resilient)
+  002822 : +0.00% [X] (resilient)
+
+2026-04-15 [W][↑IDX] avg=+4.70% idx=+0.01% wr=67% R2 [bull] n=3
+  603950 长源东谷: +10.00% [V] (momentum)
+  603773 沃格光电: +10.00% [V] (momentum)
+  605255 : -5.91% [X] (momentum)
+
+2026-04-16 [L][↑IDX] avg=+0.93% idx=+0.70% wr=33% R2 [bull] n=3
+  002364 中恒电气: -1.38% [X] (momentum)
+  603256 宏和科技: -0.56% [X] (momentum)
+  600152 维科技术: +4.72% [V] (momentum)
+
+2026-04-17 [W][↑IDX] avg=+5.29% idx=-0.10% wr=100% R2 [bull] n=3
+  600152 维科技术: +9.97% [V] (momentum)
+  001896 : +0.12% [V] (momentum)
+  603950 长源东谷: +5.77% [V] (momentum)
+
+2026-04-20 [L][↑IDX] avg=+0.79% idx=+0.76% wr=33% R2 [bull] n=3
+  603897 长城科技: -1.86% [X] (momentum)
+  601778 晶科科技: -5.79% [X] (momentum)
+  001896 : +10.01% [V] (momentum)
+
+2026-04-21 [L][↓IDX] avg=-2.74% idx=+0.07% wr=0% R2 [bull] n=3
+  002940 昂利康: -1.71% [X] (momentum)
+  603629 利通电子: -5.68% [X] (momentum)
+  600683 京投发展: -0.83% [X] (momentum)
+
+2026-04-22 [W][↑IDX] avg=+5.39% idx=+0.52% wr=100% R2 [bull] n=3
+  002297 博云新材: +6.85% [V] (momentum)
+  605222 : +4.80% [V] (momentum)
+  002149 西部材料: +4.52% [V] (momentum)
+
+2026-04-23 [L][↓IDX] avg=-4.98% idx=-0.32% wr=0% R2 [bull] n=3
+  603178 圣龙股份: -9.83% [X] (momentum)
+  002361 神剑股份: -2.79% [X] (momentum)
+  605222 : -2.32% [X] (momentum)
+
+2026-04-24 [W][↑IDX] avg=+5.27% idx=-0.33% wr=100% R2 [bull] n=3
+  003018 : +4.58% [V] (momentum)
+  600961 株冶集团: +3.64% [V] (momentum)
+  603738 泰晶科技: +7.59% [V] (momentum)

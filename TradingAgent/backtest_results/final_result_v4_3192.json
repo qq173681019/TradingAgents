@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-04-26 02:59:31",
+  "version": "v4_baseline_3192",
+  "stock_pool": 3192,
+  "eval_start": "2026-02-20",
+  "eval_end": "2026-04-24",
+  "results": {
+    "adaptive": {
+      "accuracy": 0.41304347826086957,
+      "beat_pct": 0.6304347826086957,
+      "beat_days": 29,
+      "total": 46
+    },
+    "fixed3": {
+      "accuracy": 0.391304347826087,
+      "beat_pct": 0.6304347826086957,
+      "beat_days": 29,
+      "total": 46
+    },
+    "fixed5": {
+      "accuracy": 0.391304347826087,
+      "beat_pct": 0.6304347826086957,
+      "beat_days": 29,
+      "total": 46
+    }
+  },
+  "best": "adaptive",
+  "comparison": {
+    "old_pool": 899,
+    "old_beat_idx": 0.667
+  }
+}

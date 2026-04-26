@@ -1,0 +1,57 @@
+{
+  "600200": {
+    "code": "600200",
+    "name": "600200",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "未知",
+    "matched_sector": null,
+    "sector_change": 0
+  },
+  "603056": {
+    "code": "603056",
+    "name": "德邦股份",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "未知",
+    "matched_sector": null,
+    "sector_change": 0
+  },
+  "000003": {
+    "code": "000003",
+    "name": "PT金田A",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "未知",
+    "matched_sector": null,
+    "sector_change": 0
+  },
+  "000015": {
+    "code": "000015",
+    "name": "PT中浩A",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "未知",
+    "matched_sector": null,
+    "sector_change": 0
+  },
+  "000982": {
+    "code": "000982",
+    "name": "中银绒业",
+    "short_term_score": -10.0,
+    "long_term_score": -10.0,
+    "chip_score": 5.0,
+    "hot_sector_score": 5.0,
+    "industry": "未知",
+    "matched_sector": null,
+    "sector_change": 0
+  }
+}

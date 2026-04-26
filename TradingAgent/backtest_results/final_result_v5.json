@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-04-26 09:54:34",
+  "version": "v5",
+  "data_stocks": 3192,
+  "data_days": 73,
+  "eval_range": "2026-03-01 ~ 2026-04-24",
+  "results": {
+    "adaptive": {
+      "accuracy": 0.475,
+      "beat_idx_pct": 0.55,
+      "ne_beat_pct": 0.5454545454545454
+    },
+    "fixed3": {
+      "accuracy": 0.475,
+      "beat_idx_pct": 0.525,
+      "ne_beat_pct": 0.5151515151515151
+    },
+    "fixed5": {
+      "accuracy": 0.475,
+      "beat_idx_pct": 0.525,
+      "ne_beat_pct": 0.5454545454545454
+    },
+    "fixed10": {
+      "accuracy": 0.425,
+      "beat_idx_pct": 0.525,
+      "ne_beat_pct": 0.5151515151515151
+    }
+  },
+  "best": "adaptive"
+}

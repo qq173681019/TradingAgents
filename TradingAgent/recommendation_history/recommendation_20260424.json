@@ -1,0 +1,56 @@
+{
+  "date": "2026-04-24",
+  "market_state": "市场状态: 牛市(风险2) | 波动率: 低 | 动量: +2.20% | 权重方案: bull",
+  "recommended": [
+    {
+      "date": "2026-04-24",
+      "stock_code": "000003",
+      "stock_name": "PT金田A",
+      "total_score": -3.7,
+      "technical_score": -10.0,
+      "chip_score": 5.0,
+      "sector_score": 5.0,
+      "news_score": 5.0,
+      "news_sentiment": "中性",
+      "news_reason": "无近期新闻",
+      "market_cap": "50.0亿",
+      "industry": "未知",
+      "sector_name": null,
+      "recent_gain_20d": "+0.0%",
+      "recommendation_reason": "筹码分布较为合理（5.0分）；市值50.0亿，属于小盘股；换手率3.0%，交投活跃且健康。"
+    },
+    {
+      "date": "2026-04-24",
+      "stock_code": "000015",
+      "stock_name": "PT中浩A",
+      "total_score": -3.7,
+      "technical_score": -10.0,
+      "chip_score": 5.0,
+      "sector_score": 5.0,
+      "news_score": 5.0,
+      "news_sentiment": "中性",
+      "news_reason": "无近期新闻",
+      "market_cap": "50.0亿",
+      "industry": "未知",
+      "sector_name": null,
+      "recent_gain_20d": "+0.0%",
+      "recommendation_reason": "筹码分布较为合理（5.0分）；市值50.0亿，属于小盘股；换手率3.0%，交投活跃且健康。"
+    }
+  ],
+  "candidates": [
+    {
+      "code": "000003",
+      "name": "PT金田A",
+      "total_score": -3.7,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "000015",
+      "name": "PT中浩A",
+      "total_score": -3.7,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    }
+  ]
+}

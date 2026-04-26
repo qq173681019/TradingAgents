@@ -1,0 +1,163 @@
+============================================================
+Backtest V5 Report - Ensemble & Risk Management
+============================================================
+Eval: 2026-02-20 ~ 2026-04-07
+Target: 85%
+Min stocks: 3
+
+Win Rate: 50.0% (13/26)
+Beat Index: 18/26 = 69.2%
+Cash Days: 7
+Status: FAIL
+
+By Risk Level:
+  Risk 3: 8/18 win=44% beat_idx=61%
+  Risk 4: 5/8 win=62% beat_idx=62%
+
+============================================================
+Daily Details
+============================================================
+
+2026-02-20 [L] [up] avg=+1.69% idx=+0.87% wr=33% R3 [rang] n=3
+  300749 : +19.99% [V] (ensemble)
+  000609 : -4.95% [X] (ensemble)
+  603138 : -9.98% [X] (ensemble)
+
+2026-02-23 [L] [up] avg=+2.24% idx=+0.87% wr=33% R3 [rang] n=3
+  300749 : +19.99% [V] (ensemble)
+  600589 : -9.86% [X] (ensemble)
+  603950 : -3.41% [X] (ensemble)
+
+2026-02-24 [W] [up] avg=+8.32% idx=+0.87% wr=67% R3 [rang] n=3
+  300749 : +19.99% [V] (ensemble)
+  000638 : +4.98% [V] (ensemble)
+  600673 : +0.00% [X] (ensemble)
+
+2026-02-25 [W] [up] avg=+3.48% idx=+0.72% wr=67% R3 [rang] n=3
+  603968 : -1.18% [X] (ensemble)
+  000638 : +5.17% [V] (ensemble)
+  000688 : +6.45% [V] (ensemble)
+
+2026-02-26 [W] [up] avg=+0.47% idx=-0.01% wr=67% R3 [rang] n=3
+  603256 : +1.53% [V] (ensemble)
+  000688 : -0.47% [X] (ensemble)
+  002703 : +0.36% [V] (ensemble)
+
+2026-02-27 [L] [down] avg=-1.48% idx=+0.39% wr=33% R3 [rang] n=3
+  301511 : +0.03% [X] (ensemble)
+  300328 : +2.26% [V] (ensemble)
+  603256 : -6.74% [X] (ensemble)
+
+2026-03-02 [L] [up] avg=+0.92% idx=+0.47% wr=33% R3 [rang] n=3
+  000890 : +10.05% [V] (ensemble)
+  300257 : -2.54% [X] (ensemble)
+  688530 : -4.75% [X] (ensemble)
+
+2026-03-03 [L] [down] avg=-2.95% idx=-1.43% wr=0% R3 [rang] n=3
+  600487 : -4.19% [X] (ensemble)
+  000791 : -3.05% [X] (ensemble)
+  002353 : -1.62% [X] (ensemble)
+
+2026-03-04 [W] [up] avg=+0.10% idx=-0.98% wr=67% R3 [rang] n=3
+  002843 : -2.69% [X] (ensemble)
+  301362 : +3.72% [V] (ensemble)
+  301338 : -0.74% [V] (ensemble)
+
+2026-03-05 [L] [down] avg=-3.45% idx=+0.64% wr=33% R3 [rang] n=3
+  600714 : +4.30% [V] (ensemble)
+  301362 : -4.65% [X] (ensemble)
+  002843 : -10.00% [X] (ensemble)
+
+2026-03-06 [W] [up] avg=+2.60% idx=+0.38% wr=67% R3 [rang] n=3
+  600714 : +2.86% [V] (ensemble)
+  301658 : -2.72% [X] (ensemble)
+  000988 : +7.66% [V] (ensemble)
+
+2026-03-09 [W] [down] avg=-2.40% idx=-0.67% wr=67% R3 [rang] n=3
+  600714 : -10.01% [X] (ensemble)
+  002339 : +0.92% [V] (ensemble)
+  605298 : +1.90% [V] (ensemble)
+
+2026-03-10 [L] [up] avg=+1.11% idx=+0.65% wr=33% R3 [rang] n=3
+  000988 : +4.14% [V] (ensemble)
+  002857 : -0.67% [X] (ensemble)
+  002063 : -0.13% [X] (ensemble)
+
+2026-03-11 [L] [down] avg=-0.45% idx=+0.25% wr=33% R3 [rang] n=3
+  301179 : +2.93% [V] (ensemble)
+  301606 : -1.60% [X] (ensemble)
+  301308 : -2.67% [X] (ensemble)
+
+2026-03-12 [L] [down] avg=-1.38% idx=-0.10% wr=0% R3 [rang] n=3
+  688300 : -2.47% [X] (ensemble)
+  300257 : -0.95% [X] (ensemble)
+  301179 : -0.72% [X] (ensemble)
+
+2026-03-13 [L] [down] avg=-7.27% idx=-0.82% wr=0% R3 [rang] n=3
+  002667 : -9.99% [X] (ensemble)
+  688300 : -6.28% [X] (ensemble)
+  601778 : -5.54% [X] (ensemble)
+
+2026-03-16 [W] [up] avg=+3.38% idx=-0.26% wr=67% R3 [rang] n=3
+  301396 : +4.58% [V] (ensemble)
+  688295 : +9.95% [V] (ensemble)
+  688097 : -4.39% [X] (ensemble)
+
+2026-03-17 [L] [down] avg=-2.82% idx=-0.85% wr=0% R4 [rang] n=3
+  600726 : -3.41% [X] (ensemble)
+  301396 : -3.41% [X] (ensemble)
+  301068 : -1.63% [X] (ensemble)
+
+2026-03-18 [CASH] down avg=0.00% idx=+0.32% R5 [rang] n=0 (CASH)
+
+2026-03-19 [W] [up] avg=-0.11% idx=-1.39% wr=67% R3 [rang] n=3
+  688295 : -0.05% [V] (ensemble)
+  000890 : +2.94% [V] (ensemble)
+  301099 : -3.21% [X] (ensemble)
+
+2026-03-20 [L] [down] avg=-4.18% idx=-1.24% wr=0% R4 [bear] n=3
+  000890 : -6.21% [X] (ensemble)
+  603558 : -2.13% [X] (ensemble)
+  603817 : -4.19% [X] (ensemble)
+
+2026-03-23 [W] [up] avg=+0.04% idx=-3.63% wr=67% R4 [bear] n=3
+  600381 : -5.11% [X] (ensemble)
+  601998 : -1.13% [V] (ensemble)
+  600815 : +6.37% [V] (ensemble)
+
+2026-03-24 [CASH] down avg=0.00% idx=+1.78% R5 [bear] n=0 (CASH)
+
+2026-03-25 [L] [down] avg=+0.20% idx=+1.30% wr=33% R4 [bear] n=3
+  603687 : +1.69% [V] (ensemble)
+  603803 : -1.35% [X] (ensemble)
+  002310 : +0.26% [X] (ensemble)
+
+2026-03-26 [CASH] up avg=0.00% idx=-1.09% R5 [bear] n=0 (CASH)
+
+2026-03-27 [CASH] down avg=0.00% idx=+0.63% R5 [bear] n=0 (CASH)
+
+2026-03-30 [CASH] down avg=0.00% idx=+0.24% R5 [bear] n=0 (CASH)
+
+2026-03-31 [CASH] up avg=0.00% idx=-0.80% R5 [bear] n=0 (CASH)
+
+2026-04-01 [CASH] down avg=0.00% idx=+1.46% R5 [bear] n=0 (CASH)
+
+2026-04-02 [W] [up] avg=+1.37% idx=-0.74% wr=67% R4 [rang] n=3
+  603016 : +7.53% [V] (ensemble)
+  000678 : +0.69% [V] (ensemble)
+  301048 : -4.12% [X] (ensemble)
+
+2026-04-03 [W] [up] avg=+0.17% idx=-1.00% wr=67% R4 [rang] n=3
+  000678 : +0.69% [V] (ensemble)
+  301179 : +4.68% [V] (ensemble)
+  301255 : -4.87% [X] (ensemble)
+
+2026-04-06 [W] [up] avg=+5.41% idx=+0.26% wr=100% R4 [bear] n=3
+  603222 : +7.64% [V] (ensemble)
+  000678 : +3.42% [V] (ensemble)
+  301179 : +5.17% [V] (ensemble)
+
+2026-04-07 [W] [up] avg=+2.87% idx=+0.26% wr=67% R4 [bear] n=3
+  000678 : +3.42% [V] (ensemble)
+  301179 : +5.17% [V] (ensemble)
+  399481 : +0.01% [X] (ensemble)
