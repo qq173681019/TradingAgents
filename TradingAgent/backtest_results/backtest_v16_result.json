@@ -1,0 +1,151 @@
+{
+  "timestamp": "2026-05-05 17:47:53",
+  "version": "v16b-iterative-optuna",
+  "eval_range": "2026-03-01 ~ 2026-04-24",
+  "accuracy": 0.65,
+  "beat_idx_pct": 0.9,
+  "beat_idx_days": 36,
+  "total_days": 40,
+  "stats_by_risk": {
+    "3": {
+      "wins": 13,
+      "total": 15,
+      "beat_idx": 14
+    },
+    "4": {
+      "wins": 7,
+      "total": 9,
+      "beat_idx": 8
+    },
+    "5": {
+      "wins": 2,
+      "total": 7,
+      "beat_idx": 6
+    },
+    "2": {
+      "wins": 4,
+      "total": 9,
+      "beat_idx": 8
+    }
+  },
+  "r2_params": {
+    "w_momentum": 0.543432622271623,
+    "w_trend": 0.00706272419603392,
+    "w_consistency": 0.13078430346065612,
+    "w_vol": 0.017783204693179327,
+    "w_rsi": 0.011907652814206532,
+    "w_static": 0.1405727090579345,
+    "w_defense": 0.03646897302421883,
+    "w_sector": 0.01105812022323426,
+    "w_low_vol": 0.07344506454378906,
+    "w_rel_str": 0.017644390697461772,
+    "w_rel_str_3d": 0.00984023501766257,
+    "boost_consistency": 1.2924147155077859,
+    "boost_above_ma20": 1.2376887080018488,
+    "boost_rsi_45_60": 0.8228587092654045,
+    "boost_sector_hot": 1.3381525026782264,
+    "boost_rel_str": 1.0538843359222898,
+    "penalty_below_ma20": 0.20128547717975973,
+    "penalty_high_vol": 0.19989658144763942,
+    "penalty_rsi_overbought": 0.8978033367253886,
+    "penalty_big_move": 0.1630683903187073,
+    "penalty_streak_neg": 0.9071622563599995,
+    "penalty_vol_shrink": 0.28652907199935657,
+    "penalty_turn_spike": 0.6679634892398373,
+    "penalty_below_ma5": 0.28999180632807325
+  },
+  "r3_params": {
+    "w_momentum": 0.1367368225983983,
+    "w_trend": 0.09637994830301756,
+    "w_consistency": 0.07239465845883288,
+    "w_mr": 0.08574774661868874,
+    "w_vol": 0.06881629015116482,
+    "w_rsi": 0.020767455891327818,
+    "w_static": 0.006128774990345904,
+    "w_defense": 0.1047185559416257,
+    "w_sector_heat": 0.1265592668216359,
+    "w_low_vol": 0.035520741096385325,
+    "w_rel_str": 0.10048010450673954,
+    "w_rel_str_3d": 0.14574963462163745,
+    "consistency_boost_high": 2.462901723200523,
+    "consistency_boost_mid": 1.1698048442226556,
+    "uptrend_boost_full": 1.7353555723902283,
+    "uptrend_boost_partial": 0.9607630572681164,
+    "ma20_above_mult": 1.2066113765603486,
+    "ma20_below_mult": 0.5036854829973982,
+    "low_vol_mult_high": 1.253243786482494,
+    "low_vol_mult_mid": 0.918021431097559,
+    "high_vol_penalize": 0.12550706946792134,
+    "rsi_overbought_mult": 0.16802490273066453,
+    "rsi_high_mult": 0.6567544068873018,
+    "rsi_sweet_mult": 1.3327284601521754,
+    "sector_heat_strong": 1.0231488329038572,
+    "sector_heat_mild": 1.3018677990995955,
+    "sector_cold": 0.021878077981025618,
+    "sector_cool": 0.5007357312346158,
+    "rel_str_strong": 1.897554342386533,
+    "rel_str_mild": 1.268640002021058,
+    "big_move5_penalize": 0.10155970323875607,
+    "big_move3_penalize": 0.8884580226191793,
+    "streak_penalize": 0.4538002132233489,
+    "vol_shrink_penalize": 0.3220780190128671,
+    "turn_spike_penalize": 0.7179315118846368,
+    "ma5_below_penalize": 0.5632256989490149
+  },
+  "r45_params": {
+    "w_momentum": 0.05611955594671376,
+    "w_trend": 0.017396292054216854,
+    "w_mr": 0.06667143860772484,
+    "w_vol": 0.02432094402735283,
+    "w_rsi": 0.013322969445395566,
+    "w_static": 0.14617034197499013,
+    "w_defense": 0.15486384956087368,
+    "w_sector": 0.044806218141248653,
+    "w_low_vol": 0.06464123470167246,
+    "w_rel_str": 0.15425871847955838,
+    "w_rel_str_3d": 0.08722749598950108,
+    "w_beta": 0.1702009410707518,
+    "penalty_beta_high": 0.42456696990923914,
+    "penalty_beta_mid": 0.54200873456003,
+    "boost_beta_low": 0.9726026212331566,
+    "boost_oversold": 1.4976577895155914,
+    "penalty_overbought": 0.28293836398985567,
+    "penalty_high_beta_ind": 0.6177284658983364,
+    "boost_defensive_ind": 1.4516058463132628,
+    "boost_rel_str_strong": 1.6045205879362066,
+    "boost_rel_str_very_strong": 2.1374148301267413,
+    "boost_low_vol": 1.4718823305555753,
+    "penalty_big_drop": 0.45510087346345335,
+    "penalty_big_drop_3d": 0.40193677927361093,
+    "penalty_big_jump": 0.22146321865692598,
+    "penalty_overextended": 0.6225620965801043,
+    "boost_streak_relstr": 0.887713053626238
+  },
+  "n_trials_per_phase": 500,
+  "baseline": {
+    "overall": 0.725,
+    "stats": {
+      "3": {
+        "beat_idx": 14,
+        "total": 15,
+        "wins": 13
+      },
+      "4": {
+        "beat_idx": 6,
+        "total": 9,
+        "wins": 5
+      },
+      "5": {
+        "beat_idx": 5,
+        "total": 7,
+        "wins": 3
+      },
+      "2": {
+        "beat_idx": 4,
+        "total": 9,
+        "wins": 1
+      }
+    }
+  },
+  "elapsed_seconds": 664.9370195865631
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-04-28",
+  "total_recommended": 3,
+  "verified": 0,
+  "error": "no_valid_data",
+  "details": [
+    {
+      "code": "002405",
+      "name": "四维图新",
+      "return_pct": null,
+      "error": "no_kline"
+    },
+    {
+      "code": "002140",
+      "name": "东华科技",
+      "return_pct": null,
+      "error": "no_kline"
+    },
+    {
+      "code": "601799",
+      "name": "星宇股份",
+      "return_pct": null,
+      "error": "no_kline"
+    }
+  ]
+}

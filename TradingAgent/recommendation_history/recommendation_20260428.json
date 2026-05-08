@@ -1,0 +1,129 @@
+{
+  "date": "2026-04-28",
+  "market_state": "数据不足，使用默认震荡市权重",
+  "recommended": [
+    {
+      "date": "2026-04-28",
+      "stock_code": "002405",
+      "stock_name": "四维图新",
+      "total_score": 7.38,
+      "technical_score": 10.0,
+      "chip_score": 5.0,
+      "sector_score": 5.0,
+      "news_score": 5.0,
+      "news_sentiment": "中性",
+      "news_reason": "无近期新闻",
+      "market_cap": "50.0亿",
+      "industry": "未知",
+      "sector_name": null,
+      "recent_gain_20d": "+0.0%",
+      "recommendation_reason": "技术面强势（10.0分），短期趋势向好；筹码分布较为合理（5.0分）；市值50.0亿，属于小盘股；换手率3.0%，交投活跃且健康。"
+    },
+    {
+      "date": "2026-04-28",
+      "stock_code": "002140",
+      "stock_name": "东华科技",
+      "total_score": 7.29,
+      "technical_score": 10.0,
+      "chip_score": 5.0,
+      "sector_score": 5.0,
+      "news_score": 5.0,
+      "news_sentiment": "中性",
+      "news_reason": "无近期新闻",
+      "market_cap": "50.0亿",
+      "industry": "未知",
+      "sector_name": null,
+      "recent_gain_20d": "+0.0%",
+      "recommendation_reason": "技术面强势（10.0分），短期趋势向好；筹码分布较为合理（5.0分）；市值50.0亿，属于小盘股；换手率3.0%，交投活跃且健康。"
+    },
+    {
+      "date": "2026-04-28",
+      "stock_code": "601799",
+      "stock_name": "星宇股份",
+      "total_score": 7.25,
+      "technical_score": 9.0,
+      "chip_score": 5.0,
+      "sector_score": 9.06,
+      "news_score": 5.0,
+      "news_sentiment": "中性",
+      "news_reason": "无近期新闻",
+      "market_cap": "50.0亿",
+      "industry": "汽车",
+      "sector_name": "新能源汽车",
+      "recent_gain_20d": "+0.0%",
+      "recommendation_reason": "技术面强势（9.0分），短期趋势向好；筹码分布较为合理（5.0分）；所属新能源汽车板块热度较高（9.1分）；市值50.0亿，属于小盘股；换手率3.0%，交投活跃且健康。"
+    }
+  ],
+  "candidates": [
+    {
+      "code": "002405",
+      "name": "四维图新",
+      "total_score": 7.38,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "002140",
+      "name": "东华科技",
+      "total_score": 7.29,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "002221",
+      "name": "东华能源",
+      "total_score": 7.29,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "603507",
+      "name": "振江股份",
+      "total_score": 7.29,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "601799",
+      "name": "星宇股份",
+      "total_score": 7.25,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "000538",
+      "name": "云南白药",
+      "total_score": 7.2,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "000885",
+      "name": "城发环境",
+      "total_score": 7.16,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "002088",
+      "name": "鲁阳节能",
+      "total_score": 7.16,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "002453",
+      "name": "华软科技",
+      "total_score": 7.16,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    },
+    {
+      "code": "002778",
+      "name": "中晟高科",
+      "total_score": 7.16,
+      "sentiment": "中性",
+      "sentiment_score": 5.0
+    }
+  ]
+}

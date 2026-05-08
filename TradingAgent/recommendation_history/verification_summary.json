@@ -1,0 +1,249 @@
+{
+  "timestamp": "2026-05-07 15:18:03",
+  "summary": {
+    "total_days": 9,
+    "beat_idx_days": 2,
+    "beat_idx_pct": 22.2,
+    "total_stocks": 11,
+    "stock_wins": 5,
+    "stock_win_rate": 45.5,
+    "stock_beat_idx": 4,
+    "stock_beat_idx_rate": 36.4,
+    "avg_return": 0.55,
+    "best_stock": {
+      "code": "002140",
+      "name": "东华科技",
+      "return": 4.83
+    },
+    "worst_stock": {
+      "code": "600715",
+      "name": "文投控股",
+      "return": -1.96
+    }
+  },
+  "daily_results": [
+    {
+      "date": "2026-04-07",
+      "status": "verified",
+      "index_return": 2.69,
+      "avg_stock_return": 0.19,
+      "beat_idx": false,
+      "beat_idx_count": 0,
+      "total_stocks": 1,
+      "stocks": [
+        {
+          "code": "600643",
+          "name": "爱建集团",
+          "score": 7.33,
+          "return": 0.19,
+          "beat_idx": false,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-08",
+      "status": "verified",
+      "index_return": -0.72,
+      "avg_stock_return": -1.96,
+      "beat_idx": false,
+      "beat_idx_count": 0,
+      "total_stocks": 1,
+      "stocks": [
+        {
+          "code": "600715",
+          "name": "文投控股",
+          "score": 7.58,
+          "return": -1.96,
+          "beat_idx": false,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-09",
+      "status": "verified",
+      "index_return": 0.51,
+      "avg_stock_return": 0.0,
+      "beat_idx": false,
+      "beat_idx_count": 0,
+      "total_stocks": 1,
+      "stocks": [
+        {
+          "code": "600715",
+          "name": "文投控股",
+          "score": 7.58,
+          "return": 0.0,
+          "beat_idx": false,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-14",
+      "status": "verified",
+      "index_return": 0.01,
+      "avg_stock_return": -0.26,
+      "beat_idx": false,
+      "beat_idx_count": 0,
+      "total_stocks": 1,
+      "stocks": [
+        {
+          "code": "600676",
+          "name": "交运股份",
+          "score": 7.55,
+          "return": -0.26,
+          "beat_idx": false,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-20",
+      "status": "verified",
+      "index_return": 0.07,
+      "avg_stock_return": 1.26,
+      "beat_idx": true,
+      "beat_idx_count": 1,
+      "total_stocks": 1,
+      "stocks": [
+        {
+          "code": "600676",
+          "name": "交运股份",
+          "score": 7.81,
+          "return": 1.26,
+          "beat_idx": true,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-23",
+      "status": "verified",
+      "index_return": -0.33,
+      "avg_stock_return": null,
+      "beat_idx": null,
+      "beat_idx_count": 0,
+      "total_stocks": 0,
+      "stocks": [
+        {
+          "code": "000003",
+          "name": "PT金田A",
+          "score": -1.75,
+          "return": null,
+          "beat_idx": null,
+          "status": "no_data"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-24",
+      "status": "verified",
+      "index_return": 0.16,
+      "avg_stock_return": null,
+      "beat_idx": null,
+      "beat_idx_count": 0,
+      "total_stocks": 0,
+      "stocks": [
+        {
+          "code": "000003",
+          "name": "PT金田A",
+          "score": -3.7,
+          "return": null,
+          "beat_idx": null,
+          "status": "no_data"
+        },
+        {
+          "code": "000015",
+          "name": "PT中浩A",
+          "score": -3.7,
+          "return": null,
+          "beat_idx": null,
+          "status": "no_data"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-28",
+      "status": "verified",
+      "index_return": 0.71,
+      "avg_stock_return": 2.07,
+      "beat_idx": true,
+      "beat_idx_count": 2,
+      "total_stocks": 3,
+      "stocks": [
+        {
+          "code": "002405",
+          "name": "四维图新",
+          "score": 7.38,
+          "return": 1.71,
+          "beat_idx": true,
+          "status": "ok"
+        },
+        {
+          "code": "002140",
+          "name": "东华科技",
+          "score": 7.29,
+          "return": 4.83,
+          "beat_idx": true,
+          "status": "ok"
+        },
+        {
+          "code": "601799",
+          "name": "星宇股份",
+          "score": 7.25,
+          "return": -0.34,
+          "beat_idx": false,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-04",
+      "status": "verified",
+      "index_return": 1.17,
+      "avg_stock_return": 0.21,
+      "beat_idx": false,
+      "beat_idx_count": 1,
+      "total_stocks": 3,
+      "stocks": [
+        {
+          "code": "002221",
+          "name": "东华能源",
+          "score": 8.27,
+          "return": -0.37,
+          "beat_idx": false,
+          "status": "ok"
+        },
+        {
+          "code": "002125",
+          "name": "湘潭电化",
+          "score": 7.96,
+          "return": 2.16,
+          "beat_idx": true,
+          "status": "ok"
+        },
+        {
+          "code": "002818",
+          "name": "富森美",
+          "score": 7.92,
+          "return": -1.15,
+          "beat_idx": false,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-06",
+      "status": "error",
+      "reason": "无法获取指数数据",
+      "stocks": []
+    },
+    {
+      "date": "2026-05-07",
+      "status": "skipped",
+      "reason": "今日推荐尚未收盘",
+      "stocks": []
+    }
+  ]
+}

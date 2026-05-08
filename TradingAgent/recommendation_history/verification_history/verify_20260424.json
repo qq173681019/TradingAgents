@@ -1,0 +1,20 @@
+{
+  "date": "2026-04-24",
+  "total_recommended": 2,
+  "verified": 0,
+  "error": "no_valid_data",
+  "details": [
+    {
+      "code": "000003",
+      "name": "PT金田A",
+      "return_pct": null,
+      "error": "no_kline"
+    },
+    {
+      "code": "000015",
+      "name": "PT中浩A",
+      "return_pct": null,
+      "error": "no_kline"
+    }
+  ]
+}

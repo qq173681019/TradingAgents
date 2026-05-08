@@ -31,16 +31,25 @@ try:
         DEEPSEEK_MODEL_NAME,
         AI_TEMPERATURE,
         AI_MAX_TOKENS,
-        API_TIMEOUT
+        API_TIMEOUT,
     )
+    # 额外导入备选API
+    try:
+        from config import GEMINI_API_KEY, GEMINI_API_URL, GEMINI_MODEL_NAME
+    except ImportError:
+        GEMINI_API_KEY = ""
+        GEMINI_API_URL = ""
+        GEMINI_MODEL_NAME = ""
 except ImportError:
-    # 如果无法导入，使用默认值
     DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', '')
     DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
     DEEPSEEK_MODEL_NAME = "deepseek-chat"
     AI_TEMPERATURE = 0.3
     AI_MAX_TOKENS = 500
     API_TIMEOUT = 60
+    GEMINI_API_KEY = ""
+    GEMINI_API_URL = ""
+    GEMINI_MODEL_NAME = ""
 
 
 class NewsAnalyzer:
@@ -70,8 +79,55 @@ class NewsAnalyzer:
         self.request_delay = 1.0  # 请求间隔1秒
         self.max_retries = 2  # 最大重试2次
 
+        # 多API fallback链: 智谱 → DeepSeek → Gemini
+        self._api_fallbacks = []
+        # 1. 智谱 (当前主用)
+        if self.api_key and 'bigmodel.cn' in self.api_url:
+            self._api_fallbacks.append({
+                'name': '智谱',
+                'api_key': self.api_key,
+                'api_url': self.api_url,
+                'model': self.model_name,
+                'type': 'openai',
+            })
+        # 2. 真正的DeepSeek
+        deepseek_key = os.environ.get('DEEPSEEK_REAL_KEY', 'sk-281898da205d4163a947f3af7bc5c942')
+        if deepseek_key:
+            self._api_fallbacks.append({
+                'name': 'DeepSeek',
+                'api_key': deepseek_key,
+                'api_url': 'https://api.deepseek.com/v1/chat/completions',
+                'model': 'deepseek-chat',
+                'type': 'openai',
+            })
+        # 3. Gemini
+        if GEMINI_API_KEY:
+            self._api_fallbacks.append({
+                'name': 'Gemini',
+                'api_key': GEMINI_API_KEY,
+                'api_url': GEMINI_API_URL,
+                'model': GEMINI_MODEL_NAME,
+                'type': 'gemini',
+            })
+        # 4. 如果主API不是智谱，把智谱也加入fallback
+        zhipu_keys = [
+            'd5d6e909645e4e2391afdc4244bbd18f.US6yBrPhfJTcc0nU',
+            '23570247652241e590d5d2ca8ae17287.rpUKjrX0VvyED0a8',
+            '9b9c2e2ea9d94dccaecde3b71d01da5f.1RzV8chxcSjdMdkY',
+            'fd9525ee42c14995be4d8a0053b42adf.uykrCyOz9ElMDTz8',
+        ]
+        if not self._api_fallbacks or self._api_fallbacks[0]['name'] != '智谱':
+            for zk in zhipu_keys:
+                self._api_fallbacks.append({
+                    'name': '智谱(备)',
+                    'api_key': zk,
+                    'api_url': 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+                    'model': 'glm-4-flash',
+                    'type': 'openai',
+                })
+
         if not self.api_key:
-            print("警告: DeepSeek API密钥未配置，将返回中性评分")
+            print("警告: 主API密钥未配置，将尝试fallback链")
 
     def fetch_stock_news(self, stock_code: str, stock_name: str, days: int = 7, count: int = 10) -> List[Dict]:
         """获取个股近期新闻
@@ -225,90 +281,131 @@ class NewsAnalyzer:
             return []
 
     def _call_deepseek_api(self, prompt: str, retry_count: int = 0) -> Optional[Dict]:
-        """调用DeepSeek API
+        """调用LLM API (带多provider fallback)
 
-        Args:
-            prompt: 提示词
-            retry_count: 当前重试次数
-
-        Returns:
-            解析后的响应字典，失败返回None
+        按顺序尝试: 主API → DeepSeek → Gemini → 智谱备选
         """
-        if not self.api_key:
+        import requests
+
+        # 构建API列表: 主API在前，fallback在后
+        apis_to_try = []
+        if self.api_key:
+            apis_to_try.append({
+                'name': '主API',
+                'api_key': self.api_key,
+                'api_url': self.api_url,
+                'model': self.model_name,
+                'type': 'openai' if 'generativelanguage' not in self.api_url else 'gemini',
+            })
+        apis_to_try.extend(self._api_fallbacks)
+
+        messages = [
+            {"role": "system", "content": "你是一位专业的A股投资分析师，擅长分析新闻对股价的影响。"},
+            {"role": "user", "content": prompt},
+        ]
+
+        for api_conf in apis_to_try:
+            try:
+                result = self._call_single_api(api_conf, messages)
+                if result:
+                    return result
+            except Exception as e:
+                print(f"[{api_conf['name']}] 调用异常: {e}")
+                continue
+
+        print(f"[LLM] 所有API均失败，返回中性评分")
+        return None
+
+    def _call_single_api(self, api_conf: dict, messages: list) -> Optional[Dict]:
+        """调用单个API provider"""
+        import requests
+
+        name = api_conf['name']
+        api_type = api_conf.get('type', 'openai')
+
+        if api_type == 'gemini':
+            return self._call_gemini_api(api_conf, messages)
+
+        # OpenAI兼容格式 (智谱/DeepSeek/千问等)
+        headers = {
+            "Authorization": f"Bearer {api_conf['api_key']}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": api_conf['model'],
+            "messages": messages,
+            "temperature": AI_TEMPERATURE,
+            "max_tokens": AI_MAX_TOKENS
+        }
+
+        response = requests.post(
+            api_conf['api_url'],
+            headers=headers,
+            json=payload,
+            timeout=30  # 单个请求30秒超时
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            return self._parse_llm_response(content, name)
+        elif response.status_code == 429:
+            print(f"[{name}] 限流(429)，切换下一个")
+            return None
+        else:
+            print(f"[{name}] API请求失败: {response.status_code} - {response.text[:150]}")
             return None
 
-        try:
-            import requests
+    def _call_gemini_api(self, api_conf: dict, messages: list) -> Optional[Dict]:
+        """调用Gemini API (原生格式)"""
+        import requests
 
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
-            }
+        # 提取system和user消息
+        system_msg = ""
+        user_msg = ""
+        for m in messages:
+            if m['role'] == 'system':
+                system_msg = m['content']
+            elif m['role'] == 'user':
+                user_msg = m['content']
 
-            payload = {
-                "model": self.model_name,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "你是一位专业的A股投资分析师，擅长分析新闻对股价的影响。"
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
+        payload = {
+            "contents": [{"parts": [{"text": f"{system_msg}\n\n{user_msg}"}]}],
+            "generationConfig": {
                 "temperature": AI_TEMPERATURE,
-                "max_tokens": AI_MAX_TOKENS
+                "maxOutputTokens": AI_MAX_TOKENS,
             }
+        }
 
-            response = requests.post(
-                self.api_url,
-                headers=headers,
-                json=payload,
-                timeout=API_TIMEOUT
-            )
+        url = api_conf['api_url']
+        if '?' not in url:
+            url += f"?key={api_conf['api_key']}"
 
-            if response.status_code == 200:
-                result = response.json()
-                content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        response = requests.post(url, json=payload, timeout=30)
 
-                # 解析JSON响应
-                try:
-                    return json.loads(content)
-                except json.JSONDecodeError:
-                    # 尝试提取JSON部分
-                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
-                    if json_match:
-                        try:
-                            return json.loads(json_match.group())
-                        except json.JSONDecodeError:
-                            pass
-
-                    # 解析失败，返回默认值
-                    print(f"[LLM] 响应解析失败: {content[:100]}")
-                    return {"sentiment": "中性", "score": 5.0, "reason": "LLM响应格式异常"}
-
-            elif response.status_code == 429:
-                # 限流，等待后重试
-                if retry_count < self.max_retries:
-                    print(f"[LLM] 请求限流，等待5秒后重试...")
-                    time.sleep(5)
-                    return self._call_deepseek_api(prompt, retry_count + 1)
-                else:
-                    print(f"[LLM] 达到最大重试次数")
-                    return None
-
-            else:
-                print(f"[LLM] API请求失败: {response.status_code} - {response.text[:200]}")
-                return None
-
-        except Exception as e:
-            print(f"[LLM] 调用异常: {e}")
-            if retry_count < self.max_retries:
-                print(f"[LLM] 等待后重试...")
-                time.sleep(3)
-                return self._call_deepseek_api(prompt, retry_count + 1)
+        if response.status_code == 200:
+            result = response.json()
+            content = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+            return self._parse_llm_response(content, 'Gemini')
+        else:
+            print(f"[Gemini] API请求失败: {response.status_code} - {response.text[:150]}")
             return None
+
+    def _parse_llm_response(self, content: str, provider_name: str) -> Optional[Dict]:
+        """解析LLM响应，提取JSON"""
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            # 尝试提取JSON部分
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                try:
+                    return json.loads(json_match.group())
+                except json.JSONDecodeError:
+                    pass
+
+            print(f"[{provider_name}] 响应解析失败: {content[:100]}")
+            return {"sentiment": "中性", "score": 5.0, "reason": "LLM响应格式异常"}
 
     def analyze_sentiment(self, stock_name: str, news_list: List[Dict]) -> Dict:
         """使用DeepSeek LLM分析新闻情绪

@@ -1,0 +1,200 @@
+{
+  "timestamp": "2026-05-07 23:38:28",
+  "version": "v19-sector-focused",
+  "description": "Sector-focused multi-period optimization (AI/chip/semiconductor/solar/power)",
+  "training_periods": {
+    "A": {
+      "start": "2026-02-07",
+      "end": "2026-03-10"
+    },
+    "B": {
+      "start": "2026-03-10",
+      "end": "2026-04-10"
+    },
+    "C": {
+      "start": "2026-04-10",
+      "end": "2026-05-06"
+    }
+  },
+  "full_period": {
+    "start": "2026-02-07",
+    "end": "2026-05-06"
+  },
+  "n_trials_per_phase": 200,
+  "l2_lambda": 0.001,
+  "weight_range": [
+    0.001,
+    0.4
+  ],
+  "objective_weights": {
+    "mean": 0.5,
+    "min": 0.3,
+    "variance": 0.2
+  },
+  "period_results": {
+    "A": {
+      "beat_idx_pct": 0.8636363636363636,
+      "beat_idx_days": 19,
+      "total_days": 22,
+      "stats_by_risk": {
+        "3": {
+          "wins": 14,
+          "total": 22,
+          "beat_idx": 19
+        }
+      }
+    },
+    "B": {
+      "beat_idx_pct": 0.8333333333333334,
+      "beat_idx_days": 20,
+      "total_days": 24,
+      "stats_by_risk": {
+        "3": {
+          "wins": 5,
+          "total": 7,
+          "beat_idx": 7
+        },
+        "4": {
+          "wins": 6,
+          "total": 9,
+          "beat_idx": 7
+        },
+        "5": {
+          "wins": 1,
+          "total": 7,
+          "beat_idx": 5
+        },
+        "2": {
+          "wins": 1,
+          "total": 1,
+          "beat_idx": 1
+        }
+      }
+    },
+    "C": {
+      "beat_idx_pct": 0.8947368421052632,
+      "beat_idx_days": 17,
+      "total_days": 19,
+      "stats_by_risk": {
+        "3": {
+          "wins": 4,
+          "total": 4,
+          "beat_idx": 4
+        },
+        "2": {
+          "wins": 5,
+          "total": 15,
+          "beat_idx": 13
+        }
+      }
+    }
+  },
+  "full_result": {
+    "beat_idx_pct": 0.8615384615384616,
+    "beat_idx_days": 56,
+    "total_days": 65,
+    "stats_by_risk": {}
+  },
+  "comparison": {
+    "v10_full_beat_idx": 60.8,
+    "v14_full_beat_idx": 49.0,
+    "v16_training_beat_idx": 90.0,
+    "v19_full_beat_idx": 86.15384615384616,
+    "v17_beat_idx": 73.5,
+    "success": true
+  },
+  "r2_params": {
+    "w_momentum": 0.051457894186601065,
+    "w_trend": 0.17029842028714212,
+    "w_consistency": 0.08524349923958542,
+    "w_vol": 0.08471240022593285,
+    "w_rsi": 0.058037339903130654,
+    "w_static": 0.1797292225932971,
+    "w_defense": 0.027920672200467428,
+    "w_sector": 0.14325426063970945,
+    "w_low_vol": 0.08017286661273608,
+    "w_rel_str": 0.06216092007690231,
+    "w_rel_str_3d": 0.05701250403449557,
+    "boost_consistency": 1.0642164360510908,
+    "boost_above_ma20": 1.7255927584273179,
+    "boost_rsi_45_60": 1.188513900154476,
+    "boost_sector_hot": 1.2497294324871375,
+    "boost_rel_str": 0.808942382258715,
+    "penalty_below_ma20": 0.5781429176800784,
+    "penalty_high_vol": 0.15241272667039635,
+    "penalty_rsi_overbought": 0.4848447475719676,
+    "penalty_big_move": 0.5509267431337195,
+    "penalty_streak_neg": 0.6828373464096397,
+    "penalty_vol_shrink": 0.9955801093255,
+    "penalty_turn_spike": 0.7822506818155821,
+    "penalty_below_ma5": 0.2838475110251172
+  },
+  "r3_params": {
+    "w_momentum": 0.13482032701767266,
+    "w_trend": 0.10882749119629931,
+    "w_consistency": 0.03170453223365022,
+    "w_mr": 0.166458732063428,
+    "w_vol": 0.048281454778690044,
+    "w_rsi": 0.008339847476766242,
+    "w_static": 0.010724626485495213,
+    "w_defense": 0.16676133592694548,
+    "w_sector_heat": 0.13191873465998558,
+    "w_low_vol": 0.026269678039748053,
+    "w_rel_str": 0.03868328722294376,
+    "w_rel_str_3d": 0.12720995289837544,
+    "consistency_boost_high": 1.6142258811236292,
+    "consistency_boost_mid": 0.9090125833813532,
+    "uptrend_boost_full": 1.9669242867176693,
+    "uptrend_boost_partial": 1.0196746815429822,
+    "ma20_above_mult": 0.8167982202007605,
+    "ma20_below_mult": 0.552011690152048,
+    "low_vol_mult_high": 1.0396089893707403,
+    "low_vol_mult_mid": 0.8614561045984365,
+    "high_vol_penalize": 0.14091813704816575,
+    "rsi_overbought_mult": 0.4694755677124722,
+    "rsi_high_mult": 0.6218363923373943,
+    "rsi_sweet_mult": 1.2958443905048667,
+    "sector_heat_strong": 1.2365926170185888,
+    "sector_heat_mild": 0.8536391097924464,
+    "sector_cold": 0.4323169067583321,
+    "sector_cool": 0.6174036715067991,
+    "rel_str_strong": 1.0851767620983155,
+    "rel_str_mild": 1.1742857156690842,
+    "big_move5_penalize": 0.18606359921993693,
+    "big_move3_penalize": 0.9031793282700605,
+    "streak_penalize": 0.38179243259380896,
+    "vol_shrink_penalize": 0.590195503265791,
+    "turn_spike_penalize": 0.7941630033527348,
+    "ma5_below_penalize": 0.766173705258092
+  },
+  "r45_params": {
+    "w_momentum": 0.04073260188261956,
+    "w_trend": 0.0438001249560973,
+    "w_mr": 0.06514322916366527,
+    "w_vol": 0.05692723180846514,
+    "w_rsi": 0.05970539825323906,
+    "w_static": 0.2622132158020635,
+    "w_defense": 0.12330720201552368,
+    "w_sector": 0.004368653353665519,
+    "w_low_vol": 0.09775022479225991,
+    "w_rel_str": 0.09914219458824906,
+    "w_rel_str_3d": 0.04194130379574513,
+    "w_beta": 0.1049686195884068,
+    "penalty_beta_high": 0.061214498695806224,
+    "penalty_beta_mid": 0.463945578074778,
+    "boost_beta_low": 1.252888772084738,
+    "boost_oversold": 1.0960202315783967,
+    "penalty_overbought": 0.2577609803992395,
+    "penalty_high_beta_ind": 0.6565724935753733,
+    "boost_defensive_ind": 1.0743014814031788,
+    "boost_rel_str_strong": 1.2545264561366507,
+    "boost_rel_str_very_strong": 0.9587411763132377,
+    "boost_low_vol": 1.6875898492054346,
+    "penalty_big_drop": 0.26269094359794215,
+    "penalty_big_drop_3d": 0.07081103159259589,
+    "penalty_big_jump": 0.0837981156659511,
+    "penalty_overextended": 0.29428059178968935,
+    "boost_streak_relstr": 0.9902188803310799
+  },
+  "elapsed_seconds": 300.43492126464844
+}

@@ -1,0 +1,25 @@
+{
+  "date": "2026-04-20",
+  "total_recommended": 1,
+  "verified": 1,
+  "avg_return": 1.26,
+  "index_return": 0.07,
+  "avg_excess_return": 1.19,
+  "beat_count": 1,
+  "miss_count": 0,
+  "beat_idx": 1.0,
+  "details": [
+    {
+      "code": "600676",
+      "name": "交运股份",
+      "return_pct": 1.26,
+      "index_return": 0.07,
+      "excess_return": 1.19,
+      "beat_index": true,
+      "rec_close": 7.93,
+      "next_date": "2026-04-21",
+      "next_close": 8.03,
+      "score": 7.81
+    }
+  ]
+}

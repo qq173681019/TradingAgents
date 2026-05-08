@@ -1,0 +1,19 @@
+{
+  "date": "2026-04-07",
+  "status": "verified",
+  "index_return": 2.69,
+  "avg_stock_return": 0.19,
+  "beat_idx": false,
+  "beat_idx_count": 0,
+  "total_stocks": 1,
+  "stocks": [
+    {
+      "code": "600643",
+      "name": "爱建集团",
+      "score": 7.33,
+      "return": 0.19,
+      "beat_idx": false,
+      "status": "ok"
+    }
+  ]
+}

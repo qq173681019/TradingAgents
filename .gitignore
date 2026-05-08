@@ -33,3 +33,27 @@ test_*.py
 # 数据文件（保留data/目录下的文件）
 /*.json
 !requirements.txt
+
+# 大型缓存数据文件
+TradingShared/data/kline_cache/
+TradingShared/data/sector_cache/
+TradingShared/data/comprehensive_stock_data.json
+TradingShared/data/comprehensive_stock_data_part_*.json
+TradingShared/data/ml_train_dataset.npz
+TradingShared/data/new_factors_cache.json
+TradingShared/data/index_shanghai_full.json
+TradingShared/data/ml_feature_importance.json
+TradingShared/data/ml_model_*.txt
+TradingShared/data/stock_status_cache.json
+TradingShared/data/kline_update_status.json
+TradingShared/data/index_shanghai_6m.json
+TradingShared/data/batch_stock_scores_none.json
+
+# Claude 配置
+TradingAgent/.claude/
+
+# Optuna 参数（保留）
+# optuna_v*_best_params.json 不忽略
+
+# 备份目录
+TradingAgent/_archive_*/

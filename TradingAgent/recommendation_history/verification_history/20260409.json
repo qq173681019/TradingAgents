@@ -1,0 +1,19 @@
+{
+  "date": "2026-04-09",
+  "status": "verified",
+  "index_return": 0.51,
+  "avg_stock_return": 0.0,
+  "beat_idx": false,
+  "beat_idx_count": 0,
+  "total_stocks": 1,
+  "stocks": [
+    {
+      "code": "600715",
+      "name": "文投控股",
+      "score": 7.58,
+      "return": 0.0,
+      "beat_idx": false,
+      "status": "ok"
+    }
+  ]
+}

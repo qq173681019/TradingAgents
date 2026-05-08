@@ -1,0 +1,35 @@
+{
+  "date": "2026-05-04",
+  "status": "verified",
+  "index_return": 1.17,
+  "avg_stock_return": 0.21,
+  "beat_idx": false,
+  "beat_idx_count": 1,
+  "total_stocks": 3,
+  "stocks": [
+    {
+      "code": "002221",
+      "name": "东华能源",
+      "score": 8.27,
+      "return": -0.37,
+      "beat_idx": false,
+      "status": "ok"
+    },
+    {
+      "code": "002125",
+      "name": "湘潭电化",
+      "score": 7.96,
+      "return": 2.16,
+      "beat_idx": true,
+      "status": "ok"
+    },
+    {
+      "code": "002818",
+      "name": "富森美",
+      "score": 7.92,
+      "return": -1.15,
+      "beat_idx": false,
+      "status": "ok"
+    }
+  ]
+}

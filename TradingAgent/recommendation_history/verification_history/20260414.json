@@ -1,0 +1,19 @@
+{
+  "date": "2026-04-14",
+  "status": "verified",
+  "index_return": 0.01,
+  "avg_stock_return": -0.26,
+  "beat_idx": false,
+  "beat_idx_count": 0,
+  "total_stocks": 1,
+  "stocks": [
+    {
+      "code": "600676",
+      "name": "交运股份",
+      "score": 7.55,
+      "return": -0.26,
+      "beat_idx": false,
+      "status": "ok"
+    }
+  ]
+}

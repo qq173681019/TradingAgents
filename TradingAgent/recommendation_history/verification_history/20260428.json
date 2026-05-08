@@ -1,0 +1,35 @@
+{
+  "date": "2026-04-28",
+  "status": "verified",
+  "index_return": 0.71,
+  "avg_stock_return": 2.07,
+  "beat_idx": true,
+  "beat_idx_count": 2,
+  "total_stocks": 3,
+  "stocks": [
+    {
+      "code": "002405",
+      "name": "四维图新",
+      "score": 7.38,
+      "return": 1.71,
+      "beat_idx": true,
+      "status": "ok"
+    },
+    {
+      "code": "002140",
+      "name": "东华科技",
+      "score": 7.29,
+      "return": 4.83,
+      "beat_idx": true,
+      "status": "ok"
+    },
+    {
+      "code": "601799",
+      "name": "星宇股份",
+      "score": 7.25,
+      "return": -0.34,
+      "beat_idx": false,
+      "status": "ok"
+    }
+  ]
+}

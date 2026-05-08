@@ -1,0 +1,26 @@
+{
+  "date": "2026-05-04",
+  "total_recommended": 3,
+  "verified": 0,
+  "error": "no_valid_data",
+  "details": [
+    {
+      "code": "002221",
+      "name": "东华能源",
+      "return_pct": null,
+      "error": "no_kline"
+    },
+    {
+      "code": "002125",
+      "name": "湘潭电化",
+      "return_pct": null,
+      "error": "no_kline"
+    },
+    {
+      "code": "002818",
+      "name": "富森美",
+      "return_pct": null,
+      "error": "no_kline"
+    }
+  ]
+}

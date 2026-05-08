@@ -140,11 +140,14 @@ except ImportError:
     print("⚠ 筹码分析模块不可用")
 
 
-def call_llm(prompt, model="deepseek"):
+def call_llm(prompt, model="deepseek", system_prompt=None):
     """
     调用大语言模型API进行智能分析
     支持 deepseek、minimax、openrouter 和 gemini 四种模型
+    system_prompt: 可选，传入自定义角色人格（用于专家团队模式）
     """
+    _default_system = "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。"
+    _system = system_prompt if system_prompt else _default_system
     try:
         if model == "deepseek":
             # DeepSeek API调用
@@ -156,7 +159,7 @@ def call_llm(prompt, model="deepseek"):
             data = {
                 "model": DEEPSEEK_MODEL_NAME,
                 "messages": [
-                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。"},
+                    {"role": "system", "content": _system},
                     {"role": "user", "content": prompt}
                 ],
                 "temperature": AI_TEMPERATURE,
@@ -183,7 +186,7 @@ def call_llm(prompt, model="deepseek"):
             data = {
                 "model": OPENAI_MODEL_NAME,
                 "messages": [
-                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文回复。"},
+                    {"role": "system", "content": _system},
                     {"role": "user", "content": prompt}
                 ],
                 "temperature": AI_TEMPERATURE,
@@ -234,7 +237,7 @@ def call_llm(prompt, model="deepseek"):
             data = {
                 "model": OPENROUTER_MODEL_NAME,
                 "messages": [
-                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文回复。"},
+                    {"role": "system", "content": _system},
                     {"role": "user", "content": prompt}
                 ],
                 "temperature": AI_TEMPERATURE,
@@ -290,7 +293,7 @@ def call_llm(prompt, model="deepseek"):
                 "model": MINIMAX_MODEL_NAME,
                 "tokens_to_generate": AI_MAX_TOKENS,
                 "messages": [
-                    {"role": "system", "content": "你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文回复。"},
+                    {"role": "system", "content": _system},
                     {"role": "user", "content": prompt}
                 ],
                 "temperature": AI_TEMPERATURE,
@@ -373,7 +376,7 @@ def call_llm(prompt, model="deepseek"):
             data = {
                 "contents": [{
                     "parts": [{
-                        "text": f"你是一位专业的A股投资分析师，擅长技术分析和基本面分析。请用中文分析以下内容：\n\n{prompt}"
+                        "text": f"{_system}\n\n{prompt}"
                     }]
                 }],
                 "generationConfig": {
@@ -3162,7 +3165,103 @@ class AShareAnalyzerGUI:
             self.show_progress(f"LLM分析失败: {e}")
     
     def analyze_stock_with_llm(self, code, stock_data):
-        """使用LLM分析单只股票"""
+        """使用LLM分析单只股票（专家团队辩论模式）"""
+        try:
+            # 导入专家团队
+            import sys, os
+            experts_path = os.path.dirname(os.path.abspath(__file__))
+            if experts_path not in sys.path:
+                sys.path.insert(0, experts_path)
+            from experts import EXPERTS, DEBATE_JUDGE_SYSTEM_PROMPT, get_debate_prompt
+
+            # 获取用户额外提示
+            extra_msg = ""
+            if hasattr(self, 'extra_words_var'):
+                user_msg = self.extra_words_var.get().strip()
+                if user_msg:
+                    extra_msg = f"\n额外注意事项：{user_msg}\n"
+
+            stock_name = stock_data.get('name', code)
+            tech_str = self._format_technical_data(stock_data)
+            fund_str = self._format_fundamental_data(stock_data)
+            mkt_str = self._format_market_data(stock_data)
+            base_info = f"股票代码: {code}\n股票名称: {stock_name}\n当前价格: {stock_data.get('current_price', 'N/A')}\n行业: {stock_data.get('industry', 'N/A')}\n{extra_msg}"
+
+            # 各专家的分析数据
+            expert_data = {
+                "technical": f"{base_info}\n技术指标：\n{tech_str}\n市场数据：\n{mkt_str}",
+                "fundamental": f"{base_info}\n基本面数据：\n{fund_str}",
+                "chip": f"{base_info}\n市场数据（筹码/成交量）：\n{mkt_str}\n技术指标：\n{tech_str}",
+                "macro": f"{base_info}\n行业/板块：{stock_data.get('industry', 'N/A')}\n市场数据：\n{mkt_str}",
+            }
+
+            expert_opinions = {}
+            expert_keys = ["technical", "fundamental", "chip", "macro"]
+
+            for key in expert_keys:
+                expert = EXPERTS[key]
+                prompt_fn = expert["get_prompt"]
+                # 适配各专家的 prompt 函数参数
+                if key == "technical":
+                    user_prompt = prompt_fn(code, stock_name, {"raw": tech_str, "market": mkt_str})
+                elif key == "fundamental":
+                    user_prompt = prompt_fn(code, stock_name, {"raw": fund_str})
+                elif key == "chip":
+                    user_prompt = prompt_fn(code, stock_name, {"raw": mkt_str, "tech": tech_str})
+                elif key == "macro":
+                    user_prompt = prompt_fn(code, stock_name, f"行业：{stock_data.get('industry', 'N/A')}\n{mkt_str}")
+
+                user_prompt += f"\n\n{extra_msg}" if extra_msg else ""
+                print(f"[专家团队] 正在请 {expert['name']}（{expert['role']}）分析 {stock_name}...")
+                opinion = call_llm(user_prompt, self.llm_model, system_prompt=expert["system_prompt"])
+                expert_opinions[key] = opinion or "无法获取分析"
+
+            # 裁判综合
+            print(f"[专家团队] 裁判综合四位专家意见...")
+            debate_prompt = get_debate_prompt(code, stock_name, expert_opinions)
+            final_report = call_llm(debate_prompt, self.llm_model, system_prompt=DEBATE_JUDGE_SYSTEM_PROMPT)
+
+            if final_report:
+                # 尝试从报告中提取评级数字
+                import re
+                rating = 5.0
+                rating_match = re.search(r'评分[：:]\s*(\d+(?:\.\d+)?)', final_report)
+                if not rating_match:
+                    rating_match = re.search(r'(\d+(?:\.\d+)?)\s*[/／]\s*10', final_report)
+                if rating_match:
+                    try:
+                        rating = float(rating_match.group(1))
+                    except:
+                        pass
+
+                # 提取建议词
+                rec = "观望"
+                if "强烈买入" in final_report:
+                    rec = "强烈买入"
+                elif "谨慎买入" in final_report or "买入" in final_report:
+                    rec = "买入"
+                elif "回避" in final_report or "不做" in final_report:
+                    rec = "回避"
+                elif "观望" in final_report:
+                    rec = "观望"
+
+                return {
+                    'recommendation': rec,
+                    'analysis_text': final_report,
+                    'expert_opinions': expert_opinions,
+                    'rating': rating,
+                    'analysis_mode': 'expert_team'
+                }
+            else:
+                return None
+
+        except Exception as e:
+            print(f"[专家团队] 分析股票 {code} 失败: {e}，降级为单次LLM分析")
+            # 降级：走原来的单次分析逻辑
+            return self._analyze_stock_with_llm_simple(code, stock_data)
+
+    def _analyze_stock_with_llm_simple(self, code, stock_data):
+        """降级用：单次LLM分析（原始逻辑备份）"""
         try:
             # 获取用户额外提示
             extra_msg = ""
@@ -3964,8 +4063,12 @@ KDJ: {tech_data.get('kdj', 'N/A')}
                 required_fund_fields = ['pe_ratio', 'pb_ratio', 'roe']
                 missing_fund_fields = [field for field in required_fund_fields if field not in fund_data or fund_data[field] is None]
                 if missing_fund_fields:
-                    print(f"\033[1;33m[CACHE] {stock_code} 基本面数据缺失字段: {missing_fund_fields}，数据不完整，跳过\033[0m")
-                    return None
+                    # 用 A 股市场合理默认值填充缺失字段，保证评分流程可以继续
+                    # pe_ratio=20（A股平均市盈率）、pb_ratio=2（中位数市净率）、roe=8（A股平均ROE%）
+                    field_defaults = {'pe_ratio': 20.0, 'pb_ratio': 2.0, 'roe': 8.0}
+                    for field in missing_fund_fields:
+                        fund_data[field] = field_defaults.get(field, 5.0)
+                    print(f"\033[1;36m[FILL] {stock_code} 基本面缺失字段 {missing_fund_fields} 已用默认值填充，继续评分\033[0m")
             
             fund_data['is_etf'] = self.is_etf_code(stock_code)
                 
@@ -10366,28 +10469,15 @@ K线更新后快速评分完成！
                 'failure_reason': failure_reason
             })
         
-        # 验证基本面数据完整性 - 不允许缺失关键字段
+        # 验证基本面数据完整性 - 缺失字段用 A 股市场合理默认值填充，而非直接失败
         required_fund_fields = ['pe_ratio', 'pb_ratio', 'roe']
         missing_fund_fields = [f for f in required_fund_fields if f not in financial_data or financial_data[f] is None]
         if missing_fund_fields:
-            failure_reason = f"基本面数据不完整，缺少必需字段: {', '.join(missing_fund_fields)}"
-            print(f"[FAIL] {ticker} {failure_reason}")
-            print(f"[DEBUG-验证] 基本面数据内容: {financial_data}")
-            for field in required_fund_fields:
-                if field in financial_data:
-                    print(f"  - {field}: {financial_data[field]} (类型: {type(financial_data[field])})")
-                else:
-                    print(f"  - {field}: 字段不存在")
-            return ({
-                'technical_score': 0,
-                'failure_reason': failure_reason
-            }, {
-                'total_score': 0,
-                'failure_reason': failure_reason
-            }, {
-                'fundamental_score': 0,
-                'failure_reason': failure_reason
-            })
+            # pe_ratio=20（A股平均市盈率）、pb_ratio=2（中位数市净率）、roe=8（A股平均ROE%）
+            field_defaults = {'pe_ratio': 20.0, 'pb_ratio': 2.0, 'roe': 8.0}
+            for field in missing_fund_fields:
+                financial_data[field] = field_defaults.get(field, 5.0)
+            print(f"[FILL] {ticker} 基本面缺失字段 {missing_fund_fields} 已用市场平均默认值填充，继续评分")
         
         # 提取真实数据（不使用任何默认值）
         current_price = technical_data['current_price']

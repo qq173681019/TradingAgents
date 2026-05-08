@@ -1,0 +1,19 @@
+{
+  "date": "2026-04-23",
+  "status": "verified",
+  "index_return": -0.33,
+  "avg_stock_return": null,
+  "beat_idx": null,
+  "beat_idx_count": 0,
+  "total_stocks": 0,
+  "stocks": [
+    {
+      "code": "000003",
+      "name": "PT金田A",
+      "score": -1.75,
+      "return": null,
+      "beat_idx": null,
+      "status": "no_data"
+    }
+  ]
+}

@@ -5,10 +5,10 @@ TradingShared 共享配置文件
 
 # ==================== API密钥配置 ====================
 
-# DeepSeek API
-DEEPSEEK_API_KEY = "sk-7ad9f69c693e4284a2384a920591113d"
-DEEPSEEK_API_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
-DEEPSEEK_MODEL_NAME = "qwen-turbo"
+# DeepSeek API (原千问，已欠费，切换为智谱)
+DEEPSEEK_API_KEY = "d5d6e909645e4e2391afdc4244bbd18f.US6yBrPhfJTcc0nU"
+DEEPSEEK_API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+DEEPSEEK_MODEL_NAME = "glm-4-flash"
 
 # MiniMax API
 MINIMAX_API_KEY = ""
@@ -136,7 +136,7 @@ BACKTEST_OPTIMIZED_PARAMS = {
    
 3. 在其他项目中使用：
    import sys
-   sys.path.insert(0, r"D:\TradingShared")
+   sys.path.insert(0, "D:\\TradingShared")
    from config import CHOICE_USER, TUSHARE_TOKEN
 
 注意：

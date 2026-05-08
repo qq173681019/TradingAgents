@@ -1,0 +1,25 @@
+{
+  "date": "2026-04-09",
+  "total_recommended": 1,
+  "verified": 1,
+  "avg_return": 0.0,
+  "index_return": 0.51,
+  "avg_excess_return": -0.51,
+  "beat_count": 0,
+  "miss_count": 1,
+  "beat_idx": 0.0,
+  "details": [
+    {
+      "code": "600715",
+      "name": "文投控股",
+      "return_pct": 0.0,
+      "index_return": 0.51,
+      "excess_return": -0.51,
+      "beat_index": false,
+      "rec_close": 2.0,
+      "next_date": "2026-04-10",
+      "next_close": 2.0,
+      "score": 7.58
+    }
+  ]
+}
