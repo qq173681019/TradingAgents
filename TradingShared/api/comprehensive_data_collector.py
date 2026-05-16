@@ -1126,19 +1126,20 @@ class ComprehensiveDataCollector:
         result = {}
         total_codes = len(codes)
         
-        # 确定是否启用Choice
+# 确定数据源优先级: Choice优先 → Tushare → AKShare → 腾讯K线
+        # Choice配置检查
         try:
             from config import CHOICE_PASSWORD, CHOICE_USERNAME, ENABLE_CHOICE
             effective_enable_choice = self.use_choice if self.use_choice is not None else ENABLE_CHOICE
-            choice_active = effective_enable_choice and CHOICE_USERNAME and CHOICE_PASSWORD
+            choice_enabled = effective_enable_choice and CHOICE_USERNAME and CHOICE_PASSWORD
         except:
-            choice_active = False
-
+            choice_enabled = False
+        
         print(f"[INFO] 开始采集K线数据，共 {total_codes} 只股票")
-        if choice_active:
-            print(f"[INFO] 新采集策略: Choice金融终端优先 → TUSHARE → AKShare → 腾讯K线兜底")
+        if choice_enabled:
+            print(f"[INFO] 数据源优先级: Choice(优先) → Tushare → AKShare → 腾讯K线")
         else:
-            print(f"[INFO] 新采集策略: TUSHARE优先 → AKShare → 腾讯K线兜底 (Choice已禁用)")
+            print(f"[INFO] 数据源优先级: Tushare(优先) → AKShare → 腾讯K线 (Choice未配置)")
         
         # 计算日期范围
         end_date = datetime.now()

@@ -1,0 +1,113 @@
+{
+  "date": "2026-05-11",
+  "status": "verified",
+  "total_stocks": 3,
+  "verified_stocks": 3,
+  "win_stocks": 1,
+  "no_data_stocks": 0,
+  "win_rate": 33.3,
+  "day_stats": {
+    "T+1": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    },
+    "T+2": {
+      "win": 0,
+      "total": 3,
+      "rate": 0.0
+    }
+  },
+  "stocks": [
+    {
+      "code": "002786",
+      "name": "银宝山新",
+      "status": "verified",
+      "rec_date": "2026-05-11",
+      "base_close": 8.08,
+      "t3_days": 2,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-12",
+          "stock_return": -1.73,
+          "index_return": -0.25,
+          "is_bear_day": true,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-13",
+          "stock_return": -1.24,
+          "index_return": 0.42,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -1.24,
+      "score": 6.91
+    },
+    {
+      "code": "600999",
+      "name": "招商证券",
+      "status": "verified",
+      "rec_date": "2026-05-11",
+      "base_close": 16.17,
+      "t3_days": 2,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-12",
+          "stock_return": 0.68,
+          "index_return": -0.25,
+          "is_bear_day": true,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-13",
+          "stock_return": -0.19,
+          "index_return": 0.42,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 0.68,
+      "score": 6.51
+    },
+    {
+      "code": "603102",
+      "name": "百合股份",
+      "status": "verified",
+      "rec_date": "2026-05-11",
+      "base_close": 41.63,
+      "t3_days": 2,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-12",
+          "stock_return": -0.82,
+          "index_return": -0.25,
+          "is_bear_day": true,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-13",
+          "stock_return": -1.92,
+          "index_return": 0.42,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -0.82,
+      "score": 6.44
+    }
+  ]
+}

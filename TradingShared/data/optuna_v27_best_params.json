@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-05-15 00:24:14",
+  "version": "v27-precision-optimization",
+  "description": "V25 frozen weights + smart no-trade + vol penalty + diversification",
+  "best_obj": 0.6116979405034324,
+  "train_beat_idx": 0.6521739130434783,
+  "valid_beat_idx": 0.8,
+  "test_beat_idx": 0.5,
+  "train_test_gap_pp": 15.2,
+  "frozen_v25_weights": {
+    "weights_bull": [
+      0.10743403213348336,
+      0.19687614823506336,
+      0.2724832107518529,
+      0.06933095069162497,
+      0.2105788063619203,
+      0.1432968518260551
+    ],
+    "weights_range": [
+      0.10743403213348336,
+      0.19687614823506336,
+      0.2724832107518529,
+      0.06933095069162497,
+      0.2105788063619203,
+      0.1432968518260551
+    ],
+    "weights_bear": [
+      0.11983412831656223,
+      0.14265266337867788,
+      0.30393337560649647,
+      0.07733316786590252,
+      0.23488393017744855,
+      0.12136273465491235
+    ],
+    "min_score_threshold": 62.247685219155045
+  },
+  "new_params": {
+    "vol_penalty_weight": 6.3230014612758,
+    "vol_penalty_threshold": 1.8377432194922632,
+    "max_industry_per_day": 2,
+    "cooldown_penalty_weight": 2.674913546825118,
+    "w_extra": 0.1548573069571959,
+    "prev_day_gain_threshold": 3.4328913315298033,
+    "consec_rally_limit": 5,
+    "vol_spike_threshold": 3.0746031816673414,
+    "momentum_fade_threshold": 2.4152608788529895,
+    "sector_concentration_threshold": 0.46450680201655614,
+    "n_rec_low_risk": 4,
+    "n_rec_med_risk": 1,
+    "min_score_threshold": 63.14697147738189
+  }
+}

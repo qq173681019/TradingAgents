@@ -127,9 +127,8 @@ class DataFetcher:
         try:
             username = getattr(config, 'CHOICE_USERNAME', '')
             password = getattr(config, 'CHOICE_PASSWORD', '')
-            login_str = "ForceLogin=1"
-            if username and password:
-                login_str += f",User={username},Password={password}"
+# 使用正确的 USERNAME/PASSWORD 格式
+            login_str = f"USERNAME={username},PASSWORD={password}"
             
             login_result = ChoiceAPI.start(login_str, '', lambda x: None)
             

@@ -1,0 +1,198 @@
+{
+  "records": {
+    "600643": [
+      {
+        "date": "2026-04-07",
+        "win": false,
+        "actual_return": 0.19
+      }
+    ],
+    "600715": [
+      {
+        "date": "2026-04-08",
+        "win": false,
+        "actual_return": -1.96
+      },
+      {
+        "date": "2026-04-09",
+        "win": false,
+        "actual_return": 0.5
+      }
+    ],
+    "600676": [
+      {
+        "date": "2026-04-14",
+        "win": true,
+        "actual_return": 6.33
+      },
+      {
+        "date": "2026-04-20",
+        "win": true,
+        "actual_return": 1.51
+      }
+    ],
+    "000003": [
+      {
+        "date": "2026-04-23",
+        "win": false,
+        "actual_return": 0
+      },
+      {
+        "date": "2026-04-24",
+        "win": false,
+        "actual_return": 0
+      }
+    ],
+    "000015": [
+      {
+        "date": "2026-04-24",
+        "win": false,
+        "actual_return": 0
+      }
+    ],
+    "002405": [
+      {
+        "date": "2026-04-28",
+        "win": true,
+        "actual_return": 7.43
+      },
+      {
+        "date": "2026-05-14",
+        "win": false,
+        "actual_return": 0
+      }
+    ],
+    "002140": [
+      {
+        "date": "2026-04-28",
+        "win": true,
+        "actual_return": 5.57
+      }
+    ],
+    "601799": [
+      {
+        "date": "2026-04-28",
+        "win": false,
+        "actual_return": -0.34
+      }
+    ],
+    "002221": [
+      {
+        "date": "2026-05-04",
+        "win": false,
+        "actual_return": -0.37
+      },
+      {
+        "date": "2026-05-14",
+        "win": false,
+        "actual_return": 0
+      }
+    ],
+    "002125": [
+      {
+        "date": "2026-05-04",
+        "win": true,
+        "actual_return": 2.16
+      }
+    ],
+    "002818": [
+      {
+        "date": "2026-05-04",
+        "win": false,
+        "actual_return": -0.66
+      },
+      {
+        "date": "2026-05-08",
+        "win": false,
+        "actual_return": -1.74
+      }
+    ],
+    "002034": [
+      {
+        "date": "2026-05-06",
+        "win": true,
+        "actual_return": 4.88
+      }
+    ],
+    "603611": [
+      {
+        "date": "2026-05-06",
+        "win": false,
+        "actual_return": -0.2
+      }
+    ],
+    "600668": [
+      {
+        "date": "2026-05-06",
+        "win": false,
+        "actual_return": 0.39
+      }
+    ],
+    "603368": [
+      {
+        "date": "2026-05-07",
+        "win": true,
+        "actual_return": 1.07
+      },
+      {
+        "date": "2026-05-08",
+        "win": false,
+        "actual_return": 0.71
+      }
+    ],
+    "002835": [
+      {
+        "date": "2026-05-07",
+        "win": true,
+        "actual_return": 0.7
+      }
+    ],
+    "002786": [
+      {
+        "date": "2026-05-08",
+        "win": false,
+        "actual_return": -0.25
+      },
+      {
+        "date": "2026-05-11",
+        "win": false,
+        "actual_return": -1.24
+      },
+      {
+        "date": "2026-05-12",
+        "win": false,
+        "actual_return": 0.5
+      }
+    ],
+    "600999": [
+      {
+        "date": "2026-05-11",
+        "win": true,
+        "actual_return": 0.68
+      },
+      {
+        "date": "2026-05-12",
+        "win": false,
+        "actual_return": -0.86
+      },
+      {
+        "date": "2026-05-14",
+        "win": false,
+        "actual_return": 0
+      }
+    ],
+    "603102": [
+      {
+        "date": "2026-05-11",
+        "win": false,
+        "actual_return": -0.82
+      },
+      {
+        "date": "2026-05-12",
+        "win": false,
+        "actual_return": -1.11
+      }
+    ]
+  },
+  "updated": "2026-05-16 15:46:47"
+}

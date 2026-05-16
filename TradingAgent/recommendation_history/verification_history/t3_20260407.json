@@ -1,0 +1,66 @@
+{
+  "date": "2026-04-07",
+  "status": "verified",
+  "total_stocks": 1,
+  "verified_stocks": 1,
+  "win_stocks": 0,
+  "no_data_stocks": 0,
+  "win_rate": 0.0,
+  "day_stats": {
+    "T+1": {
+      "win": 0,
+      "total": 1,
+      "rate": 0.0
+    },
+    "T+2": {
+      "win": 0,
+      "total": 1,
+      "rate": 0.0
+    },
+    "T+3": {
+      "win": 0,
+      "total": 1,
+      "rate": 0.0
+    }
+  },
+  "stocks": [
+    {
+      "code": "600643",
+      "name": "爱建集团",
+      "status": "verified",
+      "rec_date": "2026-04-07",
+      "base_close": 5.27,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-04-08",
+          "stock_return": 0.19,
+          "index_return": 2.69,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-04-09",
+          "stock_return": -1.9,
+          "index_return": 1.95,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-04-10",
+          "stock_return": -1.71,
+          "index_return": 2.47,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": 0.19,
+      "score": 7.33
+    }
+  ]
+}

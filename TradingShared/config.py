@@ -47,8 +47,8 @@ BAILIAN_ACCOUNT = "1778470174535081"
 FINNHUB_API_KEY="d3s9411r01qs1apro6ugd3s9411r01qs1apro6v0"
 ALPHA_VANTAGE_API_KEY="52N6YLT15MUAA46B"
 
-# Choice金融终端
-ENABLE_CHOICE = True  # 后台数据收集器是否使用Choice（GUI复选框独立控制）
+# Choice金融终端 - 默认启用，数据采集优先数据源
+ENABLE_CHOICE = True  # 默认启用，K线采集时优先使用Choice
 CHOICE_USERNAME = "hczq2048"  # Choice用户名
 CHOICE_USER = "hczq2048"  # 兼容性别名（旧代码使用）
 CHOICE_PASSWORD = "yo336999"  # Choice密码

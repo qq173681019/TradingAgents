@@ -107,11 +107,9 @@ class MarketDataEngine:
                 print("   2. 使用批处理文件启动")
                 return False
             
-            # 构建登录字符串
-            login_str = "ForceLogin=1"
-            if username and password:
-                login_str += f",User={username},Password={password}"
-                print(f"使用账号登录: {username}")
+# 构建登录字符串 - 使用正确的 USERNAME/PASSWORD 格式
+            login_str = f"USERNAME={username},PASSWORD={password}"
+            print(f"使用账号登录: {username}")
             
             # 登录
             login_result = ChoiceAPI.start(login_str, '', lambda x: None)

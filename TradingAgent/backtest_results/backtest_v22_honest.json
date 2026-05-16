@@ -1,0 +1,243 @@
+{
+  "timestamp": "2026-05-14 00:13:21",
+  "version": "v22-honest-enhanced",
+  "description": "V22: Honest (T+1+additive+real_static) + V21 enhanced features (BB/ATR/OBV/VolHealth/Support)",
+  "training_periods": {
+    "A": {
+      "start": "2026-02-07",
+      "end": "2026-03-03"
+    },
+    "B": {
+      "start": "2026-03-03",
+      "end": "2026-03-28"
+    },
+    "C": {
+      "start": "2026-03-28",
+      "end": "2026-04-22"
+    }
+  },
+  "full_period": {
+    "start": "2026-02-07",
+    "end": "2026-05-09"
+  },
+  "n_trials_per_phase": 200,
+  "l2_lambda": 0.01,
+  "weight_range": [
+    0.001,
+    0.6
+  ],
+  "objective_weights": {
+    "mean": 0.5,
+    "min": 0.3,
+    "variance": 0.2
+  },
+  "period_results": {
+    "A": {
+      "beat_idx_pct": 0.7647058823529411,
+      "beat_idx_days": 13,
+      "total_days": 17,
+      "stats_by_risk": {
+        "3": {
+          "wins": 12,
+          "total": 17,
+          "beat_idx": 13
+        }
+      }
+    },
+    "B": {
+      "beat_idx_pct": 0.6842105263157895,
+      "beat_idx_days": 13,
+      "total_days": 19,
+      "stats_by_risk": {
+        "3": {
+          "wins": 7,
+          "total": 11,
+          "beat_idx": 8
+        },
+        "4": {
+          "wins": 2,
+          "total": 4,
+          "beat_idx": 3
+        },
+        "5": {
+          "wins": 2,
+          "total": 4,
+          "beat_idx": 2
+        }
+      }
+    },
+    "C": {
+      "beat_idx_pct": 0.6111111111111112,
+      "beat_idx_days": 11,
+      "total_days": 18,
+      "stats_by_risk": {
+        "5": {
+          "wins": 0,
+          "total": 3,
+          "beat_idx": 1
+        },
+        "4": {
+          "wins": 0,
+          "total": 5,
+          "beat_idx": 2
+        },
+        "2": {
+          "wins": 3,
+          "total": 7,
+          "beat_idx": 5
+        },
+        "3": {
+          "wins": 2,
+          "total": 3,
+          "beat_idx": 3
+        }
+      }
+    },
+    "D": {
+      "beat_idx_pct": 0.8571428571428571,
+      "beat_idx_days": 6,
+      "total_days": 7,
+      "stats_by_risk": {
+        "2": {
+          "wins": 5,
+          "total": 6,
+          "beat_idx": 5
+        },
+        "3": {
+          "wins": 0,
+          "total": 1,
+          "beat_idx": 1
+        }
+      }
+    }
+  },
+  "full_result": {
+    "beat_idx_pct": 0.7049180327868853,
+    "beat_idx_days": 43,
+    "total_days": 61,
+    "stats_by_risk": {}
+  },
+  "comparison": {
+    "v10_full_beat_idx": 60.8,
+    "v14_full_beat_idx": 49.0,
+    "v16_training_beat_idx": 90.0,
+    "v20_full_beat_idx": 70.49180327868852,
+    "v19_full_beat_idx": 86.2,
+    "v17_beat_idx": 73.5,
+    "success": false
+  },
+  "r2_params": {
+    "w_momentum": 0.06954021537631068,
+    "w_trend": 0.0671835238739953,
+    "w_consistency": 0.05173724826025229,
+    "w_vol": 0.11748814542326291,
+    "w_rsi": 0.07280772334412855,
+    "w_static": 0.09238693625589331,
+    "w_defense": 0.07749971912028861,
+    "w_sector": 0.09101166415353901,
+    "w_low_vol": 0.04738546854206554,
+    "w_rel_str": 0.10531580543723659,
+    "w_rel_str_3d": 0.04044557687138265,
+    "w_bb": 0.0685015540288071,
+    "w_vol_health": 0.0986964193128375,
+    "b_consistency": 0.7975643665715978,
+    "b_above_ma20": 0.18157335412694645,
+    "b_rsi_45_60": 0.4543751286759808,
+    "b_sector_hot": 0.26394207707945583,
+    "b_rel_str": 0.3440667567011676,
+    "p_below_ma20": 0.7604705422343039,
+    "p_high_vol": 0.7709679836138523,
+    "p_rsi_overbought": 0.405464448271885,
+    "p_big_move": 0.40986842010669616,
+    "p_streak_neg": 0.33676084522839567,
+    "p_vol_shrink": 0.33073790555154237,
+    "p_turn_spike": 0.4732674303727744,
+    "p_below_ma5": 0.06640080066680526,
+    "p_exhaustion": 0.2606655166159106,
+    "p_vp_diverge": 0.2480284829492817
+  },
+  "r3_params": {
+    "w_momentum": 0.050457169375930026,
+    "w_trend": 0.03234005940716648,
+    "w_consistency": 0.13198392103802845,
+    "w_mr": 0.0775676290850164,
+    "w_vol": 0.11326580975453893,
+    "w_rsi": 0.03898900625622262,
+    "w_static": 0.013071740298511705,
+    "w_defense": 0.03632681830828459,
+    "w_sector_heat": 0.11443249404161618,
+    "w_low_vol": 0.05633880988940525,
+    "w_rel_str": 0.017169641512125,
+    "w_rel_str_3d": 0.15175285096870308,
+    "w_bb": 0.012038681383837117,
+    "w_support": 0.09344260497842574,
+    "w_obv": 0.06082276370218851,
+    "b_consistency_high": 0.3344866158360229,
+    "b_consistency_mid": 0.4855493987388342,
+    "b_uptrend_full": 0.10356453299056122,
+    "b_uptrend_partial": 0.07110910146840621,
+    "b_ma20_above": 0.40643107268723405,
+    "p_ma20_below": 0.09268175716795067,
+    "b_low_vol_high": 0.11696059967566146,
+    "b_low_vol_mid": 0.29926871384801196,
+    "p_high_vol": 0.26190307025874837,
+    "p_rsi_overbought": 0.6720481007373869,
+    "p_rsi_high": 0.3560691119949021,
+    "b_rsi_sweet": 0.09474371600065111,
+    "b_sector_strong": 0.417952338863814,
+    "b_sector_mild": 0.08940844644991759,
+    "p_sector_cold": 0.31258492275118704,
+    "p_sector_cool": 0.38490336064164593,
+    "b_rel_str_strong": 0.1094501759121766,
+    "b_rel_str_mild": 0.36906425035251045,
+    "p_big_move5": 0.6029098688803063,
+    "p_big_move3": 0.08768404429915184,
+    "p_streak": 0.550211091807313,
+    "p_vol_shrink": 0.4435013366876132,
+    "p_turn_spike": 0.3416214957441897,
+    "p_ma5_below": 0.25704926726033
+  },
+  "r45_params": {
+    "w_momentum": 0.04528979570375125,
+    "w_trend": 0.07507746773205982,
+    "w_mr": 0.028747704933383064,
+    "w_vol": 0.08329136223011836,
+    "w_rsi": 0.05031026711610757,
+    "w_static": 0.055963479751610416,
+    "w_defense": 0.03826862567392895,
+    "w_sector": 0.04935225251649929,
+    "w_low_vol": 0.039492297654511545,
+    "w_rel_str": 0.06703537183983332,
+    "w_rel_str_3d": 0.07677156682862825,
+    "w_beta": 0.03630463649735168,
+    "w_bb": 0.036741760138988,
+    "w_atr": 0.0868076994391799,
+    "w_vol_health": 0.04731177090166701,
+    "w_support": 0.1092153981854821,
+    "w_obv": 0.07401854285689953,
+    "p_beta_high": 0.5609159227325935,
+    "p_beta_mid": 0.3478785275665589,
+    "b_beta_low": 0.14396062049340969,
+    "b_oversold": 0.27231930519895997,
+    "p_overbought": 0.5770244818646298,
+    "p_high_beta_ind": 0.7790103765175619,
+    "b_defensive_ind": 0.06339042277415788,
+    "b_rel_str_strong": 0.11151299060554767,
+    "b_rel_str_very_strong": 0.4245634783784482,
+    "b_low_vol": 0.47296380002964944,
+    "p_big_drop": 0.419193783003688,
+    "p_big_drop_3d": 0.18402245440420748,
+    "p_big_jump": 0.2163037229964072,
+    "p_overextended": 0.44468154129736426,
+    "b_streak_relstr": 0.21157821643442967,
+    "b_bb_oversold": 0.5199887138372327,
+    "p_bb_overbought": 0.41611376445596154,
+    "p_atr_expand": 0.09660026784629203,
+    "p_distribution": 0.3887345476671712,
+    "b_near_support": 0.11637205322233088,
+    "b_vp_confirm_r45": 0.09478174003525866,
+    "p_vp_diverge_r45": 0.09200666184751585,
+    "p_exhaustion_r45": 0.5809433366124361
+  },
+  "elapsed_seconds": 490.42783403396606
+}

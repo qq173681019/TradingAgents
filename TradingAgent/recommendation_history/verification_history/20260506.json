@@ -1,0 +1,35 @@
+{
+  "date": "2026-05-06",
+  "status": "verified",
+  "index_return": 0.48,
+  "avg_stock_return": 0.36,
+  "beat_idx": false,
+  "beat_idx_count": 1,
+  "total_stocks": 3,
+  "stocks": [
+    {
+      "code": "002034",
+      "name": "旺能环境",
+      "score": 8.54,
+      "return": 1.44,
+      "beat_idx": true,
+      "status": "ok"
+    },
+    {
+      "code": "603611",
+      "name": "诺力股份",
+      "score": 8.24,
+      "return": -0.74,
+      "beat_idx": false,
+      "status": "ok"
+    },
+    {
+      "code": "600668",
+      "name": "尖峰集团",
+      "score": 7.74,
+      "return": 0.39,
+      "beat_idx": false,
+      "status": "ok"
+    }
+  ]
+}

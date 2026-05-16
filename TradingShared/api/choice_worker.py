@@ -1,7 +1,14 @@
 """Choice数据获取工作进程 - 独立运行避免调试器环境污染"""
 import json
+import os
 import sys
 from datetime import datetime, timedelta
+
+# 确保能找到 config 模块（在父目录 TradingShared/）
+_api_dir = os.path.dirname(os.path.abspath(__file__))
+_parent_dir = os.path.dirname(_api_dir)
+if _parent_dir not in sys.path:
+    sys.path.insert(0, _parent_dir)
 
 
 def get_kline_data(stock_code, start_date, end_date, indicators="OPEN,HIGH,LOW,CLOSE,VOLUME"):

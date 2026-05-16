@@ -1,0 +1,66 @@
+{
+  "date": "2026-04-14",
+  "status": "verified",
+  "total_stocks": 1,
+  "verified_stocks": 1,
+  "win_stocks": 1,
+  "no_data_stocks": 0,
+  "win_rate": 100.0,
+  "day_stats": {
+    "T+1": {
+      "win": 0,
+      "total": 1,
+      "rate": 0.0
+    },
+    "T+2": {
+      "win": 1,
+      "total": 1,
+      "rate": 100.0
+    },
+    "T+3": {
+      "win": 1,
+      "total": 1,
+      "rate": 100.0
+    }
+  },
+  "stocks": [
+    {
+      "code": "600676",
+      "name": "交运股份",
+      "status": "verified",
+      "rec_date": "2026-04-14",
+      "base_close": 7.58,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-04-15",
+          "stock_return": -0.26,
+          "index_return": 0.01,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-04-16",
+          "stock_return": 6.33,
+          "index_return": 0.72,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-04-17",
+          "stock_return": 4.88,
+          "index_return": 0.62,
+          "is_bear_day": false,
+          "win": true
+        }
+      ],
+      "win": true,
+      "win_day": 2,
+      "best_return": 6.33,
+      "score": 7.55
+    }
+  ]
+}

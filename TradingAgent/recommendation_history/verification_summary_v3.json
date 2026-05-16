@@ -1,0 +1,1322 @@
+{
+  "summary": {
+    "version": "v3-t3-window",
+    "timestamp": "2026-05-16 15:35:18",
+    "t3_window": 3,
+    "total_days": 12,
+    "day_beat_rate": 33.3,
+    "total_stocks": 25,
+    "win_stocks": 9,
+    "win_rate": 36.0,
+    "day_stats": {
+      "T+1": {
+        "win": 8,
+        "total": 25,
+        "rate": 32.0
+      },
+      "T+2": {
+        "win": 6,
+        "total": 22,
+        "rate": 27.3
+      },
+      "T+3": {
+        "win": 5,
+        "total": 19,
+        "rate": 26.3
+      }
+    },
+    "score_bins": {
+      ">=7.5": {
+        "win": 4,
+        "total": 11,
+        "rate": 36.4
+      },
+      "7.0-7.5": {
+        "win": 4,
+        "total": 8,
+        "rate": 50.0
+      },
+      "<7.0": {
+        "win": 1,
+        "total": 6,
+        "rate": 16.7
+      }
+    }
+  },
+  "daily_results": [
+    {
+      "date": "2026-04-07",
+      "status": "verified",
+      "total_stocks": 1,
+      "verified_stocks": 1,
+      "win_stocks": 0,
+      "no_data_stocks": 0,
+      "win_rate": 0.0,
+      "day_stats": {
+        "T+1": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "T+2": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "T+3": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "600643",
+          "name": "爱建集团",
+          "status": "verified",
+          "rec_date": "2026-04-07",
+          "base_close": 5.27,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-08",
+              "stock_return": 0.19,
+              "index_return": 2.69,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-09",
+              "stock_return": -1.9,
+              "index_return": 1.95,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-04-10",
+              "stock_return": -1.71,
+              "index_return": 2.47,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": 0.19,
+          "score": 7.33
+        }
+      ]
+    },
+    {
+      "date": "2026-04-08",
+      "status": "verified",
+      "total_stocks": 1,
+      "verified_stocks": 1,
+      "win_stocks": 0,
+      "no_data_stocks": 0,
+      "win_rate": 0.0,
+      "day_stats": {
+        "T+1": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "T+2": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "T+3": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "600715",
+          "name": "文投控股",
+          "status": "verified",
+          "rec_date": "2026-04-08",
+          "base_close": 2.04,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-09",
+              "stock_return": -1.96,
+              "index_return": -0.72,
+              "is_bear_day": true,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-10",
+              "stock_return": -1.96,
+              "index_return": -0.22,
+              "is_bear_day": true,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-04-13",
+              "stock_return": -1.96,
+              "index_return": -0.16,
+              "is_bear_day": true,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -1.96,
+          "score": 7.58
+        }
+      ]
+    },
+    {
+      "date": "2026-04-09",
+      "status": "verified",
+      "total_stocks": 1,
+      "verified_stocks": 1,
+      "win_stocks": 0,
+      "no_data_stocks": 0,
+      "win_rate": 0.0,
+      "day_stats": {
+        "T+1": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "T+2": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "T+3": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "600715",
+          "name": "文投控股",
+          "status": "verified",
+          "rec_date": "2026-04-09",
+          "base_close": 2.0,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-10",
+              "stock_return": 0.0,
+              "index_return": 0.51,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-13",
+              "stock_return": 0.0,
+              "index_return": 0.56,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-04-14",
+              "stock_return": 0.5,
+              "index_return": 1.52,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": 0.5,
+          "score": 7.58
+        }
+      ]
+    },
+    {
+      "date": "2026-04-14",
+      "status": "verified",
+      "total_stocks": 1,
+      "verified_stocks": 1,
+      "win_stocks": 1,
+      "no_data_stocks": 0,
+      "win_rate": 100.0,
+      "day_stats": {
+        "T+1": {
+          "win": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "T+2": {
+          "win": 1,
+          "total": 1,
+          "rate": 100.0
+        },
+        "T+3": {
+          "win": 1,
+          "total": 1,
+          "rate": 100.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "600676",
+          "name": "交运股份",
+          "status": "verified",
+          "rec_date": "2026-04-14",
+          "base_close": 7.58,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-15",
+              "stock_return": -0.26,
+              "index_return": 0.01,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-16",
+              "stock_return": 6.33,
+              "index_return": 0.72,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-04-17",
+              "stock_return": 4.88,
+              "index_return": 0.62,
+              "is_bear_day": false,
+              "win": true
+            }
+          ],
+          "win": true,
+          "win_day": 2,
+          "best_return": 6.33,
+          "score": 7.55
+        }
+      ]
+    },
+    {
+      "date": "2026-04-20",
+      "status": "verified",
+      "total_stocks": 1,
+      "verified_stocks": 1,
+      "win_stocks": 1,
+      "no_data_stocks": 0,
+      "win_rate": 100.0,
+      "day_stats": {
+        "T+1": {
+          "win": 1,
+          "total": 1,
+          "rate": 100.0
+        },
+        "T+2": {
+          "win": 1,
+          "total": 1,
+          "rate": 100.0
+        },
+        "T+3": {
+          "win": 1,
+          "total": 1,
+          "rate": 100.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "600676",
+          "name": "交运股份",
+          "status": "verified",
+          "rec_date": "2026-04-20",
+          "base_close": 7.93,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-21",
+              "stock_return": 1.26,
+              "index_return": 0.07,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-22",
+              "stock_return": 0.76,
+              "index_return": 0.59,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-04-23",
+              "stock_return": 1.51,
+              "index_return": 0.27,
+              "is_bear_day": false,
+              "win": true
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 1.51,
+          "score": 7.81
+        }
+      ]
+    },
+    {
+      "date": "2026-04-23",
+      "status": "no_data",
+      "total_stocks": 1,
+      "verified_stocks": 0,
+      "win_stocks": 0,
+      "no_data_stocks": 1,
+      "win_rate": 0,
+      "day_stats": {},
+      "stocks": [
+        {
+          "code": "000003",
+          "name": "PT金田A",
+          "status": "no_base_price",
+          "score": -1.75
+        }
+      ]
+    },
+    {
+      "date": "2026-04-24",
+      "status": "no_data",
+      "total_stocks": 2,
+      "verified_stocks": 0,
+      "win_stocks": 0,
+      "no_data_stocks": 2,
+      "win_rate": 0,
+      "day_stats": {},
+      "stocks": [
+        {
+          "code": "000003",
+          "name": "PT金田A",
+          "status": "no_base_price",
+          "score": -3.7
+        },
+        {
+          "code": "000015",
+          "name": "PT中浩A",
+          "status": "no_base_price",
+          "score": -3.7
+        }
+      ]
+    },
+    {
+      "date": "2026-04-28",
+      "status": "verified",
+      "total_stocks": 3,
+      "verified_stocks": 3,
+      "win_stocks": 2,
+      "no_data_stocks": 0,
+      "win_rate": 66.7,
+      "day_stats": {
+        "T+1": {
+          "win": 2,
+          "total": 3,
+          "rate": 66.7
+        },
+        "T+2": {
+          "win": 2,
+          "total": 3,
+          "rate": 66.7
+        },
+        "T+3": {
+          "win": 2,
+          "total": 3,
+          "rate": 66.7
+        }
+      },
+      "stocks": [
+        {
+          "code": "002405",
+          "name": "四维图新",
+          "status": "verified",
+          "rec_date": "2026-04-28",
+          "base_close": 8.75,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-29",
+              "stock_return": 1.71,
+              "index_return": 0.71,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-30",
+              "stock_return": 3.2,
+              "index_return": 0.82,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-06",
+              "stock_return": 7.43,
+              "index_return": 2.0,
+              "is_bear_day": false,
+              "win": true
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 7.43,
+          "score": 7.38
+        },
+        {
+          "code": "002140",
+          "name": "东华科技",
+          "status": "verified",
+          "rec_date": "2026-04-28",
+          "base_close": 12.02,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-29",
+              "stock_return": 4.83,
+              "index_return": 0.71,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-30",
+              "stock_return": 4.08,
+              "index_return": 0.82,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-06",
+              "stock_return": 5.57,
+              "index_return": 2.0,
+              "is_bear_day": false,
+              "win": true
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 5.57,
+          "score": 7.29
+        },
+        {
+          "code": "601799",
+          "name": "星宇股份",
+          "status": "verified",
+          "rec_date": "2026-04-28",
+          "base_close": 126.13,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-04-29",
+              "stock_return": -0.34,
+              "index_return": 0.71,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-04-30",
+              "stock_return": -1.63,
+              "index_return": 0.82,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-06",
+              "stock_return": -0.9,
+              "index_return": 2.0,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -0.34,
+          "score": 7.25
+        }
+      ]
+    },
+    {
+      "date": "2026-05-04",
+      "status": "verified",
+      "total_stocks": 3,
+      "verified_stocks": 3,
+      "win_stocks": 1,
+      "no_data_stocks": 0,
+      "win_rate": 33.3,
+      "day_stats": {
+        "T+1": {
+          "win": 1,
+          "total": 3,
+          "rate": 33.3
+        },
+        "T+2": {
+          "win": 1,
+          "total": 3,
+          "rate": 33.3
+        },
+        "T+3": {
+          "win": 0,
+          "total": 3,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "002221",
+          "name": "东华能源",
+          "status": "verified",
+          "rec_date": "2026-04-30",
+          "base_close": 8.05,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-06",
+              "stock_return": -0.37,
+              "index_return": 1.17,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-07",
+              "stock_return": -2.98,
+              "index_return": 1.65,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-08",
+              "stock_return": -3.11,
+              "index_return": 1.65,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -0.37,
+          "score": 8.27
+        },
+        {
+          "code": "002125",
+          "name": "湘潭电化",
+          "status": "verified",
+          "rec_date": "2026-04-30",
+          "base_close": 15.27,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-06",
+              "stock_return": 2.16,
+              "index_return": 1.17,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-07",
+              "stock_return": 2.16,
+              "index_return": 1.65,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-08",
+              "stock_return": 0.0,
+              "index_return": 1.65,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 2.16,
+          "score": 7.96
+        },
+        {
+          "code": "002818",
+          "name": "富森美",
+          "status": "verified",
+          "rec_date": "2026-04-30",
+          "base_close": 12.15,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-06",
+              "stock_return": -1.15,
+              "index_return": 1.17,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-07",
+              "stock_return": -0.66,
+              "index_return": 1.65,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-08",
+              "stock_return": -0.66,
+              "index_return": 1.65,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -0.66,
+          "score": 7.92
+        }
+      ]
+    },
+    {
+      "date": "2026-05-06",
+      "status": "verified",
+      "total_stocks": 3,
+      "verified_stocks": 3,
+      "win_stocks": 1,
+      "no_data_stocks": 0,
+      "win_rate": 33.3,
+      "day_stats": {
+        "T+1": {
+          "win": 1,
+          "total": 3,
+          "rate": 33.3
+        },
+        "T+2": {
+          "win": 1,
+          "total": 3,
+          "rate": 33.3
+        },
+        "T+3": {
+          "win": 1,
+          "total": 3,
+          "rate": 33.3
+        }
+      },
+      "stocks": [
+        {
+          "code": "002034",
+          "name": "旺能环境",
+          "status": "verified",
+          "rec_date": "2026-05-06",
+          "base_close": 18.05,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-07",
+              "stock_return": 1.44,
+              "index_return": 0.48,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-08",
+              "stock_return": 1.77,
+              "index_return": 0.48,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-11",
+              "stock_return": 4.88,
+              "index_return": 1.56,
+              "is_bear_day": false,
+              "win": true
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 4.88,
+          "score": 8.54
+        },
+        {
+          "code": "603611",
+          "name": "诺力股份",
+          "status": "verified",
+          "rec_date": "2026-05-06",
+          "base_close": 20.18,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-07",
+              "stock_return": -0.76,
+              "index_return": 0.48,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-08",
+              "stock_return": -0.55,
+              "index_return": 0.48,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-11",
+              "stock_return": -0.2,
+              "index_return": 1.56,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -0.2,
+          "score": 8.24
+        },
+        {
+          "code": "600668",
+          "name": "尖峰集团",
+          "status": "verified",
+          "rec_date": "2026-05-06",
+          "base_close": 10.21,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-07",
+              "stock_return": 0.39,
+              "index_return": 0.48,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-08",
+              "stock_return": -2.74,
+              "index_return": 0.48,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-11",
+              "stock_return": -9.01,
+              "index_return": 1.56,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": 0.39,
+          "score": 7.74
+        }
+      ]
+    },
+    {
+      "date": "2026-05-07",
+      "status": "verified",
+      "total_stocks": 2,
+      "verified_stocks": 2,
+      "win_stocks": 2,
+      "no_data_stocks": 0,
+      "win_rate": 100.0,
+      "day_stats": {
+        "T+1": {
+          "win": 2,
+          "total": 2,
+          "rate": 100.0
+        },
+        "T+2": {
+          "win": 0,
+          "total": 2,
+          "rate": 0.0
+        },
+        "T+3": {
+          "win": 0,
+          "total": 2,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "603368",
+          "name": "柳药集团",
+          "status": "verified",
+          "rec_date": "2026-05-07",
+          "base_close": 16.86,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-08",
+              "stock_return": 0.36,
+              "index_return": -0.0,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-11",
+              "stock_return": 1.07,
+              "index_return": 1.07,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-12",
+              "stock_return": -0.12,
+              "index_return": 0.82,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 1.07,
+          "score": 7.1
+        },
+        {
+          "code": "002835",
+          "name": "同为股份",
+          "status": "verified",
+          "rec_date": "2026-05-07",
+          "base_close": 15.64,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-08",
+              "stock_return": 0.7,
+              "index_return": -0.0,
+              "is_bear_day": false,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-11",
+              "stock_return": 0.0,
+              "index_return": 1.07,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-12",
+              "stock_return": -2.49,
+              "index_return": 0.82,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 0.7,
+          "score": 7.03
+        }
+      ]
+    },
+    {
+      "date": "2026-05-08",
+      "status": "verified",
+      "total_stocks": 3,
+      "verified_stocks": 3,
+      "win_stocks": 0,
+      "no_data_stocks": 0,
+      "win_rate": 0.0,
+      "day_stats": {
+        "T+1": {
+          "win": 0,
+          "total": 3,
+          "rate": 0.0
+        },
+        "T+2": {
+          "win": 0,
+          "total": 3,
+          "rate": 0.0
+        },
+        "T+3": {
+          "win": 0,
+          "total": 3,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "002818",
+          "name": "富森美",
+          "status": "verified",
+          "rec_date": "2026-05-08",
+          "base_close": 12.07,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-11",
+              "stock_return": -1.74,
+              "index_return": 1.08,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-12",
+              "stock_return": -3.65,
+              "index_return": 0.83,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-13",
+              "stock_return": -2.4,
+              "index_return": 1.5,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -1.74,
+          "score": 7.57
+        },
+        {
+          "code": "002786",
+          "name": "银宝山新",
+          "status": "verified",
+          "rec_date": "2026-05-08",
+          "base_close": 8.1,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-11",
+              "stock_return": -0.25,
+              "index_return": 1.08,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-12",
+              "stock_return": -1.98,
+              "index_return": 0.83,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-13",
+              "stock_return": -1.48,
+              "index_return": 1.5,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -0.25,
+          "score": 7.43
+        },
+        {
+          "code": "603368",
+          "name": "柳药集团",
+          "status": "verified",
+          "rec_date": "2026-05-08",
+          "base_close": 16.92,
+          "t3_days": 3,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-11",
+              "stock_return": 0.71,
+              "index_return": 1.08,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-12",
+              "stock_return": -0.47,
+              "index_return": 0.83,
+              "is_bear_day": false,
+              "win": false
+            },
+            {
+              "day_offset": 3,
+              "date": "2026-05-13",
+              "stock_return": -0.71,
+              "index_return": 1.5,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": 0.71,
+          "score": 7.37
+        }
+      ]
+    },
+    {
+      "date": "2026-05-11",
+      "status": "verified",
+      "total_stocks": 3,
+      "verified_stocks": 3,
+      "win_stocks": 1,
+      "no_data_stocks": 0,
+      "win_rate": 33.3,
+      "day_stats": {
+        "T+1": {
+          "win": 1,
+          "total": 3,
+          "rate": 33.3
+        },
+        "T+2": {
+          "win": 0,
+          "total": 3,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "002786",
+          "name": "银宝山新",
+          "status": "verified",
+          "rec_date": "2026-05-11",
+          "base_close": 8.08,
+          "t3_days": 2,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-12",
+              "stock_return": -1.73,
+              "index_return": -0.25,
+              "is_bear_day": true,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-13",
+              "stock_return": -1.24,
+              "index_return": 0.42,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -1.24,
+          "score": 6.91
+        },
+        {
+          "code": "600999",
+          "name": "招商证券",
+          "status": "verified",
+          "rec_date": "2026-05-11",
+          "base_close": 16.17,
+          "t3_days": 2,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-12",
+              "stock_return": 0.68,
+              "index_return": -0.25,
+              "is_bear_day": true,
+              "win": true
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-13",
+              "stock_return": -0.19,
+              "index_return": 0.42,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": true,
+          "win_day": 1,
+          "best_return": 0.68,
+          "score": 6.51
+        },
+        {
+          "code": "603102",
+          "name": "百合股份",
+          "status": "verified",
+          "rec_date": "2026-05-11",
+          "base_close": 41.63,
+          "t3_days": 2,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-12",
+              "stock_return": -0.82,
+              "index_return": -0.25,
+              "is_bear_day": true,
+              "win": false
+            },
+            {
+              "day_offset": 2,
+              "date": "2026-05-13",
+              "stock_return": -1.92,
+              "index_return": 0.42,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -0.82,
+          "score": 6.44
+        }
+      ]
+    },
+    {
+      "date": "2026-05-12",
+      "status": "verified",
+      "total_stocks": 3,
+      "verified_stocks": 3,
+      "win_stocks": 0,
+      "no_data_stocks": 0,
+      "win_rate": 0.0,
+      "day_stats": {
+        "T+1": {
+          "win": 0,
+          "total": 3,
+          "rate": 0.0
+        }
+      },
+      "stocks": [
+        {
+          "code": "002786",
+          "name": "银宝山新",
+          "status": "verified",
+          "rec_date": "2026-05-12",
+          "base_close": 7.94,
+          "t3_days": 1,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-13",
+              "stock_return": 0.5,
+              "index_return": 0.67,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": 0.5,
+          "score": 6.91
+        },
+        {
+          "code": "600999",
+          "name": "招商证券",
+          "status": "verified",
+          "rec_date": "2026-05-12",
+          "base_close": 16.28,
+          "t3_days": 1,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-13",
+              "stock_return": -0.86,
+              "index_return": 0.67,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -0.86,
+          "score": 6.51
+        },
+        {
+          "code": "603102",
+          "name": "百合股份",
+          "status": "verified",
+          "rec_date": "2026-05-12",
+          "base_close": 41.29,
+          "t3_days": 1,
+          "daily": [
+            {
+              "day_offset": 1,
+              "date": "2026-05-13",
+              "stock_return": -1.11,
+              "index_return": 0.67,
+              "is_bear_day": false,
+              "win": false
+            }
+          ],
+          "win": false,
+          "win_day": null,
+          "best_return": -1.11,
+          "score": 6.44
+        }
+      ]
+    },
+    {
+      "date": "2026-05-14",
+      "status": "no_data",
+      "total_stocks": 3,
+      "verified_stocks": 0,
+      "win_stocks": 0,
+      "no_data_stocks": 3,
+      "win_rate": 0,
+      "day_stats": {},
+      "stocks": [
+        {
+          "code": "002405",
+          "name": "四维图新",
+          "status": "no_future_data",
+          "note": "推荐日之后无交易日数据",
+          "score": 8.04
+        },
+        {
+          "code": "600999",
+          "name": "招商证券",
+          "status": "no_future_data",
+          "note": "推荐日之后无交易日数据",
+          "score": 7.11
+        },
+        {
+          "code": "002221",
+          "name": "东华能源",
+          "status": "no_future_data",
+          "note": "推荐日之后无交易日数据",
+          "score": 6.8
+        }
+      ]
+    }
+  ]
+}

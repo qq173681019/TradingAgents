@@ -1,0 +1,413 @@
+{
+  "timestamp": "2026-05-14 23:38:56",
+  "version": "v25-rule-driven",
+  "walk_forward_split": {
+    "train": "2026-02-07 ~ 2026-03-28",
+    "valid": "2026-03-28 ~ 2026-04-22",
+    "test": "2026-04-22 ~ 2026-05-09"
+  },
+  "train_result": {
+    "beat_idx": 0.4117647058823529,
+    "days": 34
+  },
+  "valid_result": {
+    "beat_idx": 0.8235294117647058,
+    "days": 17
+  },
+  "test_result": {
+    "beat_idx": 0.7692307692307693,
+    "days": 13,
+    "no_trade": 0,
+    "skipped": 0
+  },
+  "period_results": {
+    "A": {
+      "beat_rate": 0.375,
+      "beat_count": 6,
+      "total_days": 16,
+      "skipped": 0,
+      "no_trade": 1
+    },
+    "B": {
+      "beat_rate": 0.4444444444444444,
+      "beat_count": 8,
+      "total_days": 18,
+      "skipped": 0,
+      "no_trade": 1
+    },
+    "C": {
+      "beat_rate": 0.8235294117647058,
+      "beat_count": 14,
+      "total_days": 17,
+      "skipped": 0,
+      "no_trade": 1
+    },
+    "D": {
+      "beat_rate": 0.7692307692307693,
+      "beat_count": 10,
+      "total_days": 13,
+      "skipped": 0,
+      "no_trade": 0
+    }
+  },
+  "test_details": [
+    {
+      "date": "2026-04-22",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 3,
+      "avg_ret": 5.35,
+      "idx_ret": -0.32,
+      "beat": true,
+      "top": [
+        {
+          "code": "688531",
+          "name": "",
+          "score": 65.7,
+          "ret": 20.0
+        },
+        {
+          "code": "603595",
+          "name": "",
+          "score": 65.5,
+          "ret": -0.22
+        },
+        {
+          "code": "002579",
+          "name": "中京电子",
+          "score": 55.5,
+          "ret": -3.72
+        }
+      ]
+    },
+    {
+      "date": "2026-04-23",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 3,
+      "avg_ret": 7.87,
+      "idx_ret": -0.33,
+      "beat": true,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 66.5999984741211,
+          "ret": 5.6
+        },
+        {
+          "code": "688531",
+          "name": "",
+          "score": 65.7,
+          "ret": 20.0
+        },
+        {
+          "code": "002579",
+          "name": "中京电子",
+          "score": 58.9,
+          "ret": -2.01
+        }
+      ]
+    },
+    {
+      "date": "2026-04-24",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": -3.83,
+      "idx_ret": 0.16,
+      "beat": false,
+      "top": [
+        {
+          "code": "003035",
+          "name": "",
+          "score": 67.0,
+          "ret": -5.85
+        },
+        {
+          "code": "605365",
+          "name": "",
+          "score": 66.7,
+          "ret": -1.8
+        }
+      ]
+    },
+    {
+      "date": "2026-04-27",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 12.05,
+      "idx_ret": -0.19,
+      "beat": true,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 67.5,
+          "ret": 4.1
+        },
+        {
+          "code": "688531",
+          "name": "",
+          "score": 65.7,
+          "ret": 20.0
+        }
+      ]
+    },
+    {
+      "date": "2026-04-28",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 13.65,
+      "idx_ret": 0.71,
+      "beat": true,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 66.6,
+          "ret": 7.3
+        },
+        {
+          "code": "688531",
+          "name": "",
+          "score": 65.7,
+          "ret": 20.0
+        }
+      ]
+    },
+    {
+      "date": "2026-04-29",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 3.69,
+      "idx_ret": 0.11,
+      "beat": true,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 66.6,
+          "ret": 9.84
+        },
+        {
+          "code": "300745",
+          "name": "",
+          "score": 66.1,
+          "ret": -2.46
+        }
+      ]
+    },
+    {
+      "date": "2026-04-30",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 3.71,
+      "idx_ret": 1.17,
+      "beat": true,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 66.6,
+          "ret": 4.58
+        },
+        {
+          "code": "688099",
+          "name": "",
+          "score": 65.4,
+          "ret": 2.84
+        }
+      ]
+    },
+    {
+      "date": "2026-05-01",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 1.64,
+      "idx_ret": 0.48,
+      "beat": true,
+      "top": [
+        {
+          "code": "688099",
+          "name": "",
+          "score": 65.4,
+          "ret": 1.93
+        },
+        {
+          "code": "688130",
+          "name": "",
+          "score": 64.9,
+          "ret": 1.34
+        }
+      ]
+    },
+    {
+      "date": "2026-05-04",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 1.64,
+      "idx_ret": 0.48,
+      "beat": true,
+      "top": [
+        {
+          "code": "688099",
+          "name": "",
+          "score": 65.4,
+          "ret": 1.93
+        },
+        {
+          "code": "688130",
+          "name": "",
+          "score": 64.9,
+          "ret": 1.34
+        }
+      ]
+    },
+    {
+      "date": "2026-05-05",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 1.64,
+      "idx_ret": 0.48,
+      "beat": true,
+      "top": [
+        {
+          "code": "688099",
+          "name": "",
+          "score": 65.4,
+          "ret": 1.93
+        },
+        {
+          "code": "688130",
+          "name": "",
+          "score": 64.9,
+          "ret": 1.34
+        }
+      ]
+    },
+    {
+      "date": "2026-05-06",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 2,
+      "avg_ret": 1.64,
+      "idx_ret": 0.48,
+      "beat": true,
+      "top": [
+        {
+          "code": "688099",
+          "name": "",
+          "score": 65.4,
+          "ret": 1.93
+        },
+        {
+          "code": "688130",
+          "name": "",
+          "score": 64.9,
+          "ret": 1.34
+        }
+      ]
+    },
+    {
+      "date": "2026-05-07",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 3,
+      "avg_ret": -1.88,
+      "idx_ret": -0.0,
+      "beat": false,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 66.4,
+          "ret": -0.21
+        },
+        {
+          "code": "688047",
+          "name": "",
+          "score": 65.1,
+          "ret": -5.25
+        },
+        {
+          "code": "002577",
+          "name": "雷柏科技",
+          "score": 54.5,
+          "ret": -0.17
+        }
+      ]
+    },
+    {
+      "date": "2026-05-08",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 3,
+      "avg_ret": -0.09,
+      "idx_ret": 1.08,
+      "beat": false,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 66.4,
+          "ret": -8.78
+        },
+        {
+          "code": "688726",
+          "name": "",
+          "score": 66.4,
+          "ret": 7.78
+        },
+        {
+          "code": "002577",
+          "name": "雷柏科技",
+          "score": 54.8,
+          "ret": 0.73
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "v10": 60.8,
+    "v14": 49.0,
+    "v22_joint": 72.9,
+    "v24_test": 69.2,
+    "v25_test": 76.9
+  },
+  "params": {
+    "weights_bull": [
+      0.10743403213348336,
+      0.19687614823506336,
+      0.2724832107518529,
+      0.06933095069162497,
+      0.2105788063619203,
+      0.1432968518260551
+    ],
+    "weights_range": [
+      0.10743403213348336,
+      0.19687614823506336,
+      0.2724832107518529,
+      0.06933095069162497,
+      0.2105788063619203,
+      0.1432968518260551
+    ],
+    "weights_bear": [
+      0.11983412831656223,
+      0.14265266337867788,
+      0.30393337560649647,
+      0.07733316786590252,
+      0.23488393017744855,
+      0.12136273465491235
+    ],
+    "min_score_threshold": 62.247685219155045
+  },
+  "elapsed_seconds": 69.21716451644897
+}

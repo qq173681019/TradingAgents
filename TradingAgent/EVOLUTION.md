@@ -1,23 +1,25 @@
 # TradingAgent 算法演进史
 
-> 本文档记录了 TradingAgent 股票推荐系统从 V1 到 V14 的完整演进过程，
+> 本文档记录了 TradingAgent 股票推荐系统从 V1 到 V22 的完整演进过程，
 > 包括每个版本的核心思路、回测结果、失败原因和关键发现。
 > **供后续 AI Agent 接手时快速了解项目背景。**
+>
+> 📋 详细实验记录见 [EXPERIMENTS.md](EXPERIMENTS.md)
 
 ---
 
 ## 项目概述
 
 - **目标**: 每天推荐3只A股，次日涨幅跑赢沪深300指数的比例 ≥ 80%
-- **数据源**: 东方财富API（首选）+ Tushare + AKShare + 腾讯API
+- **数据源**: 东方财富API + AKShare(主力,免费无限制) + Tushare(备选) + 腾讯API(备选)
 - **K线数据**: `TradingShared/data/kline_cache/kline_full_latest.json`（全市场）
 - **指数数据**: `TradingShared/data/kline_cache/index_full_latest.json`
 - **评分数据**: `TradingShared/data/batch_stock_scores_*.json`
-- **评估期**: 2026-03-01 ~ 2026-04-24（约40个交易日）
+- **评估期**: 2026-02-07 ~ 2026-05-09（约3个月）
 - **核心指标**: 
+  - **beat_idx**: 推荐股平均涨幅 > 沪深300指数涨幅的天数占比 (主指标)
   - **win_rate**: 推荐的3只中跑赢指数的比例 > 50% 的天数占比
-  - **beat_idx**: 推荐股平均涨幅 > 沪深300指数涨幅的天数占比
-  - **ne_beat**: 排除 Risk 5（极端行情）后的 beat_idx
+  - **多期一致性**: 各训练窗口beat_idx的方差 (越小越好)
 
 ---
 
@@ -193,6 +195,73 @@ Risk 1-2 (牛/正常): momentum 策略
 - **失败原因**: 过于简化，丢失了市场状态检测
 - **文件**: `backtest_v14.py` → 已删除
 
+### V15 (2026-05-05) — 过渡版本
+- **状态**: 未详细记录，作为V14到V16的过渡
+- **文件**: 已删除
+
+### V16 (2026-05-05) — Optuna迭代优化 ⚠️ 过拟合
+- **思路**: 按Risk级别(R2→R3→R45)分Phase Optuna优化，每Phase 500 trials
+- **训练期**: 单窗口 03/01~04/24 (40天)
+- **结果**: **90% beat_idx** (训练期) → 49% (扩展验证)
+- **失败原因**: 单窗口训练，严重过拟合到特定市场环境
+- **教训**: **永远不要用单窗口训练，至少3个窗口联合优化**
+- **文件**: `backtest_v16_full_optuna.py` → 已归档
+
+### V17 (2026-05-06) — 多窗口联合优化 ⭐
+- **思路**: 3窗口(A/B/C)同时优化 + 鲁棒目标函数 + L2正则化
+- **目标函数**: `0.5*mean + 0.3*min + 0.2*(1-variance)` — 惩罚不稳定性
+- **窗口**: 2025-11-15~01-15 / 01-15~03-01 / 03-01~04-24
+- **结果**: **73.5% beat_idx** (扩展4.5个月验证)
+- **累计收益**: +88.8% vs V10的+42.6%
+- **最大回撤**: -6.8%
+- **成功因素**: 多窗口 + 鲁棒目标函数有效防止过拟合
+- **评分权重**: 技术25%+筹码8%+板块12%+新闻8%+盈利15%+EPS8%+评级4%+资金流向12%+龙虎榜8%
+- **文件**: `backtest_v17_robust.py`, `backtest_v17_extended.py` → 已归档
+
+### V18 (2026-05-06) — 资金流Proxy因子 ❌
+- **思路**: V17 + 成交量pattern作为资金流向替代
+- **新因子**: vol_ratio, vol_trend, price_vol_correlation, turn_trend
+- **结果**: ~68% (不如V17)
+- **失败原因**: proxy质量太差，成交量pattern ≠ 真实资金流向
+- **教训**: 实时因子(资金流向/龙虎榜)只在实盘有用，回测用proxy无效
+- **文件**: `backtest_v18_new_factors.py` → 已归档
+
+### V19 (2026-05-07) — 热门板块股票池 ⭐⭐
+- **思路**: 限定AI/算力/芯片/半导体/光伏/电力+科创板，1939只
+- **窗口**: 近3个月(02-07~05-06)，3个period联合优化
+- **结果**: **86.2% beat_idx** (⚠️ 含方法论问题：T+0+乘法偏斜+全5.0评分)
+- **多期一致性**: A=86.4% B=83.3% C=89.5% (方差0.0006)
+- **核心创新**: **板块股票池筛选比算法调参更重要**
+- **教训**: 结果虽虚高，但板块限定策略本身是有效的
+- **文件**: `backtest_v19_sector.py` → 已归档
+
+### V20 (2026-05-10) — 方法论修复基线 ⭐
+- **思路**: 修复3个方法论问题，建立诚实基线
+- **修复**: 
+  1. T+0→T+1 (防止未来信息泄露)
+  2. 乘法→加法评分 (消除极端值偏斜)
+  3. 全5.0→真实静态评分 (恢复基本面区分度)
+- **结果**: **70.5% beat_idx** (比V19的86.2%下降15.7pp)
+- **多期**: A=72.7% B=58.3% C=86.7%
+- **分析**: Period B偏弱，sector评分区分度差(std=0.26)
+- **教训**: **诚实数据虽不好看，但比虚假高分有价值**
+- **文件**: `backtest_v20_fixed.py` → 已归档
+
+### V21 (2026-05-10) — 增强特征(未修方法论) ⚠️
+- **思路**: V19基础上加布林%B/ATR/OBV/量价确认，4窗口训练
+- **结果**: **86.2%** (与V19相同)
+- **问题**: 方法论没修，新特征贡献无法评估
+- **教训**: 先修方法论再试新特征，否则结果不可信
+- **文件**: `backtest_v21_enhanced.py` → 已归档
+
+### V22 (2026-05-11) — 诚实+增强特征 ⭐⭐ 当前生产版本
+- **思路**: V20诚实方法论 + V21增强特征 + 500 trials + 4窗口验证
+- **结果**: **73.8% beat_idx** (比V20提升3.3pp)
+- **多期**: A=64.7% B=73.7% C=77.8% D=85.7%
+- **vs历史**: 超越V17(73.5%)，是诚实方法论下的最佳
+- **仍存问题**: Period A偏弱(64.7%)
+- **文件**: `backtest_v22_honest.py` → **当前保留**
+
 ---
 
 ## 关键发现与教训
@@ -204,20 +273,31 @@ Risk 1-2 (牛/正常): momentum 策略
 4. **相对强度** — 个股 vs 指数的相对表现比绝对表现更有预测力
 5. **Blacklist 机制** — 前一天大跌/连涨的股票第二天回避
 6. **追高过滤** — RSI > 75、pct_1d > 9.5% 的不追
+7. **多窗口联合优化** — 至少3窗口，鲁棒目标函数
+8. **板块股票池** — 限定热门板块比全市场选股效果好很多
+9. **T+1收益** — 防止未来信息泄露
+10. **加法评分** — 比乘法链更稳定、可解释
+11. **L2正则化** — 防止参数极端化
 
 ### ❌ 无效的策略
-1. **XGBoost/LightGBM** — 过拟合严重，不稳定
+1. **XGBoost/LightGBM** — A股短线过拟合严重
 2. **纯均值回归** — 超跌反弹不可靠
 3. **估值过滤** — PE/PB 在短线预测中无效
 4. **行业内排名** — 池太小信号不足
 5. **过度保守** — 空仓太多错失行情
 6. **过于分散** — 10只反而降低 beat_idx
+7. **单窗口训练** — V16的90%→49%惨痛教训
+8. **成交量proxy** — 代替资金流向质量太差
+9. **乘法评分链** — 放大极端值，结果虚高
+10. **T+0收益** — 本质是作弊
 
 ### ⚠️ 已知问题
-1. **80% 目标远未达到** — 当前最佳 65% (V9d)
-2. **极端行情 (Risk 5)** — 仍然表现差，需要更好的避险策略
-3. **K线数据覆盖** — 评分池和K线池覆盖不一致
-4. **回测期偏短** — 仅40天，统计显著性不足
+1. **80% 目标仍未达到** — 当前诚实最佳 73.8% (V22)
+2. **回测期偏短** — V22只验证了3个月
+3. **Period A偏弱** — V22早期窗口64.7%
+4. **sector评分区分度差** — std=0.26几乎无变化
+5. **实时因子无法回测** — 资金流向/龙虎榜只在实盘可用
+6. **推荐器评分映射** — daily_recommender评分和回测评分不完全一致
 
 ---
 
@@ -225,64 +305,56 @@ Risk 1-2 (牛/正常): momentum 策略
 
 ```
 TradingAgent/
-├── backtest_v9.py          # V9基准 (62.5% beat_idx) — 主要参考
-├── backtest_v9_best.py     # V9最佳 (62.5% beat_idx)
-├── backtest_v9_final.py    # V9分散化改进 (62.5% beat_idx)  
-├── backtest_v9d.py         # V9d Ensemble (65% beat_idx) — 当前最佳
-├── daily_recommender.py    # 每日推荐主入口
-├── quick_recommend.py      # 快速推荐（无API依赖）
-├── stock_screener.py       # 股票筛选器
-├── market_state.py         # 市场状态检测
-├── blacklist.py            # 黑名单过滤
-├── news_analyzer.py        # 新闻情绪分析
-├── email_notifier.py       # 邮件推送
-├── export_recommendations.py  # 导出推荐结果
-├── generate_mainboard_scores.py  # 生成主板评分数据
-├── data_loader.py          # 数据加载器
-├── fetch_kline_data.py     # K线数据获取
-├── update_kline_batch.py   # 批量更新K线
-├── update_kline_cli.py     # K线更新CLI
-├── chip_health_analyzer.py # 筹码健康分析器
-├── minimax_integration.py  # AI模型集成
-├── minimax_feature_extensions.py  # AI特征扩展
-├── a_share_gui_compatible.py  # GUI工具
+├── backtest_v22_honest.py       # V22 当前最佳回测 (73.8% beat_idx) ⭐
+├── daily_recommender.py         # 每日推荐主入口 (待迁移V22参数)
+├── real_feature_calculator.py   # 真实K线特征计算
+├── quick_recommend.py           # 快速推荐
+├── stock_screener.py            # 股票筛选器
+├── market_state.py              # 市场状态检测
+├── blacklist.py                 # 黑名单过滤
+├── news_analyzer.py             # 新闻情绪分析
+├── email_notifier.py            # 邮件推送
+├── export_recommendations.py    # 导出推荐结果
+├── generate_mainboard_scores.py # 生成主板评分
+├── data_loader.py               # 数据加载器
+├── enhanced_scorer.py           # 增强评分器
+├── enhanced_data_fetcher.py     # 增强数据获取
+├── chip_health_analyzer.py      # 筹码健康分析
+├── sector_rotation.py           # 板块轮动
+├── fetch_kline_data.py          # K线数据获取
+├── update_index.py              # 指数更新
+├── update_kline_akshare.py      # K线更新(AKShare主力)
+├── update_kline_choice_v3.py    # K线更新(Choice备选)
+├── update_kline_final.py        # K线更新(整合入口)
+├── update_kline_tencent.py      # K线更新(腾讯备选)
+├── update_kline_tushare.py      # K线更新(Tushare备选)
+├── verify_recommendation.py     # 推荐验证V1
+├── verify_recommendation_v3.py  # 推荐验证V3
+├── show_results.py              # 结果展示
+├── last_recommendation.json     # 上次推荐状态
 ├── requirements.txt
 ├── README.md
-├── EVOLUTION.md            # ← 本文档
-├── *.bat                   # 各种启动脚本
-├── chanlun/                # 缠论分析模块
-│   ├── chanlun_core.py     # 缠论核心算法
-│   ├── backtest_chanlun.py # 缠论回测
-│   ├── backtest_akshare.py # AKShare数据源
-│   ├── backtest_tushare_large.py
-│   ├── aggressive_scanner.py
-│   ├── hourly_fetcher.py
-│   ├── kline_merge.py
-│   └── test_chanlun.py
-├── experts/                # 多专家系统
-│   ├── technical_expert.py
-│   ├── fundamental_expert.py
-│   ├── chip_expert.py
-│   ├── macro_expert.py
-│   └── debate_judge.py     # 专家辩论裁决
-├── backtest_results/       # 历史回测报告
-├── recommendation_history/ # 历史推荐记录
-└── data/                   # 本地数据缓存
+├── EVOLUTION.md                 # ← 本文档
+├── EXPERIMENTS.md               # 实验记录(新建)
+├── *.bat                        # 启动脚本
+├── backtest_results/            # 回测结果
+│   └── backtest_v22_honest.json # V22结果 ⭐
+└── recommendation_history/      # 历史推荐记录
 ```
 
 ---
 
 ## 下一步方向建议
 
-1. **突破 65% → 80%**: 需要根本性的方法改进，而非调参
-2. **缠论集成**: `chanlun/` 目录已有基础代码，可尝试与 V9 融合
-3. **多专家辩论**: `experts/` 目录有5个专家模块，可尝试投票机制
-4. **更长回测期**: 当前40天不够，需要至少6个月
-5. **实时验证**: stock-pick-v2 的 Cron 闭环系统在做每日验证
-6. **情绪因子**: NewsData 新闻情绪 + 社交媒体情绪
-7. **资金流向**: 大单/北向资金/主力资金
+1. **V22参数迁移到daily_recommender** — 当前推荐器仍用V19参数，需迁移到V22
+2. **更多实盘验证** — 当前实盘验证样本太少(25% beat_idx, 8天)
+3. **解决Period A偏弱** — 64.7%，可能需要更多训练数据或调整窗口
+4. **sector评分区分度** — 当前std=0.26，几乎无区分力
+5. **集成实时因子** — 资金流向/龙虎榜在实盘推荐中加入
+6. **更长回测期** — 3个月仍偏短，需要6个月+验证
+7. **V23探索方向**: 诚实方法论+4窗口训练+增强特征，可能突破75%+
 
 ---
 
 *文档创建: 2026-05-04*
-*最后更新: 2026-05-04*
+*最后更新: 2026-05-12 (补充V15~V22)*

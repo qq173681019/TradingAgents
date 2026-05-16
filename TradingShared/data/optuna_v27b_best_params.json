@@ -1,0 +1,15 @@
+{
+  "version": "v27b",
+  "timestamp": "2026-05-15T00:44:01.538530",
+  "test_beat_idx": 0.375,
+  "params": {
+    "n_rec": 4,
+    "max_industry": 2,
+    "min_score": 59.266681074280655,
+    "cooldown_weight": 14.384825525127717,
+    "vol_penalty_weight": 5.959705569737513,
+    "vol_penalty_threshold": 2.5244098608451706,
+    "w_extra": 0.03295355531298377,
+    "trend_bonus": 8.574182783039959
+  }
+}

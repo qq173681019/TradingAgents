@@ -1,0 +1,89 @@
+{
+  "date": "2026-05-16",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "none",
+    "market_summary": "",
+    "hot_sectors_analysis": [],
+    "sector_boost": {},
+    "risk_warnings": [],
+    "tomorrow_focus": []
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "002008",
+      "name": "大族激光",
+      "industry": "机械设备",
+      "final_score": 69.6,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 5.3,
+        "sector": 94.0,
+        "relative_strength": 77.8,
+        "volume_health": 61,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 73.27999877929688,
+      "market_cap_yi": 78.2,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    },
+    {
+      "rank": 2,
+      "code": "300576",
+      "name": "",
+      "industry": "unknown",
+      "final_score": 66.2,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 8.8,
+        "sector": 50,
+        "relative_strength": 90.6,
+        "volume_health": 65,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 20.329999923706055,
+      "market_cap_yi": 16.7,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    },
+    {
+      "rank": 3,
+      "code": "600578",
+      "name": "京能电力",
+      "industry": "火力发电",
+      "final_score": 65.9,
+      "scores": {
+        "trend": 53.0,
+        "money_flow": 7.9,
+        "sector": 71.5,
+        "relative_strength": 92.6,
+        "volume_health": 56,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "neutral",
+      "ret_20d": 35.06999969482422,
+      "market_cap_yi": 31.1,
+      "divergence": {
+        "bullish": false,
+        "bearish": true
+      }
+    }
+  ],
+  "total_scored": 1724,
+  "top_10_debug": []
+}

@@ -1,0 +1,104 @@
+{
+  "date": "2026-05-07",
+  "status": "verified",
+  "total_stocks": 2,
+  "verified_stocks": 2,
+  "win_stocks": 2,
+  "no_data_stocks": 0,
+  "win_rate": 100.0,
+  "day_stats": {
+    "T+1": {
+      "win": 2,
+      "total": 2,
+      "rate": 100.0
+    },
+    "T+2": {
+      "win": 0,
+      "total": 2,
+      "rate": 0.0
+    },
+    "T+3": {
+      "win": 0,
+      "total": 2,
+      "rate": 0.0
+    }
+  },
+  "stocks": [
+    {
+      "code": "603368",
+      "name": "柳药集团",
+      "status": "verified",
+      "rec_date": "2026-05-07",
+      "base_close": 16.86,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-08",
+          "stock_return": 0.36,
+          "index_return": -0.0,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-11",
+          "stock_return": 1.07,
+          "index_return": 1.07,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-12",
+          "stock_return": -0.12,
+          "index_return": 0.82,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 1.07,
+      "score": 7.1
+    },
+    {
+      "code": "002835",
+      "name": "同为股份",
+      "status": "verified",
+      "rec_date": "2026-05-07",
+      "base_close": 15.64,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-08",
+          "stock_return": 0.7,
+          "index_return": -0.0,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-11",
+          "stock_return": 0.0,
+          "index_return": 1.07,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-12",
+          "stock_return": -2.49,
+          "index_return": 0.82,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 0.7,
+      "score": 7.03
+    }
+  ]
+}

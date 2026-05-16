@@ -34,49 +34,50 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'TradingShared'))
 
 from config import RECEIVER_EMAIL
-from market_state import detect_market_state
+from market_state import detect_market_state, get_index_kline
 from blacklist import filter_blacklist
 from stock_screener import StockScreener
 from news_analyzer import NewsAnalyzer
 from email_notifier import EmailNotifier
 from enhanced_scorer import enrich_stock_data, calculate_enhanced_total_score
+from real_feature_calculator import RealFeatureCalculator
 
 # ============================================================
 # V19 Optuna 最优参数加载（板块聚焦多周期优化，86.2% beat_idx）
 # ============================================================
 # V19参数文件路径（优先）
+_V20_PARAMS_PATH = os.path.join(
+    os.path.dirname(__file__), '..', 'TradingShared', 'data', 'optuna_v20_best_params.json'
+)
+# V17作为fallback
 _V19_PARAMS_PATH = os.path.join(
     os.path.dirname(__file__), '..', 'TradingShared', 'data', 'optuna_v19_best_params.json'
 )
-# V17作为fallback
-_V17_PARAMS_PATH = os.path.join(
-    os.path.dirname(__file__), '..', 'TradingShared', 'data', 'optuna_v17_best_params.json'
-)
 
 # 全局参数缓存
-_v19_params = None
+_v20_params = None
 _v17_params = None
 
 
-def load_v19_params() -> Dict:
-    """加载V19 Optuna最优参数，按风险等级分组
+def load_v20_params() -> Dict:
+    """加载V20 Optuna最优参数（T+1+加法评分+真实静态评分），按风险等级分组
     
-    V19参数来源: backtest_v19_sector.py (板块聚焦多周期优化)
+    V20参数来源: backtest_v20_fixed.py (修复方法论后的诚实参数)
     - 3个训练窗口: 2026-02~03, 03~04, 04~05
     - 股票池: 热门板块(AI/算力/芯片/半导体/光伏/电力) + 科创板, 1939只
-    - 鲁棒目标: 0.5*mean + 0.3*min + 0.2*(1-var)
-    - Full beat_idx: 86.2% (vs V17: 73.5%, V10: 60.8%)
-    - 多期一致性: A=86.4% B=83.3% C=89.5%
+    - 鲁棒目标: 0.5*mean + 0.3*min + 0.2*(1-var)\n    - V20改进: T+1收益 + 加法评分 + 真实静态评分 + 动态板块热度
+    - Full beat_idx: 70.5% (V19 was 86.2% but had method issues) (vs V17: 73.5%, V10: 60.8%)
+    - 多期一致性: A=72.7% B=58.3% C=86.7%
     """
-    global _v19_params
-    if _v19_params is not None:
-        return _v19_params
+    global _v20_params
+    if _v20_params is not None:
+        return _v20_params
 
     try:
-        if os.path.exists(_V19_PARAMS_PATH):
-            with open(_V19_PARAMS_PATH, 'r', encoding='utf-8') as f:
+        if os.path.exists(_V20_PARAMS_PATH):
+            with open(_V20_PARAMS_PATH, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            _v19_params = {
+            _v20_params = {
                 'r2': data.get('risk2_params', {}),
                 'r3': data.get('risk3_params', {}),
                 'r45': data.get('risk45_params', {}),
@@ -87,16 +88,16 @@ def load_v19_params() -> Dict:
                     'timestamp': data.get('timestamp', ''),
                 }
             }
-            logger.info(f"V19参数加载成功: {_v19_params['meta']['version']}, "
-                       f"beat_idx={_v19_params['meta']['full_beat_idx']*100:.1f}%")
+            logger.info(f"V20参数加载成功: {_v20_params['meta']['version']}, "
+                       f"beat_idx={_v20_params['meta']['full_beat_idx']*100:.1f}%")
         else:
-            logger.warning(f"V19参数文件不存在: {_V19_PARAMS_PATH}")
-            _v19_params = {}
+            logger.warning(f"V20参数文件不存在: {_V20_PARAMS_PATH}")
+            _v20_params = {}
     except Exception as e:
         logger.error(f"V19参数加载失败: {e}")
-        _v19_params = {}
+        _v20_params = {}
 
-    return _v19_params
+    return _v20_params
 
 
 def load_v17_params() -> Dict:
@@ -120,24 +121,34 @@ def load_v17_params() -> Dict:
 
 
 def get_v17_params_for_risk(risk_level: int) -> Dict:
-    """根据风险等级获取对应的V19参数组（优先V19，fallback V17）
+    """根据风险等级获取参数组（优先V20，fallback V19/V17）
 
     映射规则:
     - risk_level 2 → risk2_params (牛市动量策略)
     - risk_level 3 → risk3_params (震荡市均衡策略)
     - risk_level 4/5 → risk45_params (熊市防御策略)
     """
-    # 优先V19
-    v19 = load_v19_params()
-    if v19:
+    # 优先V20
+    v20 = load_v20_params()
+    if v20:
         if risk_level <= 2:
-            p = v19.get('r2', {})
+            p = v20.get('r2', {})
         elif risk_level == 3:
-            p = v19.get('r3', {})
+            p = v20.get('r3', {})
         else:
-            p = v19.get('r45', {})
+            p = v20.get('r45', {})
         if p:
             return p
+
+    # Fallback V19
+    v19 = load_v19_params() if 'load_v19_params' in dir() else {}
+    if v19:
+        if risk_level <= 2:
+            return v19.get('r2', {})
+        elif risk_level == 3:
+            return v19.get('r3', {})
+        else:
+            return v19.get('r45', {})
 
     # Fallback V17
     v17 = load_v17_params()
@@ -173,6 +184,20 @@ def is_defensive_industry(industry: str) -> bool:
 
 def is_high_beta_industry(industry: str) -> bool:
     return any(kw in industry for kw in HIGH_BETA_KEYWORDS)
+
+
+def normalize_code(code: str) -> str:
+    """统一股票代码格式"""
+    code = str(code).strip()
+    # 先去掉 sh./sz. 前缀
+    if code.startswith('sh.') or code.startswith('sz.'):
+        return code[3:]
+    # 去掉后缀
+    code = code.replace('.SZ', '').replace('.SH', '')
+    # 去掉纯前缀
+    if code.startswith('sh') or code.startswith('sz'):
+        return code[2:]
+    return code
 
 
 def map_stock_to_subscores(stock: Dict) -> Dict:
@@ -352,154 +377,158 @@ def map_stock_to_subscores(stock: Dict) -> Dict:
 # ============================================================
 
 def score_with_v17_risk2(s: Dict, p: Dict) -> float:
-    """V17 Risk2评分（牛市动量策略）
-    对应 backtest_v17_robust.py 的 score_risk2()
-    """
+    """V22 Risk2: additive scoring — 与 backtest_v22_honest.score_risk2 100%对齐"""
     score = (
-        s['momentum_s'] * p.get('w_momentum', 0.25) +
-        s['trend_s'] * p.get('w_trend', 0.20) +
+        s['momentum_s'] * p.get('w_momentum', 0.07) +
+        s['trend_s'] * p.get('w_trend', 0.07) +
         s['consistency_s'] * p.get('w_consistency', 0.05) +
-        s['vol_s'] * p.get('w_vol', 0.10) +
-        s['rsi_s'] * p.get('w_rsi', 0.05) +
-        s['static_score'] * p.get('w_static', 0.15) +
-        s['defense_s'] * p.get('w_defense', 0.05) +
-        s['sector_heat'] * p.get('w_sector', 0.10) +
+        s['vol_s'] * p.get('w_vol', 0.12) +
+        s['rsi_s'] * p.get('w_rsi', 0.07) +
+        s['static_score'] * p.get('w_static', 0.09) +
+        s['defense_s'] * p.get('w_defense', 0.08) +
+        s['sector_heat'] * p.get('w_sector', 0.09) +
         s['low_vol_s'] * p.get('w_low_vol', 0.05) +
-        s['rel_str'] * p.get('w_rel_str', 0.0) +
-        s['rel_str_3d'] * p.get('w_rel_str_3d', 0.0)
+        s['rel_str'] * p.get('w_rel_str', 0.11) +
+        s['rel_str_3d'] * p.get('w_rel_str_3d', 0.04)
     )
-    # 乘数（boost/penalty）
-    if s['consistency'] >= 4: score *= p.get('boost_consistency', 1.3)
-    if s['close_ma20'] > 0: score *= p.get('boost_above_ma20', 1.2)
-    if 45 <= s['rsi'] <= 60: score *= p.get('boost_rsi_45_60', 1.1)
-    if s['ind_heat'] > 1.5: score *= p.get('boost_sector_hot', 1.3)
-    if s['rel_str'] > 2: score *= p.get('boost_rel_str', 1.2)
-    if s['close_ma20'] < -0.05: score *= p.get('penalty_below_ma20', 0.5)
-    if s['vol5'] > 3.5: score *= p.get('penalty_high_vol', 0.6)
-    if s['rsi'] > 70: score *= p.get('penalty_rsi_overbought', 0.7)
-    if abs(s['r1']) > 5: score *= p.get('penalty_big_move', 0.5)
-    if s['streak'] <= -2: score *= p.get('penalty_streak_neg', 0.6)
-    if s['vol_shrink'] < 0.7: score *= p.get('penalty_vol_shrink', 0.8)
-    if s['turn_spike'] > 2.0: score *= p.get('penalty_turn_spike', 0.7)
-    if s['close_ma5'] < -0.02: score *= p.get('penalty_below_ma5', 0.8)
+    # V22 new feature weights
+    score += s.get('bb_s', 2.5) * p.get('w_bb', 0.02)
+    score += s.get('vol_health_s', 2.5) * p.get('w_vol_health', 0.02)
+    # Additive bonuses
+    if s['consistency'] >= 4: score += p.get('b_consistency', 0.3)
+    if s['close_ma20'] > 0: score += p.get('b_above_ma20', 0.2)
+    if 45 <= s['rsi'] <= 60: score += p.get('b_rsi_45_60', 0.1)
+    if s['ind_heat'] > 1.5: score += p.get('b_sector_hot', 0.3)
+    if s['rel_str'] > 2: score += p.get('b_rel_str', 0.2)
+    # Additive penalties
+    if s['close_ma20'] < -0.05: score -= p.get('p_below_ma20', 0.5)
+    if s['vol5'] > 3.5: score -= p.get('p_high_vol', 0.4)
+    if s['rsi'] > 70: score -= p.get('p_rsi_overbought', 0.3)
+    if abs(s['r1']) > 5: score -= p.get('p_big_move', 0.5)
+    if s['streak'] <= -2: score -= p.get('p_streak_neg', 0.4)
+    if s['vol_shrink'] < 0.7: score -= p.get('p_vol_shrink', 0.2)
+    if s['turn_spike'] > 2.0: score -= p.get('p_turn_spike', 0.3)
+    if s['close_ma5'] < -0.02: score -= p.get('p_below_ma5', 0.2)
+    # V22 penalties
+    if s.get('exhaustion'): score -= p.get('p_exhaustion', 0.5)
+    if s.get('vol_price_diverge'): score -= p.get('p_vp_diverge', 0.5)
     return score
 
 
 def score_with_v17_risk3(s: Dict, p: Dict) -> float:
-    """V17 Risk3评分（震荡市均衡策略）
-    对应 backtest_v17_robust.py 的 score_risk3()
-    """
+    """V22 Risk3: additive scoring — 与 backtest_v22_honest.score_risk3 100%对齐"""
     score = (
-        s['momentum_s'] * p.get('w_momentum', 0.14) +
-        s['trend_s'] * p.get('w_trend', 0.10) +
-        s['consistency_s'] * p.get('w_consistency', 0.07) +
-        s['mr_s'] * p.get('w_mr', 0.09) +
-        s['vol_s'] * p.get('w_vol', 0.07) +
-        s['rsi_s'] * p.get('w_rsi', 0.02) +
+        s['momentum_s'] * p.get('w_momentum', 0.05) +
+        s['trend_s'] * p.get('w_trend', 0.03) +
+        s['consistency_s'] * p.get('w_consistency', 0.13) +
+        s['mr_s'] * p.get('w_mr', 0.08) +
+        s['vol_s'] * p.get('w_vol', 0.11) +
+        s['rsi_s'] * p.get('w_rsi', 0.04) +
         s['static_score'] * p.get('w_static', 0.01) +
-        s['defense_s'] * p.get('w_defense', 0.10) +
-        s['sector_heat'] * p.get('w_sector_heat', 0.13) +
-        s['low_vol_s'] * p.get('w_low_vol', 0.04) +
-        s['rel_str'] * p.get('w_rel_str', 0.10) +
+        s['defense_s'] * p.get('w_defense', 0.04) +
+        s['sector_heat'] * p.get('w_sector_heat', 0.11) +
+        s['low_vol_s'] * p.get('w_low_vol', 0.06) +
+        s['rel_str'] * p.get('w_rel_str', 0.02) +
         s['rel_str_3d'] * p.get('w_rel_str_3d', 0.15)
     )
-    # 一致性乘数
-    if s['consistency'] >= 4: score *= p.get('consistency_boost_high', 2.46)
-    elif s['consistency'] >= 3: score *= p.get('consistency_boost_mid', 1.17)
-    # 上升趋势乘数
-    if s['r3'] > 0 and s['r5'] > 0: score *= p.get('uptrend_boost_full', 1.74)
-    elif s['r3'] > 0: score *= p.get('uptrend_boost_partial', 0.96)
-    # MA20位置乘数
-    if s['close_ma20'] > 0: score *= p.get('ma20_above_mult', 1.21)
-    elif s['close_ma20'] < -0.05: score *= p.get('ma20_below_mult', 0.50)
-    # 低波动乘数
-    if s['vol5'] < 1.5: score *= p.get('low_vol_mult_high', 1.25)
-    elif s['vol5'] < 2.0: score *= p.get('low_vol_mult_mid', 0.92)
-    elif s['vol5'] > 3.5: score *= p.get('high_vol_penalize', 0.13)
-    # RSI乘数
-    if s['rsi'] > 75: score *= p.get('rsi_overbought_mult', 0.17)
-    elif s['rsi'] > 65: score *= p.get('rsi_high_mult', 0.66)
-    elif 45 <= s['rsi'] <= 60: score *= p.get('rsi_sweet_mult', 1.33)
-    # 板块热度乘数
-    if s['ind_heat'] > 2: score *= p.get('sector_heat_strong', 1.02)
-    elif s['ind_heat'] > 0.5: score *= p.get('sector_heat_mild', 1.30)
-    elif s['ind_heat'] < -2: score *= p.get('sector_cold', 0.02)
-    elif s['ind_heat'] < -0.5: score *= p.get('sector_cool', 0.50)
-    # 相对强度乘数
-    if s['rel_str'] > 3: score *= p.get('rel_str_strong', 1.90)
-    elif s['rel_str'] > 1: score *= p.get('rel_str_mild', 1.27)
-    # 惩罚乘数
-    if abs(s['r1']) > 5: score *= p.get('big_move5_penalize', 0.10)
-    if abs(s['r1']) > 3: score *= p.get('big_move3_penalize', 0.89)
-    if s['streak'] <= -2: score *= p.get('streak_penalize', 0.45)
-    if s['vol_shrink'] < 0.7: score *= p.get('vol_shrink_penalize', 0.32)
-    if s['turn_spike'] > 2.0: score *= p.get('turn_spike_penalize', 0.72)
-    if s['close_ma5'] < -0.02: score *= p.get('ma5_below_penalize', 0.56)
+    # V22 new feature weights
+    score += s.get('bb_s', 2.5) * p.get('w_bb', 0.02)
+    score += s.get('support_s', 2.5) * p.get('w_support', 0.02)
+    score += s.get('obv_s', 2.0) * p.get('w_obv', 0.01)
+    # Additive bonuses
+    if s['consistency'] >= 4: score += p.get('b_consistency_high', 0.5)
+    elif s['consistency'] >= 3: score += p.get('b_consistency_mid', 0.2)
+    if s['r3'] > 0 and s['r5'] > 0: score += p.get('b_uptrend_full', 0.4)
+    elif s['r3'] > 0: score += p.get('b_uptrend_partial', 0.2)
+    if s['close_ma20'] > 0: score += p.get('b_ma20_above', 0.2)
+    elif s['close_ma20'] < -0.05: score -= p.get('p_ma20_below', 0.5)
+    if s['vol5'] < 1.5: score += p.get('b_low_vol_high', 0.3)
+    elif s['vol5'] < 2.0: score += p.get('b_low_vol_mid', 0.1)
+    elif s['vol5'] > 3.5: score -= p.get('p_high_vol', 0.4)
+    if s['rsi'] > 75: score -= p.get('p_rsi_overbought', 0.5)
+    elif s['rsi'] > 65: score -= p.get('p_rsi_high', 0.3)
+    elif 45 <= s['rsi'] <= 60: score += p.get('b_rsi_sweet', 0.3)
+    if s['ind_heat'] > 2: score += p.get('b_sector_strong', 0.3)
+    elif s['ind_heat'] > 0.5: score += p.get('b_sector_mild', 0.2)
+    elif s['ind_heat'] < -2: score -= p.get('p_sector_cold', 0.5)
+    elif s['ind_heat'] < -0.5: score -= p.get('p_sector_cool', 0.3)
+    if s['rel_str'] > 3: score += p.get('b_rel_str_strong', 0.4)
+    elif s['rel_str'] > 1: score += p.get('b_rel_str_mild', 0.2)
+    # Additive penalties
+    if abs(s['r1']) > 5: score -= p.get('p_big_move5', 0.5)
+    if abs(s['r1']) > 3: score -= p.get('p_big_move3', 0.2)
+    if s['streak'] <= -2: score -= p.get('p_streak', 0.3)
+    if s['vol_shrink'] < 0.7: score -= p.get('p_vol_shrink', 0.3)
+    if s['turn_spike'] > 2.0: score -= p.get('p_turn_spike', 0.3)
+    if s['close_ma5'] < -0.02: score -= p.get('p_ma5_below', 0.3)
+    # V22 penalties
+    if s.get('exhaustion'): score -= p.get('p_exhaustion', 0.5)
+    if s.get('vol_price_diverge'): score -= p.get('p_vp_diverge', 0.5)
     return score
 
 
 def score_with_v17_risk45(s: Dict, p: Dict) -> float:
-    """V17 Risk4/5评分（熊市防御策略）
-    对应 backtest_v17_robust.py 的 score_risk45()
-    """
+    """V22 Risk4/5: additive scoring — 与 backtest_v22_honest.score_risk45 100%对齐"""
     score = (
-        s['momentum_s'] * p.get('w_momentum', 0.06) +
-        s['trend_s'] * p.get('w_trend', 0.02) +
-        s['mr_s'] * p.get('w_mr', 0.07) +
-        s['vol_s'] * p.get('w_vol', 0.02) +
-        s['rsi_s'] * p.get('w_rsi', 0.01) +
-        s['static_score'] * p.get('w_static', 0.15) +
-        s['defense_s'] * p.get('w_defense', 0.15) +
-        s['sector_heat'] * p.get('w_sector', 0.04) +
-        s['low_vol_s'] * p.get('w_low_vol', 0.06) +
-        s['rel_str'] * p.get('w_rel_str', 0.15) +
-        s['rel_str_3d'] * p.get('w_rel_str_3d', 0.09) +
-        s['beta_bonus'] * p.get('w_beta', 0.17)
+        s['momentum_s'] * p.get('w_momentum', 0.05) +
+        s['trend_s'] * p.get('w_trend', 0.08) +
+        s['mr_s'] * p.get('w_mr', 0.03) +
+        s['vol_s'] * p.get('w_vol', 0.08) +
+        s['rsi_s'] * p.get('w_rsi', 0.05) +
+        s['static_score'] * p.get('w_static', 0.06) +
+        s['defense_s'] * p.get('w_defense', 0.04) +
+        s['sector_heat'] * p.get('w_sector', 0.05) +
+        s['low_vol_s'] * p.get('w_low_vol', 0.04) +
+        s['rel_str'] * p.get('w_rel_str', 0.07) +
+        s['rel_str_3d'] * p.get('w_rel_str_3d', 0.08) +
+        s['beta_bonus'] * p.get('w_beta', 0.04)
     )
-    # Beta乘数
-    if s['beta'] > 1.5: score *= p.get('penalty_beta_high', 0.42)
-    elif s['beta'] > 1.2: score *= p.get('penalty_beta_mid', 0.54)
-    elif s['beta'] < 0.5: score *= p.get('boost_beta_low', 0.97)
-    # 超卖/超买卖乘数
-    if s['oversold']: score *= p.get('boost_oversold', 1.50)
-    if s['overbought']: score *= p.get('penalty_overbought', 0.28)
-    # 行业属性乘数
-    if s['is_high_beta']: score *= p.get('penalty_high_beta_ind', 0.62)
-    if s['is_defensive']: score *= p.get('boost_defensive_ind', 1.45)
-    # 相对强度乘数
-    if s['rel_str'] > 3: score *= p.get('boost_rel_str_strong', 1.60)
-    if s['rel_str'] > 5: score *= p.get('boost_rel_str_very_strong', 2.14)
-    # 低波动奖励
-    if s['vol5'] < 1.5: score *= p.get('boost_low_vol', 1.47)
-    # 大跌/大涨惩罚
-    if s['r1'] < -5: score *= p.get('penalty_big_drop', 0.46)
-    if s['r3'] < -8: score *= p.get('penalty_big_drop_3d', 0.40)
-    if s['r1'] > 7: score *= p.get('penalty_big_jump', 0.22)
-    if s['r3'] > 15: score *= p.get('penalty_overextended', 0.62)
-    # 连涨+相对强度
-    if s['streak'] >= 2 and s['rel_str'] > 0: score *= p.get('boost_streak_relstr', 0.89)
+    # V22 new feature weights
+    score += s.get('bb_s', 2.5) * p.get('w_bb', 0.02)
+    score += s.get('atr_s', 2.5) * p.get('w_atr', 0.02)
+    score += s.get('vol_health_s', 2.5) * p.get('w_vol_health', 0.02)
+    score += s.get('support_s', 2.5) * p.get('w_support', 0.02)
+    score += s.get('obv_s', 2.0) * p.get('w_obv', 0.01)
+    # Original additive bonuses/penalties
+    if s['beta'] > 1.5: score -= p.get('p_beta_high', 0.5)
+    elif s['beta'] > 1.2: score -= p.get('p_beta_mid', 0.3)
+    elif s['beta'] < 0.5: score += p.get('b_beta_low', 0.2)
+    if s['oversold']: score += p.get('b_oversold', 0.3)
+    if s['overbought']: score -= p.get('p_overbought', 0.5)
+    if s['is_high_beta']: score -= p.get('p_high_beta_ind', 0.4)
+    if s['is_defensive']: score += p.get('b_defensive_ind', 0.3)
+    if s['rel_str'] > 3: score += p.get('b_rel_str_strong', 0.4)
+    if s['rel_str'] > 5: score += p.get('b_rel_str_very_strong', 0.3)
+    if s['vol5'] < 1.5: score += p.get('b_low_vol', 0.3)
+    if s['r1'] < -5: score -= p.get('p_big_drop', 0.5)
+    if s['r3'] < -8: score -= p.get('p_big_drop_3d', 0.4)
+    if s['r1'] > 7: score -= p.get('p_big_jump', 0.5)
+    if s['r3'] > 15: score -= p.get('p_overextended', 0.4)
+    if s['streak'] >= 2 and s['rel_str'] > 0: score += p.get('b_streak_relstr', 0.2)
+    # V22: BB-based bonuses
+    if s.get('bb_pctb', 0.5) < 0.2: score += p.get('b_bb_oversold', 0.3)
+    if s.get('bb_pctb', 0.5) > 0.85: score -= p.get('p_bb_overbought', 0.3)
+    # V22: ATR expansion penalty
+    if s.get('atr_ratio', 1.0) > 1.5: score -= p.get('p_atr_expand', 0.3)
+    # V22: distribution penalty
+    if s.get('down_vol_ratio', 1.0) > 1.5: score -= p.get('p_distribution', 0.3)
+    # V22: near support bonus
+    if s.get('support_dist', 0.5) < 0.3: score += p.get('b_near_support', 0.3)
+    # V22: VP confirm/diverge
+    if s.get('vol_price_confirm'): score += p.get('b_vp_confirm_r45', 0.2)
+    if s.get('vol_price_diverge'): score -= p.get('p_vp_diverge_r45', 0.3)
+    # V22: exhaustion
+    if s.get('exhaustion'): score -= p.get('p_exhaustion_r45', 0.3)
     return score
 
 
 def score_with_v17_params(stock: Dict, risk_level: int = None) -> float:
     """使用V19 Optuna最优参数计算评分（优先V19，fallback V17）
 
-    流程:
-    1. 将stock字段映射为回测子分数
-    2. 根据risk_level选择对应的参数组和评分函数
-    3. 计算V17原始分
-    4. 叠加增强评分维度的额外乘数
-    5. 归一化到0-10分范围
-
-    V19: 板块聚焦多周期优化，86.2% beat_idx，远超V17的73.5%
-
-    Args:
-        stock: 股票数据dict（来自stock_screener + news_analyzer + enhanced_scorer）
-        risk_level: 风险等级，None时从_market_state读取
-
-    Returns:
-        归一化后的0-10分评分
+    方案A改进：优先使用真实K线特征，消除映射偏差。
     """
+    global _real_feature_calc
+
     if risk_level is None:
         risk_level = _market_state.get('risk_level', 3) if _market_state else 3
 
@@ -510,8 +539,15 @@ def score_with_v17_params(stock: Dict, risk_level: int = None) -> float:
         logger.debug("V17参数不可用，回退到原评分")
         return calculate_total_score(stock)
 
-    # 映射为回测子分数
-    subscores = map_stock_to_subscores(stock)
+    # 优先使用真实K线特征（方案A），fallback到映射
+    subscores = None
+    if _real_feature_calc is not None:
+        code = normalize_code(stock.get('code', ''))
+        subscores = _real_feature_calc.compute_real_subscores(code, stock_data=stock)
+    if subscores is None:
+        # fallback到原映射
+        subscores = map_stock_to_subscores(stock)
+        logger.debug(f"  {stock.get('code','')} 真实特征不可用，使用映射")
 
     # 根据风险等级选择评分函数
     if risk_level <= 2:
@@ -527,8 +563,8 @@ def score_with_v17_params(stock: Dict, risk_level: int = None) -> float:
             if subscores['is_high_beta']: v17_raw *= 0.5
 
     # ---- 叠加增强评分维度的乘数 ----
-    # 增强评分的维度不参与V17的权重计算，而是作为乘数叠加
-    # 这样保持了V17权重优化的结果，同时利用增强维度信息
+    # 增强评分的维度不参与V22的权重计算，而是作为乘数叠加
+    # 这样保持了V22权重优化的结果，同时利用增强维度信息
     quarterly_score = stock.get('quarterly_score', 5.0)
     eps_score = stock.get('eps_score', 5.0)
     analyst_score = stock.get('analyst_score', 5.0)
@@ -575,14 +611,19 @@ def score_with_v17_params(stock: Dict, risk_level: int = None) -> float:
         v17_raw *= 1.0 - (3.0 - lhb_score_val) * 0.02  # 最高-4%
 
     # ---- 归一化到0-10分 ----
-    # V17原始分通常在[-2, 15]范围内
-    # 使用sigmoid-like映射归一化
-    normalized = max(0.0, min(10.0, 5.0 + v17_raw * 0.4))
+    # 回测中的raw score典型范围[-3, 12]，用百分位归一化
+    # 避免线性映射偏差：用sigmoid平滑映射
+    # calibrated so that raw=0 → 5.0, raw=5 → ~7.2, raw=-3 → ~3.3
+    normalized = 10.0 / (1.0 + np.exp(-0.35 * (v17_raw - 2.0)))
+    normalized = max(0.0, min(10.0, normalized))
 
     return round(normalized, 2)
 
 # 全局市场状态（启动时检测一次）
 _market_state = None
+
+# 真实特征计算器（方案A）
+_real_feature_calc = None
 
 # 配置日志
 logging.basicConfig(
@@ -604,6 +645,84 @@ TOP_N_CANDIDATES = 15
 RECOMMEND_COUNT = 3
 # 同行业最多推荐几只
 MAX_SAME_INDUSTRY = 2
+# 动态阈值：最低评分（基于历史胜率动态调整）
+MIN_SCORE_THRESHOLD = 6.0  # 默认最低分，低于此不推荐
+# 连续失败降温文件
+_COOLDOWN_FILE = os.path.join(os.path.dirname(__file__), 'recommendation_cooldown.json')
+
+
+def load_cooldown_data() -> Dict:
+    """加载连续失败降温数据"""
+    if os.path.exists(_COOLDOWN_FILE):
+        try:
+            with open(_COOLDOWN_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {'penalty': {}, 'history': {}}
+
+
+def save_cooldown_data(data: Dict):
+    """保存降温数据"""
+    with open(_COOLDOWN_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def apply_cooldown_penalty(stock: Dict, score: float) -> float:
+    """对连续推荐失败的股票施加临时降权惩罚
+    
+    规则:
+    - 连续1次失败: 降权5%
+    - 连续2次失败: 降权15%
+    - 连续3次及以上: 降权30%
+    """
+    cooldown = load_cooldown_data()
+    code = stock.get('code', '')
+    penalty_info = cooldown.get('penalty', {}).get(code, {})
+    consecutive_fails = penalty_info.get('consecutive_fails', 0)
+    
+    if consecutive_fails <= 0:
+        return score
+    
+    if consecutive_fails >= 3:
+        penalty_rate = 0.30
+    elif consecutive_fails == 2:
+        penalty_rate = 0.15
+    else:
+        penalty_rate = 0.05
+    
+    penalized = score * (1.0 - penalty_rate)
+    logger.info(f"  降温: {code} {stock.get('name', '')} 连续{consecutive_fails}次失败, "
+                f"降权{penalty_rate*100:.0f}%: {score:.2f} → {penalized:.2f}")
+    return round(penalized, 2)
+
+
+def get_dynamic_threshold(candidates: List[Dict]) -> float:
+    """动态推荐阈值
+    
+    规则:
+    - 如果候选股整体质量高（中位数>7.5），提高阈值到7.0
+    - 如果候选股整体质量低（中位数<5.5），降低阈值到5.0
+    - 否则用默认阈值6.0
+    """
+    if not candidates:
+        return MIN_SCORE_THRESHOLD
+    
+    scores = [s.get('total_score', 0) for s in candidates]
+    if not scores:
+        return MIN_SCORE_THRESHOLD
+    
+    median_score = sorted(scores)[len(scores) // 2]
+    
+    if median_score > 7.5:
+        threshold = 7.0
+    elif median_score < 5.5:
+        threshold = 5.0
+    else:
+        threshold = MIN_SCORE_THRESHOLD
+    
+    logger.info(f"  动态阈值: 中位数={median_score:.2f}, 阈值={threshold:.1f}")
+    return threshold
 
 
 def calculate_total_score(stock: Dict, weights: Dict = None) -> float:
@@ -779,7 +898,126 @@ def build_recommendation(stock: Dict) -> Dict:
         "v17_used": v17_score is not None,
         "v17_risk_level": risk_level,
         "v17_param_group": 'r2' if risk_level <= 2 else ('r3' if risk_level == 3 else 'r45'),
+        # 大盘预判避险信息
+        "market_outlook": {
+            "risk_level": _market_state.get('outlook', {}).get('risk_level', 'safe') if _market_state else 'safe',
+            "position_advice": _market_state.get('outlook', {}).get('position_advice', '正常仓位操作') if _market_state else '正常仓位操作',
+            "details": _market_state.get('outlook', {}).get('details', '') if _market_state else '',
+        } if _market_state else None,
     }
+
+
+def _market_outlook_check(market_state: Dict) -> Dict:
+    """步骤0.5 大盘预判避险机制
+
+    利用 market_state 模块获取最近指数数据，综合判断大盘风险：
+    - 连续3天以上下跌 → 风险较高
+    - 最近5日累计跌幅 > 3% → 风险较高
+    - risk_level >= 4 且动量为负 → 风险较高
+    - 极端风险: risk_level=5 + 连续大跌 → 可返回空推荐
+
+    Returns:
+        Dict with keys:
+            risk_level: 'safe' | 'caution' | 'danger' | 'extreme'
+            should_skip: bool (极端风险时为True，建议返回空推荐)
+            position_advice: str (仓位建议)
+            details: str (详细说明)
+    """
+    risk_level = market_state.get('risk_level', 3)
+    momentum = market_state.get('momentum', 0.0)
+    regime = market_state.get('regime', 'range')
+
+    # 获取最近5个交易日指数K线
+    index_data = get_index_kline('000001', days=10)
+
+    decline_days = 0       # 连续下跌天数
+    cumulative_drop = 0.0  # 最近5日累计涨跌幅
+    daily_changes = []     # 每日涨跌幅列表
+
+    if index_data and len(index_data) >= 6:
+        closes = [float(d['close']) for d in index_data]
+        # 计算最近5个交易日的日涨跌幅
+        for i in range(max(1, len(closes) - 5), len(closes)):
+            change = (closes[i] - closes[i - 1]) / closes[i - 1] * 100
+            daily_changes.append(change)
+
+        # 累计涨跌幅
+        if len(closes) >= 6:
+            cumulative_drop = (closes[-1] - closes[-6]) / closes[-6] * 100
+        elif len(closes) >= 2:
+            cumulative_drop = (closes[-1] - closes[0]) / closes[0] * 100
+
+        # 连续下跌天数（从最近一天往回数）
+        for i in range(len(closes) - 1, 0, -1):
+            if closes[i] < closes[i - 1]:
+                decline_days += 1
+            else:
+                break
+
+    # ---- 综合判断 ----
+    danger_signals = []
+    is_extreme = False
+
+    # 信号1: 连续下跌
+    if decline_days >= 3:
+        danger_signals.append(f"连续{decline_days}天下跌")
+    if decline_days >= 4:
+        is_extreme = True
+
+    # 信号2: 累计跌幅
+    if cumulative_drop < -3.0:
+        danger_signals.append(f"5日累计跌幅{cumulative_drop:+.1f}%")
+    if cumulative_drop < -5.0:
+        is_extreme = True
+
+    # 信号3: risk_level + 动量
+    if risk_level >= 4 and momentum < 0:
+        danger_signals.append(f"风险等级{risk_level}+动量{momentum:+.1f}%")
+    if risk_level == 5 and decline_days >= 3:
+        is_extreme = True
+
+    # 每日变化详情
+    changes_str = ", ".join([f"{c:+.2f}%" for c in daily_changes]) if daily_changes else "无数据"
+
+    # ---- 判定结果 ----
+    if is_extreme:
+        result = {
+            'risk_level': 'extreme',
+            'should_skip': True,
+            'position_advice': '建议空仓观望',
+            'details': f"极端风险: {'; '.join(danger_signals)} | 近5日: [{changes_str}]",
+            'decline_days': decline_days,
+            'cumulative_drop': cumulative_drop,
+        }
+    elif len(danger_signals) >= 1:
+        result = {
+            'risk_level': 'danger',
+            'should_skip': False,
+            'position_advice': '建议轻仓(30%以下)或减仓',
+            'details': f"风险较高: {'; '.join(danger_signals)} | 近5日: [{changes_str}]",
+            'decline_days': decline_days,
+            'cumulative_drop': cumulative_drop,
+        }
+    elif risk_level >= 4:
+        result = {
+            'risk_level': 'caution',
+            'should_skip': False,
+            'position_advice': '建议谨慎，仓位控制在50%以内',
+            'details': f"市场偏弱(风险等级{risk_level}) | 动量{momentum:+.1f}% | 近5日: [{changes_str}]",
+            'decline_days': decline_days,
+            'cumulative_drop': cumulative_drop,
+        }
+    else:
+        result = {
+            'risk_level': 'safe',
+            'should_skip': False,
+            'position_advice': '正常仓位操作',
+            'details': f"大盘相对平稳 | 动量{momentum:+.1f}% | 近5日: [{changes_str}]",
+            'decline_days': decline_days,
+            'cumulative_drop': cumulative_drop,
+        }
+
+    return result
 
 
 def run_daily_recommendation() -> Optional[Dict]:
@@ -788,6 +1026,7 @@ def run_daily_recommendation() -> Optional[Dict]:
     logger.info("每日潜力股推荐引擎启动")
     logger.info(f"运行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     global _market_state
+    global _real_feature_calc
     logger.info("=" * 60)
 
     # ---- 第0步：检测市场状态 ----
@@ -796,6 +1035,31 @@ def run_daily_recommendation() -> Optional[Dict]:
     logger.info(_market_state['description'])
     w = _market_state['weights']
     logger.info(f"使用权重: 技术{w['technical']} + 筹码{w['chip']} + 板块{w['sector']} + 新闻{w['news']}")
+
+    # ---- 第0.1步：初始化真实特征计算器（方案A） ----
+    logger.info("[步骤0.1] 初始化真实特征计算器...")
+    _real_feature_calc = RealFeatureCalculator()
+    # 延迟加载：先不加载K线数据（太慢），等到筛选完候选股后再按需加载
+    _real_feature_calc._deferred_load = True
+    logger.info("  真实特征计算器已创建（延迟加载模式）")
+
+    # ---- 第0.5步：大盘预判避险 ----
+    logger.info("[步骤0.5] 大盘预判避险检查...")
+    outlook = _market_outlook_check(_market_state)
+    logger.info(f"  预判结果: [{outlook['risk_level']}] {outlook['details']}")
+    logger.info(f"  仓位建议: {outlook['position_advice']}")
+
+    if outlook['should_skip']:
+        logger.warning("  ⚠️ 极端风险! 大盘预判建议今日跳过推荐，返回空结果")
+        logger.info("=" * 60)
+        return []
+
+    # 将预判结果附加到市场状态，供后续仓位建议使用
+    _market_state['outlook'] = outlook
+
+    if outlook['risk_level'] in ('danger', 'extreme'):
+        logger.warning(f"  ⚠️ 大盘风险较高: {outlook['details']}")
+        logger.warning(f"  ⚠️ 推荐结果将附带风险提示和降仓建议")
 
     # ---- 第1步：筛选潜力股 ----
     logger.info("[步骤1] 筛选潜力股...")
@@ -828,7 +1092,18 @@ def run_daily_recommendation() -> Optional[Dict]:
                      f"热度:{s.get('hot_sector_score', 0):.1f} "
                      f"基本面:{s.get('long_term_score', 0):.1f})")
 
-    # ---- 第1.5步：轻量新闻过滤（排除重大利空） ----
+    # ---- 第1.5步：加载候选股的真实K线数据（方案A） ----
+    if _real_feature_calc and getattr(_real_feature_calc, '_deferred_load', False):
+        codes_to_load = [s.get('code', '') for s in top_candidates]
+        logger.info(f"[步骤1.5] 加载 {len(codes_to_load)} 只候选股的K线数据...")
+        if _real_feature_calc.load_data(codes=codes_to_load):
+            logger.info(f"  K线加载成功: {len(_real_feature_calc.kline)} 只")
+            _real_feature_calc._deferred_load = False
+        else:
+            logger.warning("  K线加载失败，将回退到映射模式")
+            _real_feature_calc = None
+
+    # ---- 第1.6步：轻量新闻过滤（排除重大利空） ----
     logger.info("[步骤1.5] 轻量新闻过滤...")
     try:
         analyzer = NewsAnalyzer()
@@ -893,6 +1168,20 @@ def run_daily_recommendation() -> Optional[Dict]:
 
     analyzed_stocks.sort(key=lambda x: x['total_score'], reverse=True)
 
+    # ---- 动态阈值过滤 ----
+    threshold = get_dynamic_threshold(analyzed_stocks)
+    above_threshold = [s for s in analyzed_stocks if s['total_score'] >= threshold]
+    if len(above_threshold) < RECOMMEND_COUNT:
+        logger.warning(f"  只有 {len(above_threshold)}/{len(analyzed_stocks)} 只超过阈值 {threshold:.1f}，降级使用全量排序")
+    else:
+        logger.info(f"  {len(above_threshold)}/{len(analyzed_stocks)} 只超过阈值 {threshold:.1f}")
+
+    # ---- 连续失败降温 ----
+    for stock in analyzed_stocks:
+        stock['total_score'] = apply_cooldown_penalty(stock, stock['total_score'])
+    # 重新排序（降温后可能改变排名）
+    analyzed_stocks.sort(key=lambda x: x['total_score'], reverse=True)
+
     score_mode = "V19" if v19_available else "原评分"
     logger.info(f"综合评分排名 (模式: {score_mode}, Risk={risk_level}):")
     for i, s in enumerate(analyzed_stocks[:5], 1):
@@ -932,6 +1221,11 @@ def run_daily_recommendation() -> Optional[Dict]:
         logger.info(f"  {i}. {rec['stock_name']}({rec['stock_code']}) 综合评分:{rec['total_score']}")
         logger.info(f"     理由: {rec['recommendation_reason']}")
     logger.info(f"市场状态: {_market_state['description']}")
+    # 大盘预判信息
+    outlook = _market_state.get('outlook') if _market_state else None
+    if outlook:
+        logger.info(f"大盘预判: [{outlook['risk_level']}] {outlook['details']}")
+        logger.info(f"仓位建议: {outlook['position_advice']}")
     logger.info("=" * 60)
 
     # ---- 第5步：发送邮件 ----

@@ -1,0 +1,10 @@
+{
+  "industry_not_unknown": true,
+  "ret20_not_zero": true,
+  "fund_flow_score_range": true,
+  "lhb_check": true,
+  "market_cap_diverse": true,
+  "no_pt_st": true,
+  "same_industry_max1": true,
+  "no_trade_signal_works": true
+}

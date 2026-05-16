@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-05-15 00:12:21",
+  "version": "v26-five-fixes",
+  "description": "V25 + 5 fixes: real trading calendar, cooldown, extended test, limit-up/IPO filter, industry handling",
+  "best_obj": 0.6672564935064935,
+  "train_beat_idx": 0.7142857142857143,
+  "valid_beat_idx": 0.875,
+  "test_beat_idx": 0.5,
+  "train_test_gap_pp": 21.4,
+  "fixes": {
+    "fix1_trading_calendar": "Real trading dates from index data",
+    "fix2_cooldown_days": 3,
+    "fix3_test_end": "2026-05-13",
+    "fix4_limit_up_threshold": 15.0,
+    "fix4_ipo_min_days": 30,
+    "fix5_industry_handling": "Skip unknown industry in sector heat, allow stocks without industry"
+  },
+  "params": {
+    "weights_bull": [
+      0.20574519595624124,
+      0.05932822139878658,
+      0.3196523036039305,
+      0.1219010321126656,
+      0.14698446375874596,
+      0.14638878316963017
+    ],
+    "weights_range": [
+      0.20574519595624124,
+      0.05932822139878658,
+      0.3196523036039305,
+      0.1219010321126656,
+      0.14698446375874596,
+      0.14638878316963017
+    ],
+    "weights_bear": [
+      0.238613135468402,
+      -0.037694521658213076,
+      0.37071698353945304,
+      0.14137480758201462,
+      0.1704653350451761,
+      0.11652426002316733
+    ],
+    "min_score_threshold": 32.44694669396373,
+    "cooldown_penalty_weight": 7.8237862350517995
+  }
+}

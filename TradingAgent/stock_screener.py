@@ -67,6 +67,8 @@ class StockScreener:
         )
         self.stock_scores: Dict = {}
         self.market_data: Dict = {}
+        self._industry_cache: Dict = {}  # 行业信息缓存
+        self._load_industry_cache()
         
         # 根据市场状态动态调整阈值
         if risk_level >= 4:
@@ -110,7 +112,13 @@ class StockScreener:
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                self.stock_scores = json.load(f)
+                raw_data = json.load(f)
+            
+            # 过滤掉元数据字段（date, timestamp, model 等），只保留股票数据
+            self.stock_scores = {
+                k: v for k, v in raw_data.items()
+                if isinstance(v, dict) and ('short_term_score' in v or 'long_term_score' in v or 'chip_score' in v or 'name' in v)
+            }
             logger.info(f'成功加载 {len(self.stock_scores)} 只股票的评分数据')
             return self.stock_scores
         except Exception as e:
@@ -215,10 +223,124 @@ class StockScreener:
             logger.error(f'获取市场数据失败: {e}')
             return {}
 
+    def _load_industry_cache(self):
+        """加载本地行业缓存文件"""
+        cache_file = os.path.join(self.data_dir, 'industry_cache.json')
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    self._industry_cache = json.load(f)
+                    logger.info(f'已加载行业缓存，包含 {len(self._industry_cache)} 只股票')
+            except Exception as e:
+                logger.debug(f'加载行业缓存失败: {e}')
+
+    def _save_industry_cache(self):
+        """保存行业缓存到本地文件"""
+        cache_file = os.path.join(self.data_dir, 'industry_cache.json')
+        try:
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                json.dump(self._industry_cache, f, ensure_ascii=False)
+                logger.info(f'已保存行业缓存，包含 {len(self._industry_cache)} 只股票')
+        except Exception as e:
+            logger.debug(f'保存行业缓存失败: {e}')
+
+    def _batch_fetch_industry(self, stock_codes: List[str]):
+        """批量获取行业信息（使用AKShare），并更新缓存"""
+        need_fetch = [c for c in stock_codes if c not in self._industry_cache]
+        if not need_fetch:
+            return
+        
+        try:
+            import akshare as ak
+            os.environ['HTTP_PROXY'] = ''
+            os.environ['HTTPS_PROXY'] = ''
+            os.environ['http_proxy'] = ''
+            os.environ['https_proxy'] = ''
+            os.environ['NO_PROXY'] = '*'
+            
+            logger.info(f'正在批量获取 {len(need_fetch)} 只股票的行业信息...')
+            
+            # 使用 stock_board_industry_cons_em 获取行业成分股
+            # 先获取所有行业板块列表
+            try:
+                import winreg
+                _proxy_key = winreg.OpenKey(
+                    winreg.HKEY_CURRENT_USER,
+                    r'Software\Microsoft\Windows\CurrentVersion\Internet Settings',
+                    0, winreg.KEY_READ | winreg.KEY_SET_VALUE
+                )
+                _orig_proxy = winreg.QueryValueEx(_proxy_key, 'ProxyEnable')[0]
+                if _orig_proxy:
+                    winreg.SetValueEx(_proxy_key, 'ProxyEnable', 0, winreg.REG_DWORD, 0)
+                winreg.CloseKey(_proxy_key)
+            except Exception:
+                _orig_proxy = 0
+            
+            try:
+                # 使用 stock_zh_a_spot_em 获取带行业信息的数据
+                df = ak.stock_zh_a_spot_em()
+                if df is not None and not df.empty:
+                    for _, row in df.iterrows():
+                        raw_code = str(row.get('代码', ''))
+                        code = raw_code[-6:] if len(raw_code) > 6 else raw_code
+                        if code in need_fetch:
+                            # akshare spot数据不直接包含行业，用板块代替
+                            name = str(row.get('名称', ''))
+                            self._industry_cache[code] = _infer_industry_from_name(name)
+                    self._save_industry_cache()
+            finally:
+                if _orig_proxy:
+                    try:
+                        _proxy_key = winreg.OpenKey(
+                            winreg.HKEY_CURRENT_USER,
+                            r'Software\Microsoft\Windows\CurrentVersion\Internet Settings',
+                            0, winreg.KEY_READ | winreg.KEY_SET_VALUE
+                        )
+                        winreg.SetValueEx(_proxy_key, 'ProxyEnable', 0, winreg.REG_DWORD, _orig_proxy)
+                        winreg.CloseKey(_proxy_key)
+                    except Exception:
+                        pass
+        except ImportError:
+            logger.warning('akshare未安装，无法获取行业信息')
+        except Exception as e:
+            logger.warning(f'批量获取行业信息失败: {e}')
+
+    # 缓存 kline_full_latest.json 的数据，避免重复读取
+    _kline_full_cache = None
+
+    def _kline_key(self, stock_code: str, kline_full: Dict) -> Optional[str]:
+        """查找K线数据中的实际key（可能是 '600000' 或 'sh600000' 格式）"""
+        if stock_code in kline_full:
+            return stock_code
+        # 尝试带前缀
+        if stock_code.startswith(('6', '9')):
+            prefixed = f'sh{stock_code}'
+        else:
+            prefixed = f'sz{stock_code}'
+        if prefixed in kline_full:
+            return prefixed
+        return None
+
+    def _load_kline_full(self) -> Dict:
+        """加载 kline_full_latest.json 合并文件，带缓存"""
+        if self._kline_full_cache is not None:
+            return self._kline_full_cache
+        try:
+            kline_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'TradingShared', 'data', 'kline_cache')
+            kline_file = os.path.join(kline_dir, 'kline_full_latest.json')
+            if os.path.exists(kline_file):
+                with open(kline_file, 'r', encoding='utf-8') as f:
+                    self._kline_full_cache = json.load(f)
+                    logger.info(f'已加载 kline_full_latest.json，包含 {len(self._kline_full_cache)} 只股票的K线数据')
+                    return self._kline_full_cache
+        except Exception as e:
+            logger.debug(f'加载 kline_full_latest.json 失败: {e}')
+        return {}
+
     def get_recent_gain(self, stock_code: str, days: int = 20) -> float:
         """
         获取近N日涨幅
-        如果市场数据中没有，尝试从akshare获取K线数据计算
+        优先从 kline_full_latest.json 合并文件计算，其次尝试单独文件和akshare
 
         Args:
             stock_code: 股票代码
@@ -227,7 +349,22 @@ class StockScreener:
         Returns:
             近N日涨幅百分比
         """
-        # 尝试从本地kline_cache计算真实N日涨幅
+        # 1. 优先从 kline_full_latest.json 合并文件读取
+        try:
+            kline_full = self._load_kline_full()
+            actual_key = self._kline_key(stock_code, kline_full)
+            if actual_key:
+                kline_data = kline_full[actual_key]
+                if isinstance(kline_data, list) and len(kline_data) >= days:
+                    latest_close = float(kline_data[-1].get('close', kline_data[-1].get('收盘', 0)))
+                    close_nd_ago = float(kline_data[-days].get('close', kline_data[-days].get('收盘', 0)))
+                    if close_nd_ago > 0:
+                        gain = (latest_close - close_nd_ago) / close_nd_ago
+                        return round(gain * 100, 2)
+        except Exception as e:
+            logger.debug(f'从kline_full获取 {stock_code} 近{days}日涨幅失败: {e}')
+
+        # 2. 尝试从单独的kline文件读取（兼容旧格式）
         try:
             kline_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'TradingShared', 'data', 'kline_cache')
             kline_file = os.path.join(kline_dir, f'kline_{stock_code}.json')
@@ -241,7 +378,7 @@ class StockScreener:
                         gain = (latest_close - close_nd_ago) / close_nd_ago
                         return round(gain * 100, 2)
         except Exception as e:
-            logger.debug(f'从kline_cache获取 {stock_code} 近{days}日涨幅失败: {e}')
+            logger.debug(f'从kline_{stock_code}.json获取近{days}日涨幅失败: {e}')
 
         # fallback: 尝试akshare在线获取
         try:
@@ -364,8 +501,22 @@ class StockScreener:
                     excluded_stats['gain'] += 1
                     continue
 
-                # 使用默认值
-                market_cap = 50e8  # 假设50亿市值
+                # 尝试从评分文件获取市值，否则从K线数据推算
+                market_cap = score_data.get('market_cap', 0)
+                if market_cap <= 0:
+                    # 从K线数据推算市值：最近收盘价 × 估算总股本
+                    # 使用评分文件或K线数据中的信息
+                    kline_full = self._load_kline_full()
+                    actual_key = self._kline_key(code, kline_full)
+                    if actual_key and isinstance(kline_full[actual_key], list) and len(kline_full[actual_key]) > 0:
+                        latest_close = float(kline_full[actual_key][-1].get('close', 0))
+                        if latest_close > 0:
+                            # 用最近成交量/换手率估算总股本（粗略）
+                            # 默认假设总股本约10亿股（中小市值股常见）
+                            market_cap = latest_close * 10e8  # 估算
+                            logger.debug(f'离线模式估算 {code} 市值: {market_cap/1e8:.1f}亿')
+                if market_cap <= 0:
+                    market_cap = 50e8  # 最终fallback
                 turnover_rate = 3.0  # 假设3%换手率
             else:
                 # 在线模式：完整筛选
@@ -405,6 +556,14 @@ class StockScreener:
                     excluded_stats['gain'] += 1
                     continue
 
+            # 尝试获取行业信息：优先评分文件 -> 行业缓存 -> matched_sector -> 默认
+            industry = score_data.get('industry', '')
+            if not industry or industry == '未知':
+                industry = self._industry_cache.get(code, '')
+            if not industry or industry == '未知':
+                matched_sector = score_data.get('matched_sector', '')
+                industry = matched_sector if matched_sector else '未知'
+
             # 通过所有筛选条件，添加到结果
             screened_stock = {
                 'code': code,
@@ -417,7 +576,7 @@ class StockScreener:
                 'long_term_score': score_data.get('long_term_score', 5.0),
                 'chip_score': score_data.get('chip_score', 5.0),
                 'hot_sector_score': score_data.get('hot_sector_score', 5.0),
-                'industry': score_data.get('industry', '未知'),
+                'industry': industry,
                 'matched_sector': score_data.get('matched_sector', ''),
                 'sector_change': score_data.get('sector_change', 0),
             }

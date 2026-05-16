@@ -1,0 +1,142 @@
+{
+  "date": "2026-04-28",
+  "status": "verified",
+  "total_stocks": 3,
+  "verified_stocks": 3,
+  "win_stocks": 2,
+  "no_data_stocks": 0,
+  "win_rate": 66.7,
+  "day_stats": {
+    "T+1": {
+      "win": 2,
+      "total": 3,
+      "rate": 66.7
+    },
+    "T+2": {
+      "win": 2,
+      "total": 3,
+      "rate": 66.7
+    },
+    "T+3": {
+      "win": 2,
+      "total": 3,
+      "rate": 66.7
+    }
+  },
+  "stocks": [
+    {
+      "code": "002405",
+      "name": "四维图新",
+      "status": "verified",
+      "rec_date": "2026-04-28",
+      "base_close": 8.75,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-04-29",
+          "stock_return": 1.71,
+          "index_return": 0.71,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-04-30",
+          "stock_return": 3.2,
+          "index_return": 0.82,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-06",
+          "stock_return": 7.43,
+          "index_return": 2.0,
+          "is_bear_day": false,
+          "win": true
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 7.43,
+      "score": 7.38
+    },
+    {
+      "code": "002140",
+      "name": "东华科技",
+      "status": "verified",
+      "rec_date": "2026-04-28",
+      "base_close": 12.02,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-04-29",
+          "stock_return": 4.83,
+          "index_return": 0.71,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-04-30",
+          "stock_return": 4.08,
+          "index_return": 0.82,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-06",
+          "stock_return": 5.57,
+          "index_return": 2.0,
+          "is_bear_day": false,
+          "win": true
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 5.57,
+      "score": 7.29
+    },
+    {
+      "code": "601799",
+      "name": "星宇股份",
+      "status": "verified",
+      "rec_date": "2026-04-28",
+      "base_close": 126.13,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-04-29",
+          "stock_return": -0.34,
+          "index_return": 0.71,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-04-30",
+          "stock_return": -1.63,
+          "index_return": 0.82,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-06",
+          "stock_return": -0.9,
+          "index_return": 2.0,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -0.34,
+      "score": 7.25
+    }
+  ]
+}

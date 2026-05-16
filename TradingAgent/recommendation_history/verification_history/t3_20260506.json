@@ -1,0 +1,142 @@
+{
+  "date": "2026-05-06",
+  "status": "verified",
+  "total_stocks": 3,
+  "verified_stocks": 3,
+  "win_stocks": 1,
+  "no_data_stocks": 0,
+  "win_rate": 33.3,
+  "day_stats": {
+    "T+1": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    },
+    "T+2": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    },
+    "T+3": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    }
+  },
+  "stocks": [
+    {
+      "code": "002034",
+      "name": "旺能环境",
+      "status": "verified",
+      "rec_date": "2026-05-06",
+      "base_close": 18.05,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-07",
+          "stock_return": 1.44,
+          "index_return": 0.48,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-08",
+          "stock_return": 1.77,
+          "index_return": 0.48,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-11",
+          "stock_return": 4.88,
+          "index_return": 1.56,
+          "is_bear_day": false,
+          "win": true
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 4.88,
+      "score": 8.54
+    },
+    {
+      "code": "603611",
+      "name": "诺力股份",
+      "status": "verified",
+      "rec_date": "2026-05-06",
+      "base_close": 20.18,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-07",
+          "stock_return": -0.76,
+          "index_return": 0.48,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-08",
+          "stock_return": -0.55,
+          "index_return": 0.48,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-11",
+          "stock_return": -0.2,
+          "index_return": 1.56,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -0.2,
+      "score": 8.24
+    },
+    {
+      "code": "600668",
+      "name": "尖峰集团",
+      "status": "verified",
+      "rec_date": "2026-05-06",
+      "base_close": 10.21,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-07",
+          "stock_return": 0.39,
+          "index_return": 0.48,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-08",
+          "stock_return": -2.74,
+          "index_return": 0.48,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-11",
+          "stock_return": -9.01,
+          "index_return": 1.56,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": 0.39,
+      "score": 7.74
+    }
+  ]
+}

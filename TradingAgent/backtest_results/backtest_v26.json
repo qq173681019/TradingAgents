@@ -1,0 +1,448 @@
+{
+  "timestamp": "2026-05-15 00:12:21",
+  "version": "v26-five-fixes",
+  "walk_forward_split": {
+    "train": "2026-02-07 ~ 2026-03-28",
+    "valid": "2026-03-28 ~ 2026-04-22",
+    "test": "2026-04-22 ~ 2026-05-13"
+  },
+  "train_result": {
+    "beat_idx": 0.7142857142857143,
+    "days": 28
+  },
+  "valid_result": {
+    "beat_idx": 0.875,
+    "days": 16
+  },
+  "test_result": {
+    "beat_idx": 0.5,
+    "days": 12,
+    "no_trade": 0,
+    "skipped": 0
+  },
+  "period_results": {
+    "A": {
+      "beat_rate": 0.8,
+      "beat_count": 8,
+      "total_days": 10,
+      "skipped": 0,
+      "no_trade": 1
+    },
+    "B": {
+      "beat_rate": 0.6666666666666666,
+      "beat_count": 12,
+      "total_days": 18,
+      "skipped": 0,
+      "no_trade": 1
+    },
+    "C": {
+      "beat_rate": 0.875,
+      "beat_count": 14,
+      "total_days": 16,
+      "skipped": 0,
+      "no_trade": 1
+    },
+    "D": {
+      "beat_rate": 0.5,
+      "beat_count": 6,
+      "total_days": 12,
+      "skipped": 0,
+      "no_trade": 0
+    }
+  },
+  "test_details": [
+    {
+      "date": "2026-04-22",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -1.81,
+      "idx_ret": -0.32,
+      "beat": false,
+      "top": [
+        {
+          "code": "002938",
+          "name": "鹏鼎控股",
+          "score": 63.7,
+          "ret": -1.0
+        },
+        {
+          "code": "603032",
+          "name": "德新科技",
+          "score": 63.3,
+          "ret": -3.44
+        },
+        {
+          "code": "605222",
+          "name": "",
+          "score": 61.1,
+          "ret": -2.32
+        }
+      ]
+    },
+    {
+      "date": "2026-04-23",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -3.51,
+      "idx_ret": -0.33,
+      "beat": false,
+      "top": [
+        {
+          "code": "600531",
+          "name": "豫光金铅",
+          "score": 65.1,
+          "ret": -0.19
+        },
+        {
+          "code": "002081",
+          "name": "金螳螂",
+          "score": 63.8,
+          "ret": -9.94
+        },
+        {
+          "code": "600641",
+          "name": "",
+          "score": 61.5,
+          "ret": 0.81
+        }
+      ]
+    },
+    {
+      "date": "2026-04-24",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -0.1,
+      "idx_ret": 0.16,
+      "beat": false,
+      "top": [
+        {
+          "code": "002273",
+          "name": "水晶光电",
+          "score": 63.6,
+          "ret": 2.34
+        },
+        {
+          "code": "601512",
+          "name": "中新集团",
+          "score": 63.5,
+          "ret": -2.05
+        },
+        {
+          "code": "003035",
+          "name": "",
+          "score": 61.29999923706055,
+          "ret": -5.85
+        }
+      ]
+    },
+    {
+      "date": "2026-04-27",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -0.24,
+      "idx_ret": -0.19,
+      "beat": false,
+      "top": [
+        {
+          "code": "600633",
+          "name": "浙数文化",
+          "score": 63.5,
+          "ret": -2.95
+        },
+        {
+          "code": "002436",
+          "name": "兴森科技",
+          "score": 63.5,
+          "ret": -4.62
+        },
+        {
+          "code": "605389",
+          "name": "",
+          "score": 62.1,
+          "ret": 4.1
+        }
+      ]
+    },
+    {
+      "date": "2026-04-28",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 3.86,
+      "idx_ret": 0.71,
+      "beat": true,
+      "top": [
+        {
+          "code": "000526",
+          "name": "学大教育",
+          "score": 62.599998474121094,
+          "ret": 1.1
+        },
+        {
+          "code": "000690",
+          "name": "宝新能源",
+          "score": 62.4,
+          "ret": -0.37
+        },
+        {
+          "code": "603906",
+          "name": "",
+          "score": 60.7,
+          "ret": 10.0
+        }
+      ]
+    },
+    {
+      "date": "2026-04-29",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 4.22,
+      "idx_ret": 0.11,
+      "beat": true,
+      "top": [
+        {
+          "code": "002655",
+          "name": "共达电声",
+          "score": 61.9,
+          "ret": 2.67
+        },
+        {
+          "code": "603666",
+          "name": "亿嘉和",
+          "score": 61.79999923706055,
+          "ret": -3.31
+        },
+        {
+          "code": "688531",
+          "name": "",
+          "score": 60.2,
+          "ret": 20.0
+        }
+      ]
+    },
+    {
+      "date": "2026-04-30",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 4.96,
+      "idx_ret": 1.17,
+      "beat": true,
+      "top": [
+        {
+          "code": "603092",
+          "name": "德力佳",
+          "score": 63.4,
+          "ret": 3.42
+        },
+        {
+          "code": "000818",
+          "name": "航锦科技",
+          "score": 63.4,
+          "ret": 9.99
+        },
+        {
+          "code": "605389",
+          "name": "",
+          "score": 61.6,
+          "ret": 4.58
+        }
+      ]
+    },
+    {
+      "date": "2026-05-06",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 0.68,
+      "idx_ret": 0.48,
+      "beat": true,
+      "top": [
+        {
+          "code": "603068",
+          "name": "博通集成",
+          "score": 63.5,
+          "ret": 0.49
+        },
+        {
+          "code": "002786",
+          "name": "银宝山新",
+          "score": 62.6,
+          "ret": -1.12
+        },
+        {
+          "code": "605389",
+          "name": "",
+          "score": 61.5,
+          "ret": 3.63
+        }
+      ]
+    },
+    {
+      "date": "2026-05-07",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -1.12,
+      "idx_ret": -0.0,
+      "beat": false,
+      "top": [
+        {
+          "code": "000818",
+          "name": "航锦科技",
+          "score": 64.3,
+          "ret": 1.51
+        },
+        {
+          "code": "002158",
+          "name": "汉钟精机",
+          "score": 63.1,
+          "ret": -1.81
+        },
+        {
+          "code": "688726",
+          "name": "",
+          "score": 61.1,
+          "ret": -1.96
+        }
+      ]
+    },
+    {
+      "date": "2026-05-08",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": 3.72,
+      "idx_ret": 1.08,
+      "beat": true,
+      "top": [
+        {
+          "code": "002436",
+          "name": "兴森科技",
+          "score": 63.4,
+          "ret": 3.62
+        },
+        {
+          "code": "600208",
+          "name": "衢州发展",
+          "score": 62.8,
+          "ret": -0.58
+        },
+        {
+          "code": "300706",
+          "name": "",
+          "score": 60.3,
+          "ret": 0.78
+        }
+      ]
+    },
+    {
+      "date": "2026-05-11",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -1.84,
+      "idx_ret": -0.25,
+      "beat": false,
+      "top": [
+        {
+          "code": "300052",
+          "name": "",
+          "score": 63.9,
+          "ret": -3.01
+        },
+        {
+          "code": "002158",
+          "name": "汉钟精机",
+          "score": 63.5,
+          "ret": -1.83
+        },
+        {
+          "code": "603075",
+          "name": "热威股份",
+          "score": 63.3,
+          "ret": -0.44
+        }
+      ]
+    },
+    {
+      "date": "2026-05-12",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": 2.7,
+      "idx_ret": 0.67,
+      "beat": true,
+      "top": [
+        {
+          "code": "002897",
+          "name": "意华股份",
+          "score": 63.9,
+          "ret": 3.52
+        },
+        {
+          "code": "002436",
+          "name": "兴森科技",
+          "score": 63.5,
+          "ret": 2.21
+        },
+        {
+          "code": "688711",
+          "name": "",
+          "score": 60.6,
+          "ret": 7.4
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "v10": 60.8,
+    "v14": 49.0,
+    "v22_joint": 72.9,
+    "v24_test": 69.2,
+    "v25_test": 76.9,
+    "v26_test": 50.0
+  },
+  "params": {
+    "weights_bull": [
+      0.20574519595624124,
+      0.05932822139878658,
+      0.3196523036039305,
+      0.1219010321126656,
+      0.14698446375874596,
+      0.14638878316963017
+    ],
+    "weights_range": [
+      0.20574519595624124,
+      0.05932822139878658,
+      0.3196523036039305,
+      0.1219010321126656,
+      0.14698446375874596,
+      0.14638878316963017
+    ],
+    "weights_bear": [
+      0.238613135468402,
+      -0.037694521658213076,
+      0.37071698353945304,
+      0.14137480758201462,
+      0.1704653350451761,
+      0.11652426002316733
+    ],
+    "min_score_threshold": 32.44694669396373,
+    "cooldown_penalty_weight": 7.8237862350517995
+  },
+  "fixes": {
+    "fix1_trading_calendar": "Real trading dates from index data",
+    "fix2_cooldown_days": 3,
+    "fix3_test_end": "2026-05-13",
+    "fix4_limit_up_threshold": 15.0,
+    "fix4_ipo_min_days": 30,
+    "fix5_industry_handling": "Skip unknown industry in sector heat, allow stocks without industry"
+  },
+  "elapsed_seconds": 134.9540297985077
+}

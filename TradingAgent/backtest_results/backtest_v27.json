@@ -1,0 +1,473 @@
+{
+  "timestamp": "2026-05-15 00:24:14",
+  "version": "v27-precision-optimization",
+  "walk_forward_split": {
+    "train": "2026-02-07 ~ 2026-03-28",
+    "valid": "2026-03-28 ~ 2026-04-22",
+    "test": "2026-04-22 ~ 2026-05-13"
+  },
+  "train_result": {
+    "beat_idx": 0.6521739130434783,
+    "days": 23
+  },
+  "valid_result": {
+    "beat_idx": 0.8,
+    "days": 15
+  },
+  "test_result": {
+    "beat_idx": 0.5,
+    "days": 12,
+    "no_trade": 0,
+    "skipped": 0
+  },
+  "period_results": {
+    "A": {
+      "beat_rate": 1.0,
+      "beat_count": 7,
+      "total_days": 7,
+      "skipped": 0,
+      "no_trade": 4
+    },
+    "B": {
+      "beat_rate": 0.5,
+      "beat_count": 8,
+      "total_days": 16,
+      "skipped": 0,
+      "no_trade": 3
+    },
+    "C": {
+      "beat_rate": 0.8,
+      "beat_count": 12,
+      "total_days": 15,
+      "skipped": 0,
+      "no_trade": 2
+    },
+    "D": {
+      "beat_rate": 0.5,
+      "beat_count": 6,
+      "total_days": 12,
+      "skipped": 0,
+      "no_trade": 0
+    }
+  },
+  "test_details": [
+    {
+      "date": "2026-04-22",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": 0.11,
+      "idx_ret": -0.32,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "603595",
+          "name": "",
+          "score": 63.29999923706055,
+          "ret": -0.22
+        },
+        {
+          "code": "002878",
+          "name": "元隆雅图",
+          "score": 62.79999923706055,
+          "ret": -1.03
+        },
+        {
+          "code": "603075",
+          "name": "热威股份",
+          "score": 61.400001525878906,
+          "ret": 0.47
+        }
+      ]
+    },
+    {
+      "date": "2026-04-23",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -2.47,
+      "idx_ret": -0.33,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "002245",
+          "name": "蔚蓝锂芯",
+          "score": 63.8,
+          "ret": -0.99
+        },
+        {
+          "code": "603776",
+          "name": "永安行",
+          "score": 63.70000076293945,
+          "ret": 1.26
+        },
+        {
+          "code": "603991",
+          "name": "",
+          "score": 62.2,
+          "ret": -10.0
+        }
+      ]
+    },
+    {
+      "date": "2026-04-24",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -1.48,
+      "idx_ret": 0.16,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "600640",
+          "name": "国脉文化",
+          "score": 62.900001525878906,
+          "ret": -0.16
+        },
+        {
+          "code": "603092",
+          "name": "德力佳",
+          "score": 62.8,
+          "ret": 0.59
+        },
+        {
+          "code": "003035",
+          "name": "",
+          "score": 62.20000076293945,
+          "ret": -5.85
+        }
+      ]
+    },
+    {
+      "date": "2026-04-27",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -0.7,
+      "idx_ret": -0.19,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "600640",
+          "name": "国脉文化",
+          "score": 64.0,
+          "ret": -0.94
+        },
+        {
+          "code": "603092",
+          "name": "德力佳",
+          "score": 63.2,
+          "ret": -4.24
+        },
+        {
+          "code": "605389",
+          "name": "",
+          "score": 63.1,
+          "ret": 4.1
+        }
+      ]
+    },
+    {
+      "date": "2026-04-28",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 0.57,
+      "idx_ret": 0.71,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "688609",
+          "name": "",
+          "score": 63.3,
+          "ret": 0.5
+        },
+        {
+          "code": "300043",
+          "name": "",
+          "score": 62.3,
+          "ret": -1.16
+        },
+        {
+          "code": "603075",
+          "name": "热威股份",
+          "score": 61.79999923706055,
+          "ret": 2.06
+        }
+      ]
+    },
+    {
+      "date": "2026-04-29",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 4.24,
+      "idx_ret": 0.11,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "600023",
+          "name": "浙能电力",
+          "score": 61.099998474121094,
+          "ret": -0.35
+        },
+        {
+          "code": "688653",
+          "name": "",
+          "score": 61.0,
+          "ret": 3.79
+        },
+        {
+          "code": "300769",
+          "name": "",
+          "score": 60.6,
+          "ret": 12.92
+        }
+      ]
+    },
+    {
+      "date": "2026-04-30",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 3.18,
+      "idx_ret": 1.17,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 64.2,
+          "ret": 4.58
+        },
+        {
+          "code": "603092",
+          "name": "德力佳",
+          "score": 61.2,
+          "ret": 3.42
+        },
+        {
+          "code": "300861",
+          "name": "",
+          "score": 60.9,
+          "ret": 2.37
+        }
+      ]
+    },
+    {
+      "date": "2026-05-06",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 2.33,
+      "idx_ret": 0.48,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "688653",
+          "name": "",
+          "score": 62.6,
+          "ret": 1.32
+        },
+        {
+          "code": "605389",
+          "name": "",
+          "score": 62.4,
+          "ret": 3.63
+        },
+        {
+          "code": "603068",
+          "name": "博通集成",
+          "score": 61.2,
+          "ret": 0.49
+        }
+      ]
+    },
+    {
+      "date": "2026-05-07",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": 0.4,
+      "idx_ret": -0.0,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "300665",
+          "name": "",
+          "score": 61.8,
+          "ret": 0.11
+        },
+        {
+          "code": "600171",
+          "name": "上海贝岭",
+          "score": 61.5,
+          "ret": -0.4
+        },
+        {
+          "code": "688230",
+          "name": "",
+          "score": 60.6,
+          "ret": -0.81
+        }
+      ]
+    },
+    {
+      "date": "2026-05-08",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -1.25,
+      "idx_ret": 1.08,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "301418",
+          "name": "",
+          "score": 61.1,
+          "ret": 1.72
+        },
+        {
+          "code": "688305",
+          "name": "",
+          "score": 60.5,
+          "ret": 0.2
+        },
+        {
+          "code": "000682",
+          "name": "东方电子",
+          "score": 59.70000076293945,
+          "ret": 0.74
+        }
+      ]
+    },
+    {
+      "date": "2026-05-11",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -1.56,
+      "idx_ret": -0.25,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "603075",
+          "name": "热威股份",
+          "score": 65.1,
+          "ret": -0.44
+        },
+        {
+          "code": "688665",
+          "name": "",
+          "score": 61.2,
+          "ret": -2.54
+        },
+        {
+          "code": "688296",
+          "name": "",
+          "score": 61.1,
+          "ret": -1.65
+        }
+      ]
+    },
+    {
+      "date": "2026-05-12",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": 1.95,
+      "idx_ret": 0.67,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "688609",
+          "name": "",
+          "score": 61.4,
+          "ret": -0.27
+        },
+        {
+          "code": "688790",
+          "name": "",
+          "score": 61.0,
+          "ret": 0.87
+        },
+        {
+          "code": "002803",
+          "name": "吉宏股份",
+          "score": 60.8,
+          "ret": 4.54
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "v25_test": 76.9,
+    "v26_test": 50.0,
+    "v27_test": 50.0
+  },
+  "params": {
+    "timestamp": "2026-05-15 00:24:14",
+    "version": "v27-precision-optimization",
+    "description": "V25 frozen weights + smart no-trade + vol penalty + diversification",
+    "best_obj": 0.6116979405034324,
+    "train_beat_idx": 0.6521739130434783,
+    "valid_beat_idx": 0.8,
+    "test_beat_idx": 0.5,
+    "train_test_gap_pp": 15.2,
+    "frozen_v25_weights": {
+      "weights_bull": [
+        0.10743403213348336,
+        0.19687614823506336,
+        0.2724832107518529,
+        0.06933095069162497,
+        0.2105788063619203,
+        0.1432968518260551
+      ],
+      "weights_range": [
+        0.10743403213348336,
+        0.19687614823506336,
+        0.2724832107518529,
+        0.06933095069162497,
+        0.2105788063619203,
+        0.1432968518260551
+      ],
+      "weights_bear": [
+        0.11983412831656223,
+        0.14265266337867788,
+        0.30393337560649647,
+        0.07733316786590252,
+        0.23488393017744855,
+        0.12136273465491235
+      ],
+      "min_score_threshold": 62.247685219155045
+    },
+    "new_params": {
+      "vol_penalty_weight": 6.3230014612758,
+      "vol_penalty_threshold": 1.8377432194922632,
+      "max_industry_per_day": 2,
+      "cooldown_penalty_weight": 2.674913546825118,
+      "w_extra": 0.1548573069571959,
+      "prev_day_gain_threshold": 3.4328913315298033,
+      "consec_rally_limit": 5,
+      "vol_spike_threshold": 3.0746031816673414,
+      "momentum_fade_threshold": 2.4152608788529895,
+      "sector_concentration_threshold": 0.46450680201655614,
+      "n_rec_low_risk": 4,
+      "n_rec_med_risk": 1,
+      "min_score_threshold": 63.14697147738189
+    }
+  },
+  "elapsed_seconds": 135.18260431289673
+}

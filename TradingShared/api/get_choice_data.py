@@ -371,8 +371,8 @@ def main():
     
     # 1. 初始化Choice SDK
     print("\n[1/6] 初始化Choice SDK...")
-    print(f"使用账号密码登录: {CHOICE_USERNAME}")
-    login_options = f"username={CHOICE_USERNAME},password={CHOICE_PASSWORD}"
+print(f"使用账号密码登录: {CHOICE_USERNAME}")
+    login_options = f"USERNAME={CHOICE_USERNAME},PASSWORD={CHOICE_PASSWORD}"
     result = c.start(login_options, logcallback=login_callback)
     if result.ErrorCode != 0:
         print(f"[FAIL] Choice连接失败: {result.ErrorMsg}")

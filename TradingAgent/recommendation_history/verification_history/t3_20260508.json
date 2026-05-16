@@ -1,0 +1,142 @@
+{
+  "date": "2026-05-08",
+  "status": "verified",
+  "total_stocks": 3,
+  "verified_stocks": 3,
+  "win_stocks": 0,
+  "no_data_stocks": 0,
+  "win_rate": 0.0,
+  "day_stats": {
+    "T+1": {
+      "win": 0,
+      "total": 3,
+      "rate": 0.0
+    },
+    "T+2": {
+      "win": 0,
+      "total": 3,
+      "rate": 0.0
+    },
+    "T+3": {
+      "win": 0,
+      "total": 3,
+      "rate": 0.0
+    }
+  },
+  "stocks": [
+    {
+      "code": "002818",
+      "name": "富森美",
+      "status": "verified",
+      "rec_date": "2026-05-08",
+      "base_close": 12.07,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-11",
+          "stock_return": -1.74,
+          "index_return": 1.08,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-12",
+          "stock_return": -3.65,
+          "index_return": 0.83,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-13",
+          "stock_return": -2.4,
+          "index_return": 1.5,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -1.74,
+      "score": 7.57
+    },
+    {
+      "code": "002786",
+      "name": "银宝山新",
+      "status": "verified",
+      "rec_date": "2026-05-08",
+      "base_close": 8.1,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-11",
+          "stock_return": -0.25,
+          "index_return": 1.08,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-12",
+          "stock_return": -1.98,
+          "index_return": 0.83,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-13",
+          "stock_return": -1.48,
+          "index_return": 1.5,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -0.25,
+      "score": 7.43
+    },
+    {
+      "code": "603368",
+      "name": "柳药集团",
+      "status": "verified",
+      "rec_date": "2026-05-08",
+      "base_close": 16.92,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-11",
+          "stock_return": 0.71,
+          "index_return": 1.08,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-12",
+          "stock_return": -0.47,
+          "index_return": 0.83,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-13",
+          "stock_return": -0.71,
+          "index_return": 1.5,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": 0.71,
+      "score": 7.37
+    }
+  ]
+}

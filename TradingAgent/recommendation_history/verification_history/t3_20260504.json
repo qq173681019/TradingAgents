@@ -1,0 +1,142 @@
+{
+  "date": "2026-05-04",
+  "status": "verified",
+  "total_stocks": 3,
+  "verified_stocks": 3,
+  "win_stocks": 1,
+  "no_data_stocks": 0,
+  "win_rate": 33.3,
+  "day_stats": {
+    "T+1": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    },
+    "T+2": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    },
+    "T+3": {
+      "win": 0,
+      "total": 3,
+      "rate": 0.0
+    }
+  },
+  "stocks": [
+    {
+      "code": "002221",
+      "name": "东华能源",
+      "status": "verified",
+      "rec_date": "2026-04-30",
+      "base_close": 8.05,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-06",
+          "stock_return": -0.37,
+          "index_return": 1.17,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-07",
+          "stock_return": -2.98,
+          "index_return": 1.65,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-08",
+          "stock_return": -3.11,
+          "index_return": 1.65,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -0.37,
+      "score": 8.27
+    },
+    {
+      "code": "002125",
+      "name": "湘潭电化",
+      "status": "verified",
+      "rec_date": "2026-04-30",
+      "base_close": 15.27,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-06",
+          "stock_return": 2.16,
+          "index_return": 1.17,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-07",
+          "stock_return": 2.16,
+          "index_return": 1.65,
+          "is_bear_day": false,
+          "win": true
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-08",
+          "stock_return": 0.0,
+          "index_return": 1.65,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 2.16,
+      "score": 7.96
+    },
+    {
+      "code": "002818",
+      "name": "富森美",
+      "status": "verified",
+      "rec_date": "2026-04-30",
+      "base_close": 12.15,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-06",
+          "stock_return": -1.15,
+          "index_return": 1.17,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-07",
+          "stock_return": -0.66,
+          "index_return": 1.65,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-08",
+          "stock_return": -0.66,
+          "index_return": 1.65,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": -0.66,
+      "score": 7.92
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "date": "2026-05-16",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "none",
+    "market_summary": "LLM分析不可用，仅使用量化数据",
+    "hot_sectors_analysis": [],
+    "sector_boost": {},
+    "risk_warnings": [],
+    "tomorrow_focus": []
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "603283",
+      "name": "赛腾股份",
+      "industry": "机械设备",
+      "final_score": 67.2,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 5.3,
+        "sector": 94.0,
+        "relative_strength": 66.7,
+        "volume_health": 60,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 19.8799991607666,
+      "market_cap_yi": 15.1,
+      "divergence": {
+        "bullish": false,
+        "bearish": true
+      }
+    },
+    {
+      "rank": 2,
+      "code": "300131",
+      "name": "",
+      "industry": "unknown",
+      "final_score": 65.9,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 8.8,
+        "sector": 50,
+        "relative_strength": 95.7,
+        "volume_health": 62,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 39.16999816894531,
+      "market_cap_yi": 36.7,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    },
+    {
+      "rank": 3,
+      "code": "603290",
+      "name": "斯达半导",
+      "industry": "电子",
+      "final_score": 65.5,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 6.8,
+        "sector": 67.9,
+        "relative_strength": 90.9,
+        "volume_health": 57,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 22.43000030517578,
+      "market_cap_yi": 21.0,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    }
+  ],
+  "total_scored": 1724,
+  "top_10_debug": []
+}

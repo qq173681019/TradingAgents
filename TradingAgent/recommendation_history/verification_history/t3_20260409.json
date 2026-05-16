@@ -1,0 +1,66 @@
+{
+  "date": "2026-04-09",
+  "status": "verified",
+  "total_stocks": 1,
+  "verified_stocks": 1,
+  "win_stocks": 0,
+  "no_data_stocks": 0,
+  "win_rate": 0.0,
+  "day_stats": {
+    "T+1": {
+      "win": 0,
+      "total": 1,
+      "rate": 0.0
+    },
+    "T+2": {
+      "win": 0,
+      "total": 1,
+      "rate": 0.0
+    },
+    "T+3": {
+      "win": 0,
+      "total": 1,
+      "rate": 0.0
+    }
+  },
+  "stocks": [
+    {
+      "code": "600715",
+      "name": "文投控股",
+      "status": "verified",
+      "rec_date": "2026-04-09",
+      "base_close": 2.0,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-04-10",
+          "stock_return": 0.0,
+          "index_return": 0.51,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-04-13",
+          "stock_return": 0.0,
+          "index_return": 0.56,
+          "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-04-14",
+          "stock_return": 0.5,
+          "index_return": 1.52,
+          "is_bear_day": false,
+          "win": false
+        }
+      ],
+      "win": false,
+      "win_day": null,
+      "best_return": 0.5,
+      "score": 7.58
+    }
+  ]
+}

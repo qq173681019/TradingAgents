@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-05-07 15:18:03",
+  "timestamp": "2026-05-08 15:17:06",
   "summary": {
-    "total_days": 9,
+    "total_days": 10,
     "beat_idx_days": 2,
-    "beat_idx_pct": 22.2,
-    "total_stocks": 11,
-    "stock_wins": 5,
-    "stock_win_rate": 45.5,
-    "stock_beat_idx": 4,
-    "stock_beat_idx_rate": 36.4,
-    "avg_return": 0.55,
+    "beat_idx_pct": 20.0,
+    "total_stocks": 14,
+    "stock_wins": 7,
+    "stock_win_rate": 50.0,
+    "stock_beat_idx": 5,
+    "stock_beat_idx_rate": 35.7,
+    "avg_return": 0.51,
     "best_stock": {
       "code": "002140",
       "name": "东华科技",
@@ -235,12 +235,47 @@
     },
     {
       "date": "2026-05-06",
+      "status": "verified",
+      "index_return": 0.48,
+      "avg_stock_return": 0.36,
+      "beat_idx": false,
+      "beat_idx_count": 1,
+      "total_stocks": 3,
+      "stocks": [
+        {
+          "code": "002034",
+          "name": "旺能环境",
+          "score": 8.54,
+          "return": 1.44,
+          "beat_idx": true,
+          "status": "ok"
+        },
+        {
+          "code": "603611",
+          "name": "诺力股份",
+          "score": 8.24,
+          "return": -0.74,
+          "beat_idx": false,
+          "status": "ok"
+        },
+        {
+          "code": "600668",
+          "name": "尖峰集团",
+          "score": 7.74,
+          "return": 0.39,
+          "beat_idx": false,
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-07",
       "status": "error",
       "reason": "无法获取指数数据",
       "stocks": []
     },
     {
-      "date": "2026-05-07",
+      "date": "2026-05-08",
       "status": "skipped",
       "reason": "今日推荐尚未收盘",
       "stocks": []

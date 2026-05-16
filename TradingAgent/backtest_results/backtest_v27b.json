@@ -1,0 +1,319 @@
+{
+  "version": "v27b",
+  "timestamp": "2026-05-15T00:44:01.537795",
+  "train": {
+    "beat_idx": 0.6428571428571429,
+    "days": 28
+  },
+  "valid": {
+    "beat_idx": 0.625,
+    "days": 16
+  },
+  "test": {
+    "beat_idx": 0.375,
+    "days": 8,
+    "no_trade": 4
+  },
+  "params": {
+    "n_rec": 4,
+    "max_industry": 2,
+    "min_score": 59.266681074280655,
+    "cooldown_weight": 14.384825525127717,
+    "vol_penalty_weight": 5.959705569737513,
+    "vol_penalty_threshold": 2.5244098608451706,
+    "w_extra": 0.03295355531298377,
+    "trend_bonus": 8.574182783039959
+  },
+  "test_details": [
+    {
+      "date": "2026-04-22",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": -2.02,
+      "idx_ret": -0.32,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "603595",
+          "name": "",
+          "score": 61.5,
+          "ret": -0.22
+        },
+        {
+          "code": "002338",
+          "name": "奥普光电",
+          "score": 60.9,
+          "ret": -4.46
+        },
+        {
+          "code": "605389",
+          "name": "",
+          "score": 60.6,
+          "ret": 1.24
+        }
+      ]
+    },
+    {
+      "date": "2026-04-23",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 0,
+      "avg_ret": 0,
+      "idx_ret": -0.33,
+      "beat": false,
+      "no_trade": true,
+      "top": []
+    },
+    {
+      "date": "2026-04-24",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -1.53,
+      "idx_ret": 0.16,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "003035",
+          "name": "",
+          "score": 62.8,
+          "ret": -5.85
+        },
+        {
+          "code": "601330",
+          "name": "绿色动力",
+          "score": 61.1,
+          "ret": 1.16
+        },
+        {
+          "code": "000722",
+          "name": "湖南发展",
+          "score": 61.1,
+          "ret": -0.76
+        }
+      ]
+    },
+    {
+      "date": "2026-04-27",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -0.88,
+      "idx_ret": -0.19,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 63.0,
+          "ret": 4.1
+        },
+        {
+          "code": "600640",
+          "name": "国脉文化",
+          "score": 60.70000076293945,
+          "ret": -0.94
+        },
+        {
+          "code": "000158",
+          "name": "常山北明",
+          "score": 60.400001525878906,
+          "ret": -4.94
+        }
+      ]
+    },
+    {
+      "date": "2026-04-28",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -0.15,
+      "idx_ret": 0.71,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "688609",
+          "name": "",
+          "score": 61.2,
+          "ret": 0.5
+        },
+        {
+          "code": "688620",
+          "name": "",
+          "score": 60.6,
+          "ret": -0.23
+        },
+        {
+          "code": "603075",
+          "name": "热威股份",
+          "score": 59.79999923706055,
+          "ret": 2.06
+        }
+      ]
+    },
+    {
+      "date": "2026-04-29",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": -0.34,
+      "idx_ret": 0.11,
+      "beat": false,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "603666",
+          "name": "亿嘉和",
+          "score": 61.0,
+          "ret": -3.31
+        },
+        {
+          "code": "300745",
+          "name": "",
+          "score": 60.4,
+          "ret": -2.46
+        },
+        {
+          "code": "688653",
+          "name": "",
+          "score": 60.0,
+          "ret": 3.79
+        }
+      ]
+    },
+    {
+      "date": "2026-04-30",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 3.02,
+      "idx_ret": 1.17,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 62.4,
+          "ret": 4.58
+        },
+        {
+          "code": "603092",
+          "name": "德力佳",
+          "score": 60.79999923706055,
+          "ret": 3.42
+        },
+        {
+          "code": "688099",
+          "name": "",
+          "score": 60.6,
+          "ret": 2.84
+        }
+      ]
+    },
+    {
+      "date": "2026-05-06",
+      "regime": "bull",
+      "risk": 2,
+      "n_stocks": 4,
+      "avg_ret": 4.42,
+      "idx_ret": 0.48,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "605389",
+          "name": "",
+          "score": 63.0,
+          "ret": 3.63
+        },
+        {
+          "code": "688099",
+          "name": "",
+          "score": 61.0,
+          "ret": 1.93
+        },
+        {
+          "code": "002712",
+          "name": "思美传媒",
+          "score": 60.099998474121094,
+          "ret": 2.11
+        }
+      ]
+    },
+    {
+      "date": "2026-05-07",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 0,
+      "avg_ret": 0,
+      "idx_ret": -0.0,
+      "beat": false,
+      "no_trade": true,
+      "top": []
+    },
+    {
+      "date": "2026-05-08",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 0,
+      "avg_ret": 0,
+      "idx_ret": 1.08,
+      "beat": false,
+      "no_trade": true,
+      "top": []
+    },
+    {
+      "date": "2026-05-11",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 0,
+      "avg_ret": 0,
+      "idx_ret": -0.25,
+      "beat": false,
+      "no_trade": true,
+      "top": []
+    },
+    {
+      "date": "2026-05-12",
+      "regime": "strong_bull",
+      "risk": 1,
+      "n_stocks": 4,
+      "avg_ret": 3.1,
+      "idx_ret": 0.67,
+      "beat": true,
+      "no_trade": false,
+      "top": [
+        {
+          "code": "688727",
+          "name": "",
+          "score": 61.6,
+          "ret": 7.67
+        },
+        {
+          "code": "003004",
+          "name": "",
+          "score": 61.5,
+          "ret": -1.94
+        },
+        {
+          "code": "000158",
+          "name": "常山北明",
+          "score": 61.0,
+          "ret": 2.13
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "v25": 76.9,
+    "v26": 50.0,
+    "v27b": 37.5
+  },
+  "elapsed_s": 174.18397545814514
+}
