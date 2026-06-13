@@ -1,0 +1,156 @@
+{
+  "date": "2026-05-18",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "Gateway-DeepSeek-V4",
+    "market_summary": "科技主线延续，电子板块领涨，资金聚焦半导体和AI算力，防御性板块分化，军工脉冲后回落。",
+    "hot_sectors_analysis": [
+      {
+        "name": "电子化学品Ⅱ",
+        "hotness": "高",
+        "sustainability": "观察",
+        "driver": "政策催化",
+        "summary": "半导体材料国产替代加速"
+      },
+      {
+        "name": "电子",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "业绩驱动",
+        "summary": "消费电子复苏叠加AI需求"
+      },
+      {
+        "name": "电信运营商",
+        "hotness": "中",
+        "sustainability": "持续",
+        "driver": "资金博弈",
+        "summary": "高股息防御属性受青睐"
+      },
+      {
+        "name": "通信",
+        "hotness": "中",
+        "sustainability": "观察",
+        "driver": "事件驱动",
+        "summary": "5G-A及算力基建催化"
+      },
+      {
+        "name": "国防军工",
+        "hotness": "低",
+        "sustainability": "一日游",
+        "driver": "超跌反弹",
+        "summary": "地缘事件脉冲式行情"
+      }
+    ],
+    "sector_boost": {
+      "电子化学品Ⅱ": 1.5,
+      "电子": 1.0,
+      "电信运营商": 0.5,
+      "通信": 0.5,
+      "国防军工": -1.0
+    },
+    "risk_warnings": [
+      "电子板块短期涨幅过大，注意获利回吐",
+      "通信线缆及配套评分转负，警惕板块内部分化",
+      "电网设备评分下滑，关注政策落地节奏"
+    ],
+    "tomorrow_focus": [
+      "电子化学品（光刻胶方向）",
+      "AI算力（通信设备）",
+      "高股息（电信运营商）"
+    ]
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "688146",
+      "name": "",
+      "industry": "电子",
+      "final_score": 72.0,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 9.1,
+        "sector": 73.2,
+        "relative_strength": 100.0,
+        "volume_health": 52,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 138.17999267578125,
+      "market_cap_yi": 4730.3,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    },
+    {
+      "rank": 2,
+      "code": "688603",
+      "name": "",
+      "industry": "电子化学品Ⅱ",
+      "final_score": 71.4,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 6.3,
+        "sector": 88.5,
+        "relative_strength": 93.3,
+        "volume_health": 55,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 60.560001373291016,
+      "market_cap_yi": 1321.8,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    },
+    {
+      "rank": 3,
+      "code": "300560",
+      "name": "",
+      "industry": "通信",
+      "final_score": 57.6,
+      "scores": {
+        "trend": 67.6,
+        "money_flow": 6.5,
+        "sector": 55.7,
+        "relative_strength": 68.8,
+        "volume_health": 54,
+        "risk_adjustment": 40
+      },
+      "trend_direction": "up",
+      "ret_20d": 5.739999771118164,
+      "market_cap_yi": 2.7,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    }
+  ],
+  "total_scored": 236,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 244,
+    "hot_sectors": [
+      "通信线缆及配套",
+      "其他数字媒体",
+      "元件",
+      "历史新高",
+      "昨日打二板以上表现",
+      "油气及炼化工程",
+      "电子化学品Ⅲ",
+      "电子化学品Ⅱ",
+      "电信运营商",
+      "次新股"
+    ],
+    "filtered_out": 1568
+  },
+  "top_10_debug": []
+}

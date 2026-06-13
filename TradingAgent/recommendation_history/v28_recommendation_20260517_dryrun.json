@@ -1,0 +1,195 @@
+{
+  "date": "2026-05-17",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "none",
+    "market_summary": "LLM分析不可用，仅使用量化数据",
+    "hot_sectors_analysis": [],
+    "sector_boost": {},
+    "risk_warnings": [],
+    "tomorrow_focus": []
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "300745",
+      "name": "",
+      "industry": "汽车",
+      "final_score": 57.9,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 6.8,
+        "sector": 37.1,
+        "relative_strength": 99.0,
+        "volume_health": 58,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 88.30000305175781,
+      "market_cap_yi": 10.4,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    },
+    {
+      "rank": 2,
+      "code": "300125",
+      "name": "",
+      "industry": "光伏发电",
+      "final_score": 57.2,
+      "scores": {
+        "trend": 56.6,
+        "money_flow": 4.4,
+        "sector": 51.1,
+        "relative_strength": 72.7,
+        "volume_health": 64,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 13.829999923706055,
+      "market_cap_yi": 0.8,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    },
+    {
+      "rank": 3,
+      "code": "600207",
+      "name": "",
+      "industry": "光伏辅材",
+      "final_score": 54.9,
+      "scores": {
+        "trend": 63.6,
+        "money_flow": 5.6,
+        "sector": 34.9,
+        "relative_strength": 73.3,
+        "volume_health": 59,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 22.6299991607666,
+      "market_cap_yi": 4.2,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      }
+    }
+  ],
+  "total_scored": 259,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 262,
+    "hot_sectors": [
+      "人工智能",
+      "半导体",
+      "芯片",
+      "新能源",
+      "光伏",
+      "军工",
+      "医疗器械",
+      "新能源汽车"
+    ],
+    "filtered_out": 3820
+  },
+  "top_10_debug": [
+    {
+      "code": "688598",
+      "name": "",
+      "industry": "光伏辅材",
+      "score": 61.7,
+      "ret20": 36.95000076293945,
+      "market_cap": 630.9,
+      "money_s": 8.8
+    },
+    {
+      "code": "300745",
+      "name": "",
+      "industry": "汽车",
+      "score": 57.9,
+      "ret20": 88.30000305175781,
+      "market_cap": 10.4,
+      "money_s": 6.8
+    },
+    {
+      "code": "601908",
+      "name": "京运通",
+      "industry": "光伏发电",
+      "score": 57.6,
+      "ret20": -5.539999961853027,
+      "market_cap": 10.7,
+      "money_s": 5.3
+    },
+    {
+      "code": "300125",
+      "name": "",
+      "industry": "光伏发电",
+      "score": 57.2,
+      "ret20": 13.829999923706055,
+      "market_cap": 0.8,
+      "money_s": 4.4
+    },
+    {
+      "code": "000591",
+      "name": "太阳能",
+      "industry": "光伏发电",
+      "score": 57.0,
+      "ret20": 12.550000190734863,
+      "market_cap": 15.0,
+      "money_s": 4.7
+    },
+    {
+      "code": "300643",
+      "name": "",
+      "industry": "汽车",
+      "score": 56.9,
+      "ret20": 5.039999961853027,
+      "market_cap": 1.3,
+      "money_s": 6.2
+    },
+    {
+      "code": "301581",
+      "name": "",
+      "industry": "汽车",
+      "score": 56.4,
+      "ret20": 8.920000076293945,
+      "market_cap": 0.5,
+      "money_s": 6.8
+    },
+    {
+      "code": "002510",
+      "name": "天汽模",
+      "industry": "汽车",
+      "score": 56.2,
+      "ret20": 2.6500000953674316,
+      "market_cap": 6.5,
+      "money_s": 6.3
+    },
+    {
+      "code": "002617",
+      "name": "露笑科技",
+      "industry": "光伏发电",
+      "score": 55.9,
+      "ret20": 21.09000015258789,
+      "market_cap": 46.8,
+      "money_s": 3.8
+    },
+    {
+      "code": "603390",
+      "name": "通达电气",
+      "industry": "汽车",
+      "score": 55.3,
+      "ret20": 24.15999984741211,
+      "market_cap": 3.7,
+      "money_s": 5.0
+    }
+  ]
+}

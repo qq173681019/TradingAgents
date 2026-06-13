@@ -49,6 +49,14 @@ except ImportError as e:
     print(f"  [WARN] LLM模块不可用: {e}")
     LLM_AVAILABLE = False
 
+# V2 筛选器集成
+try:
+    from stock_screener_v2 import StockScreenerV2, SectorRotator, MoneyFlowFilter
+    V2_AVAILABLE = True
+except ImportError as e:
+    print(f"  [WARN] V2筛选器不可用: {e}")
+    V2_AVAILABLE = False
+
 # ============================================================================
 # Config
 # ============================================================================
@@ -831,9 +839,17 @@ class CooldownTracker:
 # ============================================================================
 # ★★★ V28 Scoring Engine ★★★
 # ============================================================================
-def score_all_stocks(kline, index_df, scores, date, risk, weights_config, debug=False):
-    """对全部股票计算V28评分，返回排序后的候选列表"""
+def score_all_stocks(kline, index_df, scores, date, risk, weights_config, debug=False, sector_mapping=None):
+    """对全部股票计算V28评分，返回排序后的候选列表
+    
+    Args:
+        sector_mapping: 可选的股票->行业映射字典
+    """
     print(f"\n  正在计算V28评分 (risk={risk})...")
+    
+    # 加载行业映射（如果未提供）
+    if sector_mapping is None:
+        sector_mapping = _load_sector_mapping()
 
     regime, confidence, risk_detected = detect_market_regime(index_df, date)
     should, n_rec = should_trade(regime, confidence, risk_detected)
@@ -891,12 +907,16 @@ def score_all_stocks(kline, index_df, scores, date, risk, weights_config, debug=
         else:
             last_pct = 0
 
-        # 行业信息：优先从评分文件获取，空值则标记为unknown
+        # 行业信息：优先从评分文件获取，补充sector_mapping
         industry = 'unknown'
         if static:
             raw_ind = static.get('industry', '')
             if raw_ind and raw_ind not in ('unknown', '未知', '', None):
                 industry = raw_ind
+        
+        # 从sector_mapping补充缺失的行业信息
+        if industry == 'unknown' and sector_mapping:
+            industry = sector_mapping.get(code, 'unknown')
 
         # 从kline计算20日涨幅（不再依赖评分文件）
         ret20 = (c[-1] - c[-21]) / c[-21] * 100 if len(c) >= 21 else 0
@@ -932,6 +952,7 @@ def score_all_stocks(kline, index_df, scores, date, risk, weights_config, debug=
             'extra_score': extra_score,
             'ret20': ret20,
             'market_cap': market_cap_yi,
+            'close': c[-1],  # 收盘价
         }
 
     # Phase 2: Compute sub-scores
@@ -982,6 +1003,7 @@ def score_all_stocks(kline, index_df, scores, date, risk, weights_config, debug=
             'name': cache['name'],
             'industry': industry,
             'final_score': final,
+            'close': cache['close'],  # 收盘价
             'trend_s': trend_s,
             'trend_dir': trend_dir,
             'money_s': mf_s,  # 0-10范围
@@ -1107,10 +1129,131 @@ def select_recommendations(scored_stocks, weights_config, risk, cooldown_tracker
 
 
 # ============================================================================
+# V2 预过滤集成
+# ============================================================================
+V2_FILTER_THRESHOLD = 0.5  # 只在置信度>=0.5时启用V2预过滤
+
+def apply_v2_prefilter(kline_dict, scores_dict, date_pd, risk, regime, confidence):
+    """
+    应用V2预过滤：用板块轮动筛选候选池
+    
+    流程：
+    1. 获取热点板块（使用SectorRotator）
+    2. 过滤出在热点板块中的股票
+    3. 返回过滤后的候选代码集合
+    
+    Returns:
+        (v2_filtered_codes: set, hot_sectors: list, v2_stats: dict)
+    """
+    import time as time_module
+    t0 = time_module.time()
+    
+    stats = {
+        'total_in_kline': len(kline_dict),
+        'total_in_scores': len(scores_dict),
+        'v2_filtered_count': 0,
+        'hot_sectors_used': [],
+        'v2_enabled': False,
+    }
+    
+    # 置信度太低时不启用V2过滤（避免误判热点板块）
+    if confidence < V2_FILTER_THRESHOLD and regime in ('bear', 'crisis'):
+        print(f"  [V2] 置信度={confidence:.2f} 或市场{risk}，跳过V2预过滤")
+        return set(kline_dict.keys()), [], stats
+    
+    if not V2_AVAILABLE:
+        print(f"  [V2] V2筛选器未加载，使用全量候选池")
+        return set(kline_dict.keys()), [], stats
+    
+    print(f"\n{'=' * 70}")
+    print(f"  步骤1.5: V2 预过滤（板块轮动筛选）")
+    print(f"{'=' * 70}")
+    
+    try:
+        # 初始化板块轮动识别器
+        sector_rotator = SectorRotator()
+        
+        # 获取热点板块
+        hot_sectors = sector_rotator.get_hot_sectors(top_n=10)
+        
+        if not hot_sectors:
+            print(f"  [V2] 未获取到热点板块，使用全量候选池")
+            return set(kline_dict.keys()), [], stats
+        
+        stats['hot_sectors_used'] = [s[0] for s in hot_sectors]
+        stats['v2_enabled'] = True
+        
+        print(f"  热点板块(Top 10): {[s[0] for s in hot_sectors[:5]]}...")
+        
+        # 加载行业映射（使用V28自带的函数）
+        sector_mapping = _load_sector_mapping()
+        
+        # 过滤候选池
+        v2_filtered = set()
+        skip_no_match = 0
+        skip_no_sector = 0
+        
+        for code in kline_dict.keys():
+            # 优先从评分数据获取行业信息
+            static = scores_dict.get(code)
+            
+            if static:
+                industry = static.get('industry', static.get('matched_sector', ''))
+                if not industry or industry in ('unknown', '未知', ''):
+                    # 从sector_mapping补充
+                    industry = sector_mapping.get(code, '未知')
+                name = static.get('name', '')
+            else:
+                # 没有评分数据，从sector_mapping获取
+                industry = sector_mapping.get(code, '未知')
+                name = ''
+            
+            if not industry or industry == '未知':
+                skip_no_sector += 1
+            
+            stock_info = {
+                'code': code,
+                'name': name,
+                'industry': industry,
+                'matched_sector': industry,
+            }
+            
+            # 用V2的is_in_hot_sector判断
+            if sector_rotator.is_in_hot_sector(stock_info, hot_sectors):
+                v2_filtered.add(code)
+            else:
+                skip_no_match += 1
+        
+        stats['v2_filtered_count'] = len(v2_filtered)
+        stats['filtered_out'] = skip_no_match
+        stats['no_sector_data'] = skip_no_sector
+        
+        print(f"  V2预过滤: {len(v2_filtered)}/{len(kline_dict)} 只通过板块筛选")
+        print(f"  (过滤掉 {skip_no_match} 只不在热点板块, {skip_no_sector} 只无行业数据)")
+        
+        elapsed = time_module.time() - t0
+        print(f"  V2预过滤耗时: {elapsed:.1f}s")
+        
+        return v2_filtered, hot_sectors, stats
+        
+    except Exception as e:
+        print(f"  [V2] V2预过滤失败: {e}，使用全量候选池")
+        import traceback
+        traceback.print_exc()
+        return set(kline_dict.keys()), [], stats
+
+
+# ============================================================================
 # Main Entry Point
 # ============================================================================
-def run_v28_recommendation(dry_run=False, debug=False):
-    """执行V28推荐"""
+def run_v28_recommendation(dry_run=False, debug=False, use_v2_prefilter=True):
+    """执行V28推荐
+    
+    Args:
+        dry_run: 不发送邮件
+        debug: 输出详细调试信息
+        use_v2_prefilter: 是否启用V2预过滤（默认True）
+    """
     t0 = time.time()
     today = datetime.now()
     today_str = today.strftime('%Y-%m-%d')
@@ -1178,13 +1321,39 @@ def run_v28_recommendation(dry_run=False, debug=False):
         print(f"\n  耗时: {elapsed:.0f}s")
         return result
 
+    # ===== V2 预过滤（核心集成）=====
+    v2_stats = {}
+    hot_sectors = []
+    if use_v2_prefilter:
+        v2_filtered_codes, hot_sectors, v2_stats = apply_v2_prefilter(
+            kline, scores, today_pd, risk, regime, confidence)
+        
+        # 如果V2过滤后候选池太小，放宽条件
+        if len(v2_filtered_codes) < 5:
+            print(f"  [V2] 过滤后候选池过小({len(v2_filtered_codes)}只)，放宽条件")
+            v2_filtered_codes = set(kline.keys())
+            v2_stats['v2_enabled'] = False
+        
+        # 创建过滤后的kline子集
+        kline_filtered = {code: df for code, df in kline.items() if code in v2_filtered_codes}
+        kline_size = len(kline)
+        kline = kline_filtered
+        print(f"  进入V28评分的候选池: {len(kline)}/{kline_size} 只")
+    else:
+        v2_filtered_codes = set(kline.keys())
+
+    # 加载行业映射（供V28评分使用）
+    sector_mapping = _load_sector_mapping()
+    print(f"  行业映射已加载: {len(sector_mapping)} 只")
+
     print(f"\n{'=' * 70}")
     print(f"  步骤2: V28 6维评分")
     print(f"{'=' * 70}")
 
     # Score all stocks
     scored_stocks, actual_risk, actual_regime, sector_info, stock_cache = score_all_stocks(
-        kline, index_df, scores, today_pd, risk, weights_config, debug=debug)
+        kline, index_df, scores, today_pd, risk, weights_config, debug=debug,
+        sector_mapping=sector_mapping)
 
     # ===== 新增: LLM 板块语义分析 =====
     llm_analysis = None
@@ -1291,6 +1460,7 @@ def run_v28_recommendation(dry_run=False, debug=False):
                 'bullish': s['div_bullish'],
                 'bearish': s['div_bearish'],
             },
+            'buy_price': round(s.get('close', 0), 2),  # 收盘价作为建议买入价
         }
         recommendations.append(rec)
 
@@ -1327,6 +1497,12 @@ def run_v28_recommendation(dry_run=False, debug=False):
         },
         'recommendations': recommendations,
         'total_scored': len(scored_stocks),
+        'v2_prefilter': {
+            'enabled': v2_stats.get('v2_enabled', False),
+            'candidate_pool_size': v2_stats.get('v2_filtered_count', len(kline)),
+            'hot_sectors': v2_stats.get('hot_sectors_used', [])[:10],
+            'filtered_out': v2_stats.get('filtered_out', 0),
+        },
         'top_10_debug': [
             {
                 'code': s['code'],
@@ -1689,9 +1865,10 @@ if __name__ == '__main__':
     parser.add_argument('--dry-run', action='store_true', help='不发送邮件')
     parser.add_argument('--debug', action='store_true', help='调试模式')
     parser.add_argument('--qa', action='store_true', help='运行QA验证')
+    parser.add_argument('--no-v2', action='store_true', help='禁用V2预过滤')
     args = parser.parse_args()
 
     if args.qa:
         run_qa_validation()
     else:
-        run_v28_recommendation(dry_run=args.dry_run, debug=args.debug)
+        run_v28_recommendation(dry_run=args.dry_run, debug=args.debug, use_v2_prefilter=not args.no_v2)

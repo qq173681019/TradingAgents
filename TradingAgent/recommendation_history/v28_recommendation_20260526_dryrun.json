@@ -1,0 +1,107 @@
+{
+  "date": "2026-05-26",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "none",
+    "market_summary": "LLM分析不可用，仅使用量化数据",
+    "hot_sectors_analysis": [],
+    "sector_boost": {},
+    "risk_warnings": [],
+    "tomorrow_focus": []
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "000733",
+      "name": "振华科技",
+      "industry": "国防军工",
+      "final_score": 68.8,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 7.5,
+        "sector": 65.7,
+        "relative_strength": 93.5,
+        "volume_health": 58,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 9.210000038146973,
+      "market_cap_yi": 24.4,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 52.08000183105469
+    },
+    {
+      "rank": 2,
+      "code": "600207",
+      "name": "",
+      "industry": "光伏辅材",
+      "final_score": 64.4,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 7.5,
+        "sector": 55.1,
+        "relative_strength": 80.0,
+        "volume_health": 55,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 20.809999465942383,
+      "market_cap_yi": 5.0,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 6.849999904632568
+    },
+    {
+      "rank": 3,
+      "code": "300125",
+      "name": "",
+      "industry": "光伏发电",
+      "final_score": 62.8,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 6.8,
+        "sector": 42.2,
+        "relative_strength": 100.0,
+        "volume_health": 64,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 13.369999885559082,
+      "market_cap_yi": 1.0,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 11.020000457763672
+    }
+  ],
+  "total_scored": 113,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 116,
+    "hot_sectors": [
+      "人工智能",
+      "半导体",
+      "芯片",
+      "新能源",
+      "光伏",
+      "军工",
+      "医疗器械",
+      "新能源汽车"
+    ],
+    "filtered_out": 1697
+  },
+  "top_10_debug": []
+}

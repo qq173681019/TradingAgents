@@ -1,0 +1,109 @@
+{
+  "date": "2026-06-11",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "none",
+    "market_summary": "LLM分析不可用，仅使用量化数据",
+    "hot_sectors_analysis": [],
+    "sector_boost": {},
+    "risk_warnings": [],
+    "tomorrow_focus": []
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "603890",
+      "name": "春秋电子",
+      "industry": "消费电子零部件及组装",
+      "final_score": 68.9,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 7.1,
+        "sector": 82.8,
+        "relative_strength": 100.0,
+        "volume_health": 48,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 40.02000045776367,
+      "market_cap_yi": 1.2,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 27.290000915527344
+    },
+    {
+      "rank": 2,
+      "code": "603931",
+      "name": "格林达",
+      "industry": "电子化学品Ⅱ",
+      "final_score": 61.4,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 7.1,
+        "sector": 45.5,
+        "relative_strength": 100.0,
+        "volume_health": 61,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 67.93000030517578,
+      "market_cap_yi": 7.3,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 65.80999755859375
+    },
+    {
+      "rank": 3,
+      "code": "002579",
+      "name": "中京电子",
+      "industry": "印制电路板",
+      "final_score": 59.8,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 5.3,
+        "sector": 56.4,
+        "relative_strength": 100.0,
+        "volume_health": 56,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 52.66999816894531,
+      "market_cap_yi": 39.3,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 18.8700008392334
+    }
+  ],
+  "total_scored": 240,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 243,
+    "hot_sectors": [
+      "小金属",
+      "半导体材料",
+      "钨",
+      "锂",
+      "电子化学品Ⅲ",
+      "电子化学品Ⅱ",
+      "氦气概念",
+      "橡胶助剂",
+      "高带宽内存",
+      "能源金属"
+    ],
+    "filtered_out": 3840
+  },
+  "top_10_debug": []
+}

@@ -1,0 +1,147 @@
+{
+  "date": "2026-05-20",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "Gateway-DeepSeek-V4",
+    "market_summary": "今日板块评分普遍转负，市场缺乏主线热点，短期情绪偏谨慎，资金观望为主。",
+    "hot_sectors_analysis": [
+      {
+        "name": "光伏发电",
+        "hotness": "低",
+        "sustainability": "观察",
+        "driver": "超跌反弹",
+        "summary": "评分转负，反弹动能不足"
+      },
+      {
+        "name": "汽车",
+        "hotness": "低",
+        "sustainability": "观察",
+        "driver": "资金博弈",
+        "summary": "评分偏弱，缺乏新催化"
+      },
+      {
+        "name": "医疗器械",
+        "hotness": "低",
+        "sustainability": "观察",
+        "driver": "业绩驱动",
+        "summary": "评分下滑，关注集采扰动"
+      },
+      {
+        "name": "国防军工",
+        "hotness": "低",
+        "sustainability": "观察",
+        "driver": "事件驱动",
+        "summary": "评分转弱，等待订单落地"
+      }
+    ],
+    "sector_boost": {
+      "光伏发电": -0.5,
+      "汽车": -0.3,
+      "医疗器械": -0.2,
+      "国防军工": -0.3
+    },
+    "risk_warnings": [
+      "量化评分系统显示所有热门板块内部评分均为负值，市场缺乏合力",
+      "光伏产业链评分全面转弱，需警惕产能过剩风险"
+    ],
+    "tomorrow_focus": [
+      "关注政策催化方向（如新能源、数字经济）",
+      "观察超跌板块能否企稳反弹"
+    ]
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "301581",
+      "name": "",
+      "industry": "汽车",
+      "final_score": 58.5,
+      "scores": {
+        "trend": 67.6,
+        "money_flow": 6.8,
+        "sector": 43.9,
+        "relative_strength": 79.0,
+        "volume_health": 61,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 9.260000228881836,
+      "market_cap_yi": 0.4,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 50.4900016784668
+    },
+    {
+      "rank": 2,
+      "code": "301682",
+      "name": "",
+      "industry": "国防军工",
+      "final_score": 55.5,
+      "scores": {
+        "trend": 61.0,
+        "money_flow": 6.8,
+        "sector": 28.5,
+        "relative_strength": 95.9,
+        "volume_health": 54,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 24.600000381469727,
+      "market_cap_yi": 10.3,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 155.44000244140625
+    },
+    {
+      "rank": 3,
+      "code": "600166",
+      "name": "福田汽车",
+      "industry": "商用载货车",
+      "final_score": 53.3,
+      "scores": {
+        "trend": 35.0,
+        "money_flow": 3.4,
+        "sector": 50,
+        "relative_strength": 50,
+        "volume_health": 61,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "down",
+      "ret_20d": -5.570000171661377,
+      "market_cap_yi": 4.5,
+      "divergence": {
+        "bullish": true,
+        "bearish": false
+      },
+      "buy_price": 3.2200000286102295
+    }
+  ],
+  "total_scored": 259,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 262,
+    "hot_sectors": [
+      "人工智能",
+      "半导体",
+      "芯片",
+      "新能源",
+      "光伏",
+      "军工",
+      "医疗器械",
+      "新能源汽车"
+    ],
+    "filtered_out": 3820
+  },
+  "top_10_debug": []
+}
