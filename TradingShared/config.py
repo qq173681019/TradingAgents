@@ -6,7 +6,7 @@ TradingShared 共享配置文件
 # ==================== API密钥配置 ====================
 
 # DeepSeek API (原千问，已欠费，切换为智谱)
-DEEPSEEK_API_KEY = "d5d6e909645e4e2391afdc4244bbd18f.US6yBrPhfJTcc0nU"
+DEEPSEEK_API_KEY = "e7b46d5986ae449eaab3df95b3c6dbca.yBYVAgKckidBdhMU"
 DEEPSEEK_API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 DEEPSEEK_MODEL_NAME = "glm-4-flash"
 

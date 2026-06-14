@@ -1246,13 +1246,19 @@ def apply_v2_prefilter(kline_dict, scores_dict, date_pd, risk, regime, confidenc
 # ============================================================================
 # Main Entry Point
 # ============================================================================
-def run_v28_recommendation(dry_run=False, debug=False, use_v2_prefilter=True):
+def run_v28_recommendation(dry_run=False, debug=False, use_v2_prefilter=True,
+                         enable_agent_debate=False, debate_top_n=3,
+                         debate_rounds=3, risk_rounds=2):
     """执行V28推荐
     
     Args:
         dry_run: 不发送邮件
         debug: 输出详细调试信息
         use_v2_prefilter: 是否启用V2预过滤（默认True）
+        enable_agent_debate: 启用 Agent 多空辩论
+        debate_top_n: 辩论前N只股票
+        debate_rounds: 多空辩论轮数
+        risk_rounds: 风险辩论轮数
     """
     t0 = time.time()
     today = datetime.now()
@@ -1516,6 +1522,26 @@ def run_v28_recommendation(dry_run=False, debug=False, use_v2_prefilter=True):
             for s in scored_stocks[:10]
         ] if debug else [],
     }
+
+    # Agent 多空辩论
+    if enable_agent_debate and recommendations:
+        try:
+            from agent_debate import integrate_with_v28
+            print(f"\n{'=' * 70}")
+            print(f"  步骤5: Agent 多空辩论")
+            print(f"{'=' * 70}")
+            result = integrate_with_v28(
+                result, top_n=debate_top_n,
+                debate_rounds=debate_rounds,
+                risk_rounds=risk_rounds,
+                verbose=True,
+            )
+            # 打印辩论报告
+            if 'agent_debate' in result and 'report' in result['agent_debate']:
+                print(result['agent_debate']['report'])
+        except Exception as e:
+            print(f"  [WARN] Agent 辩论失败: {e}")
+            result['agent_debate'] = {'status': 'failed', 'error': str(e)}
 
     # Save result
     _save_result(result, dry_run)
@@ -1866,9 +1892,20 @@ if __name__ == '__main__':
     parser.add_argument('--debug', action='store_true', help='调试模式')
     parser.add_argument('--qa', action='store_true', help='运行QA验证')
     parser.add_argument('--no-v2', action='store_true', help='禁用V2预过滤')
+    parser.add_argument('--debate', action='store_true', help='启用Agent多空辩论')
+    parser.add_argument('--debate-n', type=int, default=3, help='辩论股票数')
+    parser.add_argument('--debate-rounds', type=int, default=3, help='多空辩论轮数')
+    parser.add_argument('--risk-rounds', type=int, default=2, help='风险辩论轮数')
     args = parser.parse_args()
 
     if args.qa:
         run_qa_validation()
     else:
-        run_v28_recommendation(dry_run=args.dry_run, debug=args.debug, use_v2_prefilter=not args.no_v2)
+        run_v28_recommendation(
+            dry_run=args.dry_run, debug=args.debug,
+            use_v2_prefilter=not args.no_v2,
+            enable_agent_debate=args.debate,
+            debate_top_n=args.debate_n,
+            debate_rounds=args.debate_rounds,
+            risk_rounds=args.risk_rounds,
+        )
