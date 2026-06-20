@@ -57,3 +57,54 @@
 
 **3 个双锁定/远古 CRIT 案例**：002547 (88d×2) + 603201 (143d×2) + 002578 (119d×1，临界) = 100% 锁定 stock_cache 残留 + 推荐器选错基准日双重 bug。
 
+## 2026-06-13 15:00 (周六) explicit-check tick
+
+**第 11 次 explicit-check 守卫 override** (weekday=6 周六守卫连续 5 次 override: 6-13 01:00 / 05:01 / 05:30 / 06:30 / **15:00**) + **第 38 连续守卫内+守卫外纯时间流逝确认**
+
+### 守卫判定
+- hour=15 weekday=6 (周六) → 周末守卫命中 → **explicit-check override** (prompt 含 "检查并汇报")
+- 累计 11 次 explicit-check override 实测 (weekday=6 已 5 次 override)
+
+### mtime-delta 状态 (vs 上次 6-13 10:30)
+- **K线 cache 11d18h** (vs 10:30 = 11d14h, Δ+4h 纯时间) — **P0 仍待修复**
+- **T+3 verification_summary 47d** (vs 10:30 = 47d, Δ+0d) — **P0 仍待修复**
+- **LLM 凭据 Day 13+** (vs 10:30 = Day 13+, Δ+0d) — **P0 仍待修复**
+- **0 后台回测进程** — 状态正常
+- **6-12 推荐 JSON 23h59m 未变** (vs 10:30 = 19h29m, Δ+4h30m 纯时间)
+- **backtest_v23_v4.log 30d+ 幻影** (mtime = 2026-05-14 00:13) — V22 结果,非 V23
+- **backtest_v28.json 29d 幻影** (mtime = 2026-05-15 00:56) — **5-15 之后 0 个新回测**
+- **cron_self_check_log.md mtime 6-13 11:32** (vs 10:30 = 09:30, Δ+2h) — 本会话前次 append 时间
+
+### Pattern H 累计 buy_price 重算 (16th time stable)
+- **58 样本 / 有效 46 / None 12** (pre-fix era 剔除)
+- OK=17 | STALE=4 | STALE2=11 | CRIT=14 | FAIL=0 | None=12
+- **v1 异常率 (>10d) = 63.0%** | **CRIT 率 (>30d) = 30.4%**
+- 与上次 6-13 10:30 重算 (22/58/46 baseline 63.0%/30.4%) **完全一致** → Pattern H 公式已 16 次稳定
+
+### 强牛市 Day 数 (6-12 收盘后)
+- **Day 16** (5/22 + 5/25-29 + 6/1-5 + 6/8-12 = 16 个工作日累计)
+- 6-15 周一开盘后 = **Day 17** = 破 V28 训练 14 天纪录第 3 天
+
+### 6-15 周一开盘前 P0 必跑清单
+1. **K线 cache 刷新** — 滞 11d18h (上次刷新 6-01 20:12),严重影响 buy_price 验证和决策
+2. **T+3 verification 补跑** — 47d 未更新,2026-05-27 后无新增验证样本
+3. **LLM 凭据修复** — Day 13+ 持续失败 (4/4 provider 全挂: DeepSeek/ZhipuGLM/Qwen/DeepSeek-V4),sector_boost 完全失效
+4. **buy_price 排查** — v1=63.0% / CRIT=30.4%,stock_cache 残留 bug + 推荐器选错基准日双重根因
+5. **新增回测** — backtest_v28.json 29d 未刷新,V28 在强牛市 Day 17 真实考验前需要更新参数测试
+
+### 决策树状态 (基于 6-12 推荐)
+- 候选池 243 / 推荐 3 只 (final_score 62.9/61.4/59.8)
+- 0/3 ≥70 (规则 1 触发)
+- 3/3 资金分 <10 (规则 7 触发)
+- 3/3 final_score <65 + 100% CRIT 样本 final_score <65 (规则 8 触发)
+- → **建议空仓,等 6-15 开盘前决策窗口重新评估**
+
+### 经济成本与守卫建议
+- 累计 38 tick 纯时间流逝确认 → 周末高频 cron 严重浪费 token
+- 强烈建议 cron 守卫升级为统一 SILENT 模式 (state file + 30min 短路)
+- 周末自检频率降为 1 次/天 (周日 12:00) 即可
+
+### 执行时长
+- Pattern H 累计重算: 0.82s
+- terminal stat × 3: ~0.3s
+- 总体约 1.2s,极低成本

@@ -1,0 +1,137 @@
+{
+  "date": "2026-06-19",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "bull",
+    "risk": 2,
+    "confidence": 0.3400000035762787
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "ZhipuGLM",
+    "market_summary": "市场热点轮动，关注政策导向。",
+    "hot_sectors_analysis": [
+      {
+        "name": "国防军工",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "政策催化",
+        "summary": "政策支持，军工板块活跃"
+      },
+      {
+        "name": "光伏主材",
+        "hotness": "中",
+        "sustainability": "持续",
+        "driver": "业绩驱动",
+        "summary": "光伏需求增长，主材板块受益"
+      },
+      {
+        "name": "汽车",
+        "hotness": "中",
+        "sustainability": "一日游",
+        "driver": "资金博弈",
+        "summary": "短期资金关注，板块波动大"
+      }
+    ],
+    "sector_boost": {
+      "国防军工": 1.5
+    },
+    "risk_warnings": [
+      "市场波动风险",
+      "政策不确定性"
+    ],
+    "tomorrow_focus": [
+      "国防军工",
+      "光伏主材"
+    ]
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "688002",
+      "name": "睿创微纳",
+      "industry": "国防军工",
+      "final_score": 79.2,
+      "scores": {
+        "trend": 65.0,
+        "money_flow": 7.1,
+        "sector": 100,
+        "relative_strength": 86.7,
+        "volume_health": 64,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 14.210000038146973,
+      "market_cap_yi": 1242.4,
+      "divergence": {
+        "bullish": false,
+        "bearish": true
+      },
+      "buy_price": 147.75999450683594
+    },
+    {
+      "rank": 2,
+      "code": "002662",
+      "name": "峰璟股份",
+      "industry": "汽车",
+      "final_score": 76.9,
+      "scores": {
+        "trend": 51.0,
+        "money_flow": 8.4,
+        "sector": 100,
+        "relative_strength": 100.0,
+        "volume_health": 61,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "neutral",
+      "ret_20d": 4.369999885559082,
+      "market_cap_yi": 152.5,
+      "divergence": {
+        "bullish": false,
+        "bearish": true
+      },
+      "buy_price": 3.819999933242798
+    },
+    {
+      "rank": 3,
+      "code": "600538",
+      "name": "国发股份",
+      "industry": "医疗器械",
+      "final_score": 72.0,
+      "scores": {
+        "trend": 46.6,
+        "money_flow": 9.1,
+        "sector": 100,
+        "relative_strength": 52.6,
+        "volume_health": 49,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "neutral",
+      "ret_20d": -12.460000038146973,
+      "market_cap_yi": 140.4,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 5.96999979019165
+    }
+  ],
+  "total_scored": 262,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 278,
+    "hot_sectors": [
+      "人工智能",
+      "半导体",
+      "芯片",
+      "新能源",
+      "光伏",
+      "军工",
+      "医疗器械",
+      "新能源汽车"
+    ],
+    "filtered_out": 4064
+  },
+  "top_10_debug": []
+}

@@ -1,0 +1,667 @@
+{
+  "AI-CCL": {
+    "total": 3,
+    "new": 3,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "300831.SZ",
+        "name": "派特尔",
+        "note": "覆铜板相关材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300853.SZ",
+        "name": "申昊科技",
+        "note": "电子材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "301029.SZ",
+        "name": "裕太微",
+        "note": "覆铜板相关",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "AI-PCB": {
+    "total": 7,
+    "new": 5,
+    "v29_existing": 2,
+    "stocks": [
+      {
+        "code": "300476.SZ",
+        "name": "胜宏科技",
+        "note": "HDl/多层板,英伟达供应链,AI算力PCB龙头",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300408.SZ",
+        "name": "三环集团",
+        "note": "陶瓷元器件+MLCC+PCB上游",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300765.SZ",
+        "name": "安靠智能",
+        "note": "高端PCB,HDI",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300847.SZ",
+        "name": "中天精工",
+        "note": "精密PCB,5G通信板",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300942.SZ",
+        "name": "堪通科技",
+        "note": "PCB制造",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "301088.SZ",
+        "name": "景旺电子",
+        "note": "PCB行业龙头之一",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "301046.SZ",
+        "name": "金禄电子",
+        "note": "汽车PCB",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "AI算力": {
+    "total": 5,
+    "new": 2,
+    "v29_existing": 3,
+    "stocks": [
+      {
+        "code": "300476.SZ",
+        "name": "胜宏科技",
+        "note": "AI服务器PCB",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300687.SZ",
+        "name": "赛意信息",
+        "note": "工业互联网+算力",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300602.SZ",
+        "name": "飞荣达",
+        "note": "散热方案,算力配套",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300502.SZ",
+        "name": "新易盛",
+        "note": "光模块(算力配套)",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300308.SZ",
+        "name": "中际旭创",
+        "note": "光模块(算力配套)",
+        "is_v29": true,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "AI铜箔": {
+    "total": 2,
+    "new": 2,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "301511.SZ",
+        "name": "德福科技",
+        "note": "高端铜箔,AI算力供应链",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "301217.SZ",
+        "name": "铜冠铜箔",
+        "note": "PCB铜箔+锂电铜箔,HVLP",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "HBM产业链": {
+    "total": 3,
+    "new": 2,
+    "v29_existing": 1,
+    "stocks": [
+      {
+        "code": "300666.SZ",
+        "name": "江丰电子",
+        "note": "靶材,HBM封装材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300706.SZ",
+        "name": "阿石创",
+        "note": "靶材,先进封装",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300661.SZ",
+        "name": "圣邦股份",
+        "note": "电源管理IC(HBM配套)",
+        "is_v29": true,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "MLCC": {
+    "total": 1,
+    "new": 0,
+    "v29_existing": 1,
+    "stocks": [
+      {
+        "code": "300408.SZ",
+        "name": "三环集团",
+        "note": "MLCC龙头,陶瓷元器件",
+        "is_v29": true,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "光模块/CPO": {
+    "total": 5,
+    "new": 3,
+    "v29_existing": 2,
+    "stocks": [
+      {
+        "code": "300308.SZ",
+        "name": "中际旭创",
+        "note": "全球光模块龙头,800G/1.6T,CPO布局",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300502.SZ",
+        "name": "新易盛",
+        "note": "光模块二线龙头,800G量产",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300323.SZ",
+        "name": "华灿光电",
+        "note": "LED+光电器件",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300620.SZ",
+        "name": "光库科技",
+        "note": "光隔离器/环形器,铌酸锂调制器",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300738.SZ",
+        "name": "奥飞数据",
+        "note": "数据中心(IDC),光模块客户",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "半导体芯片": {
+    "total": 12,
+    "new": 11,
+    "v29_existing": 1,
+    "stocks": [
+      {
+        "code": "300661.SZ",
+        "name": "圣邦股份",
+        "note": "模拟芯片龙头,电源管理",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300223.SZ",
+        "name": "北京君正",
+        "note": "存储+处理芯片",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300613.SZ",
+        "name": "富瀚微",
+        "note": "安防芯片",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300782.SZ",
+        "name": "卓胜微",
+        "note": "射频芯片龙头",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300768.SZ",
+        "name": "迪普科技",
+        "note": "网络芯片",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300053.SZ",
+        "name": "欧比特",
+        "note": "宇航级芯片+卫星",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300101.SZ",
+        "name": "振芯科技",
+        "note": "北斗芯片",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300706.SZ",
+        "name": "阿石创",
+        "note": "靶材,PVD镀膜材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300666.SZ",
+        "name": "江丰电子",
+        "note": "高纯溅射靶材,半导体材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300942.SZ",
+        "name": "坤能科技",
+        "note": "功率器件",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300373.SZ",
+        "name": "扬杰科技",
+        "note": "功率半导体,IGBT",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300671.SZ",
+        "name": "富满微",
+        "note": "电源管理芯片",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "华为产业链": {
+    "total": 5,
+    "new": 2,
+    "v29_existing": 3,
+    "stocks": [
+      {
+        "code": "300476.SZ",
+        "name": "胜宏科技",
+        "note": "华为PCB供应商",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300661.SZ",
+        "name": "圣邦股份",
+        "note": "华为芯片供应链",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300223.SZ",
+        "name": "北京君正",
+        "note": "华为存储芯片",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300024.SZ",
+        "name": "机器人",
+        "note": "华为机器人合作",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300682.SZ",
+        "name": "新联电子",
+        "note": "华为电力合作",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "商业航天": {
+    "total": 6,
+    "new": 5,
+    "v29_existing": 1,
+    "stocks": [
+      {
+        "code": "300034.SZ",
+        "name": "钢研高纳",
+        "note": "高温合金,航天材料",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300053.SZ",
+        "name": "欧比特",
+        "note": "宇航芯片+卫星星座",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300101.SZ",
+        "name": "振芯科技",
+        "note": "北斗+卫星导航",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300455.SZ",
+        "name": "康拓红外",
+        "note": "航天红外检测",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300699.SZ",
+        "name": "光威复材",
+        "note": "碳纤维,航天材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300527.SZ",
+        "name": "中船应急",
+        "note": "军工+应急装备",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "存储芯片": {
+    "total": 2,
+    "new": 1,
+    "v29_existing": 1,
+    "stocks": [
+      {
+        "code": "300661.SZ",
+        "name": "圣邦股份",
+        "note": "存储相关模拟芯片",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300223.SZ",
+        "name": "北京君正",
+        "note": "DRAM+SRAM,车规存储",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "新能源电池": {
+    "total": 5,
+    "new": 4,
+    "v29_existing": 1,
+    "stocks": [
+      {
+        "code": "300750.SZ",
+        "name": "宁德时代",
+        "note": "全球动力电池龙头",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300014.SZ",
+        "name": "亿纬锂能",
+        "note": "锂原电池+动力电池",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300207.SZ",
+        "name": "欣旺达",
+        "note": "消费电池+动力电池",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300438.SZ",
+        "name": "鹏辉能源",
+        "note": "储能电池",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300068.SZ",
+        "name": "南都电源",
+        "note": "铅酸+锂电+储能",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "机器人": {
+    "total": 3,
+    "new": 2,
+    "v29_existing": 1,
+    "stocks": [
+      {
+        "code": "300024.SZ",
+        "name": "机器人",
+        "note": "工业机器人龙头,新松",
+        "is_v29": true,
+        "ak_concepts": []
+      },
+      {
+        "code": "300457.SZ",
+        "name": "赢合科技",
+        "note": "锂电设备+机器人",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300606.SZ",
+        "name": "金太阳",
+        "note": "精密研磨(机器人配套)",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "消费电子": {
+    "total": 4,
+    "new": 4,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "300433.SZ",
+        "name": "蓝思科技",
+        "note": "玻璃盖板龙头,苹果链",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300115.SZ",
+        "name": "长盈精密",
+        "note": "精密结构件,苹果链",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300296.SZ",
+        "name": "利亚德",
+        "note": "小间距LED,显示",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300706.SZ",
+        "name": "阿石创",
+        "note": "消费电子镀膜",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "液冷": {
+    "total": 4,
+    "new": 4,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "300602.SZ",
+        "name": "飞荣达",
+        "note": "导热界面材料+液冷板",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300682.SZ",
+        "name": "新联电子",
+        "note": "温控设备",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300738.SZ",
+        "name": "奥飞数据",
+        "note": "IDC液冷",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300663.SZ",
+        "name": "科大国创",
+        "note": "储能液冷",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "电力": {
+    "total": 4,
+    "new": 4,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "300443.SZ",
+        "name": "金智科技",
+        "note": "电力信息化",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300341.SZ",
+        "name": "麦克奥迪",
+        "note": "电气元器件",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300842.SZ",
+        "name": "帝科股份",
+        "note": "导电银浆(光伏配套)",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300322.SZ",
+        "name": "硕贝德",
+        "note": "天线+汽车电子",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "电子布": {
+    "total": 1,
+    "new": 1,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "300056.SZ",
+        "name": "三维化学",
+        "note": "化工材料",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "电子树脂": {
+    "total": 2,
+    "new": 2,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "300398.SZ",
+        "name": "飞凯材料",
+        "note": "电子化学品+树脂材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300699.SZ",
+        "name": "沃特股份",
+        "note": "特种工程塑料+树脂",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  },
+  "电子特气": {
+    "total": 2,
+    "new": 2,
+    "v29_existing": 0,
+    "stocks": [
+      {
+        "code": "300699.SZ",
+        "name": "光威复材",
+        "note": "碳纤维+特种材料",
+        "is_v29": false,
+        "ak_concepts": []
+      },
+      {
+        "code": "300398.SZ",
+        "name": "飞凯材料",
+        "note": "电子化学品+特气",
+        "is_v29": false,
+        "ak_concepts": []
+      }
+    ]
+  }
+}

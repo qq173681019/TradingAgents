@@ -1,0 +1,72 @@
+{
+  "date": "2026-06-18",
+  "version": "V29",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "bull",
+    "risk": 2,
+    "confidence": 0.6
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "300034",
+      "name": "钢研高纳",
+      "track": "商业航天",
+      "final_score": 93.3,
+      "close": 110.969388,
+      "rsi": 34.3,
+      "ret5": 9.77,
+      "ret20": -7.5,
+      "scores": {
+        "trend": 62.5,
+        "money_flow": 5.0,
+        "sector": 76.6,
+        "relative_strength": 100.0,
+        "technical_signal": 82,
+        "volume_health": 58,
+        "risk": 70
+      }
+    },
+    {
+      "rank": 2,
+      "code": "300476",
+      "name": "胜宏科技",
+      "track": "AI-PCB",
+      "final_score": 87.7,
+      "close": 1796.524904,
+      "rsi": 46.4,
+      "ret5": 9.52,
+      "ret20": 8.23,
+      "scores": {
+        "trend": 72.5,
+        "money_flow": 5.0,
+        "sector": 100,
+        "relative_strength": 25.0,
+        "technical_signal": 55,
+        "volume_health": 65,
+        "risk": 55
+      }
+    },
+    {
+      "rank": 3,
+      "code": "300308",
+      "name": "中际旭创",
+      "track": "光模块",
+      "final_score": 87.7,
+      "close": 8426.71755,
+      "rsi": 56.8,
+      "ret5": 11.26,
+      "ret20": 23.06,
+      "scores": {
+        "trend": 87.5,
+        "money_flow": 6.5,
+        "sector": 100,
+        "relative_strength": 50.0,
+        "technical_signal": 50,
+        "volume_health": 52,
+        "risk": 55
+      }
+    }
+  ]
+}

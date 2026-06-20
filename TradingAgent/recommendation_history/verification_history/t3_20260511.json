@@ -16,6 +16,11 @@
       "win": 0,
       "total": 3,
       "rate": 0.0
+    },
+    "T+3": {
+      "win": 0,
+      "total": 3,
+      "rate": 0.0
     }
   },
   "stocks": [
@@ -25,7 +30,7 @@
       "status": "verified",
       "rec_date": "2026-05-11",
       "base_close": 8.08,
-      "t3_days": 2,
+      "t3_days": 3,
       "daily": [
         {
           "day_offset": 1,
@@ -42,6 +47,14 @@
           "index_return": 0.42,
           "is_bear_day": false,
           "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-14",
+          "stock_return": -2.1,
+          "index_return": -1.11,
+          "is_bear_day": true,
+          "win": false
         }
       ],
       "win": false,
@@ -55,7 +68,7 @@
       "status": "verified",
       "rec_date": "2026-05-11",
       "base_close": 16.17,
-      "t3_days": 2,
+      "t3_days": 3,
       "daily": [
         {
           "day_offset": 1,
@@ -72,6 +85,14 @@
           "index_return": 0.42,
           "is_bear_day": false,
           "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-14",
+          "stock_return": -0.99,
+          "index_return": -1.11,
+          "is_bear_day": true,
+          "win": false
         }
       ],
       "win": true,
@@ -85,7 +106,7 @@
       "status": "verified",
       "rec_date": "2026-05-11",
       "base_close": 41.63,
-      "t3_days": 2,
+      "t3_days": 3,
       "daily": [
         {
           "day_offset": 1,
@@ -101,6 +122,14 @@
           "stock_return": -1.92,
           "index_return": 0.42,
           "is_bear_day": false,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-14",
+          "stock_return": -3.12,
+          "index_return": -1.11,
+          "is_bear_day": true,
           "win": false
         }
       ],

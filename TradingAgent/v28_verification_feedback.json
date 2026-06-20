@@ -58,8 +58,8 @@
       },
       {
         "date": "2026-05-14",
-        "win": false,
-        "actual_return": 0
+        "win": true,
+        "actual_return": 2.48
       }
     ],
     "002140": [
@@ -84,8 +84,8 @@
       },
       {
         "date": "2026-05-14",
-        "win": false,
-        "actual_return": 0
+        "win": true,
+        "actual_return": 0.25
       }
     ],
     "002125": [
@@ -160,8 +160,8 @@
       },
       {
         "date": "2026-05-12",
-        "win": false,
-        "actual_return": 0.5
+        "win": true,
+        "actual_return": 5.92
       }
     ],
     "600999": [
@@ -177,8 +177,8 @@
       },
       {
         "date": "2026-05-14",
-        "win": false,
-        "actual_return": 0
+        "win": true,
+        "actual_return": 4.43
       }
     ],
     "603102": [
@@ -194,5 +194,5 @@
       }
     ]
   },
-  "updated": "2026-05-27 17:33:18"
+  "updated": "2026-06-16 17:30:26"
 }

@@ -1,0 +1,72 @@
+{
+  "date": "2026-06-19",
+  "version": "V29",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "bull",
+    "risk": 2,
+    "confidence": 0.6
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "002475",
+      "name": "立讯精密",
+      "track": "消费电子",
+      "final_score": 89.2,
+      "close": 69.93,
+      "rsi": 44.8,
+      "ret5": 8.28,
+      "ret20": 3.04,
+      "scores": {
+        "trend": 72.5,
+        "money_flow": 5.5,
+        "sector": 100,
+        "relative_strength": 100.0,
+        "technical_signal": 60,
+        "volume_health": 59,
+        "risk": 55
+      }
+    },
+    {
+      "rank": 2,
+      "code": "601179",
+      "name": "中国西电",
+      "track": "电力",
+      "final_score": 87.0,
+      "close": 15.26,
+      "rsi": 42.2,
+      "ret5": 13.37,
+      "ret20": -5.33,
+      "scores": {
+        "trend": 77.5,
+        "money_flow": 4.0,
+        "sector": 78.2,
+        "relative_strength": 100.0,
+        "technical_signal": 75,
+        "volume_health": 58,
+        "risk": 55
+      }
+    },
+    {
+      "rank": 3,
+      "code": "603688",
+      "name": "圣泉集团",
+      "track": "电子树脂",
+      "final_score": 83.3,
+      "close": 80.55,
+      "rsi": 65.4,
+      "ret5": 5.78,
+      "ret20": 11.0,
+      "scores": {
+        "trend": 87.5,
+        "money_flow": 5.0,
+        "sector": 100,
+        "relative_strength": 50,
+        "technical_signal": 50,
+        "volume_health": 46,
+        "risk": 40
+      }
+    }
+  ]
+}

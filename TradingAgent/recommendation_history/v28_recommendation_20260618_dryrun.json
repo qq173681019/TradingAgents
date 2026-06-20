@@ -1,0 +1,138 @@
+{
+  "date": "2026-06-18",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "bull",
+    "risk": 2,
+    "confidence": 0.3400000035762787
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "ZhipuGLM",
+    "market_summary": "市场热点集中，政策预期强。",
+    "hot_sectors_analysis": [
+      {
+        "name": "国防军工",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "政策催化",
+        "summary": "政策支持，军工需求旺盛"
+      },
+      {
+        "name": "光伏主材",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "业绩驱动",
+        "summary": "光伏行业景气度高，需求旺盛"
+      },
+      {
+        "name": "汽车",
+        "hotness": "中",
+        "sustainability": "观察",
+        "driver": "资金博弈",
+        "summary": "汽车板块资金博弈明显，需关注基本面"
+      }
+    ],
+    "sector_boost": {
+      "国防军工": 1.5,
+      "光伏主材": 1.5
+    },
+    "risk_warnings": [
+      "政策变动风险",
+      "市场情绪波动"
+    ],
+    "tomorrow_focus": [
+      "国防军工",
+      "光伏主材"
+    ]
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "002023",
+      "name": "海特高新",
+      "industry": "国防军工",
+      "final_score": 75.9,
+      "scores": {
+        "trend": 60.0,
+        "money_flow": 6.8,
+        "sector": 100,
+        "relative_strength": 79.7,
+        "volume_health": 56,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": -8.010000228881836,
+      "market_cap_yi": 652.7,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 12.180000305175781
+    },
+    {
+      "rank": 2,
+      "code": "002984",
+      "name": "森麒麟",
+      "industry": "汽车",
+      "final_score": 75.5,
+      "scores": {
+        "trend": 63.0,
+        "money_flow": 7.8,
+        "sector": 97.4,
+        "relative_strength": 92.4,
+        "volume_health": 59,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": -0.5699999928474426,
+      "market_cap_yi": 325.0,
+      "divergence": {
+        "bullish": true,
+        "bearish": false
+      },
+      "buy_price": 15.619999885559082
+    },
+    {
+      "rank": 3,
+      "code": "002901",
+      "name": "大博医疗",
+      "industry": "医疗器械",
+      "final_score": 70.3,
+      "scores": {
+        "trend": 65.0,
+        "money_flow": 7.1,
+        "sector": 87.6,
+        "relative_strength": 84.2,
+        "volume_health": 56,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 6.039999961853027,
+      "market_cap_yi": 71.7,
+      "divergence": {
+        "bullish": false,
+        "bearish": true
+      },
+      "buy_price": 42.47999954223633
+    }
+  ],
+  "total_scored": 262,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 278,
+    "hot_sectors": [
+      "人工智能",
+      "半导体",
+      "芯片",
+      "新能源",
+      "光伏",
+      "军工",
+      "医疗器械",
+      "新能源汽车"
+    ],
+    "filtered_out": 4064
+  },
+  "top_10_debug": []
+}

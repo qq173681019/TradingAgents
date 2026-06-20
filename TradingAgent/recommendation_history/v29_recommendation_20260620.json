@@ -1,0 +1,72 @@
+{
+  "date": "2026-06-20",
+  "version": "V29",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "bull",
+    "risk": 2,
+    "confidence": 0.6
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "688008",
+      "name": "澜起科技",
+      "track": "半导体芯片",
+      "final_score": 84.7,
+      "close": 269.9,
+      "rsi": 55.6,
+      "ret5": 18.01,
+      "ret20": 2.95,
+      "scores": {
+        "trend": 82.5,
+        "money_flow": 5.0,
+        "sector": 100,
+        "relative_strength": 50.0,
+        "technical_signal": 60,
+        "volume_health": 60,
+        "risk": 55
+      }
+    },
+    {
+      "rank": 2,
+      "code": "000901",
+      "name": "航天科技",
+      "track": "商业航天",
+      "final_score": 83.3,
+      "close": 18.34,
+      "rsi": 40.7,
+      "ret5": 3.73,
+      "ret20": -13.37,
+      "scores": {
+        "trend": 36.5,
+        "money_flow": 5.0,
+        "sector": 88.9,
+        "relative_strength": 60.0,
+        "technical_signal": 75,
+        "volume_health": 65,
+        "risk": 55
+      }
+    },
+    {
+      "rank": 3,
+      "code": "600406",
+      "name": "国电南瑞",
+      "track": "电力",
+      "final_score": 81.3,
+      "close": 23.06,
+      "rsi": 29.8,
+      "ret5": 0.92,
+      "ret20": -10.13,
+      "scores": {
+        "trend": 36.5,
+        "money_flow": 5.0,
+        "sector": 78.2,
+        "relative_strength": 66.7,
+        "technical_signal": 75,
+        "volume_health": 55,
+        "risk": 70
+      }
+    }
+  ]
+}

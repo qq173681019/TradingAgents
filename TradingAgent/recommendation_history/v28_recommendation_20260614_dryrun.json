@@ -1,0 +1,152 @@
+{
+  "date": "2026-06-14",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "strong_bull",
+    "risk": 1,
+    "confidence": 1.0
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "ZhipuGLM",
+    "market_summary": "市场波动，热点轮动较快",
+    "hot_sectors_analysis": [
+      {
+        "name": "光伏发电",
+        "hotness": "低",
+        "sustainability": "一日游",
+        "driver": "政策催化",
+        "summary": "政策预期降温，短期热度减退"
+      },
+      {
+        "name": "光伏主材",
+        "hotness": "低",
+        "sustainability": "一日游",
+        "driver": "业绩驱动",
+        "summary": "业绩不及预期，板块回调"
+      },
+      {
+        "name": "汽车",
+        "hotness": "中",
+        "sustainability": "观察",
+        "driver": "资金博弈",
+        "summary": "资金流入，但需观察持续性"
+      },
+      {
+        "name": "国防军工",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "政策催化",
+        "summary": "政策支持，板块有望持续"
+      },
+      {
+        "name": "光伏辅材",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "业绩驱动",
+        "summary": "业绩增长，板块受关注"
+      }
+    ],
+    "sector_boost": {
+      "国防军工": 1.5,
+      "光伏辅材": 1.5
+    },
+    "risk_warnings": [
+      "市场情绪波动大",
+      "成交量萎缩"
+    ],
+    "tomorrow_focus": [
+      "国防军工",
+      "光伏辅材"
+    ]
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "301093",
+      "name": "",
+      "industry": "医疗器械",
+      "final_score": 54.2,
+      "scores": {
+        "trend": 64.4,
+        "money_flow": 5.0,
+        "sector": 50,
+        "relative_strength": 41.7,
+        "volume_health": 62,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 51.16999816894531,
+      "market_cap_yi": 6.3,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 127.0999984741211
+    },
+    {
+      "rank": 2,
+      "code": "002594",
+      "name": "比亚迪",
+      "industry": "新能源汽车",
+      "final_score": 53.6,
+      "scores": {
+        "trend": 37.4,
+        "money_flow": 5.0,
+        "sector": 50,
+        "relative_strength": 50,
+        "volume_health": 60,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "down",
+      "ret_20d": -11.149999618530273,
+      "market_cap_yi": 41.8,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 93.6500015258789
+    },
+    {
+      "rank": 3,
+      "code": "603267",
+      "name": "鸿远电子",
+      "industry": "国防军工",
+      "final_score": 53.1,
+      "scores": {
+        "trend": 69.0,
+        "money_flow": 4.0,
+        "sector": 31.2,
+        "relative_strength": 95.7,
+        "volume_health": 53,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": 38.93000030517578,
+      "market_cap_yi": 19.3,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 71.80000305175781
+    }
+  ],
+  "total_scored": 113,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 116,
+    "hot_sectors": [
+      "人工智能",
+      "半导体",
+      "芯片",
+      "新能源",
+      "光伏",
+      "军工",
+      "医疗器械",
+      "新能源汽车"
+    ],
+    "filtered_out": 1697
+  },
+  "top_10_debug": []
+}

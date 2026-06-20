@@ -1,0 +1,72 @@
+{
+  "date": "2026-06-17",
+  "version": "V29",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "bull",
+    "risk": 2,
+    "confidence": 0.6
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "000977",
+      "name": "浪潮信息",
+      "track": "AI算力",
+      "final_score": 100.2,
+      "close": 323.953466,
+      "rsi": 45.6,
+      "ret5": 8.6,
+      "ret20": -9.45,
+      "scores": {
+        "trend": 62.5,
+        "money_flow": 5.0,
+        "sector": 94.5,
+        "relative_strength": 100.0,
+        "technical_signal": 95,
+        "volume_health": 64,
+        "risk": 55
+      }
+    },
+    {
+      "rank": 2,
+      "code": "688981",
+      "name": "中芯国际",
+      "track": "半导体芯片",
+      "final_score": 93.0,
+      "close": 134.7,
+      "rsi": 33.9,
+      "ret5": 7.47,
+      "ret20": 0.67,
+      "scores": {
+        "trend": 72.5,
+        "money_flow": 5.0,
+        "sector": 100,
+        "relative_strength": 0.0,
+        "technical_signal": 92,
+        "volume_health": 50,
+        "risk": 70
+      }
+    },
+    {
+      "rank": 3,
+      "code": "002241",
+      "name": "歌尔股份",
+      "track": "消费电子",
+      "final_score": 90.5,
+      "close": 570.762361,
+      "rsi": 24.7,
+      "ret5": 4.04,
+      "ret20": -4.91,
+      "scores": {
+        "trend": 61.5,
+        "money_flow": 5.0,
+        "sector": 88.0,
+        "relative_strength": 100.0,
+        "technical_signal": 80,
+        "volume_health": 59,
+        "risk": 70
+      }
+    }
+  ]
+}

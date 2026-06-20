@@ -1,0 +1,138 @@
+{
+  "date": "2026-06-17",
+  "action": "RECOMMEND",
+  "market": {
+    "regime": "bull",
+    "risk": 2,
+    "confidence": 0.3400000035762787
+  },
+  "no_trade_signals": [],
+  "no_trade_risk_total": 0,
+  "llm_analysis": {
+    "provider": "ZhipuGLM",
+    "market_summary": "市场热点轮动，光伏和国防军工领涨。",
+    "hot_sectors_analysis": [
+      {
+        "name": "光伏主材",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "政策催化",
+        "summary": "光伏政策支持，板块持续走强"
+      },
+      {
+        "name": "国防军工",
+        "hotness": "高",
+        "sustainability": "持续",
+        "driver": "资金博弈",
+        "summary": "军工订单增加，资金流入明显"
+      },
+      {
+        "name": "汽车",
+        "hotness": "中",
+        "sustainability": "一日游",
+        "driver": "业绩驱动",
+        "summary": "汽车行业业绩预期提升，短期热度高"
+      }
+    ],
+    "sector_boost": {
+      "光伏主材": 1.5,
+      "国防军工": 1.5
+    },
+    "risk_warnings": [
+      "市场波动风险",
+      "政策变化风险"
+    ],
+    "tomorrow_focus": [
+      "光伏辅材",
+      "光伏发电"
+    ]
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "code": "002297",
+      "name": "博云新材",
+      "industry": "国防军工",
+      "final_score": 78.7,
+      "scores": {
+        "trend": 55.0,
+        "money_flow": 7.8,
+        "sector": 100,
+        "relative_strength": 95.9,
+        "volume_health": 57,
+        "risk_adjustment": 70
+      },
+      "trend_direction": "up",
+      "ret_20d": -8.979999542236328,
+      "market_cap_yi": 3346.5,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 23.100000381469727
+    },
+    {
+      "rank": 2,
+      "code": "002085",
+      "name": "万丰奥威",
+      "industry": "汽车",
+      "final_score": 76.7,
+      "scores": {
+        "trend": 63.0,
+        "money_flow": 8.5,
+        "sector": 95.5,
+        "relative_strength": 96.2,
+        "volume_health": 60,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "up",
+      "ret_20d": 0.7300000190734863,
+      "market_cap_yi": 1780.1,
+      "divergence": {
+        "bullish": false,
+        "bearish": false
+      },
+      "buy_price": 13.720000267028809
+    },
+    {
+      "rank": 3,
+      "code": "603658",
+      "name": "安图生物",
+      "industry": "医疗器械",
+      "final_score": 70.7,
+      "scores": {
+        "trend": 48.0,
+        "money_flow": 7.8,
+        "sector": 86.6,
+        "relative_strength": 86.8,
+        "volume_health": 60,
+        "risk_adjustment": 55
+      },
+      "trend_direction": "neutral",
+      "ret_20d": -4.210000038146973,
+      "market_cap_yi": 119.2,
+      "divergence": {
+        "bullish": true,
+        "bearish": false
+      },
+      "buy_price": 32.09000015258789
+    }
+  ],
+  "total_scored": 262,
+  "v2_prefilter": {
+    "enabled": true,
+    "candidate_pool_size": 278,
+    "hot_sectors": [
+      "人工智能",
+      "半导体",
+      "芯片",
+      "新能源",
+      "光伏",
+      "军工",
+      "医疗器械",
+      "新能源汽车"
+    ],
+    "filtered_out": 4064
+  },
+  "top_10_debug": []
+}

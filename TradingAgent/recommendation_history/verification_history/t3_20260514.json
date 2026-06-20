@@ -1,0 +1,142 @@
+{
+  "date": "2026-05-14",
+  "status": "verified",
+  "total_stocks": 3,
+  "verified_stocks": 3,
+  "win_stocks": 3,
+  "no_data_stocks": 0,
+  "win_rate": 100.0,
+  "day_stats": {
+    "T+1": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    },
+    "T+2": {
+      "win": 1,
+      "total": 3,
+      "rate": 33.3
+    },
+    "T+3": {
+      "win": 2,
+      "total": 3,
+      "rate": 66.7
+    }
+  },
+  "stocks": [
+    {
+      "code": "002405",
+      "name": "四维图新",
+      "status": "verified",
+      "rec_date": "2026-05-14",
+      "base_close": 9.29,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-15",
+          "stock_return": -3.88,
+          "index_return": -1.02,
+          "is_bear_day": true,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-18",
+          "stock_return": -1.51,
+          "index_return": -1.11,
+          "is_bear_day": true,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-19",
+          "stock_return": 2.48,
+          "index_return": -0.2,
+          "is_bear_day": true,
+          "win": true
+        }
+      ],
+      "win": true,
+      "win_day": 3,
+      "best_return": 2.48,
+      "score": 8.04
+    },
+    {
+      "code": "600999",
+      "name": "招商证券",
+      "status": "verified",
+      "rec_date": "2026-05-14",
+      "base_close": 16.01,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-15",
+          "stock_return": -1.37,
+          "index_return": -1.02,
+          "is_bear_day": true,
+          "win": false
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-18",
+          "stock_return": 1.06,
+          "index_return": -1.11,
+          "is_bear_day": true,
+          "win": true
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-19",
+          "stock_return": 4.43,
+          "index_return": -0.2,
+          "is_bear_day": true,
+          "win": true
+        }
+      ],
+      "win": true,
+      "win_day": 2,
+      "best_return": 4.43,
+      "score": 7.11
+    },
+    {
+      "code": "002221",
+      "name": "东华能源",
+      "status": "verified",
+      "rec_date": "2026-05-14",
+      "base_close": 8.0,
+      "t3_days": 3,
+      "daily": [
+        {
+          "day_offset": 1,
+          "date": "2026-05-15",
+          "stock_return": 0.25,
+          "index_return": -1.02,
+          "is_bear_day": true,
+          "win": true
+        },
+        {
+          "day_offset": 2,
+          "date": "2026-05-18",
+          "stock_return": -0.5,
+          "index_return": -1.11,
+          "is_bear_day": true,
+          "win": false
+        },
+        {
+          "day_offset": 3,
+          "date": "2026-05-19",
+          "stock_return": -1.25,
+          "index_return": -0.2,
+          "is_bear_day": true,
+          "win": false
+        }
+      ],
+      "win": true,
+      "win_day": 1,
+      "best_return": 0.25,
+      "score": 6.8
+    }
+  ]
+}
